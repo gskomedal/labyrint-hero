@@ -735,7 +735,9 @@ class GameScene extends Phaser.Scene {
             this._handleBow();
             this._handleZoom();
 
-            if (Phaser.Input.Keyboard.JustDown(this.eKey)) {
+            const touchInv = this.game.registry.get('touch_inventory');
+            if (touchInv) this.game.registry.set('touch_inventory', false);
+            if (Phaser.Input.Keyboard.JustDown(this.eKey) || touchInv) {
                 this.scene.launch('InventoryScene');
             }
 
@@ -756,6 +758,13 @@ class GameScene extends Phaser.Scene {
         else if (this.cursors.right.isDown || this.wasd.D.isDown) dx =  1;
         else if (this.cursors.up.isDown    || this.wasd.W.isDown) dy = -1;
         else if (this.cursors.down.isDown  || this.wasd.S.isDown) dy =  1;
+
+        // Touch d-pad fallback
+        if (dx === 0 && dy === 0) {
+            dx = this.game.registry.get('touch_dx') || 0;
+            dy = this.game.registry.get('touch_dy') || 0;
+        }
+
         if (dx !== 0 || dy !== 0) {
             this._tryMoveHero(dx, dy);
             this.moveTimer = MOVE_DELAY_MS;
@@ -825,7 +834,9 @@ class GameScene extends Phaser.Scene {
     _handleAttack() {
         const spaceDown = Phaser.Input.Keyboard.JustDown(this.attackKey);
         const fDown     = Phaser.Input.Keyboard.JustDown(this.altAtkKey);
-        if (!spaceDown && !fDown) return;
+        const touchAtk  = this.game.registry.get('touch_attack');
+        if (touchAtk) this.game.registry.set('touch_attack', false);
+        if (!spaceDown && !fDown && !touchAtk) return;
 
         const { dx, dy } = this.hero.facing;
         const fx = this.hero.gridX + dx, fy = this.hero.gridY + dy;
@@ -867,7 +878,9 @@ class GameScene extends Phaser.Scene {
     // ── Bow / Ranged Attack (R) ────────────────────────────────────────────────
 
     _handleBow() {
-        if (!Phaser.Input.Keyboard.JustDown(this.bowKey)) return;
+        const touchBow = this.game.registry.get('touch_bow');
+        if (touchBow) this.game.registry.set('touch_bow', false);
+        if (!Phaser.Input.Keyboard.JustDown(this.bowKey) && !touchBow) return;
         const weapon = this.hero.inventory.equipped.weapon;
         if (!weapon || weapon.subtype !== 'bow') {
             this._showMessage('Ingen bue utstyrt! (trykk E for inventar)', '#ff8844');

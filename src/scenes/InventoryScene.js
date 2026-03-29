@@ -45,9 +45,17 @@ class InventoryScene extends Phaser.Scene {
         });
 
         this.add.text(cx, cy + panelH / 2 - 14,
-            '[Venstreklikk] Bruk/utstyr  ·  [Høyreklikk] Slipp  ·  [E/ESC] Lukk', {
+            '[Trykk] Bruk/utstyr  ·  [Hold] Slipp  ·  [E/ESC] Lukk', {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(0.5);
+
+        // Close button (touch-friendly)
+        const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
+            fontSize: '20px', color: '#667788', fontFamily: 'monospace'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
+        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
+        closeBtn.on('pointerdown', () => this._tryClose());
 
         // ── Build dynamic slot UI ──────────────────────────────────────────────
         this._refresh();
@@ -134,17 +142,32 @@ class InventoryScene extends Phaser.Scene {
             bg.setInteractive({ useHandCursor: true });
             bg.on('pointerdown', (pointer) => {
                 if (pointer.rightButtonDown()) {
-                    // Right-click: drop equipped item to floor
                     const dropped = this.inv.dropEquipped(slot, this.hero);
                     if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
-                } else {
-                    // Left-click: unequip to backpack
-                    this.inv.unequip(slot, this.hero);
+                    this._refresh();
+                    return;
                 }
-                this._refresh();
+                // Long-press (touch) = drop, short tap = unequip
+                bg._lpTimer = this.time.delayedCall(500, () => {
+                    bg._lpTimer = null;
+                    const dropped = this.inv.dropEquipped(slot, this.hero);
+                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    this._refresh();
+                });
+            });
+            bg.on('pointerup', () => {
+                if (bg._lpTimer) {
+                    bg._lpTimer.remove();
+                    bg._lpTimer = null;
+                    this.inv.unequip(slot, this.hero);
+                    this._refresh();
+                }
             });
             bg.on('pointerover', () => { bg.setFillStyle(0x1a1830); this._showTooltip(x, y - size/2 - 20, item); });
-            bg.on('pointerout',  () => { bg.setFillStyle(0x0a0918); this._hideTooltip(); });
+            bg.on('pointerout',  () => {
+                bg.setFillStyle(0x0a0918); this._hideTooltip();
+                if (bg._lpTimer) { bg._lpTimer.remove(); bg._lpTimer = null; }
+            });
         } else {
             this._d(this.add.text(x, y, 'Tom', {
                 fontSize: '11px', color: '#223344', fontFamily: 'monospace'
@@ -180,14 +203,26 @@ class InventoryScene extends Phaser.Scene {
             bg.on('pointerdown', (pointer) => {
                 this._hideTooltip();
                 if (pointer.rightButtonDown()) {
-                    // Right-click: drop item on hero's current tile
                     const dropped = this.inv.dropSlot(index);
                     if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
-                } else {
-                    // Left-click: use / equip
-                    this.inv.useSlot(index, this.hero, this.gs);
+                    this._refresh();
+                    return;
                 }
-                this._refresh();
+                // Long-press (touch) = drop, short tap = use/equip
+                bg._lpTimer = this.time.delayedCall(500, () => {
+                    bg._lpTimer = null;
+                    const dropped = this.inv.dropSlot(index);
+                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    this._refresh();
+                });
+            });
+            bg.on('pointerup', () => {
+                if (bg._lpTimer) {
+                    bg._lpTimer.remove();
+                    bg._lpTimer = null;
+                    this.inv.useSlot(index, this.hero, this.gs);
+                    this._refresh();
+                }
             });
         }
     }

@@ -2,6 +2,28 @@
 
 ---
 
+## v0.9 – 2026-03-29
+
+### Nye funksjoner
+- **Touch/mobil-støtte (#4):** Spillet er nå spillbart på mobil og nettbrett
+  - D-pad (4 retningsknapper) nederst til venstre for bevegelse
+  - Handlingsknapper nederst til høyre: Angrep, Bue, Inventar, Minikart
+  - Touch-kontroller vises kun på touch-enheter; tastatur fungerer som før
+  - Responsiv skalering: canvas tilpasser seg alle skjermstørrelser (Scale.FIT)
+  - Støtte for 3 samtidige berøringspunkter (bevegelse + handling samtidig)
+- **Langt trykk i inventory:** Hold 500ms for å slippe gjenstander (touch-erstatning for høyreklikk)
+
+### Tekniske endringer
+- Ny fil: `src/systems/TouchControls.js` – d-pad og handlingsknapper via Phaser Graphics
+- `src/main.js` – Phaser Scale.FIT config, `activePointers: 3`, touch-deteksjon i registry
+- `index.html` – `user-scalable=no` i viewport-meta; ny script-tag for TouchControls
+- `GameScene._handleInput()` – leser `touch_dx`/`touch_dy` fra registry som fallback
+- `GameScene._handleAttack()` / `_handleBow()` – leser `touch_attack`/`touch_bow` flagg
+- `UIScene` – instansierer TouchControls, skjuler tastaturhint på touch-enheter
+- `InventoryScene` – langt-trykk-logikk erstatter ren pointerdown for drop-funksjon
+
+---
+
 ## v0.6 – 2026-03-27
 
 ### Nye funksjoner
