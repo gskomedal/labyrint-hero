@@ -57,6 +57,15 @@ class UIScene extends Phaser.Scene {
             }
         });
 
+        // Hide keyboard hints on touch devices
+        if (this.game.registry.get('isTouchDevice')) {
+            this.eHint.setVisible(false);
+        }
+
+        // Touch controls (d-pad + action buttons)
+        this.touchControls = new TouchControls(this);
+        this.touchControls.create();
+
         this.bossBar = this._makeBossBar(W);
 
         // ── Minimap ───────────────────────────────────────────────────────────
@@ -67,12 +76,10 @@ class UIScene extends Phaser.Scene {
         this._minimapY     = H - 8;    // bottom-anchored
         this._minimapThrottle = 0;
 
-        // Toggle minimap with M key
+        // Toggle minimap with M key or touch button
         this._minimapVisible = true;
         this.input.keyboard.on('keydown-M', () => {
-            this._minimapVisible = !this._minimapVisible;
-            this.minimapGfx.setVisible(this._minimapVisible);
-            this.minimapBorder.setVisible(this._minimapVisible);
+            this._toggleMinimap();
         });
 
         this.refresh();
@@ -174,6 +181,12 @@ class UIScene extends Phaser.Scene {
 
     // ── Main refresh (called every frame from update) ─────────────────────────
 
+    _toggleMinimap() {
+        this._minimapVisible = !this._minimapVisible;
+        this.minimapGfx.setVisible(this._minimapVisible);
+        this.minimapBorder.setVisible(this._minimapVisible);
+    }
+
     update() {
         // Throttle to avoid thrashing – refresh every ~80 ms
         const now = this.time.now;
@@ -185,6 +198,11 @@ class UIScene extends Phaser.Scene {
         if (this._minimapVisible && now - this._minimapThrottle > 120) {
             this._minimapThrottle = now;
             this._drawMinimap();
+        }
+        // Touch minimap toggle
+        if (this.game.registry.get('touch_minimap')) {
+            this.game.registry.set('touch_minimap', false);
+            this._toggleMinimap();
         }
     }
 

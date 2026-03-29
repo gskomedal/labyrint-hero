@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.8
-**Sist oppdatert:** 2026-03-28
+**Versjon:** 0.9
+**Sist oppdatert:** 2026-03-29
 
 ---
 
@@ -117,15 +117,17 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 ## 5. Kamp
 
 ### Kontrollskjema
-| Tast | Handling |
+| Tast / Touch | Handling |
 |------|----------|
-| WASD / Piltaster | Beveg helt |
-| SPACE / F | Angrip i sett retning (eller nærmeste monster) |
-| R | Skyt pil (krever bue utstyrt) |
-| E | Åpne/lukk inventory |
+| WASD / Piltaster / D-pad (touch) | Beveg helt |
+| SPACE / F / Angrepsknapp (touch) | Angrip i sett retning (eller nærmeste monster) |
+| R / Bueknapp (touch) | Skyt pil (krever bue utstyrt) |
+| E / Inventarknapp (touch) | Åpne/lukk inventory |
 | ESC | Lukk overlay |
 | +/- eller muskjul | Zoom inn/ut |
+| M / Minikartknapp (touch) | Vis/skjul minikart |
 | ⚙ (HUD) | Åpne lydinnstillinger |
+| Langt trykk (touch) | Slipp gjenstand i inventory (erstatter høyreklikk) |
 
 ### Kampberegning
 - **Helteangrep:** `attack + rand(0–2)`, krit ×2 (krit fra evne)
@@ -276,7 +278,7 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Balanse-simulator | ✅ Ferdig | simulator.html |
 | Butikk / handelsmann | ❌ Mangler | |
 | Gull + økonomi | ❌ Mangler | |
-| Touch/mobil-støtte | ❌ Mangler | |
+| Touch/mobil-støtte | ✅ Ferdig | D-pad, handlingsknapper, responsiv skalering, langt-trykk drop |
 | Leaderboard | ❌ Mangler | |
 
 ---
@@ -311,6 +313,6 @@ Spilleren kan spre poeng på tvers av veier (generalist) eller gå dypt i én (s
 
 1. **Gull + handelsmann** – Valuta fra monstre; handelsmann i labyrinten selger forbruksgjenstander.
 2. **Skilltre-utvidelse** – Legg til 2–3 ekstra ferdigheter per vei; kryss-vei-synergier.
-3. **Touch/mobil-støtte** – Virtuelle piltaster og angrepsknapp for mobil.
+3. ~~**Touch/mobil-støtte**~~ – ✅ Implementert i v0.9.
 4. **Leaderboard** – Lokal high-score-liste (verdensrekord per rase/vanskelighetsgrad).
 5. **Frostbrent statuseffekt** – Isbaserte monstre (fremtidig verdenstema) setter ned bevegelsestakten.
