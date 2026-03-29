@@ -2,6 +2,26 @@
 
 ---
 
+## v0.10 – 2026-03-29
+
+### Bugfikser
+- **Gift tikker saktere (#10):** Gift tikker nå hvert ~900ms (før: ~380ms). Gir tid til å åpne inventory og bruke motgift
+- **Motgift kurerer gift (#10):** Motgift fjerner nå gifteffekten (i tillegg til +1 hjerte)
+- **Sprukne vegger fikset (#11):** Facing-retning oppdateres nå også når bevegelse blokkeres av vegger/dører, slik at man alltid kan bryte sprekket vegg ved å trykke mot den + SPACE/F
+- **HUD overlapper ikke lenger (#12):** Kamera følger helten med offset nedover slik at HUD-baren ikke skjuler figuren i øverste rader
+- **Redusert item-drop (#13):** Monster drop rate senket fra 45% til 25%; 70% sjanse for consumable fremfor utstyr; kiste-item nr 2 er nå alltid consumable
+- **Bruksgjenstand-knapp (#14):** Ny Q-tast (+ USE touch-knapp) bruker første consumable i ryggsekken direkte i spill — bomber, blendgranater, drikker osv. fungerer nå i kamp
+
+### Tekniske endringer
+- `GameScene.poisonTickTimer` – egen timer for gift, uavhengig av monstertick
+- `GameScene._handleUseItem()` – ny quick-use metode (Q / touch USE)
+- `GameScene._tryMoveHero()` – setter `hero.facing` før bevegelsessjekk
+- `GameScene.cameras.main.setFollowOffset(0, -30)` – kameraoffset for HUD
+- `TouchControls` – ny USE-knapp i action button grid
+- `antidote.use()` – nullstiller `poisonTurns` + refresher sprite
+
+---
+
 ## v0.9 – 2026-03-29
 
 ### Nye funksjoner

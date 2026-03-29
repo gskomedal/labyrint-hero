@@ -84,6 +84,8 @@ class GameScene extends Phaser.Scene {
         // ── Camera ───────────────────────────────────────────────────────────
         this.cameras.main.setBounds(0, 0, this.tileW * TILE_SIZE, this.tileH * TILE_SIZE);
         this.cameras.main.startFollow(this.hero.graphics, true, 0.08, 0.08);
+        // Offset camera follow downward so HUD (54px) doesn't obscure the hero
+        this.cameras.main.setFollowOffset(0, -30);
         this.cameras.main.setZoom(ZOOM_DEFAULT);
 
         // ── Input ─────────────────────────────────────────────────────────────
@@ -97,6 +99,7 @@ class GameScene extends Phaser.Scene {
         this.zoomOutKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS);
         this.zoomInAlt    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ADD);
         this.zoomOutAlt   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_SUBTRACT);
+        this.useItemKey   = this.input.keyboard.addKey('Q');
         this.moveTimer    = 0;
 
         // Mouse wheel zoom
@@ -110,6 +113,7 @@ class GameScene extends Phaser.Scene {
 
         // ── Monster tick ──────────────────────────────────────────────────────
         this.monsterTick = 0;
+        this.poisonTickTimer = 0;
 
         // ── Exit portal pulse ─────────────────────────────────────────────────
         this._spawnExitPortal();
@@ -540,11 +544,12 @@ class GameScene extends Phaser.Scene {
                 onComplete: () => chest.graphic.destroy()
             });
 
-            // Contents: 2 items guaranteed; first always weapon or armor
+            // Contents: 2 items; first is equipment (weapon/armor), second is consumable
             const item1 = Math.random() < 0.5
                 ? randomItemByType(this.worldNum, 'weapon', new Set())
                 : randomItemByType(this.worldNum, 'armor',  new Set());
-            const item2 = randomItemForWorld(this.worldNum);
+            const item2 = randomItemByType(this.worldNum, 'consumable', new Set())
+                || randomItemForWorld(this.worldNum);
 
             let givenCount = 0;
             for (const item of [item1, item2]) {
@@ -733,6 +738,7 @@ class GameScene extends Phaser.Scene {
             this._handleInput(delta);
             this._handleAttack();
             this._handleBow();
+            this._handleUseItem();
             this._handleZoom();
 
             const touchInv = this.game.registry.get('touch_inventory');
@@ -772,6 +778,9 @@ class GameScene extends Phaser.Scene {
     }
 
     _tryMoveHero(dx, dy) {
+        // Always update facing direction, even when movement is blocked
+        this.hero.facing = { dx, dy };
+
         const nx = this.hero.gridX + dx, ny = this.hero.gridY + dy;
         if (nx < 0 || nx >= this.tileW || ny < 0 || ny >= this.tileH) return;
 
@@ -891,6 +900,29 @@ class GameScene extends Phaser.Scene {
         this._shootArrow(dx, dy, weapon.atk || 3);
     }
 
+    // ── Quick-Use Item (Q key / touch USE button) ──────────────────────────
+
+    _handleUseItem() {
+        const touchUse = this.game.registry.get('touch_use');
+        if (touchUse) this.game.registry.set('touch_use', false);
+        if (!Phaser.Input.Keyboard.JustDown(this.useItemKey) && !touchUse) return;
+
+        // Find first consumable in backpack
+        const bp = this.hero.inventory.backpack;
+        const idx = bp.findIndex(item => item && item.type === 'consumable');
+        if (idx === -1) {
+            this._showMessage('Ingen bruksgjenstander i ryggsekken!', '#ff8844');
+            return;
+        }
+        const item = bp[idx];
+        const consumed = item.use(this.hero, this);
+        if (consumed) {
+            bp[idx] = null;
+            Audio.playPickup();
+            this._floatingText(this.hero.gridX, this.hero.gridY, `✦ ${item.name}`, '#44ccff');
+        }
+    }
+
     _shootArrow(dx, dy, damage) {
         Audio.playArrow();
         let ax = this.hero.gridX + dx, ay = this.hero.gridY + dy;
@@ -1008,8 +1040,13 @@ class GameScene extends Phaser.Scene {
             // Boss always drops a guaranteed item from a higher tier
             const bossItem = randomItemForWorld(Math.min(this.worldNum + 1, 7));
             if (bossItem) this._spawnItemAt(monster.gridX, monster.gridY, bossItem);
-        } else if (Math.random() < 0.45) {
-            this._spawnItemAt(monster.gridX, monster.gridY, randomItemForWorld(this.worldNum));
+        } else if (Math.random() < 0.25) {
+            // Favor consumables over equipment (70% consumable, 30% any)
+            const item = Math.random() < 0.7
+                ? randomItemByType(this.worldNum, 'consumable', new Set())
+                  || randomItemForWorld(this.worldNum)
+                : randomItemForWorld(this.worldNum);
+            this._spawnItemAt(monster.gridX, monster.gridY, item);
         }
         if (leveled) this._onLevelUp();
     }
@@ -1053,17 +1090,24 @@ class GameScene extends Phaser.Scene {
 
     _tickMonsters(delta) {
         this.monsterTick += delta;
+
+        // Poison ticks on its own slower timer (every ~900ms instead of every monster tick)
+        if (this.hero.poisonTurns > 0) {
+            this.poisonTickTimer += delta;
+            if (this.poisonTickTimer >= 900) {
+                this.poisonTickTimer = 0;
+                this.hero.poisonTurns--;
+                const died = this.hero.takeDamage(1);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '☠ -1', '#44ee66');
+                this.hero._drawSprite();
+                if (died) { this._heroDied(); return; }
+            }
+        } else {
+            this.poisonTickTimer = 0;
+        }
+
         if (this.monsterTick < MONSTER_TICK_MS) return;
         this.monsterTick = 0;
-
-        // Poison damage tick
-        if (this.hero.poisonTurns > 0) {
-            this.hero.poisonTurns--;
-            const died = this.hero.takeDamage(1);
-            this._floatingText(this.hero.gridX, this.hero.gridY, '☠ -1', '#44ee66');
-            this.hero._drawSprite();  // refresh tint (clears when poisonTurns hits 0)
-            if (died) { this._heroDied(); return; }
-        }
 
         for (const m of [...this.monsters]) {
             if (!m.alive) continue;

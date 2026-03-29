@@ -17,6 +17,7 @@ class TouchControls {
         reg.set('touch_bow', false);
         reg.set('touch_inventory', false);
         reg.set('touch_minimap', false);
+        reg.set('touch_use', false);
 
         this._createDpad();
         this._createActionButtons();
@@ -91,6 +92,7 @@ class TouchControls {
         const buttons = [
             { label: 'ATK', key: 'touch_attack',    color: 0xaa3333, ox: 0,           oy: 0           },
             { label: 'BOW', key: 'touch_bow',       color: 0x997722, ox: -(sz + gap), oy: 0           },
+            { label: 'USE', key: 'touch_use',       color: 0x339988, ox: -(sz + gap) * 2, oy: 0       },
             { label: 'INV', key: 'touch_inventory', color: 0x335588, ox: 0,           oy: -(sz + gap) },
             { label: 'MAP', key: 'touch_minimap',   color: 0x338844, ox: -(sz + gap), oy: -(sz + gap) },
         ];

@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.9
+**Versjon:** 0.10
 **Sist oppdatert:** 2026-03-29
 
 ---
@@ -122,6 +122,7 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 | WASD / Piltaster / D-pad (touch) | Beveg helt |
 | SPACE / F / Angrepsknapp (touch) | Angrip i sett retning (eller nærmeste monster) |
 | R / Bueknapp (touch) | Skyt pil (krever bue utstyrt) |
+| Q / USE-knapp (touch) | Bruk første consumable i ryggsekken (bombe, drikk, etc.) |
 | E / Inventarknapp (touch) | Åpne/lukk inventory |
 | ESC | Lukk overlay |
 | +/- eller muskjul | Zoom inn/ut |
