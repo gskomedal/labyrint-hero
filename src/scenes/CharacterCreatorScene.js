@@ -353,6 +353,10 @@ class CharacterCreatorScene extends Phaser.Scene {
         this._nameBg  = this.add.rectangle(cx + 40, nameY + 12, 240, 28, 0x1a1830).setStrokeStyle(1, 0x4444aa);
         this._nameTxt = this.add.text(cx + 40, nameY + 12, '|', { fontSize: '15px', color: '#ffffff', fontFamily: 'monospace' }).setOrigin(0.5);
 
+        // Tap name field to open mobile keyboard via hidden HTML input
+        this._nameBg.setInteractive({ useHandCursor: true });
+        this._nameBg.on('pointerdown', () => this._openMobileNameInput());
+
         this._cursor = true;
         this.time.addEvent({ delay: 500, loop: true, callback: () => {
             this._cursor = !this._cursor;
@@ -379,7 +383,41 @@ class CharacterCreatorScene extends Phaser.Scene {
         this._nameTxt.setText(this.heroName + '|');
     }
 
+    _openMobileNameInput() {
+        // Create a temporary HTML input to trigger the mobile keyboard
+        let inp = document.getElementById('_heroNameInput');
+        if (!inp) {
+            inp = document.createElement('input');
+            inp.id = '_heroNameInput';
+            inp.type = 'text';
+            inp.maxLength = 14;
+            inp.autocomplete = 'off';
+            inp.style.cssText = 'position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);' +
+                'font-size:18px;font-family:monospace;padding:8px 12px;width:240px;' +
+                'background:#1a1830;color:#ffffff;border:2px solid #4444aa;border-radius:6px;' +
+                'text-align:center;z-index:9999;outline:none;';
+            document.body.appendChild(inp);
+            inp.addEventListener('input', () => {
+                this.heroName = inp.value.slice(0, 14);
+                this._nameTxt.setText(this.heroName + '|');
+            });
+            inp.addEventListener('blur', () => {
+                this.heroName = inp.value.slice(0, 14);
+                this._nameTxt.setText(this.heroName + (this._cursor ? '|' : ' '));
+                inp.remove();
+            });
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { inp.blur(); }
+            });
+        }
+        inp.value = this.heroName;
+        inp.focus();
+    }
+
     _startGame() {
+        // Remove mobile input if still present
+        const inp = document.getElementById('_heroNameInput');
+        if (inp) inp.remove();
         const name = this.heroName.trim() || RACE_DEFS[this.selectedRace].name;
         this.input.keyboard.off('keydown', this._onKey, this);
         this.scene.start('GameScene', {

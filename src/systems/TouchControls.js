@@ -25,12 +25,10 @@ class TouchControls {
     // ── D-Pad (bottom-left) ──────────────────────────────────────────────────
 
     _createDpad() {
-        const sz   = 52;
-        const gap  = 4;
-        const baseX = 20 + sz + gap;
-        const baseY = 640 - 20 - sz - gap;
-        const alpha = 0.3;
-        const pressAlpha = 0.65;
+        const sz   = 58;
+        const gap  = 6;
+        const baseX = 24 + sz + gap;
+        const baseY = 640 - 24 - sz - gap;
 
         const directions = [
             { label: '\u25B2', dx:  0, dy: -1, ox: 0,           oy: -(sz + gap) },
@@ -42,47 +40,38 @@ class TouchControls {
         for (const dir of directions) {
             const x = baseX + dir.ox;
             const y = baseY + dir.oy;
-            this._makeDpadButton(x, y, sz, dir.label, dir.dx, dir.dy, alpha, pressAlpha);
+            this._makeDpadButton(x, y, sz, dir.label, dir.dx, dir.dy);
         }
     }
 
-    _makeDpadButton(x, y, sz, label, dx, dy, alpha, pressAlpha) {
+    _makeDpadButton(x, y, sz, label, dx, dy) {
         const scene = this.scene;
         const reg   = this.game.registry;
+        const alpha = 0.4;
+        const pressAlpha = 0.75;
 
         const bg = scene.add.graphics();
-        bg.fillStyle(0x334466, alpha);
-        bg.fillRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 8);
-        bg.lineStyle(1, 0x5577aa, alpha);
-        bg.strokeRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 8);
+        this._drawRoundedBtn(bg, x, y, sz, 0x334466, alpha);
         bg.setDepth(100);
 
         const txt = scene.add.text(x, y, label, {
-            fontSize: '22px', color: '#aabbdd', fontFamily: 'monospace'
-        }).setOrigin(0.5).setDepth(101).setAlpha(alpha + 0.2);
+            fontSize: '26px', color: '#aabbdd', fontFamily: 'monospace'
+        }).setOrigin(0.5).setDepth(101).setAlpha(0.7);
 
         const zone = scene.add.zone(x, y, sz, sz).setInteractive().setDepth(102);
 
         zone.on('pointerdown', () => {
             reg.set('touch_dx', dx);
             reg.set('touch_dy', dy);
-            bg.clear();
-            bg.fillStyle(0x4466aa, pressAlpha);
-            bg.fillRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 8);
-            bg.lineStyle(1, 0x6699cc, pressAlpha);
-            bg.strokeRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 8);
-            txt.setAlpha(0.9);
+            this._drawRoundedBtn(bg, x, y, sz, 0x4466aa, pressAlpha);
+            txt.setAlpha(1);
         });
 
         const release = () => {
             reg.set('touch_dx', 0);
             reg.set('touch_dy', 0);
-            bg.clear();
-            bg.fillStyle(0x334466, alpha);
-            bg.fillRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 8);
-            bg.lineStyle(1, 0x5577aa, alpha);
-            bg.strokeRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 8);
-            txt.setAlpha(alpha + 0.2);
+            this._drawRoundedBtn(bg, x, y, sz, 0x334466, alpha);
+            txt.setAlpha(0.7);
         };
 
         zone.on('pointerup', release);
@@ -94,16 +83,16 @@ class TouchControls {
     // ── Action Buttons (bottom-right) ────────────────────────────────────────
 
     _createActionButtons() {
-        const sz   = 48;
-        const gap  = 8;
-        const baseX = 960 - 20 - sz;
-        const baseY = 640 - 20 - sz;
+        const sz   = 56;
+        const gap  = 10;
+        const baseX = 960 - 24 - sz / 2;
+        const baseY = 640 - 24 - sz / 2;
 
         const buttons = [
-            { label: '\u2694', key: 'touch_attack',    color: 0x883333, ox: 0,           oy: 0           },
-            { label: '\u279B', key: 'touch_bow',       color: 0x886633, ox: -(sz + gap), oy: 0           },
-            { label: '\u25A1', key: 'touch_inventory', color: 0x335588, ox: 0,           oy: -(sz + gap) },
-            { label: 'M',     key: 'touch_minimap',   color: 0x338844, ox: -(sz + gap), oy: -(sz + gap) },
+            { label: 'ATK', key: 'touch_attack',    color: 0xaa3333, ox: 0,           oy: 0           },
+            { label: 'BOW', key: 'touch_bow',       color: 0x997722, ox: -(sz + gap), oy: 0           },
+            { label: 'INV', key: 'touch_inventory', color: 0x335588, ox: 0,           oy: -(sz + gap) },
+            { label: 'MAP', key: 'touch_minimap',   color: 0x338844, ox: -(sz + gap), oy: -(sz + gap) },
         ];
 
         for (const btn of buttons) {
@@ -116,39 +105,28 @@ class TouchControls {
     _makeActionButton(x, y, sz, label, regKey, color) {
         const scene = this.scene;
         const reg   = this.game.registry;
-        const alpha = 0.3;
-        const pressAlpha = 0.65;
+        const alpha = 0.4;
+        const pressAlpha = 0.75;
 
         const bg = scene.add.graphics();
-        bg.fillStyle(color, alpha);
-        bg.fillRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 10);
-        bg.lineStyle(1, color, alpha + 0.2);
-        bg.strokeRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 10);
+        this._drawRoundedBtn(bg, x, y, sz, color, alpha);
         bg.setDepth(100);
 
         const txt = scene.add.text(x, y, label, {
-            fontSize: '20px', color: '#ccccdd', fontFamily: 'monospace'
-        }).setOrigin(0.5).setDepth(101).setAlpha(alpha + 0.2);
+            fontSize: '14px', color: '#eeeeff', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101).setAlpha(0.7);
 
         const zone = scene.add.zone(x, y, sz, sz).setInteractive().setDepth(102);
 
         zone.on('pointerdown', () => {
             reg.set(regKey, true);
-            bg.clear();
-            bg.fillStyle(color, pressAlpha);
-            bg.fillRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 10);
-            bg.lineStyle(1, color, pressAlpha + 0.2);
-            bg.strokeRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 10);
-            txt.setAlpha(0.9);
+            this._drawRoundedBtn(bg, x, y, sz, color, pressAlpha);
+            txt.setAlpha(1);
         });
 
         const release = () => {
-            bg.clear();
-            bg.fillStyle(color, alpha);
-            bg.fillRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 10);
-            bg.lineStyle(1, color, alpha + 0.2);
-            bg.strokeRoundedRect(x - sz / 2, y - sz / 2, sz, sz, 10);
-            txt.setAlpha(alpha + 0.2);
+            this._drawRoundedBtn(bg, x, y, sz, color, alpha);
+            txt.setAlpha(0.7);
         };
 
         zone.on('pointerup', release);
@@ -157,8 +135,18 @@ class TouchControls {
         this.widgets.push(bg, txt, zone);
     }
 
+    // ── Shared draw helper ───────────────────────────────────────────────────
+
+    _drawRoundedBtn(gfx, cx, cy, sz, color, alpha) {
+        gfx.clear();
+        gfx.fillStyle(color, alpha);
+        gfx.fillRoundedRect(cx - sz / 2, cy - sz / 2, sz, sz, 10);
+        gfx.lineStyle(2, color, Math.min(1, alpha + 0.3));
+        gfx.strokeRoundedRect(cx - sz / 2, cy - sz / 2, sz, sz, 10);
+    }
+
     update() {
-        // Reserved for future per-frame logic (e.g. held-button repeat)
+        // Reserved for future per-frame logic
     }
 
     destroy() {

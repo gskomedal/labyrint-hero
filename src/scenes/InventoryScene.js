@@ -45,9 +45,17 @@ class InventoryScene extends Phaser.Scene {
         });
 
         this.add.text(cx, cy + panelH / 2 - 14,
-            '[Venstreklikk] Bruk/utstyr  ·  [Høyreklikk] Slipp  ·  [E/ESC] Lukk', {
+            '[Trykk] Bruk/utstyr  ·  [Hold] Slipp  ·  [E/ESC] Lukk', {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(0.5);
+
+        // Close button (touch-friendly)
+        const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
+            fontSize: '20px', color: '#667788', fontFamily: 'monospace'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
+        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
+        closeBtn.on('pointerdown', () => this._tryClose());
 
         // ── Build dynamic slot UI ──────────────────────────────────────────────
         this._refresh();
