@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Labyrint Hero</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #08060f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: monospace;
+        }
+        canvas { display: block; image-rendering: pixelated; }
+    </style>
+</head>
+<body>
+
+<!-- Phaser 3 via CDN -->
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+<!-- Core -->
+<script src="src/constants.js"></script>
+<script src="src/maze.js"></script>
+<script src="src/utils/SaveManager.js"></script>
+
+<!-- Data -->
+<script src="src/data/skills.js"></script>
+<script src="src/data/items.js"></script>
+
+<!-- Graphics -->
+<script src="src/graphics/CharacterSprite.js"></script>
+
+<!-- Systems -->
+<script src="src/systems/Inventory.js"></script>
+<script src="src/systems/AudioManager.js"></script>
+
+<!-- Entities -->
+<script src="src/entities/Hero.js"></script>
+<script src="src/entities/Monster.js"></script>
+
+<!-- Scenes -->
+<script src="src/scenes/MenuScene.js"></script>
+<script src="src/scenes/CharacterCreatorScene.js"></script>
+<script src="src/scenes/GameScene.js"></script>
+<script src="src/scenes/UIScene.js"></script>
+<script src="src/scenes/SkillScene.js"></script>
+<script src="src/scenes/InventoryScene.js"></script>
+<script src="src/scenes/GameOverScene.js"></script>
+<script src="src/scenes/SettingsScene.js"></script>
+
+<!-- Boot -->
+<script src="src/main.js"></script>
+
+</body>
+</html>

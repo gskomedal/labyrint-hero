@@ -1,0 +1,201 @@
+// ─── Labyrint Hero – Item Definitions ────────────────────────────────────────
+// type: 'weapon' | 'armor' | 'consumable' | 'tool'
+// Weapons/armor: { atk?, def? }  – applied on equip, removed on unequip
+// Consumables:   use(hero, scene) → returns true if item is consumed
+// subtype: 'bow' marks ranged weapons
+// Tools: pickaxe, key – have special in-world interactions
+
+const ITEM_DEFS = {
+    // ── Melee Weapons ─────────────────────────────────────────────────────────
+    dagger: {
+        id: 'dagger', name: 'Dolk', type: 'weapon',
+        color: 0x88aacc, desc: '+1 Angrep', atk: 1, tier: 1
+    },
+    wood_sword: {
+        id: 'wood_sword', name: 'Tresverd', type: 'weapon',
+        color: 0xaa7733, desc: '+1 Angrep', atk: 1, tier: 1
+    },
+    spear: {
+        id: 'spear', name: 'Spyd', type: 'weapon',
+        color: 0xccbb77, desc: '+2 Angrep', atk: 2, tier: 2
+    },
+    iron_sword: {
+        id: 'iron_sword', name: 'Jernsverd', type: 'weapon',
+        color: 0xaaaacc, desc: '+2 Angrep', atk: 2, tier: 2
+    },
+    battle_axe: {
+        id: 'battle_axe', name: 'Stridsøks', type: 'weapon',
+        color: 0xcc6622, desc: '+3 Angrep', atk: 3, tier: 3
+    },
+    war_hammer: {
+        id: 'war_hammer', name: 'Krigshammer', type: 'weapon',
+        color: 0x886644, desc: '+4 Angrep', atk: 4, tier: 4
+    },
+    magic_staff: {
+        id: 'magic_staff', name: 'Trollstav', type: 'weapon',
+        color: 0xaa44ff, desc: '+2 Angrep, +1 Forsvar', atk: 2, def: 1, tier: 3
+    },
+
+    // ── Ranged Weapons (subtype: 'bow') ───────────────────────────────────────
+    shortbow: {
+        id: 'shortbow', name: 'Kortbue', type: 'weapon', subtype: 'bow',
+        color: 0x996633, desc: '+2 Angrep på avstand (trykk R)', atk: 2, tier: 2
+    },
+    elven_bow: {
+        id: 'elven_bow', name: 'Alvebue', type: 'weapon', subtype: 'bow',
+        color: 0x55cc88, desc: '+3 Angrep på avstand (trykk R)', atk: 3, tier: 3
+    },
+    crossbow: {
+        id: 'crossbow', name: 'Armbrøst', type: 'weapon', subtype: 'bow',
+        color: 0x886644, desc: '+4 Angrep på avstand (trykk R)', atk: 4, tier: 4
+    },
+
+    // ── Armor ─────────────────────────────────────────────────────────────────
+    leather_armor: {
+        id: 'leather_armor', name: 'Lærpansring', type: 'armor',
+        color: 0x886633, desc: '+1 Forsvar', def: 1, tier: 1
+    },
+    padded_vest: {
+        id: 'padded_vest', name: 'Vattert vest', type: 'armor',
+        color: 0x998866, desc: '+1 Forsvar, +1 hjerte', def: 1, hearts: 1, tier: 1
+    },
+    chain_mail: {
+        id: 'chain_mail', name: 'Ringbrynje', type: 'armor',
+        color: 0x8899aa, desc: '+2 Forsvar', def: 2, tier: 2
+    },
+    plate_armor: {
+        id: 'plate_armor', name: 'Platedrakt', type: 'armor',
+        color: 0xccccdd, desc: '+3 Forsvar', def: 3, tier: 3
+    },
+    robe_magic: {
+        id: 'robe_magic', name: 'Magikappe', type: 'armor',
+        color: 0x6633aa, desc: '+2 Forsvar, +1 Angrep', def: 2, atk: 1, tier: 3
+    },
+    dragon_scale: {
+        id: 'dragon_scale', name: 'Drageskjell', type: 'armor',
+        color: 0xff6622, desc: '+4 Forsvar', def: 4, tier: 4
+    },
+
+    // ── Consumables ───────────────────────────────────────────────────────────
+    health_pot: {
+        id: 'health_pot', name: 'Livspotte', type: 'consumable',
+        color: 0xff2244, desc: 'Gjenoppretter 2 hjerter', tier: 1,
+        use(hero) { hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); return true; }
+    },
+    big_health_pot: {
+        id: 'big_health_pot', name: 'Stor livspotte', type: 'consumable',
+        color: 0xff0000, desc: 'Gjenoppretter alle hjerter', tier: 2,
+        use(hero) { hero.hearts = hero.maxHearts; return true; }
+    },
+    strength_brew: {
+        id: 'strength_brew', name: 'Styrkebrygg', type: 'consumable',
+        color: 0xff8800, desc: '+2 Angrep (permanent)', tier: 2,
+        use(hero) { hero.attack += 2; return true; }
+    },
+    defense_brew: {
+        id: 'defense_brew', name: 'Forsvarsbrygg', type: 'consumable',
+        color: 0x4488ff, desc: '+1 Forsvar (permanent)', tier: 2,
+        use(hero) { hero.defense += 1; return true; }
+    },
+    xp_scroll: {
+        id: 'xp_scroll', name: 'Erfaringsrulle', type: 'consumable',
+        color: 0xaabbff, desc: 'Gir 80 XP', tier: 2,
+        use(hero) { hero.gainXP(80); return true; }
+    },
+    antidote: {
+        id: 'antidote', name: 'Motgift', type: 'consumable',
+        color: 0x88ee44, desc: 'Gjenoppretter 1 hjerte', tier: 1,
+        use(hero) { hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); return true; }
+    },
+    bomb: {
+        id: 'bomb', name: 'Bombe', type: 'consumable',
+        color: 0x333333, desc: 'Skader alle monstre innen 3 ruter (6 skade)', tier: 2,
+        use(hero, scene) {
+            if (!scene) return false;
+            for (const m of scene.monsters) {
+                if (!m.alive) continue;
+                const d = Math.abs(m.gridX - hero.gridX) + Math.abs(m.gridY - hero.gridY);
+                if (d <= 3) m.takeDamage(6);
+            }
+            scene.monsters = scene.monsters.filter(m => m.alive);
+            return true;
+        }
+    },
+    flashbang: {
+        id: 'flashbang', name: 'Blendgranate', type: 'consumable',
+        color: 0xffffcc, desc: 'Halvér angrepet til monstre innen 4 ruter', tier: 2,
+        use(hero, scene) {
+            if (!scene) return false;
+            for (const m of scene.monsters) {
+                if (!m.alive) continue;
+                const d = Math.abs(m.gridX - hero.gridX) + Math.abs(m.gridY - hero.gridY);
+                if (d <= 4) m.attack = Math.max(1, Math.floor(m.attack / 2));
+            }
+            return true;
+        }
+    },
+    map_scroll: {
+        id: 'map_scroll', name: 'Kart-rulle', type: 'consumable',
+        color: 0xeecc88, desc: 'Avslører hele labyrinten', tier: 2,
+        use(hero, scene) {
+            if (!scene) return false;
+            for (let y = 0; y < scene.tileH; y++)
+                for (let x = 0; x < scene.tileW; x++)
+                    if (scene.fog[y][x] === FOG.DARK) scene.fog[y][x] = FOG.DIM;
+            scene._drawFog();
+            return true;
+        }
+    },
+    heart_crystal: {
+        id: 'heart_crystal', name: 'Hjerte-krystall', type: 'consumable',
+        color: 0xff44aa, desc: '+1 Maks-hjerte (permanent)', tier: 3,
+        use(hero) {
+            hero.maxHearts += 1;
+            hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            return true;
+        }
+    },
+
+    // ── Tools (in-world use, not manual use from inventory) ───────────────────
+    key: {
+        id: 'key', name: 'Nøkkel', type: 'tool',
+        color: 0xffcc00, desc: 'Bær den – åpner låste dører automatisk',
+        tier: 1,
+        use() { return false; }   // Auto-consumed by door logic in GameScene
+    },
+    pickaxe: {
+        id: 'pickaxe', name: 'Hakke', type: 'tool',
+        color: 0xaa7744, desc: 'Bruk SPACE/F mot sprekket vegg for å bryte igjennom',
+        tier: 1,
+        use() { return false; }   // Consumed by cracked-wall logic in GameScene
+    }
+};
+
+/** Pool of item IDs by tier (tools excluded – placed separately) */
+const ITEM_POOL = {
+    1: ['dagger', 'wood_sword', 'leather_armor', 'padded_vest', 'health_pot', 'antidote'],
+    2: ['spear', 'iron_sword', 'shortbow', 'chain_mail',
+        'health_pot', 'big_health_pot', 'strength_brew', 'defense_brew',
+        'xp_scroll', 'bomb', 'map_scroll'],
+    3: ['battle_axe', 'war_hammer', 'elven_bow', 'plate_armor', 'robe_magic',
+        'big_health_pot', 'strength_brew', 'defense_brew', 'bomb',
+        'flashbang', 'heart_crystal', 'map_scroll'],
+    4: ['war_hammer', 'crossbow', 'magic_staff', 'robe_magic', 'plate_armor',
+        'dragon_scale', 'big_health_pot', 'strength_brew', 'bomb',
+        'heart_crystal', 'flashbang']
+};
+
+/** Return a random item def appropriate for the given world number */
+function randomItemForWorld(worldNum) {
+    const tier = Math.min(4, Math.ceil(worldNum / 2));
+    const pool = ITEM_POOL[tier];
+    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+}
+
+/** Return a random item of a specific type for the given tier, excluding ids in the exclude Set */
+function randomItemByType(worldNum, type, exclude = new Set()) {
+    const tier = Math.min(4, Math.ceil(worldNum / 2));
+    const pool = ITEM_POOL[tier].filter(id => ITEM_DEFS[id].type === type && !exclude.has(id));
+    if (pool.length === 0) return null;
+    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+}

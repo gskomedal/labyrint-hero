@@ -1,0 +1,25 @@
+{
+  "_comment": "Spillbalansering – justeres underveis i utviklingen",
+  "difficulty_levels": {
+    "easy":   { "maze_size": [20, 20], "monster_density": 0.05, "trap_density": 0.03 },
+    "normal": { "maze_size": [40, 40], "monster_density": 0.08, "trap_density": 0.05 },
+    "hard":   { "maze_size": [60, 60], "monster_density": 0.12, "trap_density": 0.08 },
+    "epic":   { "maze_size": [80, 80], "monster_density": 0.16, "trap_density": 0.12 }
+  },
+  "hero_classes": {
+    "human":   { "hp": 5, "strength": 3, "agility": 3, "magic": 3, "special": "xp_bonus" },
+    "dwarf":   { "hp": 6, "strength": 5, "agility": 2, "magic": 2, "special": "armor_bonus" },
+    "elf":     { "hp": 4, "strength": 2, "agility": 5, "magic": 4, "special": "fog_radius" },
+    "hobbit":  { "hp": 4, "strength": 2, "agility": 4, "magic": 2, "special": "trap_dodge" }
+  },
+  "world_scaling": {
+    "monster_hp_multiplier_per_world": 1.25,
+    "monster_strength_multiplier_per_world": 1.15,
+    "boss_hp_multiplier_per_world": 1.4,
+    "xp_required_multiplier_per_level": 1.3
+  },
+  "fog_of_war": {
+    "default_vision_radius": 4,
+    "elf_vision_bonus": 2
+  }
+}

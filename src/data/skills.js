@@ -1,0 +1,201 @@
+// ─── Labyrint Hero – Skill Tree ───────────────────────────────────────────────
+// Four specialization paths, each with 3 tiers.
+// Tier 1 is always unlocked. Tier 2 requires ≥1 skill from that path's T1.
+// Tier 3 requires ≥1 skill from that path's T2.
+// Each skill can generally be stacked 2× (maxStack), T3 skills only 1×.
+
+const SKILL_TREE_PATHS = [
+    // ── KRIGAR (Warrior) ───────────────────────────────────────────────────────
+    {
+        id:    'krigar',
+        name:  'Krigar',
+        desc:  'Kamp og råstyrke',
+        color: 0xff4422,
+        icon:  'K',
+        tiers: [
+            {
+                id:       'power_strike',
+                name:     'Kraftig slag',
+                desc:     '+2 Angrep',
+                category: 'ATK',
+                maxStack: 3,
+                apply(hero) { hero.attack += 2; }
+            },
+            {
+                id:       'battle_hardened',
+                name:     'Kampherdet',
+                desc:     '+2 Angrep\n+1 Forsvar',
+                category: 'ATK',
+                maxStack: 2,
+                apply(hero) { hero.attack += 2; hero.defense += 1; }
+            },
+            {
+                id:       'giant_strength',
+                name:     'Jotunstyrke',
+                desc:     '+5 Angrep\n(krever T2)',
+                category: 'ATK',
+                maxStack: 1,
+                apply(hero) { hero.attack += 5; }
+            },
+        ]
+    },
+
+    // ── VOKTER (Guardian) ──────────────────────────────────────────────────────
+    {
+        id:    'vokter',
+        name:  'Vokter',
+        desc:  'Forsvar og utholdenhet',
+        color: 0x2266cc,
+        icon:  'V',
+        tiers: [
+            {
+                id:       'thick_skin',
+                name:     'Tykk hud',
+                desc:     '+1 Forsvar',
+                category: 'DEF',
+                maxStack: 3,
+                apply(hero) { hero.defense += 1; }
+            },
+            {
+                id:       'bulwark',
+                name:     'Festning',
+                desc:     '+1 Forsvar\n+1 Hjerte',
+                category: 'DEF',
+                maxStack: 2,
+                apply(hero) { hero.defense += 1; hero.maxHearts++; hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); }
+            },
+            {
+                id:       'iron_health',
+                name:     'Jernhelse',
+                desc:     '+2 maks hjerter\n(krever T2)',
+                category: 'HP',
+                maxStack: 1,
+                apply(hero) { hero.maxHearts += 2; hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); }
+            },
+        ]
+    },
+
+    // ── JEGER (Hunter) ─────────────────────────────────────────────────────────
+    {
+        id:    'jeger',
+        name:  'Jeger',
+        desc:  'Syn, presisjon og kritiske treff',
+        color: 0x44dd88,
+        icon:  'J',
+        tiers: [
+            {
+                id:       'keen_eye',
+                name:     'Skarpsyn',
+                desc:     '+2 synsradius',
+                category: 'VIS',
+                maxStack: 2,
+                apply(hero) { hero.visionRadius += 2; }
+            },
+            {
+                id:       'vital_strike',
+                name:     'Vitalt anslag',
+                desc:     '+25% kritisk-\nsjanse (×2 skade)',
+                category: 'ATK',
+                maxStack: 2,
+                apply(hero) { hero.critChance = Math.min(0.75, hero.critChance + 0.25); }
+            },
+            {
+                id:       'precision',
+                name:     'Presisjon',
+                desc:     '+3 Angrep\n(krever T2)',
+                category: 'ATK',
+                maxStack: 1,
+                apply(hero) { hero.attack += 3; }
+            },
+        ]
+    },
+
+    // ── SKURK (Rogue) ──────────────────────────────────────────────────────────
+    {
+        id:    'skurk',
+        name:  'Skurk',
+        desc:  'Unnvikelse og erfaring',
+        color: 0xaa44ff,
+        icon:  'S',
+        tiers: [
+            {
+                id:       'xp_boost',
+                name:     'Kunnskap',
+                desc:     '+30% XP fra alt',
+                category: 'UTIL',
+                maxStack: 2,
+                apply(hero) { hero.xpMultiplier += 0.30; }
+            },
+            {
+                id:       'dodge',
+                name:     'Unnvikelse',
+                desc:     '+20% sjanse\nfor å unngå',
+                category: 'UTIL',
+                maxStack: 2,
+                apply(hero) { hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.20); }
+            },
+            {
+                id:       'regen',
+                name:     'Blomstersaft',
+                desc:     'Gjenoppretter\n2 hjerter nå',
+                category: 'HP',
+                maxStack: 99,
+                apply(hero) { hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); }
+            },
+        ]
+    },
+];
+
+// ── Flat list for backward compat (save/load, apply) ──────────────────────────
+const SKILL_DEFS = SKILL_TREE_PATHS.flatMap(path => path.tiers);
+
+/**
+ * Count how many times a skill has been taken from hero.skills[].
+ */
+function _countSkill(hero, id) {
+    return (hero.skills || []).filter(s => s === id).length;
+}
+
+/**
+ * Check whether a skill slot in the tree is available to pick.
+ *   tier 0 (T1) – always available (if not maxed)
+ *   tier 1 (T2) – need ≥1 T1 skill from same path
+ *   tier 2 (T3) – need ≥1 T2 skill from same path
+ */
+function isSkillUnlocked(hero, pathIndex, tierIndex) {
+    const path  = SKILL_TREE_PATHS[pathIndex];
+    const skill = path.tiers[tierIndex];
+
+    // Already at max stack → not available
+    if (_countSkill(hero, skill.id) >= skill.maxStack) return false;
+
+    if (tierIndex === 0) return true;   // T1 always unlocked
+
+    // Needs at least 1 pick from previous tier of SAME path
+    const prevSkill = path.tiers[tierIndex - 1];
+    return _countSkill(hero, prevSkill.id) >= 1;
+}
+
+/**
+ * Return all currently pickable skills as { pathIndex, tierIndex, skill } objects.
+ */
+function getAvailableSkills(hero) {
+    const available = [];
+    SKILL_TREE_PATHS.forEach((path, pi) => {
+        path.tiers.forEach((skill, ti) => {
+            if (isSkillUnlocked(hero, pi, ti)) {
+                available.push({ pathIndex: pi, tierIndex: ti, skill });
+            }
+        });
+    });
+    return available;
+}
+
+/**
+ * Legacy helper – still used by simulator. Returns 3 random picks.
+ */
+function getRandomSkillChoices(hero, count = 3) {
+    const available = getAvailableSkills(hero);
+    const shuffled  = [...available].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count).map(e => e.skill);
+}

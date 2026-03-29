@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<title>Labyrint Hero – Spillbalanse-simulator</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #0a0916;
+    color: #ccddee;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    padding: 16px;
+    min-height: 100vh;
+}
+h1 { color: #88bbff; font-size: 20px; margin-bottom: 4px; }
+h2 { color: #667799; font-size: 13px; font-weight: normal; margin-bottom: 16px; }
+h3 { color: #aabbff; font-size: 14px; margin: 16px 0 8px; border-bottom: 1px solid #223344; padding-bottom: 4px; }
+
+.controls {
+    display: flex; flex-wrap: wrap; gap: 12px;
+    background: #0f0d20; border: 1px solid #223344;
+    padding: 14px; border-radius: 6px;
+    margin-bottom: 16px; align-items: flex-end;
+}
+.control-group { display: flex; flex-direction: column; gap: 4px; }
+.control-group label { color: #667799; font-size: 11px; }
+.control-group input, .control-group select {
+    background: #1a1830; border: 1px solid #334466;
+    color: #ccddee; padding: 4px 8px; border-radius: 3px;
+    font-family: inherit; font-size: 13px; width: 130px;
+}
+button#runBtn {
+    background: #1a3a5a; border: 1px solid #2255aa;
+    color: #88ccff; padding: 8px 20px; border-radius: 4px;
+    font-family: inherit; font-size: 14px; cursor: pointer;
+    align-self: flex-end;
+}
+button#runBtn:hover { background: #1e4570; }
+button#runBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#progress { display: none; color: #667799; font-size: 11px; margin-top: 6px; font-style: italic; }
+
+.dashboard { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 1100px) { .dashboard { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px)  { .dashboard { grid-template-columns: 1fr; } }
+
+.card { background: #0f0d20; border: 1px solid #223344; border-radius: 6px; padding: 14px; }
+.card.wide { grid-column: span 2; }
+.card.full  { grid-column: span 3; }
+@media (max-width: 700px) { .card.wide, .card.full { grid-column: span 1; } }
+
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+.stat-row  { display: flex; justify-content: space-between; align-items: center; }
+.stat-label { color: #667799; }
+.stat-val   { color: #eeeeff; font-weight: bold; }
+.stat-val.good { color: #44ee88; }
+.stat-val.warn { color: #ffcc44; }
+.stat-val.bad  { color: #ff5555; }
+
+.bar-chart { margin-top: 4px; }
+.bar-row   { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.bar-name  { color: #889aaa; min-width: 140px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-outer { flex: 1; height: 14px; background: #0a0916; border-radius: 3px; overflow: hidden; }
+.bar-inner { height: 100%; border-radius: 3px; }
+.bar-pct   { color: #667799; font-size: 11px; min-width: 52px; text-align: right; }
+
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th { text-align: left; color: #667799; font-size: 11px; border-bottom: 1px solid #223344; padding: 4px 6px; }
+tbody td { padding: 4px 6px; border-bottom: 1px solid #161626; }
+tbody tr:hover td { background: #131128; }
+.td-num { text-align: right; }
+
+#logBox {
+    max-height: 180px; overflow-y: auto; background: #070612;
+    padding: 8px; border-radius: 3px; font-size: 11px;
+    color: #556677; line-height: 1.5; border: 1px solid #1a1a30; margin-top: 8px;
+}
+.log-win  { color: #44ee88; }
+.log-loss { color: #ff5555; }
+</style>
+</head>
+<body>
+<h1>⚔ Labyrint Hero – Balanse-simulator</h1>
+<h2>Simulerer N komplette spill med en enkel AI og rapporterer spillbalanse-statistikk</h2>
+
+<div class="controls">
+    <div class="control-group">
+        <label>Antall simuleringer</label>
+        <input type="number" id="cfgRuns" value="300" min="10" max="2000">
+    </div>
+    <div class="control-group">
+        <label>Start-verden</label>
+        <input type="number" id="cfgStartWorld" value="1" min="1" max="8">
+    </div>
+    <div class="control-group">
+        <label>Maks verdener per spill</label>
+        <input type="number" id="cfgMaxWorlds" value="6" min="1" max="12">
+    </div>
+    <div class="control-group">
+        <label>AI-strategi</label>
+        <select id="cfgAI">
+            <option value="balanced">Balansert (anbefalt)</option>
+            <option value="aggressive">Aggressiv (drep alt)</option>
+            <option value="coward">Feig (unngå kamp)</option>
+            <option value="collector">Samler (hent alt)</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label>Race</label>
+        <select id="cfgRace">
+            <option value="human">Menneskelig (+XP)</option>
+            <option value="elf">Alv (+ATK)</option>
+            <option value="dwarf">Dverg (+DEF +Heart)</option>
+            <option value="orc">Ork (+ATK, -Heart)</option>
+        </select>
+    </div>
+    <button id="runBtn" onclick="runSimulation()">▶ Kjør simulering</button>
+</div>
+<div id="progress"></div>
+
+<div id="dashboard" class="dashboard" style="display:none">
+    <div class="card">
+        <h3>🏆 Gjennomsnittlig utfall</h3>
+        <div class="stat-grid" id="metricGrid"></div>
+    </div>
+    <div class="card">
+        <h3>💀 Dødsårsaker</h3>
+        <div class="bar-chart" id="deathChart"></div>
+    </div>
+    <div class="card">
+        <h3>🧬 Nivå-fordeling</h3>
+        <div class="bar-chart" id="levelChart"></div>
+    </div>
+    <div class="card wide">
+        <h3>🎒 Gjenstander (gjennomsnitt per spill)</h3>
+        <div class="bar-chart" id="itemChart"></div>
+    </div>
+    <div class="card">
+        <h3>👾 Monster-drap (gjennomsnitt per spill)</h3>
+        <div class="bar-chart" id="monsterChart"></div>
+    </div>
+    <div class="card full">
+        <h3>🌍 Verden-for-verden oversikt</h3>
+        <table id="worldTable">
+            <thead>
+                <tr>
+                    <th>Verden</th><th>Antall</th><th>Seiersrate</th>
+                    <th>Snitt-nivå</th><th>Snitt-monstre</th>
+                    <th>Snitt-hjerter</th><th>Snitt-turns</th><th>Vanligste død</th>
+                </tr>
+            </thead>
+            <tbody id="worldTableBody"></tbody>
+        </table>
+    </div>
+    <div class="card">
+        <h3>⚖ Kamp-balanse</h3>
+        <div class="stat-grid" id="combatGrid"></div>
+    </div>
+    <div class="card">
+        <h3>🔑 Verktøy-bruk</h3>
+        <div class="stat-grid" id="toolGrid"></div>
+    </div>
+    <div class="card">
+        <h3>📊 Siste 20 spill (log)</h3>
+        <div id="logBox"></div>
+    </div>
+</div>
+
+<script>
+// ─── Constants (mirrors constants.js) ─────────────────────────────────────────
+const TILE = { WALL:0, FLOOR:1, EXIT:2, SECRET:3, CRACKED_WALL:4, DOOR:5 };
+const BASE_CELL_W = 13, BASE_CELL_H = 10;
+const HERO_BASE_ATTACK = 2, HERO_BASE_HEARTS = 5;
+// v0.7 balance – must match constants.js
+const MONSTER_BASE_HP   = { goblin:10, orc:18, troll:30, boss:35 };
+const MONSTER_ATTACK    = { goblin:2,  orc:4,  troll:6,  boss:3  };
+const MONSTER_XP        = { goblin:10, orc:25, troll:50, boss:150 };
+const XP_BASE = 100, XP_GROWTH = 1.55;  // v0.7 – must match constants.js
+const AGGRO_RADIUS    = 12;
+const SIM_SIGHT       = 8;   // Simulated "sight" – monster only aggros within this range in sim
+
+// ─── Races ────────────────────────────────────────────────────────────────────
+const RACE_STATS = {
+    human:  { attack:0, defense:0, hearts:0 },
+    elf:    { attack:1, defense:0, hearts:0 },
+    dwarf:  { attack:0, defense:1, hearts:1 },
+    orc:    { attack:2, defense:0, hearts:-1 },
+};
+
+// ─── Skills ───────────────────────────────────────────────────────────────────
+const SKILL_DEFS = [
+    { atk:1, def:0, hearts:0 }, { atk:0, def:1, hearts:0 }, { atk:0, def:0, hearts:1 },
+    { atk:1, def:0, hearts:0 }, { atk:2, def:0, hearts:0 }, { atk:0, def:0, hearts:2 },
+    { atk:1, def:1, hearts:0 }, { atk:0, def:2, hearts:0 }, { atk:1, def:0, hearts:1 },
+];
+
+// ─── Items ────────────────────────────────────────────────────────────────────
+const ITEM_DEFS = {
+    dagger:         { id:'dagger',         type:'weapon', atk:1,  def:0, hearts:0, tier:1, name:'Dolk' },
+    wood_sword:     { id:'wood_sword',     type:'weapon', atk:1,  def:0, hearts:0, tier:1, name:'Tresverd' },
+    spear:          { id:'spear',          type:'weapon', atk:2,  def:0, hearts:0, tier:2, name:'Spyd' },
+    iron_sword:     { id:'iron_sword',     type:'weapon', atk:2,  def:0, hearts:0, tier:2, name:'Jernsverd' },
+    battle_axe:     { id:'battle_axe',     type:'weapon', atk:3,  def:0, hearts:0, tier:3, name:'Stridsøks' },
+    war_hammer:     { id:'war_hammer',     type:'weapon', atk:4,  def:0, hearts:0, tier:4, name:'Krigshammer' },
+    magic_staff:    { id:'magic_staff',    type:'weapon', atk:2,  def:1, hearts:0, tier:3, name:'Trollstav' },
+    shortbow:       { id:'shortbow',       type:'weapon', atk:2,  def:0, hearts:0, tier:2, name:'Kortbue' },
+    elven_bow:      { id:'elven_bow',      type:'weapon', atk:3,  def:0, hearts:0, tier:3, name:'Alvebue' },
+    crossbow:       { id:'crossbow',       type:'weapon', atk:4,  def:0, hearts:0, tier:4, name:'Armbrøst' },
+    leather_armor:  { id:'leather_armor',  type:'armor',  atk:0,  def:1, hearts:0, tier:1, name:'Lærpansring' },
+    padded_vest:    { id:'padded_vest',    type:'armor',  atk:0,  def:1, hearts:1, tier:1, name:'Vattert vest' },
+    chain_mail:     { id:'chain_mail',     type:'armor',  atk:0,  def:2, hearts:0, tier:2, name:'Ringbrynje' },
+    plate_armor:    { id:'plate_armor',    type:'armor',  atk:0,  def:3, hearts:0, tier:3, name:'Platedrakt' },
+    robe_magic:     { id:'robe_magic',     type:'armor',  atk:1,  def:2, hearts:0, tier:3, name:'Magikappe' },
+    dragon_scale:   { id:'dragon_scale',   type:'armor',  atk:0,  def:4, hearts:0, tier:4, name:'Drageskjell' },
+    health_pot:     { id:'health_pot',     type:'consumable', heal:2,   tier:1, name:'Livspotte' },
+    big_health_pot: { id:'big_health_pot', type:'consumable', heal:99,  tier:2, name:'Stor livspotte' },
+    strength_brew:  { id:'strength_brew',  type:'consumable', atkBuff:2,tier:2, name:'Styrkebrygg' },
+    defense_brew:   { id:'defense_brew',   type:'consumable', defBuff:1,tier:2, name:'Forsvarsbrygg' },
+    xp_scroll:      { id:'xp_scroll',      type:'consumable', xp:80,    tier:2, name:'Erfaringsrulle' },
+    antidote:       { id:'antidote',       type:'consumable', heal:1,   tier:1, name:'Motgift' },
+    bomb:           { id:'bomb',           type:'consumable', bomb:true,tier:2, name:'Bombe' },
+    flashbang:      { id:'flashbang',      type:'consumable', flash:true,tier:2,name:'Blendgranate' },
+    map_scroll:     { id:'map_scroll',     type:'consumable', tier:2,           name:'Kart-rulle' },
+    heart_crystal:  { id:'heart_crystal',  type:'consumable', maxHeart:1,tier:3,name:'Hjerte-krystall' },
+    key:            { id:'key',            type:'tool', tier:1, name:'Nøkkel' },
+    pickaxe:        { id:'pickaxe',        type:'tool', tier:1, name:'Hakke' },
+};
+const ITEM_POOL = {
+    1: ['dagger','wood_sword','leather_armor','padded_vest','health_pot','antidote'],
+    2: ['spear','iron_sword','shortbow','chain_mail','health_pot','big_health_pot','strength_brew','defense_brew','xp_scroll','bomb','map_scroll'],
+    3: ['battle_axe','war_hammer','elven_bow','plate_armor','robe_magic','big_health_pot','strength_brew','defense_brew','bomb','flashbang','heart_crystal'],
+    4: ['war_hammer','crossbow','magic_staff','robe_magic','plate_armor','dragon_scale','big_health_pot','strength_brew','bomb','heart_crystal','flashbang']
+};
+function rndItem(world) {
+    const tier = Math.min(4, Math.ceil(world / 2));
+    const pool = ITEM_POOL[tier];
+    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+}
+function rndItemByType(world, type, exclude = new Set()) {
+    const tier = Math.min(4, Math.ceil(world / 2));
+    const pool = ITEM_POOL[tier].filter(id => ITEM_DEFS[id].type === type && !exclude.has(id));
+    if (!pool.length) return null;
+    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+}
+
+// ─── Maze generator (mirrors maze.js) ────────────────────────────────────────
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function generateMaze(world) {
+    const extra = Math.min(world - 1, 6);
+    const cellW = BASE_CELL_W + extra * 2;
+    const cellH = BASE_CELL_H + extra;
+    const tileW = cellW * 2 + 1, tileH = cellH * 2 + 1;
+    const grid = Array.from({ length: tileH }, () => new Array(tileW).fill(TILE.WALL));
+    const visited = Array.from({ length: cellH }, () => new Array(cellW).fill(false));
+
+    function carve(cx, cy) {
+        visited[cy][cx] = true;
+        grid[cy * 2 + 1][cx * 2 + 1] = TILE.FLOOR;
+        const dirs = shuffle([[0,-1],[0,1],[-1,0],[1,0]]);
+        for (const [dx, dy] of dirs) {
+            const nx = cx + dx, ny = cy + dy;
+            if (nx >= 0 && nx < cellW && ny >= 0 && ny < cellH && !visited[ny][nx]) {
+                grid[cy*2+1+dy][cx*2+1+dx] = TILE.FLOOR;
+                carve(nx, ny);
+            }
+        }
+    }
+    carve(0, 0);
+
+    // Extra passages (mirrors maze.js ratio)
+    const candidates = [];
+    for (let cy = 0; cy < cellH; cy++) for (let cx = 0; cx < cellW; cx++) {
+        if (cx+1 < cellW) { const wx=cx*2+2, wy=cy*2+1; if (grid[wy][wx]===TILE.WALL) candidates.push({wx,wy}); }
+        if (cy+1 < cellH) { const wx=cx*2+1, wy=cy*2+2; if (grid[wy][wx]===TILE.WALL) candidates.push({wx,wy}); }
+    }
+    shuffle(candidates);
+    const count = Math.floor(candidates.length * 0.18);
+    for (let i = 0; i < count; i++) {
+        const { wx, wy } = candidates[i];
+        const r = Math.random();
+        if      (r < 0.35) grid[wy][wx] = TILE.FLOOR;
+        else if (r < 0.55) grid[wy][wx] = TILE.SECRET;
+        else if (r < 0.75) grid[wy][wx] = TILE.CRACKED_WALL;
+        else               grid[wy][wx] = TILE.DOOR;
+    }
+
+    const exitX = tileW - 2, exitY = tileH - 2;
+    grid[exitY][exitX] = TILE.EXIT;
+
+    return { grid, tileW, tileH, exitX, exitY };
+}
+
+function getFloorTiles(grid, tileW, tileH) {
+    const tiles = [];
+    for (let y = 0; y < tileH; y++)
+        for (let x = 0; x < tileW; x++)
+            if (grid[y][x] === TILE.FLOOR || grid[y][x] === TILE.EXIT)
+                tiles.push({ x, y });
+    return tiles;
+}
+function countTile(grid, tileW, tileH, type) {
+    let n = 0;
+    for (let y = 0; y < tileH; y++) for (let x = 0; x < tileW; x++) if (grid[y][x] === type) n++;
+    return n;
+}
+
+// ─── BFS pathfinding – avoids living monster positions ────────────────────────
+function bfsPath(grid, tileW, tileH, sx, sy, tx, ty, monsters, allowDoor=false, allowCracked=false) {
+    if (sx === tx && sy === ty) return [];
+    const visited = new Set();
+    const key = (x, y) => y * tileW + x;
+    // Build monster position set for fast lookup (exclude target tile – we WANT to reach the monster)
+    const monSet = new Set(monsters.filter(m => m.alive).map(m => key(m.x, m.y)));
+
+    const q = [{ x: sx, y: sy, path: [] }];
+    visited.add(key(sx, sy));
+    while (q.length) {
+        const { x, y, path } = q.shift();
+        for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+            const nx = x + dx, ny = y + dy;
+            if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
+            const k = key(nx, ny);
+            if (visited.has(k)) continue;
+            const t = grid[ny][nx];
+            const passable = t === TILE.FLOOR || t === TILE.EXIT || t === TILE.SECRET
+                || (allowDoor && t === TILE.DOOR)
+                || (allowCracked && t === TILE.CRACKED_WALL);
+            if (!passable) continue;
+            // Don't path through alive monsters (but ALLOW stepping on target)
+            if (monSet.has(k) && !(nx === tx && ny === ty)) continue;
+            visited.add(k);
+            const np = [...path, { x: nx, y: ny }];
+            if (nx === tx && ny === ty) return np;
+            q.push({ x: nx, y: ny, path: np });
+        }
+    }
+    return null;
+}
+
+// ─── XP helpers ───────────────────────────────────────────────────────────────
+function xpForLevel(lvl) { return Math.floor(XP_BASE * Math.pow(XP_GROWTH, lvl - 1)); }
+
+// ─── SimHero ──────────────────────────────────────────────────────────────────
+class SimHero {
+    constructor(raceId) {
+        const race = RACE_STATS[raceId] || RACE_STATS.human;
+        this.attack    = HERO_BASE_ATTACK + race.attack;
+        this.defense   = race.defense;
+        this.maxHearts = HERO_BASE_HEARTS + race.hearts;
+        this.hearts    = this.maxHearts;
+        this.level     = 1;
+        this.xp        = 0;
+        this.xpNext    = xpForLevel(1);
+        this.backpack  = new Array(10).fill(null);
+        this.equipped  = { weapon: null, armor: null };
+        this.x = 1; this.y = 1;
+    }
+    get isFull() { return !this.backpack.includes(null); }
+    addItem(item) {
+        const i = this.backpack.indexOf(null);
+        if (i === -1) return false;
+        this.backpack[i] = item;
+        return true;
+    }
+    gainXP(xp) {
+        this.xp += xp;
+        while (this.xp >= this.xpNext) {
+            this.xp -= this.xpNext;
+            this.level++;
+            this.xpNext = xpForLevel(this.level);
+            // No automatic ATK on level-up (matches Hero.js v0.7) – all power via skills/gear
+            const sk = SKILL_DEFS[Math.floor(Math.random() * SKILL_DEFS.length)];
+            if (sk.atk) this.attack += sk.atk;
+            if (sk.def) this.defense += sk.def;
+            if (sk.hearts) { this.maxHearts += sk.hearts; this.hearts = Math.min(this.hearts + sk.hearts, this.maxHearts); }
+        }
+    }
+    equip(item, idx) {
+        const slot = item.type;
+        const cur  = this.equipped[slot];
+        if (cur) {
+            if (cur.atk)    this.attack   -= cur.atk;
+            if (cur.def)    this.defense  -= cur.def;
+            if (cur.hearts) { this.maxHearts -= cur.hearts; this.hearts = Math.min(this.hearts, this.maxHearts); }
+            this.backpack[idx] = cur;
+        } else {
+            this.backpack[idx] = null;
+        }
+        this.equipped[slot] = item;
+        if (item.atk)    this.attack   += item.atk;
+        if (item.def)    this.defense  += item.def;
+        if (item.hearts) { this.maxHearts += item.hearts; this.hearts += item.hearts; }
+    }
+    useConsumable(item, idx, monsters = []) {
+        if (item.heal)     this.hearts = Math.min(this.hearts + item.heal, this.maxHearts);
+        if (item.atkBuff)  this.attack  += item.atkBuff;
+        if (item.defBuff)  this.defense += item.defBuff;
+        if (item.xp)       this.gainXP(item.xp);
+        if (item.maxHeart) { this.maxHearts += 1; this.hearts += 1; }
+        if (item.bomb)     { for (const m of monsters) { if (m.alive) m.hp -= 6; } }
+        this.backpack[idx] = null;
+    }
+    findInBackpack(id) { return this.backpack.findIndex(i => i && i.id === id); }
+}
+
+// ─── SimMonster ───────────────────────────────────────────────────────────────
+class SimMonster {
+    constructor(type, x, y, world = 1) {
+        this.type   = type;
+        this.x = x; this.y = y;
+        this.alive  = true;
+        this.aggro  = false;
+
+        if (type === 'boss') {
+            // Matches Monster.js: 35 + worldNum*18 HP, 3 + worldNum attack
+            this.maxHp  = 35 + world * 18;
+            this.attack = 3 + world;
+        } else {
+            // Regular monsters scale +30% HP per world (capped)
+            const scale = Math.pow(1.3, world - 1);
+            this.maxHp  = Math.round(MONSTER_BASE_HP[type] * scale);
+            this.attack = MONSTER_ATTACK[type];
+        }
+        this.hp = this.maxHp;
+    }
+}
+
+// ─── SimGame ──────────────────────────────────────────────────────────────────
+class SimGame {
+    constructor(world, heroFromPrev, raceId, strategy) {
+        const maze    = generateMaze(world);
+        this.grid     = maze.grid;
+        this.tileW    = maze.tileW;
+        this.tileH    = maze.tileH;
+        this.exitX    = maze.exitX;
+        this.exitY    = maze.exitY;
+        this.world    = world;
+        this.strategy = strategy;
+
+        this.hero = heroFromPrev
+            ? (heroFromPrev.hearts = heroFromPrev.maxHearts, heroFromPrev)  // full heal between worlds
+            : new SimHero(raceId);
+        this.hero.x = 1;
+        this.hero.y = 1;
+
+        this.items    = [];
+        this.monsters = [];
+        this._placeItems();
+        this._placeMonsters();
+
+        this.turns       = 0;
+        this.maxTurns    = 4000;
+        this.outcome     = null;
+        this.deathCause  = null;
+        this.itemsPickedUp   = {};
+        this.itemsUsed       = {};
+        this.monstersKilled  = { goblin:0, orc:0, troll:0, boss:0 };
+        this.keysUsed    = 0;
+        this.wallsBroken = 0;
+    }
+
+    _placeItems() {
+        // v0.7 economy: 2-3 chests (each with 2 items), plus tools proportional to doors/cracks.
+        // Monster drops (45% + boss guaranteed) are added dynamically in _onKilled().
+        const eligible = shuffle(
+            getFloorTiles(this.grid, this.tileW, this.tileH).filter(
+                ({ x, y }) => this._dist(x, y, 1, 1) > 5 && !(x === this.exitX && y === this.exitY)
+            )
+        );
+
+        const chestCount = this.world <= 2 ? 2 : 3;
+        const usedIds    = new Set();
+        let idx = 0;
+
+        // Each "chest" gives 2 items: first is weapon or armor, second is anything
+        for (let c = 0; c < chestCount && idx + 1 < eligible.length; c++) {
+            const item1 = Math.random() < 0.5
+                ? rndItemByType(this.world, 'weapon', usedIds)
+                : rndItemByType(this.world, 'armor',  usedIds);
+            const item2 = rndItem(this.world);
+            if (item1) { usedIds.add(item1.id); this.items.push({ ...eligible[idx++], item: item1 }); }
+            if (item2) { this.items.push({ ...eligible[idx++], item: item2 }); }
+        }
+
+        // Tools (keys + pickaxes)
+        const doorCount    = countTile(this.grid, this.tileW, this.tileH, TILE.DOOR);
+        const crackedCount = countTile(this.grid, this.tileW, this.tileH, TILE.CRACKED_WALL);
+        const keyCount   = Math.min(doorCount, 2);
+        const pickCount  = crackedCount > 0 ? Math.min(Math.ceil(crackedCount / 3), 2) : 0;
+
+        for (let i = 0; i < keyCount  && idx < eligible.length; i++, idx++)
+            this.items.push({ ...eligible[idx], item: ITEM_DEFS.key });
+        for (let i = 0; i < pickCount && idx < eligible.length; i++, idx++)
+            this.items.push({ ...eligible[idx], item: ITEM_DEFS.pickaxe });
+    }
+
+    _placeMonsters() {
+        // Place regular monsters far enough away that they don't immediately aggro
+        const floor = shuffle(
+            getFloorTiles(this.grid, this.tileW, this.tileH).filter(
+                ({ x, y }) => this._dist(x, y, 1, 1) > SIM_SIGHT + 2 &&
+                              !(x === this.exitX && y === this.exitY)
+            )
+        );
+
+        const types = ['goblin','goblin','orc','goblin','orc','troll'];
+        const count = 3 + Math.floor(this.world * 1.5);
+        for (let i = 0; i < Math.min(count, floor.length); i++) {
+            const type = types[Math.floor(Math.random() * types.length)];
+            this.monsters.push(new SimMonster(type, floor[i].x, floor[i].y, this.world));
+        }
+
+        // Boss: place near exit on a valid floor tile
+        const bossPool = getFloorTiles(this.grid, this.tileW, this.tileH).filter(
+            ({ x, y }) => {
+                const d = this._dist(x, y, this.exitX, this.exitY);
+                return d >= 2 && d <= 10;
+            }
+        );
+        const bossPos = bossPool.length > 0
+            ? bossPool[Math.floor(Math.random() * bossPool.length)]
+            : { x: this.exitX, y: this.exitY };
+        this.monsters.push(new SimMonster('boss', bossPos.x, bossPos.y, this.world));
+    }
+
+    run() {
+        while (this.turns < this.maxTurns && !this.outcome) {
+            this._heroTurn();
+            if (this.outcome) break;
+            this._monstersTurn();
+            this.turns++;
+        }
+        if (!this.outcome) this.outcome = 'timeout';
+        return this;
+    }
+
+    _heroTurn() {
+        const h = this.hero;
+
+        // 1. Pick up items on current tile
+        const here = this.items.filter(i => i.x === h.x && i.y === h.y);
+        for (const slot of here) {
+            if (!h.isFull) {
+                h.addItem(slot.item);
+                this.itemsPickedUp[slot.item.id] = (this.itemsPickedUp[slot.item.id] || 0) + 1;
+                this.items.splice(this.items.indexOf(slot), 1);
+            }
+        }
+
+        // 2. Auto-equip better gear
+        this._autoEquip();
+
+        // 3. Use buffs/scrolls proactively
+        this._useBuffs();
+
+        // 4. Heal if needed (heal early – at 75%)
+        if (h.hearts < h.maxHearts * 0.75) this._usePotion();
+
+        // 5. Act
+        this._act();
+    }
+
+    _autoEquip() {
+        const h = this.hero;
+        for (let i = 0; i < 10; i++) {
+            const item = h.backpack[i];
+            if (!item || (item.type !== 'weapon' && item.type !== 'armor')) continue;
+            const cur      = h.equipped[item.type];
+            const curScore = cur ? (cur.atk||0) + (cur.def||0) * 1.5 + (cur.hearts||0) * 2 : -99;
+            const newScore = (item.atk||0) + (item.def||0) * 1.5 + (item.hearts||0) * 2;
+            if (newScore > curScore) h.equip(item, i);
+        }
+    }
+
+    _usePotion() {
+        const h = this.hero;
+        let best = -1, bestVal = 0;
+        for (let i = 0; i < 10; i++) {
+            const item = h.backpack[i];
+            if (!item || item.type !== 'consumable' || !item.heal) continue;
+            if (item.heal > bestVal) { bestVal = item.heal; best = i; }
+        }
+        if (best >= 0) {
+            const item = h.backpack[best];
+            h.useConsumable(item, best);
+            this.itemsUsed[item.id] = (this.itemsUsed[item.id] || 0) + 1;
+        }
+    }
+
+    _useBuffs() {
+        const h = this.hero;
+        for (let i = 0; i < 10; i++) {
+            const item = h.backpack[i];
+            if (!item || item.type !== 'consumable') continue;
+            // Use heart crystals + brews right away; use bombs near groups
+            if (item.maxHeart || item.atkBuff || item.defBuff || item.xp) {
+                h.useConsumable(item, i);
+                this.itemsUsed[item.id] = (this.itemsUsed[item.id] || 0) + 1;
+            } else if (item.bomb && this._nearbyAlive(3).length >= 2) {
+                h.useConsumable(item, i, this.monsters);
+                this.itemsUsed[item.id] = (this.itemsUsed[item.id] || 0) + 1;
+                // Kill dead monsters
+                for (const m of this.monsters) {
+                    if (m.alive && m.hp <= 0) {
+                        m.alive = false;
+                        this.monstersKilled[m.type]++;
+                        h.gainXP(MONSTER_XP[m.type]);
+                    }
+                }
+            }
+        }
+    }
+
+    _nearbyAlive(r) {
+        return this.monsters.filter(
+            m => m.alive && this._dist(m.x, m.y, this.hero.x, this.hero.y) <= r
+        );
+    }
+
+    _act() {
+        const h = this.hero;
+
+        // Fight any adjacent alive monster (distance <= 1) before moving
+        const adj = this.monsters.filter(
+            m => m.alive && this._dist(m.x, m.y, h.x, h.y) <= 1
+        );
+
+        if (adj.length > 0) {
+            // Fight the lowest-HP adjacent monster
+            const target = adj.reduce((a, b) => a.hp < b.hp ? a : b);
+            const dmg = Math.max(1, h.attack);
+            target.hp -= dmg;
+            if (target.hp <= 0) {
+                target.alive = false;
+                this.monstersKilled[target.type]++;
+                h.gainXP(MONSTER_XP[target.type]);
+                this._onKilled(target);
+            }
+            return;
+        }
+
+        // If low HP and monsters nearby, flee toward start
+        if (h.hearts <= h.maxHearts * 0.3 && this._nearbyAlive(SIM_SIGHT).length > 0) {
+            // Pass [] – no monster avoidance so BFS always finds a route
+            const fp = bfsPath(this.grid, this.tileW, this.tileH, h.x, h.y, 1, 1,
+                [], true, true);
+            if (fp && fp.length) { const n = fp[0]; h.x = n.x; h.y = n.y; return; }
+        }
+
+        // Choose navigation target based on strategy
+        let gx = this.exitX, gy = this.exitY;
+
+        if (this.strategy === 'aggressive') {
+            const nm = this._nearestAlive();
+            if (nm) { gx = nm.x; gy = nm.y; }
+        } else if (this.strategy === 'collector') {
+            const ni = this._nearestItem();
+            if (ni && !h.isFull) { gx = ni.x; gy = ni.y; }
+        } else if (this.strategy === 'balanced') {
+            // Collect nearby items if not full and safe
+            const ni = this._nearestItem();
+            if (ni && !h.isFull && this._dist(h.x, h.y, ni.x, ni.y) < 6) {
+                gx = ni.x; gy = ni.y;
+            }
+        }
+        // 'coward' just goes to exit
+
+        const hasKey     = h.findInBackpack('key')     >= 0;
+        const hasPickaxe = h.findInBackpack('pickaxe') >= 0;
+
+        // KEY FIX: pass [] instead of this.monsters so BFS never blocks on monster tiles.
+        // Monsters on the path are handled via bump-combat below.
+        let path = bfsPath(this.grid, this.tileW, this.tileH, h.x, h.y, gx, gy,
+            [], hasKey, hasPickaxe);
+
+        // Fallback: also allow doors/cracked walls
+        if (!path || !path.length) {
+            path = bfsPath(this.grid, this.tileW, this.tileH, h.x, h.y, gx, gy,
+                [], true, true);
+        }
+        if (!path || !path.length) return; // truly unreachable
+
+        const next = path[0];
+        const t    = this.grid[next.y][next.x];
+
+        // Bump-combat: if a monster occupies the next tile, fight it instead of moving
+        const monOnNext = this.monsters.find(m => m.alive && m.x === next.x && m.y === next.y);
+        if (monOnNext) {
+            const dmg = Math.max(1, h.attack);
+            monOnNext.hp -= dmg;
+            if (monOnNext.hp <= 0) {
+                monOnNext.alive = false;
+                this.monstersKilled[monOnNext.type]++;
+                h.gainXP(MONSTER_XP[monOnNext.type]);
+                this._onKilled(monOnNext);
+            }
+            return; // took a combat action – don't move
+        }
+
+        if (t === TILE.DOOR) {
+            const ki = h.findInBackpack('key');
+            if (ki >= 0) {
+                h.backpack[ki] = null;
+                this.grid[next.y][next.x] = TILE.FLOOR;
+                this.keysUsed++;
+            } else return; // blocked
+        } else if (t === TILE.CRACKED_WALL) {
+            const pi = h.findInBackpack('pickaxe');
+            if (pi >= 0) {
+                h.backpack[pi] = null;
+                this.grid[next.y][next.x] = TILE.FLOOR;
+                this.wallsBroken++;
+            } else return; // blocked
+        }
+
+        h.x = next.x;
+        h.y = next.y;
+
+        // Reached exit? Boss must be dead first
+        if (h.x === this.exitX && h.y === this.exitY) {
+            const bossAlive = this.monsters.find(m => m.type === 'boss' && m.alive);
+            if (!bossAlive) this.outcome = 'exit';
+        }
+    }
+
+    _onKilled(m) {
+        if (m.type === 'boss') {
+            // Boss always drops one item from a higher tier
+            const item = rndItem(Math.min(this.world + 1, 7));
+            this.items.push({ x: m.x, y: m.y, item });
+        } else if (Math.random() < 0.45) {
+            // 45% drop rate for regular monsters
+            const item = rndItem(this.world);
+            this.items.push({ x: m.x, y: m.y, item });
+        }
+    }
+
+    _monstersTurn() {
+        const h = this.hero;
+        for (const m of this.monsters) {
+            if (!m.alive) continue;
+            const d = this._dist(h.x, h.y, m.x, m.y);
+
+            // Update aggro: once within sight range, stays aggro'd
+            if (d <= SIM_SIGHT) m.aggro = true;
+            if (!m.aggro) continue;
+
+            if (d <= 1) {
+                // Attack hero (distance 0 = same tile, or 1 = adjacent)
+                const dmg = Math.max(0, m.attack - h.defense);
+                h.hearts -= dmg;
+                if (h.hearts <= 0) {
+                    this.outcome  = 'dead';
+                    this.deathCause = m.type;
+                    return;
+                }
+            } else {
+                // Move toward hero (simple greedy)
+                const dirs = shuffle([[0,-1],[0,1],[-1,0],[1,0]]);
+                for (const [dx, dy] of dirs) {
+                    const nx = m.x + dx, ny = m.y + dy;
+                    if (nx < 0 || nx >= this.tileW || ny < 0 || ny >= this.tileH) continue;
+                    const tt = this.grid[ny][nx];
+                    if (tt !== TILE.FLOOR && tt !== TILE.EXIT && tt !== TILE.SECRET) continue;
+                    if (this.monsters.some(o => o.alive && o !== m && o.x === nx && o.y === ny)) continue;
+                    if (nx === h.x && ny === h.y) continue; // don't step on hero
+                    if (this._dist(nx, ny, h.x, h.y) < d) { m.x = nx; m.y = ny; break; }
+                }
+            }
+        }
+    }
+
+    _dist(ax, ay, bx, by) { return Math.abs(ax - bx) + Math.abs(ay - by); }
+    _nearestAlive() {
+        let best = null, bd = 9999;
+        for (const m of this.monsters) {
+            if (!m.alive) continue;
+            const d = this._dist(this.hero.x, this.hero.y, m.x, m.y);
+            if (d < bd) { bd = d; best = m; }
+        }
+        return best;
+    }
+    _nearestItem() {
+        let best = null, bd = 9999;
+        for (const it of this.items) {
+            const d = this._dist(this.hero.x, this.hero.y, it.x, it.y);
+            if (d < bd) { bd = d; best = it; }
+        }
+        return best;
+    }
+}
+
+// ─── Simulation runner ─────────────────────────────────────────────────────────
+function runSimulation() {
+    const N          = parseInt(document.getElementById('cfgRuns').value);
+    const startWorld = parseInt(document.getElementById('cfgStartWorld').value);
+    const maxWorlds  = parseInt(document.getElementById('cfgMaxWorlds').value);
+    const strategy   = document.getElementById('cfgAI').value;
+    const raceId     = document.getElementById('cfgRace').value;
+
+    document.getElementById('runBtn').disabled = true;
+    document.getElementById('progress').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+
+    const results  = [];
+    const logLines = [];
+    let i = 0;
+
+    function chunk() {
+        const end = Math.min(i + 15, N);
+        for (; i < end; i++) {
+            const r = runOneGame(startWorld, maxWorlds, raceId, strategy);
+            results.push(r);
+            if (i >= N - 20) {
+                const tag = r.finalOutcome === 'exit' ? 'log-win' : 'log-loss';
+                logLines.push(
+                    `<span class="${tag}">[${i+1}] V${r.finalWorld} – ` +
+                    (r.finalOutcome === 'exit'
+                        ? `SEIRET – Nivå ${r.finalLevel} – ${r.totalTurns} turns`
+                        : `DØD (${r.deathCause||'?'}) – Nivå ${r.finalLevel} – V${r.finalWorld}`) +
+                    `</span>`
+                );
+            }
+        }
+        document.getElementById('progress').textContent = `Simulerer… ${i}/${N} spill`;
+        if (i < N) setTimeout(chunk, 0);
+        else {
+            document.getElementById('runBtn').disabled = false;
+            document.getElementById('progress').style.display = 'none';
+            renderDashboard(results, logLines);
+            document.getElementById('dashboard').style.display = 'grid';
+        }
+    }
+    setTimeout(chunk, 0);
+}
+
+function runOneGame(startWorld, maxWorlds, raceId, strategy) {
+    let hero = null;
+    let finalWorld = startWorld, finalOutcome = 'dead', deathCause = null, totalTurns = 0;
+    const perWorldData = [];
+    const totalPicked = {}, totalUsed = {}, totalKills = { goblin:0, orc:0, troll:0, boss:0 };
+    let totalKeys = 0, totalWalls = 0;
+
+    for (let w = startWorld; w <= maxWorlds; w++) {
+        const game = new SimGame(w, hero, raceId, strategy).run();
+        hero         = game.hero;
+        finalWorld   = w;
+        finalOutcome = game.outcome;
+        deathCause   = game.deathCause;
+        totalTurns  += game.turns;
+        for (const [k,v] of Object.entries(game.itemsPickedUp)) totalPicked[k] = (totalPicked[k]||0)+v;
+        for (const [k,v] of Object.entries(game.itemsUsed))    totalUsed[k]   = (totalUsed[k]||0)+v;
+        for (const t of ['goblin','orc','troll','boss']) totalKills[t] += game.monstersKilled[t];
+        totalKeys  += game.keysUsed;
+        totalWalls += game.wallsBroken;
+        perWorldData.push({ world:w, outcome:game.outcome, deathCause:game.deathCause,
+            turns:game.turns, level:hero.level, heartsLeft:hero.hearts,
+            kills:{...game.monstersKilled} });
+        if (game.outcome !== 'exit') break;
+    }
+
+    return { finalWorld, finalOutcome, deathCause, totalTurns,
+        finalLevel: hero.level, finalHearts: hero.hearts, finalMaxHearts: hero.maxHearts,
+        itemsPickedUp: totalPicked, itemsUsed: totalUsed,
+        monstersKilled: totalKills, perWorldData,
+        keysUsed: totalKeys, wallsBroken: totalWalls };
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+function pct(n, d)      { return d ? Math.round(n / d * 100) : 0; }
+function avg(arr, key)  { return arr.length ? arr.reduce((s,r) => s + (r[key]||0), 0) / arr.length : 0; }
+function vc(v, g, w)    { return v >= g ? 'good' : v >= w ? 'warn' : 'bad'; }
+function bar(name, v, max, color, label) {
+    return `<div class="bar-row">
+        <span class="bar-name">${name}</span>
+        <div class="bar-outer"><div class="bar-inner" style="width:${pct(v,max)}%;background:${color}"></div></div>
+        <span class="bar-pct">${label}</span>
+    </div>`;
+}
+
+const MON_COLOR = { goblin:'#44cc44', orc:'#7a9944', troll:'#997755', boss:'#ff1166', timeout:'#888888' };
+const MON_NAME  = { goblin:'Goblin', orc:'Ork', troll:'Troll', boss:'Boss', timeout:'Timeout' };
+
+function renderDashboard(results, logLines) {
+    const N    = results.length;
+    const wins = results.filter(r => r.finalOutcome === 'exit');
+
+    const winRate  = pct(wins.length, N);
+    const avgLevel = avg(results, 'finalLevel').toFixed(1);
+    const avgTurns = avg(results, 'totalTurns').toFixed(0);
+    const avgWorld = avg(results, 'finalWorld').toFixed(1);
+    const avgHp    = (results.reduce((s,r) => s + r.finalHearts / r.finalMaxHearts, 0) / N * 100).toFixed(0);
+
+    // ── Key metrics
+    document.getElementById('metricGrid').innerHTML = `
+        <div class="stat-row"><span class="stat-label">Seiersrate</span><span class="stat-val ${vc(winRate,60,35)}">${winRate}%</span></div>
+        <div class="stat-row"><span class="stat-label">Totalt spill</span><span class="stat-val">${N}</span></div>
+        <div class="stat-row"><span class="stat-label">Seire</span><span class="stat-val good">${wins.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Tap</span><span class="stat-val bad">${N - wins.length}</span></div>
+        <div class="stat-row"><span class="stat-label">Snitt-nivå</span><span class="stat-val">${avgLevel}</span></div>
+        <div class="stat-row"><span class="stat-label">Snitt-verden nådd</span><span class="stat-val">${avgWorld}</span></div>
+        <div class="stat-row"><span class="stat-label">Snitt-turns</span><span class="stat-val">${avgTurns}</span></div>
+        <div class="stat-row"><span class="stat-label">Snitt-hjerter igjen</span><span class="stat-val ${vc(+avgHp,50,25)}">${avgHp}%</span></div>`;
+
+    // ── Death causes
+    const dc = { goblin:0, orc:0, troll:0, boss:0, timeout:0 };
+    for (const r of results) if (r.finalOutcome !== 'exit') dc[r.deathCause || 'timeout']++;
+    const maxD = Math.max(...Object.values(dc), 1);
+    document.getElementById('deathChart').innerHTML =
+        Object.entries(dc).map(([k,v]) => bar(MON_NAME[k], v, maxD, MON_COLOR[k], `${v} (${pct(v,N)}%)`)).join('');
+
+    // ── Level distribution
+    const lc = {};
+    for (const r of results) lc[r.finalLevel] = (lc[r.finalLevel]||0) + 1;
+    const levels = Object.keys(lc).map(Number).sort((a,b) => a-b);
+    const maxL   = Math.max(...Object.values(lc), 1);
+    document.getElementById('levelChart').innerHTML =
+        levels.map(l => bar(`Nivå ${l}`, lc[l], maxL, '#44aaff', `${lc[l]} (${pct(lc[l],N)}%)`)).join('');
+
+    // ── Items
+    const pickedTot = {}, usedTot = {};
+    for (const r of results) {
+        for (const [k,v] of Object.entries(r.itemsPickedUp)) pickedTot[k] = (pickedTot[k]||0)+v;
+        for (const [k,v] of Object.entries(r.itemsUsed))    usedTot[k]   = (usedTot[k]||0)+v;
+    }
+    const iColors = { weapon:'#ff8800', armor:'#4488ff', consumable:'#ff4466', tool:'#ffcc00' };
+    const allIds  = [...new Set([...Object.keys(pickedTot)])].sort((a,b)=>(pickedTot[b]||0)-(pickedTot[a]||0));
+    const maxI    = Math.max(...allIds.map(id => pickedTot[id]||0), 1);
+    document.getElementById('itemChart').innerHTML =
+        allIds.slice(0, 18).map(id => {
+            const def = ITEM_DEFS[id];
+            const col = def ? iColors[def.type] : '#888';
+            const v   = pickedTot[id] || 0;
+            return bar(def ? def.name : id, v, maxI, col, `${(v/N).toFixed(1)}/spill`);
+        }).join('');
+
+    // ── Monster kills
+    const kt = { goblin:0, orc:0, troll:0, boss:0 };
+    for (const r of results) for (const t of Object.keys(kt)) kt[t] += r.monstersKilled[t]||0;
+    const maxK = Math.max(...Object.values(kt), 1);
+    document.getElementById('monsterChart').innerHTML =
+        Object.entries(kt).map(([t,v]) => bar(MON_NAME[t], v, maxK, MON_COLOR[t], `${(v/N).toFixed(1)}/spill`)).join('');
+
+    // ── Per-world table
+    const worldNums = [...new Set(results.flatMap(r => r.perWorldData.map(d => d.world)))].sort((a,b) => a-b);
+    document.getElementById('worldTableBody').innerHTML = worldNums.map(w => {
+        const wd    = results.flatMap(r => r.perWorldData.filter(d => d.world === w));
+        const wWins = wd.filter(d => d.outcome === 'exit');
+        const wRate = pct(wWins.length, wd.length);
+        const wLvl  = (wd.reduce((s,d) => s + d.level, 0) / wd.length).toFixed(1);
+        const wKill = (wd.reduce((s,d) => s + Object.values(d.kills).reduce((a,b)=>a+b,0), 0) / wd.length).toFixed(1);
+        const wHrt  = (wd.reduce((s,d) => s + d.heartsLeft, 0) / wd.length).toFixed(1);
+        const wTrn  = (wd.reduce((s,d) => s + d.turns, 0) / wd.length).toFixed(0);
+        const dmap  = {};
+        wd.filter(d => d.outcome !== 'exit').forEach(d => dmap[d.deathCause||'?'] = (dmap[d.deathCause||'?']||0)+1);
+        const top   = Object.entries(dmap).sort((a,b) => b[1]-a[1])[0];
+        const col   = wRate >= 60 ? '#44ee88' : wRate >= 35 ? '#ffcc44' : '#ff5555';
+        return `<tr>
+            <td style="color:${col}">Verden ${w}</td>
+            <td class="td-num">${wd.length}</td>
+            <td class="td-num" style="color:${col}">${wRate}%</td>
+            <td class="td-num">${wLvl}</td>
+            <td class="td-num">${wKill}</td>
+            <td class="td-num">${wHrt}</td>
+            <td class="td-num">${wTrn}</td>
+            <td>${top ? `${MON_NAME[top[0]]||top[0]} (${top[1]})` : '–'}</td>
+        </tr>`;
+    }).join('');
+
+    // ── Combat balance
+    const bossKill = pct(results.filter(r => r.monstersKilled.boss > 0).length, N);
+    document.getElementById('combatGrid').innerHTML = `
+        <div class="stat-row"><span class="stat-label">Boss drept</span><span class="stat-val ${vc(bossKill,50,25)}">${bossKill}%</span></div>
+        <div class="stat-row"><span class="stat-label">Goblin/spill</span><span class="stat-val">${(kt.goblin/N).toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Ork/spill</span><span class="stat-val">${(kt.orc/N).toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Troll/spill</span><span class="stat-val">${(kt.troll/N).toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Snitt-hjerter</span><span class="stat-val">${avgHp}%</span></div>
+        <div class="stat-row"><span class="stat-label">Seiersrate</span><span class="stat-val ${vc(winRate,60,35)}">${winRate}%</span></div>`;
+
+    // ── Tool use
+    const kPickup = results.reduce((s,r) => s+(r.itemsPickedUp.key||0), 0);
+    const pPickup = results.reduce((s,r) => s+(r.itemsPickedUp.pickaxe||0), 0);
+    const kUsed   = results.reduce((s,r) => s+r.keysUsed, 0);
+    const wUsed   = results.reduce((s,r) => s+r.wallsBroken, 0);
+    document.getElementById('toolGrid').innerHTML = `
+        <div class="stat-row"><span class="stat-label">Nøkler plukket/spill</span><span class="stat-val">${(kPickup/N).toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Nøkler brukt/spill</span><span class="stat-val">${(kUsed/N).toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Hakker plukket/spill</span><span class="stat-val">${(pPickup/N).toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Vegger brutt/spill</span><span class="stat-val">${(wUsed/N).toFixed(1)}</span></div>
+        <div class="stat-row"><span class="stat-label">Nøkkel-bruksrate</span><span class="stat-val">${kPickup > 0 ? pct(kUsed,kPickup) : '–'}%</span></div>
+        <div class="stat-row"><span class="stat-label">Hakke-bruksrate</span><span class="stat-val">${pPickup > 0 ? pct(wUsed,pPickup) : '–'}%</span></div>`;
+
+    // ── Log
+    document.getElementById('logBox').innerHTML = logLines.join('<br>');
+}
+</script>
+</body>
+</html>

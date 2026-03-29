@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if ever added)
+node_modules/
+npm-debug.log
+
+# Build artifacts
+dist/
+build/
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+*.bak
