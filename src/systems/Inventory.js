@@ -1,10 +1,12 @@
 // ─── Labyrint Hero – Inventory System ────────────────────────────────────────
-// Manages two equipment slots (weapon, armor) + 10-slot backpack.
+// Manages equipment slots (weapon, armor, quickUse) + 10-slot backpack.
+// Consumables and tools stack up to 10 in a single backpack slot.
 
 class Inventory {
     constructor() {
         this.equipped = { weapon: null, armor: null };
-        this.backpack  = new Array(10).fill(null); // null = empty slot
+        this.quickUse = null;       // { id, count } – assigned consumable for Q/USE button
+        this.backpack = new Array(10).fill(null); // null or { id, count } for stackable, or itemDef for equipment
     }
 
     // ── Queries ───────────────────────────────────────────────────────────────
@@ -17,10 +19,47 @@ class Inventory {
         return this.backpack.filter(Boolean).length;
     }
 
+    // ── Stack helpers ─────────────────────────────────────────────────────────
+
+    _isStackable(itemDef) {
+        return itemDef.type === 'consumable' || itemDef.type === 'tool';
+    }
+
+    _getItemDef(entry) {
+        if (!entry) return null;
+        // Stacked entry: { id, count }
+        if (entry.id && entry.count !== undefined) return ITEM_DEFS[entry.id];
+        // Plain item def (equipment)
+        return entry;
+    }
+
+    _getCount(entry) {
+        if (!entry) return 0;
+        if (entry.count !== undefined) return entry.count;
+        return 1;
+    }
+
     // ── Pick up / add ─────────────────────────────────────────────────────────
 
     /** Returns true if item was successfully added to backpack */
     addItem(itemDef) {
+        // Stackable: try to add to existing stack first
+        if (this._isStackable(itemDef)) {
+            for (let i = 0; i < this.backpack.length; i++) {
+                const entry = this.backpack[i];
+                if (entry && entry.id === itemDef.id && entry.count < 10) {
+                    entry.count++;
+                    return true;
+                }
+            }
+            // No existing stack or all full – create new stack
+            const slot = this.backpack.indexOf(null);
+            if (slot === -1) return false;
+            this.backpack[slot] = { id: itemDef.id, count: 1 };
+            return true;
+        }
+
+        // Non-stackable (equipment)
         const slot = this.backpack.indexOf(null);
         if (slot === -1) return false;
         this.backpack[slot] = itemDef;
@@ -32,21 +71,62 @@ class Inventory {
     /**
      * Activate a backpack slot.
      * - Equipment: equip it (swapping current if any, putting old back in slot)
-     * - Consumable: use it (remove if consumed)
+     * - Consumable/tool: assign to quick-use slot (left-click) or use directly
      * @param {number} slotIndex  backpack index 0–9
      * @param {Hero}   hero
      * @param {GameScene} scene   needed for some consumables (e.g. bomb)
      */
     useSlot(slotIndex, hero, scene = null) {
-        const item = this.backpack[slotIndex];
-        if (!item) return;
+        const entry = this.backpack[slotIndex];
+        if (!entry) return;
+        const itemDef = this._getItemDef(entry);
+        if (!itemDef) return;
 
-        if (item.type === 'weapon' || item.type === 'armor') {
+        if (itemDef.type === 'weapon' || itemDef.type === 'armor') {
             this._equip(slotIndex, hero);
-        } else if (item.type === 'consumable') {
-            const consumed = item.use(hero, scene);
-            if (consumed) this.backpack[slotIndex] = null;
+        } else if (itemDef.type === 'consumable' || itemDef.type === 'tool') {
+            // Assign to quick-use slot
+            this._assignQuickUse(slotIndex);
         }
+    }
+
+    /** Assign a consumable/tool backpack slot to quick-use */
+    _assignQuickUse(slotIndex) {
+        const entry = this.backpack[slotIndex];
+        if (!entry) return;
+        const itemDef = this._getItemDef(entry);
+        if (!itemDef || (itemDef.type !== 'consumable' && itemDef.type !== 'tool')) return;
+
+        // If quick-use already has something, put it back in backpack
+        if (this.quickUse) {
+            // Try to stack back
+            const oldDef = ITEM_DEFS[this.quickUse.id];
+            if (oldDef) {
+                for (let i = 0; i < this.quickUse.count; i++) {
+                    this.addItem(oldDef);
+                }
+            }
+        }
+
+        // Move from backpack to quick-use
+        this.quickUse = { id: entry.id, count: entry.count || 1 };
+        this.backpack[slotIndex] = null;
+    }
+
+    /** Use the item in quick-use slot. Returns the itemDef if used, null otherwise. */
+    useQuickItem(hero, scene) {
+        if (!this.quickUse || this.quickUse.count <= 0) return null;
+        const itemDef = ITEM_DEFS[this.quickUse.id];
+        if (!itemDef) return null;
+
+        if (itemDef.type === 'tool') return null; // Tools are auto-consumed elsewhere
+
+        const consumed = itemDef.use(hero, scene);
+        if (consumed) {
+            this.quickUse.count--;
+            if (this.quickUse.count <= 0) this.quickUse = null;
+        }
+        return consumed ? itemDef : null;
     }
 
     /** Unequip a slot ('weapon' or 'armor') back into backpack, if space */
@@ -60,15 +140,43 @@ class Inventory {
         return true;
     }
 
-    /** Remove item from backpack slot and return it (null if empty). */
-    dropSlot(index) {
-        const item = this.backpack[index];
-        if (!item) return null;
-        this.backpack[index] = null;
-        return item;
+    /** Unequip quick-use back into backpack */
+    unequipQuickUse() {
+        if (!this.quickUse) return false;
+        const itemDef = ITEM_DEFS[this.quickUse.id];
+        if (!itemDef) { this.quickUse = null; return false; }
+        for (let i = 0; i < this.quickUse.count; i++) {
+            if (!this.addItem(itemDef)) return false; // backpack full
+        }
+        this.quickUse = null;
+        return true;
     }
 
-    /** Unequip and drop equipped item (returns item or null if nothing equipped / backpack full). */
+    /** Remove item from backpack slot and return itemDef (null if empty). Decrements stack. */
+    dropSlot(index) {
+        const entry = this.backpack[index];
+        if (!entry) return null;
+        const itemDef = this._getItemDef(entry);
+
+        if (entry.count !== undefined) {
+            entry.count--;
+            if (entry.count <= 0) this.backpack[index] = null;
+        } else {
+            this.backpack[index] = null;
+        }
+        return itemDef;
+    }
+
+    /** Drop from quick-use slot (one item). Returns itemDef or null. */
+    dropQuickUse() {
+        if (!this.quickUse) return null;
+        const itemDef = ITEM_DEFS[this.quickUse.id];
+        this.quickUse.count--;
+        if (this.quickUse.count <= 0) this.quickUse = null;
+        return itemDef;
+    }
+
+    /** Unequip and drop equipped item (returns item or null). */
     dropEquipped(slot, hero) {
         const item = this.equipped[slot];
         if (!item) return null;
@@ -80,13 +188,11 @@ class Inventory {
     // ── Private ───────────────────────────────────────────────────────────────
 
     _equip(slotIndex, item_or_index, hero) {
-        // Allow calling as _equip(slotIndex, hero) with item already in backpack[slotIndex]
         let item, h;
         if (item_or_index instanceof Hero) {
-            item = this.backpack[slotIndex];
+            item = this._getItemDef(this.backpack[slotIndex]);
             h    = item_or_index;
         } else {
-            // legacy: shouldn't happen
             return;
         }
         if (!item) return;
@@ -95,7 +201,6 @@ class Inventory {
         const current   = this.equipped[equipSlot];
 
         if (current) {
-            // Swap: put old item into same backpack slot
             this._unapply(current, h);
             this.backpack[slotIndex] = current;
         } else {
@@ -132,7 +237,12 @@ class Inventory {
                 weapon: this.equipped.weapon?.id || null,
                 armor:  this.equipped.armor?.id  || null
             },
-            backpack: this.backpack.map(i => i?.id || null)
+            quickUse: this.quickUse ? { id: this.quickUse.id, count: this.quickUse.count } : null,
+            backpack: this.backpack.map(entry => {
+                if (!entry) return null;
+                if (entry.count !== undefined) return { id: entry.id, count: entry.count };
+                return entry.id || null;
+            })
         };
     }
 
@@ -150,9 +260,31 @@ class Inventory {
             }
         });
 
-        data.backpack.forEach((id, i) => {
-            inv.backpack[i] = restoreItem(id);
-        });
+        // Restore quick-use slot
+        if (data.quickUse && data.quickUse.id && ITEM_DEFS[data.quickUse.id]) {
+            inv.quickUse = { id: data.quickUse.id, count: data.quickUse.count || 1 };
+        }
+
+        // Restore backpack (supports both old format [id, ...] and new [{id, count}, ...])
+        if (data.backpack) {
+            data.backpack.forEach((entry, i) => {
+                if (!entry) { inv.backpack[i] = null; return; }
+                if (typeof entry === 'string') {
+                    // Old format: plain item ID
+                    const def = restoreItem(entry);
+                    if (def && (def.type === 'consumable' || def.type === 'tool')) {
+                        inv.backpack[i] = { id: entry, count: 1 };
+                    } else {
+                        inv.backpack[i] = def;
+                    }
+                } else if (entry.id) {
+                    // New format: { id, count }
+                    if (ITEM_DEFS[entry.id]) {
+                        inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
+                    }
+                }
+            });
+        }
 
         return inv;
     }

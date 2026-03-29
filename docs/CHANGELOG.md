@@ -2,6 +2,26 @@
 
 ---
 
+## v0.11 – 2026-03-29
+
+### Nye funksjoner
+- **Stabling av gjenstander (#14):** Consumables og verktøy stabler nå opp til 10 stykk per slot i ryggsekken. Antall vises som tall-badge i inventory
+- **Hurtig-bruk-slot (#14):** Nytt utstyrsfelt «Hurtig (Q)» i inventory for å tildele en consumable til hurtigknappen. Klikk en consumable i ryggsekken for å sette den i hurtigsloten. Trykk Q / USE for å bruke den i spill
+- **Forbedret inventory-layout:** Tre utstyrsfelt side om side (Våpen – Rustning – Hurtig)
+
+### Tekniske endringer
+- `Inventory.quickUse` – nytt felt `{ id, count }` for hurtigbruk-slot
+- `Inventory.addItem()` – automatisk stabling for consumables/tools
+- `Inventory._getItemDef()` / `_getCount()` – hjelpere for nytt entry-format
+- `Inventory.serialize()` / `deserialize()` – støtter stabel-format `{ id, count }` + bakoverkompatibelt med gamle saves
+- `InventoryScene._makeQuickUseSlot()` – ny UI-komponent
+- `InventoryScene._makeBackpackSlot()` – viser stabelantall-badge
+- `GameScene._handleUseItem()` – bruker `inventory.useQuickItem()` istedenfor direkte backpack-søk
+- `GameScene._findItemInBackpack()` – kompatibel med nytt entry-format
+- Nøkkel/hakke-forbruk bruker nå `dropSlot()` for korrekt stabel-dekrementering
+
+---
+
 ## v0.10 – 2026-03-29
 
 ### Bugfikser
