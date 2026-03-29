@@ -814,7 +814,7 @@ class GameScene extends Phaser.Scene {
                 return;
             }
             Audio.playDoor();
-            this.hero.inventory.backpack[keyIdx] = null;
+            this.hero.inventory.dropSlot(keyIdx);
             this.maze[ny][nx] = TILE.FLOOR;
             this._drawMap();
             this.cameras.main.shake(50, 0.003);
@@ -860,7 +860,7 @@ class GameScene extends Phaser.Scene {
                 const pickIdx = this._findItemInBackpack('pickaxe');
                 if (pickIdx !== -1) {
                     Audio.playBreak();
-                    this.hero.inventory.backpack[pickIdx] = null;
+                    this.hero.inventory.dropSlot(pickIdx);
                     this.maze[fy][fx] = TILE.FLOOR;
                     this._drawMap();
                     this.cameras.main.shake(100, 0.006);
@@ -907,19 +907,13 @@ class GameScene extends Phaser.Scene {
         if (touchUse) this.game.registry.set('touch_use', false);
         if (!Phaser.Input.Keyboard.JustDown(this.useItemKey) && !touchUse) return;
 
-        // Find first consumable in backpack
-        const bp = this.hero.inventory.backpack;
-        const idx = bp.findIndex(item => item && item.type === 'consumable');
-        if (idx === -1) {
-            this._showMessage('Ingen bruksgjenstander i ryggsekken!', '#ff8844');
-            return;
-        }
-        const item = bp[idx];
-        const consumed = item.use(this.hero, this);
-        if (consumed) {
-            bp[idx] = null;
+        // Use item from quick-use slot
+        const used = this.hero.inventory.useQuickItem(this.hero, this);
+        if (used) {
             Audio.playPickup();
-            this._floatingText(this.hero.gridX, this.hero.gridY, `✦ ${item.name}`, '#44ccff');
+            this._floatingText(this.hero.gridX, this.hero.gridY, `✦ ${used.name}`, '#44ccff');
+        } else {
+            this._showMessage('Ingen hurtiggjenstand valgt! (åpne inventar med E)', '#ff8844');
         }
     }
 
@@ -1153,7 +1147,10 @@ class GameScene extends Phaser.Scene {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     _findItemInBackpack(id) {
-        return this.hero.inventory.backpack.findIndex(item => item && item.id === id);
+        return this.hero.inventory.backpack.findIndex(entry => {
+            if (!entry) return false;
+            return entry.id === id;
+        });
     }
 
     // ── Level up ──────────────────────────────────────────────────────────────

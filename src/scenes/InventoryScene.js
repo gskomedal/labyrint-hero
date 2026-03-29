@@ -89,8 +89,9 @@ class InventoryScene extends Phaser.Scene {
 
         // Equipment slots
         const eqY = cy - panelH / 2 + 110;
-        this._makeEquipSlot(cx - 80, eqY, 'weapon', 'Våpen');
-        this._makeEquipSlot(cx + 80, eqY, 'armor',  'Rustning');
+        this._makeEquipSlot(cx - 120, eqY, 'weapon', 'Våpen');
+        this._makeEquipSlot(cx,       eqY, 'armor',  'Rustning');
+        this._makeQuickUseSlot(cx + 120, eqY);
 
         // Skills
         this._drawSkills(cx, cy - panelH / 2 + 185);
@@ -175,26 +176,95 @@ class InventoryScene extends Phaser.Scene {
         }
     }
 
+    // ── Quick-Use slot ─────────────────────────────────────────────────────────
+
+    _makeQuickUseSlot(x, y) {
+        const size = 64;
+        const qu = this.inv.quickUse;
+        const itemDef = qu ? ITEM_DEFS[qu.id] : null;
+
+        const bg = this._d(this.add.rectangle(x, y, size, size, 0x0a0918).setStrokeStyle(
+            itemDef ? 2 : 1,
+            itemDef ? 0x33aa88 : 0x223344
+        ));
+
+        this._d(this.add.text(x, y + size / 2 + 10, 'Hurtig (Q)', {
+            fontSize: '10px', color: '#33aa88', fontFamily: 'monospace'
+        }).setOrigin(0.5));
+
+        if (itemDef) {
+            this._drawItemIcon(x, y, itemDef, size - 12);
+            const label = qu.count > 1 ? `${itemDef.name} ×${qu.count}` : itemDef.name;
+            this._d(this.add.text(x, y - size / 2 - 10, label, {
+                fontSize: '10px', color: '#ccddff', fontFamily: 'monospace'
+            }).setOrigin(0.5));
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerdown', (pointer) => {
+                if (pointer.rightButtonDown()) {
+                    const dropped = this.inv.dropQuickUse();
+                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    this._refresh();
+                    return;
+                }
+                bg._lpTimer = this.time.delayedCall(500, () => {
+                    bg._lpTimer = null;
+                    const dropped = this.inv.dropQuickUse();
+                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    this._refresh();
+                });
+            });
+            bg.on('pointerup', () => {
+                if (bg._lpTimer) {
+                    bg._lpTimer.remove();
+                    bg._lpTimer = null;
+                    // Tap: unequip back to backpack
+                    this.inv.unequipQuickUse();
+                    this._refresh();
+                }
+            });
+            bg.on('pointerover', () => { bg.setFillStyle(0x1a1830); this._showTooltip(x, y - size/2 - 20, itemDef); });
+            bg.on('pointerout',  () => {
+                bg.setFillStyle(0x0a0918); this._hideTooltip();
+                if (bg._lpTimer) { bg._lpTimer.remove(); bg._lpTimer = null; }
+            });
+        } else {
+            this._d(this.add.text(x, y, 'Tom', {
+                fontSize: '11px', color: '#223344', fontFamily: 'monospace'
+            }).setOrigin(0.5));
+        }
+    }
+
     // ── Backpack slot ─────────────────────────────────────────────────────────
 
     _makeBackpackSlot(x, y, size, index) {
-        const item = this.inv.backpack[index];
-        const col  = item
-            ? (item.type === 'weapon' ? 0xff8800 : item.type === 'armor' ? 0x4488ff : 0xff2244)
+        const entry   = this.inv.backpack[index];
+        const itemDef = this.inv._getItemDef(entry);
+        const count   = this.inv._getCount(entry);
+        const col     = itemDef
+            ? (itemDef.type === 'weapon' ? 0xff8800 : itemDef.type === 'armor' ? 0x4488ff : 0xff2244)
             : 0x112233;
 
         const bg = this._d(this.add.rectangle(x, y, size, size, 0x0a0918).setStrokeStyle(1, col));
 
-        if (item) {
-            this._drawItemIcon(x, y, item, size - 10);
-            this._d(this.add.text(x, y + size / 2 - 2, this._shortName(item.name), {
+        if (itemDef) {
+            this._drawItemIcon(x, y, itemDef, size - 10);
+            this._d(this.add.text(x, y + size / 2 - 2, this._shortName(itemDef.name), {
                 fontSize: '8px', color: '#aabbcc', fontFamily: 'monospace'
             }).setOrigin(0.5, 1));
+
+            // Stack count badge
+            if (count > 1) {
+                this._d(this.add.text(x + size / 2 - 4, y - size / 2 + 2, `${count}`, {
+                    fontSize: '10px', color: '#ffee88', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setOrigin(1, 0));
+            }
 
             bg.setInteractive({ useHandCursor: true });
             bg.on('pointerover', () => {
                 bg.setFillStyle(0x1a2030);
-                this._showTooltip(x, y - size / 2 - 4, item);
+                const tip = count > 1 ? { ...itemDef, name: `${itemDef.name} ×${count}` } : itemDef;
+                this._showTooltip(x, y - size / 2 - 4, tip);
             });
             bg.on('pointerout', () => {
                 bg.setFillStyle(0x0a0918);
@@ -208,7 +278,6 @@ class InventoryScene extends Phaser.Scene {
                     this._refresh();
                     return;
                 }
-                // Long-press (touch) = drop, short tap = use/equip
                 bg._lpTimer = this.time.delayedCall(500, () => {
                     bg._lpTimer = null;
                     const dropped = this.inv.dropSlot(index);
