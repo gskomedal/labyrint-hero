@@ -36,7 +36,7 @@ class UIScene extends Phaser.Scene {
         this.levelText  = this.add.text(W - 50, 22, '', ts).setOrigin(1, 0);
         this.atkText    = this.add.text(W - 50, 36, '', ts).setOrigin(1, 0);
         this.eqText     = this.add.text(10, 56, '', { fontSize: '10px', color: '#556677', fontFamily: 'monospace' });
-        this.eHint      = this.add.text(W - 50, 56, '[SPACE/F] Angrep  [R] Pil  [E] Inventar  [+/-] Zoom', { fontSize: '10px', color: '#334455', fontFamily: 'monospace' }).setOrigin(1, 0);
+        this.eHint      = this.add.text(W - 50, 56, '[SPACE/F] Angrep  [R] Pil  [Q] Bruk  [E] Inventar  [+/-] Zoom', { fontSize: '10px', color: '#334455', fontFamily: 'monospace' }).setOrigin(1, 0);
 
         // Poison indicator (hidden until poisoned)
         this.poisonText = this.add.text(10, 70, '', {

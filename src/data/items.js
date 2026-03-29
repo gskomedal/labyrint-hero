@@ -104,8 +104,13 @@ const ITEM_DEFS = {
     },
     antidote: {
         id: 'antidote', name: 'Motgift', type: 'consumable',
-        color: 0x88ee44, desc: 'Gjenoppretter 1 hjerte', tier: 1,
-        use(hero) { hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); return true; }
+        color: 0x88ee44, desc: 'Kurerer gift og gjenoppretter 1 hjerte', tier: 1,
+        use(hero) {
+            hero.poisonTurns = 0;
+            hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            hero._drawSprite();
+            return true;
+        }
     },
     bomb: {
         id: 'bomb', name: 'Bombe', type: 'consumable',
