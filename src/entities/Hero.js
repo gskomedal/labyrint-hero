@@ -23,6 +23,8 @@ class Hero {
         this.dodgeChance  = 0;
         this.critChance   = 0;
         this.xpMultiplier = 1.0;
+        this.counterChance = 0;  // counter-attack on hit (synergy)
+        this.thornsDamage  = 0;  // damage reflected to attackers (synergy)
 
         // Progression
         this.level    = 1;
@@ -199,8 +201,10 @@ class Hero {
             defense:      this.defense,
             visionRadius: this.visionRadius,
             dodgeChance:  this.dodgeChance,
-            critChance:   this.critChance,
-            xpMultiplier: this.xpMultiplier,
+            critChance:    this.critChance,
+            xpMultiplier:  this.xpMultiplier,
+            counterChance: this.counterChance,
+            thornsDamage:  this.thornsDamage,
             gold:         this.gold,
             poisonTurns:  this.poisonTurns,
             burnTurns:    this.burnTurns,
@@ -224,8 +228,10 @@ class Hero {
         this.defense      = stats.defense      || 0;
         this.visionRadius = stats.visionRadius || VISION_RADIUS;
         this.dodgeChance  = stats.dodgeChance  || 0;
-        this.critChance   = stats.critChance   || 0;
-        this.xpMultiplier = stats.xpMultiplier || 1;
+        this.critChance    = stats.critChance    || 0;
+        this.xpMultiplier  = stats.xpMultiplier || 1;
+        this.counterChance = stats.counterChance || 0;
+        this.thornsDamage  = stats.thornsDamage  || 0;
         this.gold         = stats.gold         || 0;
         this.poisonTurns  = stats.poisonTurns  || 0;
         this.burnTurns    = stats.burnTurns    || 0;

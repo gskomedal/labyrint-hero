@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.14
+**Versjon:** 0.15
 **Sist oppdatert:** 2026-03-30
 
 ---
@@ -300,7 +300,8 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Skattekiste-system | ✅ Ferdig | 2–3 per verden |
 | Monster-drop system | ✅ Ferdig | 45% per drap, boss-garantert |
 | Nøkkel/hakke-mekanikk | ✅ Ferdig | |
-| Skilltre (4 spesialiseringsveier) | ✅ Ferdig | Krigar / Vokter / Jeger / Skurk – tre-UI |
+| Skilltre (4 veier + synergier) | ✅ Ferdig | Krigar / Vokter / Jeger / Skurk + 4 kryss-vei-synergier |
+| Unike gjenstandsikoner | ✅ Ferdig | 20+ distinkte prosedyregrafikker |
 | Bevegelsesanimasjon (glide) | ✅ Ferdig | 90ms hero, 126ms monster |
 | Zoom (kamera) | ✅ Ferdig | Muskjul og +/− |
 | HUD + UIScene | ✅ Ferdig | |
@@ -351,6 +352,18 @@ Fire spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever ≥1 T1
 | **Skurk** | Nytte | Kunnskap (+30% XP) | Unnvikelse (+20% dodge) | Blomstersaft (hel 2 HP) |
 
 Spilleren kan spre poeng på tvers av veier (generalist) eller gå dypt i én (spesialist).
+
+### Kryss-vei-synergier (v0.15)
+Automatiske bonuser som aktiveres når helten har evner fra to forskjellige veier:
+
+| Synergi | Veier | Effekt |
+|---------|-------|--------|
+| Motangrep | Krigar + Jeger | 20% sjanse for automatisk motangrep |
+| Tornehud | Vokter + Skurk | Angripere tar 1 skade |
+| Uovervinnelig | Krigar + Vokter | +2 ATK, +1 DEF, +1 hjerte |
+| Skyggejeger | Jeger + Skurk | +15% unnvikelse, +1 synsfelt |
+
+Synergier gir insentiv til å investere bredt istedenfor å spesialisere seg.
 
 ---
 

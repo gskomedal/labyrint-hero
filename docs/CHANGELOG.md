@@ -2,6 +2,33 @@
 
 ---
 
+## v0.15 – 2026-03-30
+
+### Nye funksjoner
+- **Kryss-vei-synergier (#3):** Fire automatiske bonuser som aktiveres når helten har evner fra to forskjellige spesialiseringsveier:
+  - **Motangrep** (Krigar + Jeger): 20% sjanse for automatisk motangrep ved treff
+  - **Tornehud** (Vokter + Skurk): Angripere tar 1 skade
+  - **Uovervinnelig** (Krigar + Vokter): +2 Angrep, +1 Forsvar, +1 Hjerte
+  - **Skyggejeger** (Jeger + Skurk): +15% unnvikelse, +1 synsfelt
+  - Synergier vises i SkillScene med aktiv/inaktiv status
+  - Flytende tekst varsler nye synergier ved aktivering
+- **Unike gjenstandsgrafikk (#19):** Hvert våpen, rustning og forbruksgjenstand har nå distinkt prosedyregrafikk:
+  - Våpen: Dolk, tresverd, jernsverd, spyd, stridsøks, krigshammer, trollstav, buer
+  - Rustning: Lær, vest, ringbrynje, platedrakt, magikappe, drageskjell (med skjellmønster)
+  - Forbruk: Drikker med korker, bomber med lunte, ruller med segl, hjertekrystall-form
+  - Unike ikoner vises både på bakken og i inventory
+
+### Tekniske endringer
+- `skills.js` – `SKILL_SYNERGIES[]`, `getActiveSynergies()`, `applySynergies()` – kryssvei-system
+- `Hero.counterChance`, `Hero.thornsDamage` – nye stats for synergier, med serialisering
+- `GameScene._onSkillPicked()` – sjekker og aktiverer synergier etter evnevalg
+- `GameScene._monsterAttack()` – tornehud reflekterer skade; motangrep trigges ved treff
+- `SkillScene._drawSynergies()` – viser alle 4 synergier med aktiv/inaktiv status
+- `GameScene._drawItemGraphic()` – ny metode med unike ikoner for 20+ gjenstander
+- `InventoryScene._drawItemIcon()` – oppgradert med distinkte ikoner per gjenstandstype
+
+---
+
 ## v0.14 – 2026-03-30
 
 ### Nye funksjoner

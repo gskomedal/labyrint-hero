@@ -351,26 +351,108 @@ class InventoryScene extends Phaser.Scene {
 
     _drawItemIcon(x, y, item, size) {
         const g = this._d(this.add.graphics());
-        const col = item.type === 'weapon' ? 0xff8800
-                  : item.type === 'armor'  ? 0x4488ff
-                  : 0xff2244;
+        const s  = size;
+        const hs = s / 2;
+        const col = item.rarityColor || item.color || (
+            item.type === 'weapon' ? 0xff8800
+          : item.type === 'armor'  ? 0x4488ff
+          : 0xff2244);
         g.fillStyle(col, 0.8);
-        if (item.type === 'weapon') {
-            if (item.subtype === 'bow') {
-                // Bow shape: arc
-                g.lineStyle(3, col, 0.9);
-                g.strokeCircle(x, y, size / 3.5);
-                g.fillRect(x - 1, y - size / 2.5, 3, size * 0.6); // string
-            } else {
-                g.fillRect(x - size / 6, y - size / 2.5, size / 3, size * 0.65);
-                g.fillRect(x - size / 3, y - size / 10, size * 0.66, size / 5);
+
+        // Unique icons per item ID
+        if (item.id === 'dagger') {
+            g.fillRect(x - 1, y - hs + 2, 3, s * 0.5);
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(x - 4, y + 2, 8, 3);
+            g.fillRect(x - 2, y + 5, 4, 4);
+        } else if (item.id === 'wood_sword' || item.id === 'iron_sword') {
+            g.fillRect(x - 2, y - hs + 2, 4, s * 0.55);
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(x - 5, y + 4, 10, 3);
+            g.fillRect(x - 2, y + 7, 4, 4);
+        } else if (item.id === 'spear') {
+            g.fillRect(x - 1, y - hs + 1, 3, s * 0.75);
+            g.fillStyle(0xaaaacc, 0.9);
+            g.fillTriangle(x - 4, y - hs + 8, x + 4, y - hs + 8, x, y - hs + 1);
+        } else if (item.id === 'battle_axe') {
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(x - 1, y - hs + 4, 3, s * 0.65);
+            g.fillStyle(col, 0.9);
+            g.fillTriangle(x - 8, y - hs + 5, x - 1, y - hs + 5, x - 1, y + 2);
+            g.fillTriangle(x + 8, y - hs + 5, x + 1, y - hs + 5, x + 1, y + 2);
+        } else if (item.id === 'war_hammer') {
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(x - 1, y - 2, 3, s * 0.45);
+            g.fillStyle(col, 0.9);
+            g.fillRoundedRect(x - 7, y - hs + 2, 14, 10, 2);
+        } else if (item.id === 'magic_staff') {
+            g.fillStyle(0x664422, 0.9);
+            g.fillRect(x - 1, y - 2, 3, s * 0.5);
+            g.fillStyle(0xaa44ff, 0.8);
+            g.fillCircle(x, y - hs + 6, 5);
+            g.fillStyle(0xffffff, 0.4);
+            g.fillCircle(x - 1, y - hs + 5, 2);
+        } else if (item.subtype === 'bow') {
+            g.lineStyle(3, col, 0.9);
+            g.beginPath();
+            g.arc(x + 3, y, s / 3, -1.8, 1.8, false);
+            g.strokePath();
+            g.lineStyle(1, 0xccaa66, 0.7);
+            g.lineBetween(x + 3, y - s / 3, x + 3, y + s / 3);
+        } else if (item.id === 'chain_mail') {
+            g.fillStyle(0x8899aa, 0.9);
+            g.fillRoundedRect(x - hs / 2, y - hs / 2, hs, hs * 1.1, 3);
+            for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+                g.fillStyle(0x667788, 0.5);
+                g.fillCircle(x - hs / 3 + c * (hs / 3), y - hs / 3 + r * (hs / 3), 2);
+            }
+        } else if (item.id === 'plate_armor') {
+            g.fillStyle(0xccccdd, 0.9);
+            g.fillRoundedRect(x - hs / 2, y - hs / 2, hs, hs * 1.1, 3);
+            g.fillStyle(0xaaaacc, 0.5);
+            g.fillRect(x - 1, y - hs / 2 + 2, 2, hs);
+        } else if (item.id === 'dragon_scale') {
+            g.fillStyle(0xff6622, 0.9);
+            g.fillRoundedRect(x - hs / 2, y - hs / 2, hs, hs * 1.1, 3);
+            g.fillStyle(0xcc4411, 0.6);
+            for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
+                g.fillTriangle(x - 6 + c * 5, y - 4 + r * 7, x - 4 + c * 5, y + r * 7, x - 8 + c * 5, y + r * 7);
             }
         } else if (item.type === 'armor') {
-            g.fillRoundedRect(x - size / 3, y - size / 3, size * 0.66, size * 0.66, 4);
+            g.fillRoundedRect(x - hs / 2, y - hs / 2, hs, hs * 1.1, 4);
+        } else if (item.id === 'health_pot' || item.id === 'big_health_pot') {
+            g.fillRoundedRect(x - 5, y - 2, 10, 12, 3);
+            g.fillRect(x - 3, y - 5, 6, 4);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(x - 2, y + 2, 2);
+        } else if (item.id === 'bomb') {
+            g.fillStyle(0x333333, 0.9);
+            g.fillCircle(x, y + 2, 8);
+            g.fillStyle(0xff6600, 0.8);
+            g.fillRect(x - 1, y - 8, 2, 5);
+            g.fillCircle(x, y - 8, 3);
+        } else if (item.id === 'heart_crystal') {
+            g.fillTriangle(x, y + 8, x - 9, y - 2, x + 9, y - 2);
+            g.fillCircle(x - 5, y - 4, 5);
+            g.fillCircle(x + 5, y - 4, 5);
+        } else if (item.id === 'xp_scroll' || item.id === 'map_scroll') {
+            g.fillRoundedRect(x - 6, y - 6, 12, 16, 2);
+            g.fillCircle(x - 6, y - 6, 3);
+            g.fillCircle(x + 6, y - 6, 3);
+            g.fillCircle(x - 6, y + 10, 3);
+            g.fillCircle(x + 6, y + 10, 3);
+        } else if (item.type === 'consumable') {
+            g.fillRoundedRect(x - 5, y - 2, 10, 12, 3);
+            g.fillRect(x - 3, y - 5, 6, 4);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(x - 2, y + 2, 2);
+        } else if (item.type === 'weapon') {
+            g.fillRect(x - 2, y - hs + 2, 4, s * 0.55);
+            g.fillRect(x - hs / 2, y, hs, s / 5);
         } else {
-            g.fillCircle(x, y, size / 3.5);
+            g.fillCircle(x, y, s / 3.5);
             g.fillStyle(0xffffff, 0.35);
-            g.fillCircle(x - size / 8, y - size / 8, size / 8);
+            g.fillCircle(x - s / 8, y - s / 8, s / 8);
         }
     }
 

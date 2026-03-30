@@ -191,11 +191,85 @@ function getAvailableSkills(hero) {
     return available;
 }
 
-/**
- * Legacy helper – still used by simulator. Returns 3 random picks.
- */
-function getRandomSkillChoices(hero, count = 3) {
-    const available = getAvailableSkills(hero);
-    const shuffled  = [...available].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, count).map(e => e.skill);
+// ── Cross-path synergies ──────────────────────────────────────────────────────
+// Auto-activate when hero has ≥1 skill from each path in the pair.
+
+const SKILL_SYNERGIES = [
+    {
+        id:    'counter_attack',
+        name:  'Motangrep',
+        desc:  '20% sjanse for motangrep ved treff',
+        paths: ['krigar', 'jeger'],
+        color: 0xff8844,
+        apply(hero) { hero.counterChance = Math.min(0.4, (hero.counterChance || 0) + 0.20); },
+        unapply(hero) { hero.counterChance = Math.max(0, (hero.counterChance || 0) - 0.20); },
+    },
+    {
+        id:    'thorns',
+        name:  'Tornehud',
+        desc:  'Angripere tar 1 skade',
+        paths: ['vokter', 'skurk'],
+        color: 0x44ddaa,
+        apply(hero) { hero.thornsDamage = (hero.thornsDamage || 0) + 1; },
+        unapply(hero) { hero.thornsDamage = Math.max(0, (hero.thornsDamage || 0) - 1); },
+    },
+    {
+        id:    'unbreakable',
+        name:  'Uovervinnelig',
+        desc:  '+2 Angrep, +1 Forsvar, +1 Hjerte',
+        paths: ['krigar', 'vokter'],
+        color: 0xff6644,
+        apply(hero) { hero.attack += 2; hero.defense += 1; hero.maxHearts += 1; hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); },
+        unapply(hero) { hero.attack -= 2; hero.defense -= 1; hero.maxHearts -= 1; hero.hearts = Math.min(hero.hearts, hero.maxHearts); },
+    },
+    {
+        id:    'shadow_hunter',
+        name:  'Skyggejeger',
+        desc:  '+15% unnvikelse, +1 synsfelt',
+        paths: ['jeger', 'skurk'],
+        color: 0x9966ff,
+        apply(hero) { hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.15); hero.visionRadius += 1; },
+        unapply(hero) { hero.dodgeChance = Math.max(0, hero.dodgeChance - 0.15); hero.visionRadius -= 1; },
+    },
+];
+
+/** Check which synergies are active for a hero and return their IDs. */
+function getActiveSynergies(hero) {
+    const pathCounts = {};
+    for (const skillId of (hero.skills || [])) {
+        for (const path of SKILL_TREE_PATHS) {
+            if (path.tiers.some(t => t.id === skillId)) {
+                pathCounts[path.id] = (pathCounts[path.id] || 0) + 1;
+            }
+        }
+    }
+    return SKILL_SYNERGIES.filter(syn =>
+        syn.paths.every(p => (pathCounts[p] || 0) >= 1)
+    );
+}
+
+/** Apply all earned synergies that aren't already active. Call after picking a skill. */
+function applySynergies(hero) {
+    const active  = getActiveSynergies(hero);
+    const applied = hero._appliedSynergies || [];
+
+    // Remove synergies no longer active
+    for (const id of applied) {
+        if (!active.some(s => s.id === id)) {
+            const syn = SKILL_SYNERGIES.find(s => s.id === id);
+            if (syn) syn.unapply(hero);
+        }
+    }
+
+    // Apply newly active synergies
+    const newApplied = [];
+    for (const syn of active) {
+        if (!applied.includes(syn.id)) {
+            syn.apply(hero);
+        }
+        newApplied.push(syn.id);
+    }
+
+    hero._appliedSynergies = newApplied;
+    return active;
 }
