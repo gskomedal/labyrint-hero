@@ -4,7 +4,7 @@ const RACE_DEFS = {
     human:  { name: 'Menneske', hearts: 5, attack: 2, defense: 0, visionRadius: 5, xpMultiplier: 1.25, special: 'XP-bonus +25%',       desc: 'Allsidig og tilpasningsdyktig. Lærer raskere enn andre.' },
     dwarf:  { name: 'Dverg',    hearts: 6, attack: 3, defense: 1, visionRadius: 4, xpMultiplier: 1.0,  special: 'Rustning +1 forsvar',  desc: 'Seig og sterk. Starter med ekstra forsvar og hjerter.' },
     elf:    { name: 'Alv',      hearts: 4, attack: 2, defense: 0, visionRadius: 7, xpMultiplier: 1.0,  special: 'Skarpt syn +2',        desc: 'Yndig og årvåken. Ser mye lenger gjennom tåken.' },
-    hobbit: { name: 'Hobbit',   hearts: 4, attack: 2, defense: 0, visionRadius: 5, xpMultiplier: 1.15, special: 'Felle-sans +XP ×1.15', desc: 'Liten og uredd. Snubber sjeldnere i feller.' }
+    hobbit: { name: 'Hobbit',   hearts: 4, attack: 2, defense: 0, visionRadius: 5, xpMultiplier: 1.15, special: 'Felle-sans +XP ×1.15', desc: 'Liten og uredd. Snubbler sjeldnere i feller.' }
 };
 
 // Starting bonus options
@@ -18,7 +18,6 @@ class CharacterCreatorScene extends Phaser.Scene {
     constructor() { super({ key: 'CharacterCreatorScene' }); }
 
     init(data) {
-        // Inherit difficulty from MenuScene if provided
         this._initDifficulty = data?.difficulty || 'normal';
     }
 
@@ -42,7 +41,7 @@ class CharacterCreatorScene extends Phaser.Scene {
             fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 3
         }).setOrigin(0.5, 0);
 
-        // ── Difficulty display (inherited from menu, can still change) ─────────
+        // ── Difficulty display ────────────────────────────────────────────────
         this._buildDifficultyRow(cx, W);
 
         // ── Race tabs ─────────────────────────────────────────────────────────
@@ -61,7 +60,7 @@ class CharacterCreatorScene extends Phaser.Scene {
         this.input.keyboard.on('keydown', this._onKey, this);
     }
 
-    // ── Difficulty row (compact, top of screen) ───────────────────────────────
+    // ── Difficulty row ────────────────────────────────────────────────────────
 
     _buildDifficultyRow(cx, W) {
         this.add.rectangle(cx, 45, W - 20, 1, 0x1a1535);
@@ -188,13 +187,39 @@ class CharacterCreatorScene extends Phaser.Scene {
         this._appearObjs = [];
 
         const { width: W } = this.cameras.main;
-        const px = W - 330, py = 112;
+        const px = W - 380, py = 112;
         const add = o => { this._appearObjs.push(o); return o; };
 
         add(this.add.text(px, py, 'UTSEENDE', { fontSize: '10px', color: '#445566', fontFamily: 'monospace' }));
 
-        // Skin tone row
+        // ── Gender row ────────────────────────────────────────────────────────
         let rowY = py + 18;
+        add(this.add.text(px, rowY, 'Kjønn:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        GENDERS.forEach((gid, i) => {
+            const bx  = px + 56 + i * 70;
+            const sel = this.appearance.gender === gid;
+            const bg  = this.add.rectangle(bx + 24, rowY + 7, 60, 18, sel ? 0x2a2060 : 0x111122)
+                .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
+            const txt = this.add.text(bx + 24, rowY + 7, GENDER_LABELS[gid], {
+                fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            bg.on('pointerdown', () => {
+                this._customOverrides.gender = gid;
+                this.appearance.gender = gid;
+                // Reset beard for female
+                if (gid === 'female' && this.appearance.beardStyle !== 'none') {
+                    this._customOverrides.beardStyle = 'none';
+                    this.appearance.beardStyle = 'none';
+                }
+                this._rebuildPreview();
+                this._rebuildAppearancePickers();
+            });
+            add(bg);
+            add(txt);
+        });
+
+        // ── Skin tone row ─────────────────────────────────────────────────────
+        rowY += 24;
         add(this.add.text(px, rowY, 'Hud:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
         SKIN_TONES.forEach((col, i) => {
             const btn = this._colorDot(px + 44 + i * 26, rowY + 5, col, this.appearance.skinColor === col);
@@ -202,16 +227,16 @@ class CharacterCreatorScene extends Phaser.Scene {
             add(btn);
         });
 
-        // Hair color row
+        // ── Hair color row ────────────────────────────────────────────────────
         rowY += 24;
         add(this.add.text(px, rowY, 'Hår:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
         HAIR_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 44 + i * 26, rowY + 5, col, this.appearance.hairColor === col);
+            const btn = this._colorDot(px + 44 + i * 24, rowY + 5, col, this.appearance.hairColor === col);
             btn.on('pointerdown', () => { this._customOverrides.hairColor = col; this.appearance.hairColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
-        // Eye color row (NEW)
+        // ── Eye color row ─────────────────────────────────────────────────────
         rowY += 24;
         add(this.add.text(px, rowY, 'Øyne:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
         EYE_COLORS.forEach((col, i) => {
@@ -220,40 +245,85 @@ class CharacterCreatorScene extends Phaser.Scene {
             add(btn);
         });
 
-        // Cloth color row
+        // ── Cloth color row ───────────────────────────────────────────────────
         rowY += 24;
-        add(this.add.text(px, rowY, 'Drakt:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        add(this.add.text(px, rowY, 'Farge:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
         CLOTH_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 52 + i * 26, rowY + 5, col, this.appearance.clothColor === col);
+            const btn = this._colorDot(px + 52 + i * 22, rowY + 5, col, this.appearance.clothColor === col);
             btn.on('pointerdown', () => { this._customOverrides.clothColor = col; this.appearance.clothColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
-        // Hair style row
+        // ── Clothing style row ────────────────────────────────────────────────
+        rowY += 24;
+        add(this.add.text(px, rowY, 'Drakt:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        CLOTH_STYLES.forEach((style, i) => {
+            const bx  = px + 52 + i * 58;
+            const sel = this.appearance.clothStyle === style;
+            const bg  = this.add.rectangle(bx + 22, rowY + 7, 52, 18, sel ? 0x2a2060 : 0x111122)
+                .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
+            const txt = this.add.text(bx + 22, rowY + 7, CLOTH_STYLE_LABELS[style], {
+                fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            bg.on('pointerdown', () => {
+                this._customOverrides.clothStyle = style;
+                this.appearance.clothStyle = style;
+                this._rebuildPreview();
+                this._rebuildAppearancePickers();
+            });
+            add(bg);
+            add(txt);
+        });
+
+        // ── Hair style row (not for dwarf) ────────────────────────────────────
         if (this.selectedRace !== 'dwarf') {
             rowY += 26;
-            add(this.add.text(px, rowY, 'Stil:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+            add(this.add.text(px, rowY, 'Frisyre:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+            // Show 5 styles per row to fit
+            const stylesPerRow = 5;
             HAIR_STYLES.forEach((style, i) => {
-                const bx  = px + 44 + i * 50;
+                const row = Math.floor(i / stylesPerRow);
+                const col = i % stylesPerRow;
+                const bx  = px + 60 + col * 56;
+                const by  = rowY + 7 + row * 22;
                 const sel = this.appearance.hairStyle === style;
-                const bg  = this.add.rectangle(bx + 18, rowY + 7, 44, 18, sel ? 0x2a2060 : 0x111122).setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 18, rowY + 7, HAIR_STYLE_LABELS[style], { fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace' }).setOrigin(0.5);
-                bg.on('pointerdown', () => { this._customOverrides.hairStyle = style; this.appearance.hairStyle = style; this._rebuildPreview(); this._rebuildAppearancePickers(); });
+                const bg  = this.add.rectangle(bx + 22, by, 50, 18, sel ? 0x2a2060 : 0x111122)
+                    .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
+                const txt = this.add.text(bx + 22, by, HAIR_STYLE_LABELS[style], {
+                    fontSize: '8px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                bg.on('pointerdown', () => {
+                    this._customOverrides.hairStyle = style;
+                    this.appearance.hairStyle = style;
+                    this._rebuildPreview();
+                    this._rebuildAppearancePickers();
+                });
                 add(bg);
                 add(txt);
             });
+            rowY += Math.ceil(HAIR_STYLES.length / stylesPerRow) * 22;
         }
 
-        // Beard style row (human / dwarf only) (NEW)
-        if (this.selectedRace === 'human' || this.selectedRace === 'dwarf') {
-            rowY += 26;
+        // ── Beard style row (male human / dwarf only) ─────────────────────────
+        const showBeard = (this.selectedRace === 'human' || this.selectedRace === 'dwarf') &&
+                          this.appearance.gender !== 'female';
+        if (showBeard) {
+            rowY += 4;
             add(this.add.text(px, rowY, 'Skjegg:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
             BEARD_STYLES.forEach((style, i) => {
                 const bx  = px + 56 + i * 60;
                 const sel = this.appearance.beardStyle === style;
-                const bg  = this.add.rectangle(bx + 20, rowY + 7, 54, 18, sel ? 0x2a2060 : 0x111122).setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 20, rowY + 7, BEARD_STYLE_LABELS[style], { fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace' }).setOrigin(0.5);
-                bg.on('pointerdown', () => { this._customOverrides.beardStyle = style; this.appearance.beardStyle = style; this._rebuildPreview(); this._rebuildAppearancePickers(); });
+                const bg  = this.add.rectangle(bx + 20, rowY + 7, 54, 18, sel ? 0x2a2060 : 0x111122)
+                    .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
+                const txt = this.add.text(bx + 20, rowY + 7, BEARD_STYLE_LABELS[style], {
+                    fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+                }).setOrigin(0.5);
+                bg.on('pointerdown', () => {
+                    this._customOverrides.beardStyle = style;
+                    this.appearance.beardStyle = style;
+                    this._rebuildPreview();
+                    this._rebuildAppearancePickers();
+                });
                 add(bg);
                 add(txt);
             });
@@ -280,11 +350,11 @@ class CharacterCreatorScene extends Phaser.Scene {
         const g = this._previewGfx;
         g.clear();
 
-        const previewSize = 112;
-        const px = W - 170;
-        const py = H - 230;
+        const previewSize = 128;
+        const px = W - 100;
+        const py = H - 250;
 
-        // Preview box with glow effect
+        // Preview box
         g.lineStyle(1, 0x2a2050);
         g.strokeRect(px - previewSize / 2 - 6, py - 6, previewSize + 12, previewSize + 12);
         g.lineStyle(1, 0x334466, 0.5);
@@ -297,13 +367,9 @@ class CharacterCreatorScene extends Phaser.Scene {
         g.fillRect(px - previewSize / 2 - 3, py + previewSize - 10, previewSize + 6, 13);
 
         drawCharacterSprite(g, px - previewSize / 2, py, previewSize, this.appearance, this.selectedRace);
-
-        // Race name label
-        g.fillStyle(0x0d0b1e, 0.7);
-        g.fillRect(px - previewSize / 2 - 3, py + previewSize + 10, previewSize + 6, 14);
     }
 
-    // ── Starting bonus panel (left side, below stats) ─────────────────────────
+    // ── Starting bonus panel ──────────────────────────────────────────────────
 
     _buildBonusPanel(W, H) {
         const lx = 22, by = this._statsY + 120;
@@ -353,7 +419,6 @@ class CharacterCreatorScene extends Phaser.Scene {
         this._nameBg  = this.add.rectangle(cx + 40, nameY + 12, 240, 28, 0x1a1830).setStrokeStyle(1, 0x4444aa);
         this._nameTxt = this.add.text(cx + 40, nameY + 12, '|', { fontSize: '15px', color: '#ffffff', fontFamily: 'monospace' }).setOrigin(0.5);
 
-        // Tap name field to open mobile keyboard via hidden HTML input
         this._nameBg.setInteractive({ useHandCursor: true });
         this._nameBg.on('pointerdown', () => this._openMobileNameInput());
 
@@ -384,7 +449,6 @@ class CharacterCreatorScene extends Phaser.Scene {
     }
 
     _openMobileNameInput() {
-        // Create a temporary HTML input to trigger the mobile keyboard
         let inp = document.getElementById('_heroNameInput');
         if (!inp) {
             inp = document.createElement('input');
@@ -415,7 +479,6 @@ class CharacterCreatorScene extends Phaser.Scene {
     }
 
     _startGame() {
-        // Remove mobile input if still present
         const inp = document.getElementById('_heroNameInput');
         if (inp) inp.remove();
         const name = this.heroName.trim() || RACE_DEFS[this.selectedRace].name;

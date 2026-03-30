@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.11
-**Sist oppdatert:** 2026-03-29
+**Versjon:** 0.12
+**Sist oppdatert:** 2026-03-30
 
 ---
 
@@ -33,7 +33,7 @@ src/
   utils/SaveManager.js      – localStorage persistens
   data/skills.js            – 12 passive evner
   data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy)
-  graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser)
+  graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser, 2 kjønn, 10 frisyrer, 4 klesstiler)
   systems/Inventory.js      – 2 utstyrsplasser + 10-spors ryggsekk
   systems/AudioManager.js   – prosedyremusikk (5 temaer) + SFX-motoren
   entities/Hero.js          – spillerkarakter
@@ -251,8 +251,8 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Tile-typer (6 typer inkl. TRAP) | ✅ Ferdig | SECRET, CRACKED_WALL, DOOR, TRAP |
 | Fog of War | ✅ Ferdig | 3 nivåer |
 | Visuelle verdenstemaer | ✅ Ferdig | 5 temaer med per-tile dekorasjoner |
-| Karakterskaper (4 raser) | ✅ Ferdig | Alv, Dverg, Menneske, Hobbit |
-| Prosedyrekaraktergrafikk | ✅ Ferdig | Øynefarge, skjegg, tilbehør per rase |
+| Karakterskaper (4 raser) | ✅ Ferdig | Alv, Dverg, Menneske, Hobbit; kjønnsvalg |
+| Prosedyrekaraktergrafikk | ✅ Ferdig | 2 kjønn, 10 frisyrer, 4 klesstiler, øynefarge, skjegg, tilbehør per rase |
 | Vanskelighetsgrad (MenuScene) | ✅ Ferdig | LETT/NORMAL/VANSKELIG – prominent i startmenyen |
 | Startbonus-valg | ✅ Ferdig | +Hjerte / +Angrep / +Syn |
 | Knapp-basert kamp | ✅ Ferdig | SPACE/F, facing-retning |
@@ -284,14 +284,22 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 
 ---
 
-## 4b. Helten – detaljert utseende (v0.8)
+## 4b. Helten – detaljert utseende (v0.12)
 
-I tillegg til hud/hår/drakt kan spilleren nå velge:
+Spilleren kan tilpasse heltens utseende i karakterskaperen:
 
 | Alternativ | Valg |
 |-----------|------|
+| Kjønn | Mann, Kvinne (påvirker kroppsproportioner, ansiktstrekk) |
+| Hudfarge | 4 toner |
+| Hårfarge | 7 farger (inkl. dyp rød, mørk lilla) |
+| Frisyre | 10 styler: Kort, Langt, Mohawk, Skallet, Kappe, Hestehale, Fletter, Krøller, Knute, Sidekam |
 | Øynefarge | Mørk, Blå, Grønn, Grå, Rødt, Lilla |
-| Skjeggstil (Menneske/Dverg) | Ingen, Stubb, Skjegg, Langt |
+| Drakt-farge | 8 farger |
+| Klesstil | Tunika, Kappe (lang), Vest (åpen front), Kåpe (med skulderkappe) |
+| Skjeggstil (Menneske/Dverg, kun mann) | Ingen, Stubb, Skjegg, Langt |
+
+Kvinner har slankere kroppsproportioner, smalere nese, vipper og subtil blush. Skjegg er utilgjengelig for kvinner.
 
 Hobbiter har karakteristiske store, lodne føtter (ingen sko). Alver har spisse ører med øredobber og bladbrosje.
 
