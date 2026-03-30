@@ -8,10 +8,10 @@
 // ─── Rarity System ───────────────────────────────────────────────────────────
 const RARITIES = [
     { id: 'common',    label: 'Vanlig',      color: 0xaaaaaa, textColor: '#aaaaaa', statMul: 1.0  },
-    { id: 'rare',      label: 'Sjelden',     color: 0x4488ff, textColor: '#4488ff', statMul: 1.25 },
-    { id: 'epic',      label: 'Episk',       color: 0xaa44ff, textColor: '#aa44ff', statMul: 1.5  },
-    { id: 'legendary', label: 'Legendarisk', color: 0xff8800, textColor: '#ff8800', statMul: 2.0  },
-    { id: 'mythic',    label: 'Mytisk',      color: 0xff2244, textColor: '#ff2244', statMul: 3.0  },
+    { id: 'rare',      label: 'Sjelden',     color: 0x4488ff, textColor: '#4488ff', statMul: 1.5  },
+    { id: 'epic',      label: 'Episk',       color: 0xaa44ff, textColor: '#aa44ff', statMul: 2.0  },
+    { id: 'legendary', label: 'Legendarisk', color: 0xff8800, textColor: '#ff8800', statMul: 3.0  },
+    { id: 'mythic',    label: 'Mytisk',      color: 0xff2244, textColor: '#ff2244', statMul: 5.0  },
 ];
 const RARITY_BY_ID = {};
 RARITIES.forEach(r => RARITY_BY_ID[r.id] = r);
@@ -67,71 +67,71 @@ const ITEM_DEFS = {
     // ── Melee Weapons ─────────────────────────────────────────────────────────
     dagger: {
         id: 'dagger', name: 'Dolk', type: 'weapon',
-        color: 0x88aacc, desc: '+1 Angrep', atk: 1, tier: 1
+        color: 0x88aacc, desc: '+2 Angrep', atk: 2, tier: 1
     },
     wood_sword: {
         id: 'wood_sword', name: 'Tresverd', type: 'weapon',
-        color: 0xaa7733, desc: '+1 Angrep', atk: 1, tier: 1
+        color: 0xaa7733, desc: '+3 Angrep', atk: 3, tier: 1
     },
     spear: {
         id: 'spear', name: 'Spyd', type: 'weapon',
-        color: 0xccbb77, desc: '+2 Angrep', atk: 2, tier: 2
+        color: 0xccbb77, desc: '+4 Angrep', atk: 4, tier: 2
     },
     iron_sword: {
         id: 'iron_sword', name: 'Jernsverd', type: 'weapon',
-        color: 0xaaaacc, desc: '+2 Angrep', atk: 2, tier: 2
+        color: 0xaaaacc, desc: '+5 Angrep', atk: 5, tier: 2
     },
     battle_axe: {
         id: 'battle_axe', name: 'Stridsøks', type: 'weapon',
-        color: 0xcc6622, desc: '+3 Angrep', atk: 3, tier: 3
+        color: 0xcc6622, desc: '+7 Angrep', atk: 7, tier: 3
     },
     war_hammer: {
         id: 'war_hammer', name: 'Krigshammer', type: 'weapon',
-        color: 0x886644, desc: '+4 Angrep', atk: 4, tier: 4
+        color: 0x886644, desc: '+9 Angrep', atk: 9, tier: 4
     },
     magic_staff: {
         id: 'magic_staff', name: 'Trollstav', type: 'weapon',
-        color: 0xaa44ff, desc: '+2 Angrep, +1 Forsvar', atk: 2, def: 1, tier: 3
+        color: 0xaa44ff, desc: '+5 Angrep, +2 Forsvar', atk: 5, def: 2, tier: 3
     },
 
     // ── Ranged Weapons (subtype: 'bow') ───────────────────────────────────────
     shortbow: {
         id: 'shortbow', name: 'Kortbue', type: 'weapon', subtype: 'bow',
-        color: 0x996633, desc: '+2 Angrep på avstand (trykk R)', atk: 2, tier: 2
+        color: 0x996633, desc: '+4 Angrep på avstand (trykk R)', atk: 4, tier: 2
     },
     elven_bow: {
         id: 'elven_bow', name: 'Alvebue', type: 'weapon', subtype: 'bow',
-        color: 0x55cc88, desc: '+3 Angrep på avstand (trykk R)', atk: 3, tier: 3
+        color: 0x55cc88, desc: '+6 Angrep på avstand (trykk R)', atk: 6, tier: 3
     },
     crossbow: {
         id: 'crossbow', name: 'Armbrøst', type: 'weapon', subtype: 'bow',
-        color: 0x886644, desc: '+4 Angrep på avstand (trykk R)', atk: 4, tier: 4
+        color: 0x886644, desc: '+8 Angrep på avstand (trykk R)', atk: 8, tier: 4
     },
 
     // ── Armor ─────────────────────────────────────────────────────────────────
     leather_armor: {
         id: 'leather_armor', name: 'Lærpansring', type: 'armor',
-        color: 0x886633, desc: '+1 Forsvar', def: 1, tier: 1
+        color: 0x886633, desc: '+2 Forsvar', def: 2, tier: 1
     },
     padded_vest: {
         id: 'padded_vest', name: 'Vattert vest', type: 'armor',
-        color: 0x998866, desc: '+1 Forsvar, +1 hjerte', def: 1, hearts: 1, tier: 1
+        color: 0x998866, desc: '+2 Forsvar, +1 hjerte', def: 2, hearts: 1, tier: 1
     },
     chain_mail: {
         id: 'chain_mail', name: 'Ringbrynje', type: 'armor',
-        color: 0x8899aa, desc: '+2 Forsvar', def: 2, tier: 2
+        color: 0x8899aa, desc: '+4 Forsvar', def: 4, tier: 2
     },
     plate_armor: {
         id: 'plate_armor', name: 'Platedrakt', type: 'armor',
-        color: 0xccccdd, desc: '+3 Forsvar', def: 3, tier: 3
+        color: 0xccccdd, desc: '+6 Forsvar', def: 6, tier: 3
     },
     robe_magic: {
         id: 'robe_magic', name: 'Magikappe', type: 'armor',
-        color: 0x6633aa, desc: '+2 Forsvar, +1 Angrep', def: 2, atk: 1, tier: 3
+        color: 0x6633aa, desc: '+4 Forsvar, +2 Angrep', def: 4, atk: 2, tier: 3
     },
     dragon_scale: {
         id: 'dragon_scale', name: 'Drageskjell', type: 'armor',
-        color: 0xff6622, desc: '+4 Forsvar', def: 4, tier: 4
+        color: 0xff6622, desc: '+8 Forsvar', def: 8, tier: 4
     },
 
     // ── Consumables ───────────────────────────────────────────────────────────
