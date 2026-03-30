@@ -2,6 +2,39 @@
 
 ---
 
+## v0.14 – 2026-03-30
+
+### Nye funksjoner
+- **Flere statuseffekter (#6):** Tre nye statuseffekter i tillegg til gift:
+  - **Frostbitt (❄):** Halverer bevegelseshastighet i 4 runder. Påføres av monstre i Iskrystall-verdenen (25% sjanse)
+  - **Brann (🔥):** 2 skade per ~800ms i 3 runder. Påføres av monstre i Vulkandungeon (20% sjanse)
+  - **Lammet (⚡):** Blokkerer all input i 1 runde. Boss fase 2 har 15% sjanse til å lamme
+  - Visuelle tint-overlays for alle effekter (blå, oransje, gul)
+  - Motgift kurerer nå ALLE statuseffekter (ikke bare gift)
+  - Nye forbruksvarer: Frostsalve (kurerer frostbitt) og Brannsalve (kurerer brannsår)
+- **Ledertavle (#5):** Persistent high-score-system:
+  - Registrerer verdener fullført, nivå, monsterdrap, gull for hvert forsøk
+  - LeaderboardScene med topp-15-tabell tilgjengelig fra hovedmenyen
+  - Filtrering etter rase og vanskelighetsgrad
+  - Medaljer for topp 3 (gull/sølv/bronse)
+  - Lagres i localStorage uavhengig av save-system
+
+### Tekniske endringer
+- `Hero.burnTurns`, `slowTurns`, `stunTurns` – nye statuseffekt-felt med serialisering
+- `Hero.applyBurn()`, `applySlow()`, `applyStun()`, `clearAllEffects()` – nye metoder
+- `GameScene._tickMonsters()` – separate timere for brann (800ms), slow (1000ms) og stun (600ms)
+- `GameScene._monsterAttack()` – tema-baserte statuseffekter (is→slow, vulkan→burn, boss→stun)
+- `GameScene._handleInput()` – stun blokkerer input; slow dobler bevegelsesdelay
+- `GameScene.monstersKilled` – teller for ledertavle
+- `items.js` – nye consumables `frost_salve` og `burn_salve`; motgift kurerer alle effekter
+- `UIScene.statusText` – viser alle aktive statuseffekter i HUD
+- Ny fil: `Leaderboard.js` – localStorage-basert high-score-lagring
+- Ny fil: `LeaderboardScene.js` – filtrerbar ledertavle
+- `GameOverScene` – registrerer resultater til ledertavle
+- `MenuScene` – ledertavle-knapp
+
+---
+
 ## v0.13 – 2026-03-30
 
 ### Nye funksjoner

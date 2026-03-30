@@ -78,6 +78,7 @@ class GameScene extends Phaser.Scene {
         // ── Monsters ─────────────────────────────────────────────────────────
         this.monsters = [];
         this.boss     = null;
+        this.monstersKilled = 0;
         this._placeMonsters();
 
         // ── Fog overlay ───────────────────────────────────────────────────────
@@ -873,6 +874,8 @@ class GameScene extends Phaser.Scene {
     // ── Input / hero movement ─────────────────────────────────────────────────
 
     _handleInput(delta) {
+        // Stun blocks all input
+        if (this.hero.stunTurns > 0) return;
         this.moveTimer -= delta;
         if (this.moveTimer > 0) return;
         let dx = 0, dy = 0;
@@ -889,7 +892,8 @@ class GameScene extends Phaser.Scene {
 
         if (dx !== 0 || dy !== 0) {
             this._tryMoveHero(dx, dy);
-            this.moveTimer = MOVE_DELAY_MS;
+            // Slow doubles movement delay
+            this.moveTimer = this.hero.slowTurns > 0 ? MOVE_DELAY_MS * 2 : MOVE_DELAY_MS;
         }
     }
 
@@ -958,6 +962,7 @@ class GameScene extends Phaser.Scene {
     // ── Button-press Attack (SPACE / F) ───────────────────────────────────────
 
     _handleAttack() {
+        if (this.hero.stunTurns > 0) return;
         const spaceDown = Phaser.Input.Keyboard.JustDown(this.attackKey);
         const fDown     = Phaser.Input.Keyboard.JustDown(this.altAtkKey);
         const touchAtk  = this.game.registry.get('touch_attack');
@@ -1147,6 +1152,7 @@ class GameScene extends Phaser.Scene {
         const xp      = Math.round(monster.xpReward * this._diffMods().xpMul);
         const leveled = this.hero.gainXP(xp);
         this.monsters = this.monsters.filter(m => m !== monster);
+        this.monstersKilled++;
 
         // Gold drop
         const goldBase = GOLD_DROP[monster.type] || 5;
@@ -1184,6 +1190,23 @@ class GameScene extends Phaser.Scene {
             }
         }
 
+        // Theme-based status effects
+        if (!died) {
+            const deco = this._theme.DECO;
+            if (deco === 'ice' && Math.random() < 0.25) {
+                this.hero.applySlow(4);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '❄ Frostbitt!', '#88ddff');
+            } else if (deco === 'volcanic' && Math.random() < 0.20) {
+                this.hero.applyBurn(3);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '🔥 Brenner!', '#ff6600');
+            }
+            // Boss phase 2 can stun
+            if (monster.type === 'boss' && monster.phase === 2 && Math.random() < 0.15) {
+                this.hero.applyStun(1);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '⚡ Lammet!', '#ffee00');
+            }
+        }
+
         if (died || !this.hero.alive) {
             this.cameras.main.shake(120, 0.008);
             this._heroDied();
@@ -1208,7 +1231,8 @@ class GameScene extends Phaser.Scene {
     _tickMonsters(delta) {
         this.monsterTick += delta;
 
-        // Poison ticks on its own slower timer (every ~900ms instead of every monster tick)
+        // ── Status effect ticks (each on ~900ms timer) ────────────────────────
+        // Poison
         if (this.hero.poisonTurns > 0) {
             this.poisonTickTimer += delta;
             if (this.poisonTickTimer >= 900) {
@@ -1221,6 +1245,48 @@ class GameScene extends Phaser.Scene {
             }
         } else {
             this.poisonTickTimer = 0;
+        }
+
+        // Burn (fire DoT – 2 damage per tick, ~800ms)
+        if (this.hero.burnTurns > 0) {
+            this.burnTickTimer = (this.burnTickTimer || 0) + delta;
+            if (this.burnTickTimer >= 800) {
+                this.burnTickTimer = 0;
+                this.hero.burnTurns--;
+                const died = this.hero.takeDamage(2);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '🔥 -2', '#ff6600');
+                this.hero._drawSprite();
+                if (died) { this._heroDied(); return; }
+            }
+        } else {
+            this.burnTickTimer = 0;
+        }
+
+        // Slow (decrements once per second, effect handled in _handleInput)
+        if (this.hero.slowTurns > 0) {
+            this.slowTickTimer = (this.slowTickTimer || 0) + delta;
+            if (this.slowTickTimer >= 1000) {
+                this.slowTickTimer = 0;
+                this.hero.slowTurns--;
+                this.hero._drawSprite();
+            }
+        } else {
+            this.slowTickTimer = 0;
+        }
+
+        // Stun (decrements per monster tick – skips hero input while active)
+        if (this.hero.stunTurns > 0) {
+            this.stunTickTimer = (this.stunTickTimer || 0) + delta;
+            if (this.stunTickTimer >= 600) {
+                this.stunTickTimer = 0;
+                this.hero.stunTurns--;
+                this.hero._drawSprite();
+                if (this.hero.stunTurns <= 0) {
+                    this._floatingText(this.hero.gridX, this.hero.gridY, 'Ustunnet!', '#ffee00');
+                }
+            }
+        } else {
+            this.stunTickTimer = 0;
         }
 
         if (this.monsterTick < MONSTER_TICK_MS) return;
@@ -1306,7 +1372,8 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
                 type: 'worldComplete', worldNum: this.worldNum,
-                heroStats: this.hero.getStats(), difficulty: this.difficulty
+                heroStats: this.hero.getStats(), difficulty: this.difficulty,
+                monstersKilled: this.monstersKilled
             });
         });
     }
@@ -1322,7 +1389,8 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(700, () => {
             this.scene.start('GameOverScene', {
                 type: 'death', worldNum: this.worldNum,
-                heroStats: this.hero.getStats(), difficulty: this.difficulty
+                heroStats: this.hero.getStats(), difficulty: this.difficulty,
+                monstersKilled: this.monstersKilled
             });
         });
     }

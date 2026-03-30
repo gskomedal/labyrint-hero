@@ -162,10 +162,29 @@ const ITEM_DEFS = {
     },
     antidote: {
         id: 'antidote', name: 'Motgift', type: 'consumable',
-        color: 0x88ee44, desc: 'Kurerer gift og gjenoppretter 1 hjerte', tier: 1,
+        color: 0x88ee44, desc: 'Kurerer alle statuseffekter og gjenoppretter 1 hjerte', tier: 1,
         use(hero) {
-            hero.poisonTurns = 0;
+            hero.clearAllEffects();
             hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            return true;
+        }
+    },
+    frost_salve: {
+        id: 'frost_salve', name: 'Frostsalve', type: 'consumable',
+        color: 0x88ddff, desc: 'Kurerer frostbitt og gir motstand mot kulde', tier: 2,
+        use(hero) {
+            hero.slowTurns = 0;
+            hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            hero._drawSprite();
+            return true;
+        }
+    },
+    burn_salve: {
+        id: 'burn_salve', name: 'Brannsalve', type: 'consumable',
+        color: 0xff8844, desc: 'Kurerer brannsår og gjenoppretter 2 hjerter', tier: 2,
+        use(hero) {
+            hero.burnTurns = 0;
+            hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts);
             hero._drawSprite();
             return true;
         }
@@ -239,13 +258,13 @@ const ITEM_POOL = {
     1: ['dagger', 'wood_sword', 'leather_armor', 'padded_vest', 'health_pot', 'antidote'],
     2: ['spear', 'iron_sword', 'shortbow', 'chain_mail',
         'health_pot', 'big_health_pot', 'strength_brew', 'defense_brew',
-        'xp_scroll', 'bomb', 'map_scroll'],
+        'xp_scroll', 'bomb', 'map_scroll', 'frost_salve', 'burn_salve'],
     3: ['battle_axe', 'war_hammer', 'elven_bow', 'plate_armor', 'robe_magic',
         'big_health_pot', 'strength_brew', 'defense_brew', 'bomb',
-        'flashbang', 'heart_crystal', 'map_scroll'],
+        'flashbang', 'heart_crystal', 'map_scroll', 'frost_salve', 'burn_salve'],
     4: ['war_hammer', 'crossbow', 'magic_staff', 'robe_magic', 'plate_armor',
         'dragon_scale', 'big_health_pot', 'strength_brew', 'bomb',
-        'heart_crystal', 'flashbang']
+        'heart_crystal', 'flashbang', 'frost_salve', 'burn_salve']
 };
 
 /** Return a random item def appropriate for the given world number.

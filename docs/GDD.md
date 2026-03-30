@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.13
+**Versjon:** 0.14
 **Sist oppdatert:** 2026-03-30
 
 ---
@@ -144,6 +144,16 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 | Boss | 35 + V×18 | 3 + V | 150 | – (eget uttrykk) |
 
 Verdensnummer V brukes til å skalere både HP og skade – kamp bør alltid føles risikofylt.
+
+### Statuseffekter (v0.14)
+| Effekt | Ikon | Varighet | Skade | Kilde | Kur |
+|--------|------|----------|-------|-------|-----|
+| Gift | ☠ | 4 runder | 1/runde | Orc (20%), Troll (30%) | Motgift |
+| Brann | 🔥 | 3 runder | 2/runde | Vulkandungeon-monstre (20%) | Brannsalve, Motgift |
+| Frostbitt | ❄ | 4 runder | Ingen (halv fart) | Iskrystall-monstre (25%) | Frostsalve, Motgift |
+| Lammet | ⚡ | 1 runde | Ingen (skip turn) | Boss fase 2 (15%) | Venter ut |
+
+Motgift kurerer alle statuseffekter. Effektene stables ikke – ny påføring forlenger gjenværende varighet.
 
 ### Bump-mekanikk
 Bevegelse inn i monster-rute: helten setter facing uten å angripe (visuell flash). Trykk SPACE/F for å angripe i facing-retning.
@@ -295,7 +305,7 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Zoom (kamera) | ✅ Ferdig | Muskjul og +/− |
 | HUD + UIScene | ✅ Ferdig | |
 | Minimap (M-tast) | ✅ Ferdig | Fog-bevisst, hjørne-kart |
-| Statuseffekter (gift) | ✅ Ferdig | Orc/Troll; 4 runder; grønt tint |
+| Statuseffekter (4 typer) | ✅ Ferdig | Gift, Brann, Frostbitt, Lammet |
 | Feller/traps | ✅ Ferdig | Usynlige spikefeller, 1-gangs-trigger |
 | Bakgrunnsmusikk (5 temaer) | ✅ Ferdig | Web Audio API |
 | SFX (9 typer) | ✅ Ferdig | |
@@ -306,7 +316,7 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Gull + økonomi | ✅ Ferdig | Gullvaluta fra monstre/kister; handelsmann |
 | Gjenstandssjeldenhet | ✅ Ferdig | 5 sjeldenhetsgrader med stat-boost |
 | Touch/mobil-støtte | ✅ Ferdig | D-pad, handlingsknapper, responsiv skalering, langt-trykk drop |
-| Leaderboard | ❌ Mangler | |
+| Leaderboard | ✅ Ferdig | Ledertavle med filtrering |
 
 ---
 
@@ -349,6 +359,6 @@ Spilleren kan spre poeng på tvers av veier (generalist) eller gå dypt i én (s
 1. ~~**Gull + handelsmann**~~ – ✅ Implementert i v0.13.
 2. **Skilltre-utvidelse** – Legg til 2–3 ekstra ferdigheter per vei; kryss-vei-synergier.
 3. ~~**Touch/mobil-støtte**~~ – ✅ Implementert i v0.9.
-4. **Leaderboard** – Lokal high-score-liste (verdensrekord per rase/vanskelighetsgrad).
-5. **Frostbrent statuseffekt** – Isbaserte monstre (fremtidig verdenstema) setter ned bevegelsestakten.
+4. ~~**Leaderboard**~~ – ✅ Implementert i v0.14.
+5. ~~**Frostbrent statuseffekt**~~ – ✅ Implementert i v0.14 (+ brann og stun).
 6. **Refaktorering** – Splitte GameScene.js i mindre moduler (CombatManager, MapRenderer, etc.).
