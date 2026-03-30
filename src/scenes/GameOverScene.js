@@ -9,6 +9,7 @@ class GameOverScene extends Phaser.Scene {
         this.heroStats      = data.heroStats;
         this.difficulty     = data.difficulty || 'normal';
         this.monstersKilled = data.monstersKilled || 0;
+        this.timeSeconds    = data.timeSeconds || 0;
     }
 
     create() {
@@ -26,7 +27,8 @@ class GameOverScene extends Phaser.Scene {
             level:          this.heroStats.level || 1,
             monstersKilled: this.monstersKilled,
             goldEarned:     this.heroStats.gold || 0,
-            result:         this.type === 'death' ? 'death' : 'worldComplete'
+            result:         this.type === 'death' ? 'death' : 'worldComplete',
+            timeSeconds:    this.timeSeconds
         });
 
         if (this.type === 'death') {
@@ -117,12 +119,19 @@ class GameOverScene extends Phaser.Scene {
 
     // ── Shared helpers ────────────────────────────────────────────────────────
 
+    _formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
     _statsPanel(cx, cy) {
         const s = this.heroStats;
         const lines = [
             `Hjerter: ${s.hearts}/${s.maxHearts}`,
             `Angrep: ${s.attack}  ·  Forsvar: ${s.defense}`,
-            `XP: ${s.xp} / ${s.xpToNext}`
+            `XP: ${s.xp} / ${s.xpToNext}`,
+            `Tid: ${this._formatTime(this.timeSeconds)}`
         ];
         lines.forEach((line, i) => {
             this.add.text(cx, cy + i * 18, line, {

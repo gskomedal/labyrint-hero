@@ -103,11 +103,11 @@ class LeaderboardScene extends Phaser.Scene {
 
         // Header
         const hdrStyle = { fontSize: '10px', color: '#556677', fontFamily: 'monospace' };
-        const cols = [cx - 200, cx - 120, cx - 50, cx, cx + 60, cx + 120, cx + 180];
-        ['#', 'Navn', 'Rase', 'Verden', 'Niv\u00e5', 'Drap', 'Gull'].forEach((h, i) => {
+        const cols = [cx - 215, cx - 150, cx - 85, cx - 30, cx + 15, cx + 60, cx + 110, cx + 160];
+        ['#', 'Navn', 'Rase', 'Verden', 'Niv\u00e5', 'Drap', 'Gull', 'Tid'].forEach((h, i) => {
             this._dyn.push(this.add.text(cols[i], y0, h, hdrStyle));
         });
-        this._dyn.push(this.add.rectangle(cx, y0 + 14, 440, 1, 0x223344));
+        this._dyn.push(this.add.rectangle(cx, y0 + 14, 480, 1, 0x223344));
 
         const RACE_NAMES = { human: 'Menneske', dwarf: 'Dverg', elf: 'Alv', hobbit: 'Hobbit' };
         const rowH = 20;
@@ -128,11 +128,15 @@ class LeaderboardScene extends Phaser.Scene {
             this._dyn.push(this.add.text(cols[4], ry, `${s.level}`, style));
             this._dyn.push(this.add.text(cols[5], ry, `${s.monstersKilled}`, style));
             this._dyn.push(this.add.text(cols[6], ry, `${s.goldEarned}g`, style));
+            // Time column (mm:ss)
+            const t = s.timeSeconds || 0;
+            const tStr = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+            this._dyn.push(this.add.text(cols[7], ry, tStr, style));
 
             // Result indicator
             const resCol = s.result === 'death' ? '#ff4444' : '#44ee66';
             const resIcon = s.result === 'death' ? '\u2620' : '\u2713';
-            this._dyn.push(this.add.text(cols[6] + 55, ry, resIcon, { ...style, color: resCol }));
+            this._dyn.push(this.add.text(cols[7] + 45, ry, resIcon, { ...style, color: resCol }));
         }
     }
 }

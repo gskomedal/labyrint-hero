@@ -24,6 +24,7 @@ class GameScene extends Phaser.Scene {
 
     create() {
         this._dyingHandled = false;
+        this._worldStartTime = Date.now();
         this._theme = getWorldTheme(this.worldNum);
 
         // ── Generate maze ────────────────────────────────────────────────────
@@ -166,12 +167,29 @@ class GameScene extends Phaser.Scene {
                 if (t === TILE.WALL) {
                     g.fillStyle(th.WALL);
                     g.fillRect(px, py, S, S);
+                    // Brick / stone block pattern
+                    g.lineStyle(1, th.WALL_MID, 0.3);
+                    g.lineBetween(px, py + S / 3, px + S, py + S / 3);
+                    g.lineBetween(px, py + 2 * S / 3, px + S, py + 2 * S / 3);
+                    const vOff = (y % 2 === 0) ? S / 2 : 0;
+                    g.lineBetween(px + (S / 4 + vOff) % S, py, px + (S / 4 + vOff) % S, py + S / 3);
+                    g.lineBetween(px + (3 * S / 4 + vOff) % S, py + S / 3, px + (3 * S / 4 + vOff) % S, py + 2 * S / 3);
+                    g.lineBetween(px + (S / 4 + vOff) % S, py + 2 * S / 3, px + (S / 4 + vOff) % S, py + S);
                     // Highlight top edge
                     g.fillStyle(th.WALL_TOP);
                     g.fillRect(px, py, S, 3);
                     // Subtle mid-tone bevel
                     g.fillStyle(th.WALL_MID, 0.5);
                     g.fillRect(px, py + 3, S, 2);
+                    // Per-brick shade variation
+                    const wseed = (x * 31 + y * 17) & 0xFF;
+                    if (wseed < 80) {
+                        g.fillStyle(th.WALL_TOP, 0.12);
+                        g.fillRect(px + 2, py + 2, S / 2 - 2, S / 3 - 2);
+                    } else if (wseed > 200) {
+                        g.fillStyle(th.WALL_MID, 0.18);
+                        g.fillRect(px + S / 2, py + S / 3 + 1, S / 2 - 2, S / 3 - 2);
+                    }
                     // Theme-specific wall decorations
                     this._drawWallDeco(g, th, px, py, S, x, y);
 
@@ -250,6 +268,15 @@ class GameScene extends Phaser.Scene {
                     const col = (x + y) % 2 === 0 ? th.FLOOR_A : th.FLOOR_B;
                     g.fillStyle(col);
                     g.fillRect(px, py, S, S);
+                    // Shadow along wall edges
+                    if (y > 0 && this.maze[y - 1][x] === TILE.WALL) {
+                        g.fillStyle(0x000000, 0.18);
+                        g.fillRect(px, py, S, 4);
+                    }
+                    if (x > 0 && this.maze[y][x - 1] === TILE.WALL) {
+                        g.fillStyle(0x000000, 0.12);
+                        g.fillRect(px, py, 3, S);
+                    }
                     this._drawFloorDeco(g, th, px, py, S, x, y);
 
                 // ── EXIT ──────────────────────────────────────────────────
@@ -285,6 +312,7 @@ class GameScene extends Phaser.Scene {
     // Per-theme wall decorations (subtle texture)
     _drawWallDeco(g, th, px, py, S, gx, gy) {
         const seed = (gx * 31 + gy * 17) & 0xFF; // cheap deterministic noise
+        const seed2 = (gx * 53 + gy * 41) & 0xFF; // second noise channel
         switch (th.DECO) {
             case 'forest': {
                 // Leafy dots + vine hint
@@ -294,21 +322,48 @@ class GameScene extends Phaser.Scene {
                     g.fillCircle(px + 18 + (seed & 5),  py + 14 + (seed >> 3 & 5), 1);
                 }
                 if (seed > 200) {
-                    // Vine tendril
+                    // Vine tendril with leaves
                     g.lineStyle(1, th.WALL_TOP, 0.4);
-                    g.lineBetween(px + 4, py, px + 4, py + S);
+                    const vx = px + 4 + (seed & 3);
+                    g.lineBetween(vx, py, vx, py + S);
+                    // Small leaf buds along vine
+                    g.fillStyle(th.WALL_TOP, 0.5);
+                    g.fillCircle(vx + 2, py + 8, 2);
+                    g.fillCircle(vx - 1, py + 20, 1);
+                }
+                // Moss patches on lower wall
+                if (seed2 > 180) {
+                    g.fillStyle(th.WALL_TOP, 0.25);
+                    g.fillRect(px + (seed2 & 7), py + S - 6, 6 + (seed2 & 3), 4);
                 }
                 break;
             }
             case 'cave': {
-                // Stone block lines
+                // Rough stone texture with varied blocks
                 g.lineStyle(1, th.WALL_MID, 0.35);
                 if (gy % 2 === 0) g.lineBetween(px, py + S/2, px + S, py + S/2);
                 if (gx % 2 === 0) g.lineBetween(px + S/2, py, px + S/2, py + S);
+                // Diagonal crack for roughness
+                if (seed2 < 50) {
+                    g.lineStyle(1, th.WALL_MID, 0.2);
+                    g.lineBetween(px + 3, py + 5, px + S - 5, py + S - 3);
+                }
                 // Moisture drip
                 if (seed > 220) {
                     g.fillStyle(0x3a4a6a, 0.5);
                     g.fillRect(px + (seed & 15) + 4, py + S - 5, 2, 4);
+                    // Water stain streak
+                    g.fillStyle(0x3a4a6a, 0.15);
+                    g.fillRect(px + (seed & 15) + 4, py + S/2, 2, S/2 - 5);
+                }
+                // Stalactite nubs from top
+                if (seed2 > 210) {
+                    g.fillStyle(th.WALL_TOP, 0.4);
+                    g.fillTriangle(
+                        px + (seed2 & 15) + 4, py + 4,
+                        px + (seed2 & 15) + 7, py + 4,
+                        px + (seed2 & 15) + 5, py + 10
+                    );
                 }
                 break;
             }
@@ -316,10 +371,25 @@ class GameScene extends Phaser.Scene {
                 // Crystal facets
                 g.lineStyle(1, th.ACCENT, 0.2);
                 g.lineBetween(px, py + S/3, px + S, py + 2*S/3);
+                // Cross facet
+                if (seed2 < 100) {
+                    g.lineStyle(1, th.ACCENT, 0.12);
+                    g.lineBetween(px + S, py + S/4, px, py + 3*S/4);
+                }
                 if (seed < 80) {
                     // Ice shard on top
                     g.fillStyle(th.ACCENT, 0.45);
                     g.fillTriangle(px + (seed & 15) + 4, py, px + (seed & 15) + 8, py, px + (seed & 15) + 6, py - 5);
+                }
+                // Frost sparkle
+                if (seed2 > 200) {
+                    g.fillStyle(0xffffff, 0.3);
+                    g.fillCircle(px + (seed2 & 15) + 6, py + (seed2 >> 4 & 15) + 6, 1);
+                }
+                // Icicle drip
+                if (seed > 190 && seed <= 200) {
+                    g.fillStyle(th.ACCENT, 0.35);
+                    g.fillTriangle(px + 14, py + S - 2, px + 17, py + S - 2, px + 15, py + S + 3);
                 }
                 break;
             }
@@ -329,10 +399,20 @@ class GameScene extends Phaser.Scene {
                     g.lineStyle(1, th.CRACKED_LINE, 0.6);
                     g.lineBetween(px + (seed & 7) + 4, py, px + (seed & 7) + 2, py + S);
                 }
-                // Ember dot
-                if (seed > 230) {
+                // Ember dots (more frequent)
+                if (seed > 220) {
                     g.fillStyle(th.ACCENT, 0.8);
                     g.fillCircle(px + (seed & 15) + 4, py + S - 4, 1);
+                }
+                // Charred marks
+                if (seed2 < 40) {
+                    g.fillStyle(0x000000, 0.2);
+                    g.fillRect(px + (seed2 & 7) + 4, py + (seed2 >> 3 & 7) + 8, 5, 3);
+                }
+                // Lava glow seep from bottom
+                if (seed2 > 220) {
+                    g.fillStyle(th.CRACKED_LINE, 0.15);
+                    g.fillRect(px, py + S - 3, S, 3);
                 }
                 break;
             }
@@ -342,11 +422,21 @@ class GameScene extends Phaser.Scene {
                     g.fillStyle(th.WALL_TOP, 0.3);
                     g.fillRect(px + 3, py + 4, 5, S - 8);
                     g.fillRect(px + S - 8, py + 4, 5, S - 8);
+                    // Column capitals
+                    g.fillStyle(th.ACCENT, 0.2);
+                    g.fillRect(px + 2, py + 3, 7, 2);
+                    g.fillRect(px + S - 9, py + 3, 7, 2);
                 }
-                // Hieroglyph dot
+                // Hieroglyph symbols
                 if (seed > 200) {
                     g.fillStyle(th.ACCENT, 0.25);
                     g.fillRect(px + (seed & 7) + 8, py + (seed >> 4 & 7) + 6, 4, 3);
+                }
+                // Carved line motif
+                if (seed2 < 60) {
+                    g.lineStyle(1, th.ACCENT, 0.15);
+                    g.lineBetween(px + 10, py + S/2, px + S - 10, py + S/2);
+                    g.lineBetween(px + 12, py + S/2 + 3, px + S - 12, py + S/2 + 3);
                 }
                 break;
             }
@@ -356,45 +446,91 @@ class GameScene extends Phaser.Scene {
     // Per-theme floor decorations
     _drawFloorDeco(g, th, px, py, S, gx, gy) {
         const seed = (gx * 37 + gy * 23) & 0xFF;
+        const seed2 = (gx * 59 + gy * 43) & 0xFF;
         switch (th.DECO) {
             case 'forest': {
-                // Grass blades
-                if (seed < 40) {
+                // Grass blades (more frequent, varied)
+                if (seed < 60) {
                     g.lineStyle(1, th.WALL_TOP, 0.45);
                     g.lineBetween(px + 6,  py + S - 2, px + 4,  py + S - 8);
                     g.lineBetween(px + 10, py + S - 2, px + 12, py + S - 7);
+                    if (seed < 30) {
+                        g.lineBetween(px + 22, py + S - 2, px + 20, py + S - 6);
+                    }
                 }
-                // Flower
+                // Flower (varied colors)
                 if (seed > 230) {
-                    g.fillStyle(0xffff44, 0.6);
+                    const flowerCol = seed2 < 128 ? 0xffff44 : 0xff88cc;
+                    g.fillStyle(flowerCol, 0.6);
                     g.fillCircle(px + (seed & 15) + 4, py + (seed >> 4 & 9) + 6, 2);
+                    // Stem
+                    g.lineStyle(1, th.WALL_TOP, 0.3);
+                    g.lineBetween(px + (seed & 15) + 4, py + (seed >> 4 & 9) + 8, px + (seed & 15) + 4, py + (seed >> 4 & 9) + 13);
                 }
                 // Pebble
                 if (seed > 200 && seed <= 230) {
                     g.fillStyle(th.WALL_MID, 0.5);
                     g.fillCircle(px + (seed & 13) + 6, py + (seed >> 3 & 11) + 5, 2);
                 }
+                // Dirt patch
+                if (seed2 > 230) {
+                    g.fillStyle(th.WALL_MID, 0.15);
+                    g.fillCircle(px + S/2, py + S/2, 4);
+                }
                 break;
             }
             case 'cave': {
-                // Pebbles
-                if (seed > 210) {
+                // Pebbles (more varied)
+                if (seed > 200) {
                     g.fillStyle(th.WALL_MID, 0.4);
                     g.fillCircle(px + (seed & 15) + 4, py + (seed >> 4 & 13) + 4, 2);
                     g.fillCircle(px + (seed & 9) + 14,  py + (seed >> 3 & 9) + 14,  1);
                 }
+                // Rubble scatter
+                if (seed2 < 30) {
+                    g.fillStyle(th.WALL_MID, 0.3);
+                    g.fillCircle(px + 8, py + 12, 1);
+                    g.fillCircle(px + 20, py + 8, 1);
+                    g.fillCircle(px + 14, py + 22, 2);
+                }
+                // Subtle floor crack
+                if (seed > 150 && seed <= 170) {
+                    g.lineStyle(1, th.WALL_MID, 0.2);
+                    g.lineBetween(px + 2, py + (seed2 & 15) + 6, px + S - 4, py + (seed2 >> 4 & 15) + 6);
+                }
+                // Puddle (rare)
+                if (seed2 > 240) {
+                    g.fillStyle(0x3a4a6a, 0.2);
+                    g.fillCircle(px + S/2, py + S/2, 4);
+                    g.fillStyle(0x5a6a8a, 0.12);
+                    g.fillCircle(px + S/2 + 1, py + S/2 - 1, 2);
+                }
                 break;
             }
             case 'ice': {
-                // Ice floor cracks
+                // Ice floor cracks (branching)
                 if (seed < 50) {
                     g.lineStyle(1, th.ACCENT, 0.2);
                     g.lineBetween(px + 2, py + S/2, px + S - 2, py + S/2 + (seed & 5) - 2);
+                    if (seed < 25) {
+                        g.lineBetween(px + S/2, py + S/2, px + S/2 + (seed & 3), py + 4);
+                    }
                 }
                 // Frost crystal
                 if (seed > 230) {
                     g.fillStyle(th.ACCENT, 0.3);
                     g.fillTriangle(px + S/2 - 2, py + S/2, px + S/2, py + S/2 - 4, px + S/2 + 2, py + S/2);
+                }
+                // Frost rim on edges
+                if (seed2 > 200) {
+                    g.fillStyle(0xffffff, 0.08);
+                    g.fillRect(px, py, S, 2);
+                    g.fillRect(px, py, 2, S);
+                }
+                // Snow dusting
+                if (seed2 < 40) {
+                    g.fillStyle(0xffffff, 0.12);
+                    g.fillCircle(px + (seed2 & 15) + 6, py + (seed2 >> 3 & 13) + 6, 3);
                 }
                 break;
             }
@@ -403,11 +539,26 @@ class GameScene extends Phaser.Scene {
                 if (seed > 220) {
                     g.fillStyle(th.ACCENT, 0.35);
                     g.fillCircle(px + (seed & 13) + 5, py + (seed >> 4 & 11) + 5, 2);
+                    // Glow halo
+                    g.fillStyle(th.ACCENT, 0.1);
+                    g.fillCircle(px + (seed & 13) + 5, py + (seed >> 4 & 11) + 5, 5);
                 }
                 // Ash crack
                 if (seed > 180 && seed <= 220) {
                     g.lineStyle(1, th.CRACKED_LINE, 0.2);
                     g.lineBetween(px + 4, py + S/2, px + S - 4, py + S/2 + (seed & 3) - 1);
+                }
+                // Scorched marks
+                if (seed2 < 35) {
+                    g.fillStyle(0x000000, 0.15);
+                    g.fillCircle(px + (seed2 & 15) + 6, py + (seed2 >> 3 & 15) + 6, 3);
+                }
+                // Cooling lava puddle (rare)
+                if (seed2 > 245) {
+                    g.fillStyle(th.CRACKED_LINE, 0.2);
+                    g.fillCircle(px + S/2, py + S/2, 3);
+                    g.fillStyle(th.ACCENT, 0.1);
+                    g.fillCircle(px + S/2, py + S/2, 5);
                 }
                 break;
             }
@@ -420,6 +571,16 @@ class GameScene extends Phaser.Scene {
                 if ((gx + gy) % 4 === 0) {
                     g.fillStyle(th.ACCENT, 0.4);
                     g.fillCircle(px + S/2, py + S/2, 2);
+                }
+                // Worn/chipped tile corners
+                if (seed2 < 40) {
+                    g.fillStyle(th.WALL_MID, 0.15);
+                    g.fillTriangle(px, py, px + 4, py, px, py + 4);
+                }
+                // Dust scatter
+                if (seed > 210 && seed <= 230) {
+                    g.fillStyle(th.WALL_MID, 0.12);
+                    g.fillCircle(px + (seed & 11) + 6, py + (seed >> 3 & 11) + 6, 2);
                 }
                 break;
             }
@@ -1537,11 +1698,13 @@ class GameScene extends Phaser.Scene {
         Audio.playExit();
         this._stopOverlayScenes();
         SaveManager.save(this.worldNum + 1, this.hero.getStats());
+        const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
                 type: 'worldComplete', worldNum: this.worldNum,
                 heroStats: this.hero.getStats(), difficulty: this.difficulty,
-                monstersKilled: this.monstersKilled
+                monstersKilled: this.monstersKilled,
+                timeSeconds: worldTime
             });
         });
     }
@@ -1554,11 +1717,13 @@ class GameScene extends Phaser.Scene {
         Audio.stopMusic();
         this._stopOverlayScenes();
         SaveManager.save(this.worldNum, this.hero.getStats());
+        const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
         this.time.delayedCall(700, () => {
             this.scene.start('GameOverScene', {
                 type: 'death', worldNum: this.worldNum,
                 heroStats: this.hero.getStats(), difficulty: this.difficulty,
-                monstersKilled: this.monstersKilled
+                monstersKilled: this.monstersKilled,
+                timeSeconds: worldTime
             });
         });
     }
