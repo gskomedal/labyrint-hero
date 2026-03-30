@@ -2,6 +2,25 @@
 
 ---
 
+## v0.12 – 2026-03-30
+
+### Nye funksjoner
+- **Kjønnsvalg (#15):** Velg mellom mann og kvinne i karakterskaperen. Kvinner har slankere kropp, smalere nese, fyldige lepper, vipper og lett blush. Skjegg skjules automatisk for kvinnelige karakterer
+- **Flere klær (#16):** 4 klesstiler: Tunika (standard), Kappe (lang kjole), Vest (åpen front), Kåpe (over skuldrene). 3 nye drakt-farger (dyp blå, dyp rød, grå)
+- **Slankere sprites (#17):** Karaktersprites har nå slankere proporsjoner med kjønnsbaserte kroppsforskjeller (skulderbredde, torso, armer, bein)
+- **Flere frisyrer (#18):** 10 hårstyler (opp fra 5): Kort, Langt, Mohawk, Skallet, Kappe, Hestehale, Fletter, Krøller, Knute, Sidekam. 2 nye hårfarger (dyp rød, mørk lilla)
+
+### Tekniske endringer
+- `CharacterSprite.js` – `gender` felt i appearance; `clothStyle` felt; 10 hårstyler; kjønnsbaserte kroppsdimensjoner
+- `GENDERS`, `GENDER_LABELS`, `CLOTH_STYLES`, `CLOTH_STYLE_LABELS` – nye konstantarrayer
+- `HAIR_STYLES` utvidet fra 5→10; `HAIR_COLORS` fra 5→7; `CLOTH_COLORS` fra 5→8
+- `defaultAppearance()` – inkluderer nå `gender` og `clothStyle`
+- `CharacterCreatorScene.js` – kjønnsvelger-rad, klesstilvelger, 2-rads frisyreliste, skjult skjegg for kvinner
+- Preview-boks utvidet fra 112→128px for bedre detaljvisning
+- Bakoverkompatibelt: manglende `gender`/`clothStyle` fallbacker til 'male'/'tunic'
+
+---
+
 ## v0.11 – 2026-03-29
 
 ### Nye funksjoner
