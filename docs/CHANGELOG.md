@@ -2,6 +2,19 @@
 
 ---
 
+## v0.17 – 2026-03-30
+
+### Tekniske endringer
+- **Refaktorering av GameScene.js (#7):** Delt opp i 5 fokuserte moduler:
+  - `MapRenderer` – kartrendering, tåke, portal-animasjon
+  - `ItemSpawner` – kister, verktøy, gjenstander, kjøpmann
+  - `MonsterManager` – monsterplassering, AI, statuseffekter
+  - `CombatManager` – nærkamp, bue, skadeberegning, drap
+  - `InputHandler` – tastatur/touch-inndata, bevegelse, zoom
+  - GameScene er nå orkestrator (~230 linjer, ned fra ~1800)
+
+---
+
 ## v0.16 – 2026-03-30
 
 ### Nye funksjoner

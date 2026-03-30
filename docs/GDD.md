@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.16
+**Versjon:** 0.17
 **Sist oppdatert:** 2026-03-30
 
 ---
@@ -36,12 +36,17 @@ src/
   graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser, 2 kjønn, 10 frisyrer, 4 klesstiler)
   systems/Inventory.js      – 2 utstyrsplasser + 10-spors ryggsekk
   systems/AudioManager.js   – prosedyremusikk (5 temaer) + SFX-motoren
+  systems/MapRenderer.js    – kartrendering, tåke, portal-animasjon
+  systems/ItemSpawner.js    – kister, verktøy, gjenstander, kjøpmann
+  systems/MonsterManager.js – monsterplassering, AI, statuseffekter
+  systems/CombatManager.js  – nærkamp, bue, skadeberegning, drap
+  systems/InputHandler.js   – tastatur/touch-inndata, bevegelse, zoom
   entities/Hero.js          – spillerkarakter
   entities/Monster.js       – fiender med unike sprites per type
   scenes/
     MenuScene.js
     CharacterCreatorScene.js
-    GameScene.js             – hoved-spillscene (~950 linjer)
+    GameScene.js             – orkestrator-scene (~230 linjer)
     UIScene.js               – HUD overlay + ⚙-knapp
     SkillScene.js            – nivå-opp evnevalg (velg 1 av 3)
     InventoryScene.js        – inventory overlay (refresh-in-place)
