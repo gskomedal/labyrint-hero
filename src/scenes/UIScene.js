@@ -35,14 +35,15 @@ class UIScene extends Phaser.Scene {
         this.worldText  = this.add.text(W - 50, 8,  '', { ...ts, color: '#aaaacc' }).setOrigin(1, 0);
         this.levelText  = this.add.text(W - 50, 22, '', ts).setOrigin(1, 0);
         this.atkText    = this.add.text(W - 50, 36, '', ts).setOrigin(1, 0);
+        this.goldText   = this.add.text(10, 30, '', { fontSize: '11px', color: '#ffcc00', fontFamily: 'monospace' });
         this.eqText     = this.add.text(10, 56, '', { fontSize: '10px', color: '#556677', fontFamily: 'monospace' });
         this.eHint      = this.add.text(W - 50, 56, '[SPACE/F] Angrep  [R] Pil  [Q] Bruk  [E] Inventar  [+/-] Zoom', { fontSize: '10px', color: '#334455', fontFamily: 'monospace' }).setOrigin(1, 0);
 
-        // Poison indicator (hidden until poisoned)
-        this.poisonText = this.add.text(10, 70, '', {
-            fontSize: '11px', color: '#44ee66', fontFamily: 'monospace', fontStyle: 'bold'
+        // Status effect indicators
+        this.statusText = this.add.text(10, 70, '', {
+            fontSize: '11px', color: '#ffffff', fontFamily: 'monospace', fontStyle: 'bold'
         });
-        this.poisonText.setVisible(false);
+        this.statusText.setVisible(false);
 
         // Settings gear button
         const gearBtn = this.add.text(W - 14, 10, '⚙', { fontSize: '18px', color: '#445566', fontFamily: 'monospace' })
@@ -156,6 +157,14 @@ class UIScene extends Phaser.Scene {
             g.fillRect(px, py, sc, sc);
         }
 
+        // Merchant (blue dot)
+        if (gs.merchant && gs.fog[gs.merchant.gridY][gs.merchant.gridX] !== FOG.DARK) {
+            const mpx = mx + gs.merchant.gridX * sc;
+            const mpy = my + gs.merchant.gridY * sc;
+            g.fillStyle(0x4488ff);
+            g.fillRect(mpx, mpy, sc, sc);
+        }
+
         // Chests (gold dots)
         for (const c of gs.chests) {
             if (c.opened) continue;
@@ -238,6 +247,7 @@ class UIScene extends Phaser.Scene {
         this.worldText.setText(`Verden ${this.gameScene.worldNum}`);
         this.levelText.setText(`Nivå ${stats.level}  XP ${stats.xp}/${stats.xpToNext}`);
         this.atkText.setText(`ATK ${stats.attack}  DEF ${stats.defense}  Syn ${stats.visionRadius}`);
+        this.goldText.setText(`💰 ${hero.gold}g`);
 
         // ── Equipped items ─────────────────────────────────────────────────────
         const inv = hero.inventory;
@@ -247,13 +257,25 @@ class UIScene extends Phaser.Scene {
         if (wpn) parts.push(`[${wpn.name}]`);
         if (arm) parts.push(`[${arm.name}]`);
         this.eqText.setText(parts.length ? parts.join('  ') : '');
+        // Color equipped text by highest rarity
+        const bestRarity = [wpn, arm].reduce((best, it) => {
+            if (!it || !it.rarity) return best;
+            const r = RARITY_BY_ID[it.rarity];
+            return r && RARITIES.indexOf(r) > best ? RARITIES.indexOf(r) : best;
+        }, -1);
+        this.eqText.setColor(bestRarity > 0 ? RARITIES[bestRarity].textColor : '#556677');
 
-        // ── Poison indicator ──────────────────────────────────────────────────
-        if (hero.poisonTurns > 0) {
-            this.poisonText.setText(`☠ Forgiftet (${hero.poisonTurns} runder)`);
-            this.poisonText.setVisible(true);
+        // ── Status effect indicators ──────────────────────────────────────────
+        const effects = [];
+        if (hero.poisonTurns > 0) effects.push(`☠ Gift (${hero.poisonTurns})`);
+        if (hero.burnTurns > 0)   effects.push(`🔥 Brann (${hero.burnTurns})`);
+        if (hero.slowTurns > 0)   effects.push(`❄ Frostbitt (${hero.slowTurns})`);
+        if (hero.stunTurns > 0)   effects.push(`⚡ Lammet (${hero.stunTurns})`);
+        if (effects.length > 0) {
+            this.statusText.setText(effects.join('  '));
+            this.statusText.setVisible(true);
         } else {
-            this.poisonText.setVisible(false);
+            this.statusText.setVisible(false);
         }
 
         // ── Boss HP bar ────────────────────────────────────────────────────────

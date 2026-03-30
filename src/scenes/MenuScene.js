@@ -77,6 +77,10 @@ class MenuScene extends Phaser.Scene {
             this.tweens.add({ targets: start, alpha: 0.45, duration: 750, yoyo: true, repeat: -1 });
         }
 
+        // ── Leaderboard button ────────────────────────────────────────────────
+        const lbBtn = this._btn(cx, cy + 175, '[ LEDERTAVLE ]', '#8899bb', 14);
+        lbBtn.on('pointerdown', () => this.scene.start('LeaderboardScene'));
+
         // ── Footer tips ───────────────────────────────────────────────────────
         const ts = { fontSize: '11px', color: '#445566', fontFamily: 'monospace' };
         this.add.text(cx, H - 50, 'WASD/Piltaster: Beveg  ·  SPACE/F: Angrep  ·  R: Pil  ·  E: Inventar  ·  M: Kart', ts).setOrigin(0.5);

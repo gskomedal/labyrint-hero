@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.12
+**Versjon:** 0.15
 **Sist oppdatert:** 2026-03-30
 
 ---
@@ -32,7 +32,7 @@ src/
   maze.js                   – MazeGenerator (DFS + ekstra passasjer)
   utils/SaveManager.js      – localStorage persistens
   data/skills.js            – 12 passive evner
-  data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy)
+  data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy) + sjeldenhetsystem
   graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser, 2 kjønn, 10 frisyrer, 4 klesstiler)
   systems/Inventory.js      – 2 utstyrsplasser + 10-spors ryggsekk
   systems/AudioManager.js   – prosedyremusikk (5 temaer) + SFX-motoren
@@ -145,6 +145,16 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 
 Verdensnummer V brukes til å skalere både HP og skade – kamp bør alltid føles risikofylt.
 
+### Statuseffekter (v0.14)
+| Effekt | Ikon | Varighet | Skade | Kilde | Kur |
+|--------|------|----------|-------|-------|-----|
+| Gift | ☠ | 4 runder | 1/runde | Orc (20%), Troll (30%) | Motgift |
+| Brann | 🔥 | 3 runder | 2/runde | Vulkandungeon-monstre (20%) | Brannsalve, Motgift |
+| Frostbitt | ❄ | 4 runder | Ingen (halv fart) | Iskrystall-monstre (25%) | Frostsalve, Motgift |
+| Lammet | ⚡ | 1 runde | Ingen (skip turn) | Boss fase 2 (15%) | Venter ut |
+
+Motgift kurerer alle statuseffekter. Effektene stables ikke – ny påføring forlenger gjenværende varighet.
+
 ### Bump-mekanikk
 Bevegelse inn i monster-rute: helten setter facing uten å angripe (visuell flash). Trykk SPACE/F for å angripe i facing-retning.
 
@@ -158,12 +168,37 @@ Trykk R med bue utstyrt – pilen flyr i facing-retning til første hinder. Anim
 ### Designprinsipp (v0.7)
 Gjenstander er sjeldne og verdifulle. Spilleren må kjempe seg til utstyr, ikke bare plukke opp alt de ser. Labyrinten er ikke et supermarked.
 
+### Sjeldenhetsgrader (v0.13)
+Våpen og rustning har sjeldenhetsgrader som påvirker stats:
+
+| Sjeldenhet | Farge | Droprate | Stat-bonus |
+|-----------|-------|----------|------------|
+| Vanlig | Grå | ~60% | Basisstats |
+| Sjelden | Blå | ~25% | +25% stats |
+| Episk | Lilla | ~10% | +50% stats |
+| Legendarisk | Oransje | ~4% | ×2 stats |
+| Mytisk | Rød | ~1% | ×3 stats |
+
+- Høyere verdener øker sjansen for bedre sjeldenhet
+- Boss-drops er garantert sjelden eller bedre
+- Sjeldenhetsfarge vises på gjenstandsnavn, rammer og glow i labyrinten
+
+### Gull og handelsmann (v0.13)
+- Monstre dropper gull ved død (goblin: ~5g, orc: ~12g, troll: ~25g, boss: ~100g + verdensbonus)
+- Skattekister gir gull (~15g base + verdensbonus)
+- Handelsmann-NPC spawner i hver labyrint (blå figur med pengesekk)
+- Gå over handelsmannen for å åpne butikken
+- Butikken selger 2 forbruksvarer, 1 våpen, 1 rustning og 1 nøkkel
+- Priser skalerer med tier, sjeldenhet og verdensnummer
+- Gull beholdes ved død (myk permadeath)
+
 ### Kilder til gjenstander
 | Kilde | Frekvens | Innhold |
 |-------|----------|---------|
-| Skattekiste | 2–3 per verden (faste) | 2 tilfeldige gjenstander |
-| Monster-drop | ~45% sjanse per drap | 1 tilfeldig gjenstand |
-| Boss-drop | Garantert | 1 gjenstand fra høyere tier |
+| Skattekiste | 2–3 per verden (faste) | Gull + 2 tilfeldige gjenstander |
+| Monster-drop | ~25% sjanse per drap | 1 tilfeldig gjenstand + gull |
+| Boss-drop | Garantert | 1 gjenstand (sjelden+) + mye gull |
+| Handelsmann | 1 per verden | 5 varer til salgs for gull |
 | Nøkler/hakker | Automatisk plassert | Proporsjonalt med dører/sprukne vegger |
 
 ### Inventory
@@ -265,22 +300,24 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Skattekiste-system | ✅ Ferdig | 2–3 per verden |
 | Monster-drop system | ✅ Ferdig | 45% per drap, boss-garantert |
 | Nøkkel/hakke-mekanikk | ✅ Ferdig | |
-| Skilltre (4 spesialiseringsveier) | ✅ Ferdig | Krigar / Vokter / Jeger / Skurk – tre-UI |
+| Skilltre (4 veier + synergier) | ✅ Ferdig | Krigar / Vokter / Jeger / Skurk + 4 kryss-vei-synergier |
+| Unike gjenstandsikoner | ✅ Ferdig | 20+ distinkte prosedyregrafikker |
 | Bevegelsesanimasjon (glide) | ✅ Ferdig | 90ms hero, 126ms monster |
 | Zoom (kamera) | ✅ Ferdig | Muskjul og +/− |
 | HUD + UIScene | ✅ Ferdig | |
 | Minimap (M-tast) | ✅ Ferdig | Fog-bevisst, hjørne-kart |
-| Statuseffekter (gift) | ✅ Ferdig | Orc/Troll; 4 runder; grønt tint |
+| Statuseffekter (4 typer) | ✅ Ferdig | Gift, Brann, Frostbitt, Lammet |
 | Feller/traps | ✅ Ferdig | Usynlige spikefeller, 1-gangs-trigger |
 | Bakgrunnsmusikk (5 temaer) | ✅ Ferdig | Web Audio API |
 | SFX (9 typer) | ✅ Ferdig | |
 | Lydinnstillinger | ✅ Ferdig | SettingsScene |
 | SaveManager (localStorage) | ✅ Ferdig | |
 | Balanse-simulator | ✅ Ferdig | simulator.html |
-| Butikk / handelsmann | ❌ Mangler | |
-| Gull + økonomi | ❌ Mangler | |
+| Butikk / handelsmann | ✅ Ferdig | Handelsmann-NPC i hver labyrint |
+| Gull + økonomi | ✅ Ferdig | Gullvaluta fra monstre/kister; handelsmann |
+| Gjenstandssjeldenhet | ✅ Ferdig | 5 sjeldenhetsgrader med stat-boost |
 | Touch/mobil-støtte | ✅ Ferdig | D-pad, handlingsknapper, responsiv skalering, langt-trykk drop |
-| Leaderboard | ❌ Mangler | |
+| Leaderboard | ✅ Ferdig | Ledertavle med filtrering |
 
 ---
 
@@ -316,12 +353,25 @@ Fire spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever ≥1 T1
 
 Spilleren kan spre poeng på tvers av veier (generalist) eller gå dypt i én (spesialist).
 
+### Kryss-vei-synergier (v0.15)
+Automatiske bonuser som aktiveres når helten har evner fra to forskjellige veier:
+
+| Synergi | Veier | Effekt |
+|---------|-------|--------|
+| Motangrep | Krigar + Jeger | 20% sjanse for automatisk motangrep |
+| Tornehud | Vokter + Skurk | Angripere tar 1 skade |
+| Uovervinnelig | Krigar + Vokter | +2 ATK, +1 DEF, +1 hjerte |
+| Skyggejeger | Jeger + Skurk | +15% unnvikelse, +1 synsfelt |
+
+Synergier gir insentiv til å investere bredt istedenfor å spesialisere seg.
+
 ---
 
 ## 13. Neste steg (prioritert)
 
-1. **Gull + handelsmann** – Valuta fra monstre; handelsmann i labyrinten selger forbruksgjenstander.
+1. ~~**Gull + handelsmann**~~ – ✅ Implementert i v0.13.
 2. **Skilltre-utvidelse** – Legg til 2–3 ekstra ferdigheter per vei; kryss-vei-synergier.
 3. ~~**Touch/mobil-støtte**~~ – ✅ Implementert i v0.9.
-4. **Leaderboard** – Lokal high-score-liste (verdensrekord per rase/vanskelighetsgrad).
-5. **Frostbrent statuseffekt** – Isbaserte monstre (fremtidig verdenstema) setter ned bevegelsestakten.
+4. ~~**Leaderboard**~~ – ✅ Implementert i v0.14.
+5. ~~**Frostbrent statuseffekt**~~ – ✅ Implementert i v0.14 (+ brann og stun).
+6. **Refaktorering** – Splitte GameScene.js i mindre moduler (CombatManager, MapRenderer, etc.).

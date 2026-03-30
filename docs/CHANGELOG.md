@@ -2,6 +2,89 @@
 
 ---
 
+## v0.15 – 2026-03-30
+
+### Nye funksjoner
+- **Kryss-vei-synergier (#3):** Fire automatiske bonuser som aktiveres når helten har evner fra to forskjellige spesialiseringsveier:
+  - **Motangrep** (Krigar + Jeger): 20% sjanse for automatisk motangrep ved treff
+  - **Tornehud** (Vokter + Skurk): Angripere tar 1 skade
+  - **Uovervinnelig** (Krigar + Vokter): +2 Angrep, +1 Forsvar, +1 Hjerte
+  - **Skyggejeger** (Jeger + Skurk): +15% unnvikelse, +1 synsfelt
+  - Synergier vises i SkillScene med aktiv/inaktiv status
+  - Flytende tekst varsler nye synergier ved aktivering
+- **Unike gjenstandsgrafikk (#19):** Hvert våpen, rustning og forbruksgjenstand har nå distinkt prosedyregrafikk:
+  - Våpen: Dolk, tresverd, jernsverd, spyd, stridsøks, krigshammer, trollstav, buer
+  - Rustning: Lær, vest, ringbrynje, platedrakt, magikappe, drageskjell (med skjellmønster)
+  - Forbruk: Drikker med korker, bomber med lunte, ruller med segl, hjertekrystall-form
+  - Unike ikoner vises både på bakken og i inventory
+
+### Tekniske endringer
+- `skills.js` – `SKILL_SYNERGIES[]`, `getActiveSynergies()`, `applySynergies()` – kryssvei-system
+- `Hero.counterChance`, `Hero.thornsDamage` – nye stats for synergier, med serialisering
+- `GameScene._onSkillPicked()` – sjekker og aktiverer synergier etter evnevalg
+- `GameScene._monsterAttack()` – tornehud reflekterer skade; motangrep trigges ved treff
+- `SkillScene._drawSynergies()` – viser alle 4 synergier med aktiv/inaktiv status
+- `GameScene._drawItemGraphic()` – ny metode med unike ikoner for 20+ gjenstander
+- `InventoryScene._drawItemIcon()` – oppgradert med distinkte ikoner per gjenstandstype
+
+---
+
+## v0.14 – 2026-03-30
+
+### Nye funksjoner
+- **Flere statuseffekter (#6):** Tre nye statuseffekter i tillegg til gift:
+  - **Frostbitt (❄):** Halverer bevegelseshastighet i 4 runder. Påføres av monstre i Iskrystall-verdenen (25% sjanse)
+  - **Brann (🔥):** 2 skade per ~800ms i 3 runder. Påføres av monstre i Vulkandungeon (20% sjanse)
+  - **Lammet (⚡):** Blokkerer all input i 1 runde. Boss fase 2 har 15% sjanse til å lamme
+  - Visuelle tint-overlays for alle effekter (blå, oransje, gul)
+  - Motgift kurerer nå ALLE statuseffekter (ikke bare gift)
+  - Nye forbruksvarer: Frostsalve (kurerer frostbitt) og Brannsalve (kurerer brannsår)
+- **Ledertavle (#5):** Persistent high-score-system:
+  - Registrerer verdener fullført, nivå, monsterdrap, gull for hvert forsøk
+  - LeaderboardScene med topp-15-tabell tilgjengelig fra hovedmenyen
+  - Filtrering etter rase og vanskelighetsgrad
+  - Medaljer for topp 3 (gull/sølv/bronse)
+  - Lagres i localStorage uavhengig av save-system
+
+### Tekniske endringer
+- `Hero.burnTurns`, `slowTurns`, `stunTurns` – nye statuseffekt-felt med serialisering
+- `Hero.applyBurn()`, `applySlow()`, `applyStun()`, `clearAllEffects()` – nye metoder
+- `GameScene._tickMonsters()` – separate timere for brann (800ms), slow (1000ms) og stun (600ms)
+- `GameScene._monsterAttack()` – tema-baserte statuseffekter (is→slow, vulkan→burn, boss→stun)
+- `GameScene._handleInput()` – stun blokkerer input; slow dobler bevegelsesdelay
+- `GameScene.monstersKilled` – teller for ledertavle
+- `items.js` – nye consumables `frost_salve` og `burn_salve`; motgift kurerer alle effekter
+- `UIScene.statusText` – viser alle aktive statuseffekter i HUD
+- Ny fil: `Leaderboard.js` – localStorage-basert high-score-lagring
+- Ny fil: `LeaderboardScene.js` – filtrerbar ledertavle
+- `GameOverScene` – registrerer resultater til ledertavle
+- `MenuScene` – ledertavle-knapp
+
+---
+
+## v0.13 – 2026-03-30
+
+### Nye funksjoner
+- **Gjenstandssjeldenhetsystem (#21):** Våpen og rustning har nå sjeldenhetsgrader: Vanlig (grå), Sjelden (blå), Episk (lilla), Legendarisk (oransje), Mytisk (rød). Høyere sjeldenheter gir bedre stats (opp til ×3). Verden-nummer øker sjansen for sjeldne gjenstander. Boss-drops er garantert sjelden eller bedre. Sjeldenhetsfarger vises på gjenstandsnavn, rammer og glow-effekter
+- **Gull og handelsmann (#2):** Nytt økonomisystem med gullvaluta. Monstre dropper gull ved død (skalerer med type og verden). Skattekister inneholder gull. Handelsmann-NPC spawner i hver labyrint og selger forbruksvarer, utstyr og nøkler. Gull vises i HUD og inventory. Gull beholdes mellom dødsfall (myk permadeath)
+
+### Tekniske endringer
+- `items.js` – `RARITIES[]`, `RARITY_BY_ID{}`, `rollRarity()`, `makeRarityItem()` – fullstendig sjeldenhetsystem
+- `randomItemForWorld()` / `randomItemByType()` – støtter nå `minRarityIdx`-parameter; genererer gjenstander med sjeldenhet
+- `Inventory.serialize()` / `deserialize()` – lagrer og gjenoppretter sjeldenhetsinfo for utstyr
+- `Hero.gold` – nytt felt; inkludert i `getStats()` / `applyStats()`
+- `constants.js` – `GOLD_DROP`, `GOLD_CHEST_BASE`, `MERCHANT_MARKUP`
+- `GameScene._onMonsterKilled()` – gulldrop med flytende tekst
+- `GameScene._checkChestPickup()` – gull fra kister
+- `GameScene._placeMerchant()` – plasserer handelsmann-NPC med prosedyresprite
+- `GameScene._generateMerchantStock()` – genererer handelsvarer
+- `GameScene._spawnItemAt()` – sjeldenhetsglow og ramme for utstyr
+- Ny fil: `MerchantScene.js` – butikk-overlay med kjøpsfunksjon
+- `UIScene` – gullvisning i HUD; handelsmann på minikart (blå prikk)
+- `InventoryScene` – sjeldenhetsfarger på gjenstandsnavn og rammer; gull i stats-linje
+
+---
+
 ## v0.12 – 2026-03-30
 
 ### Nye funksjoner

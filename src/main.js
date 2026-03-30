@@ -21,6 +21,8 @@ const config = {
         UIScene,
         SkillScene,
         InventoryScene,
+        MerchantScene,
+        LeaderboardScene,
         GameOverScene,
         SettingsScene
     ]

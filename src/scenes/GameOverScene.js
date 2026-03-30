@@ -4,10 +4,11 @@ class GameOverScene extends Phaser.Scene {
     constructor() { super({ key: 'GameOverScene' }); }
 
     init(data) {
-        this.type       = data.type;
-        this.worldNum   = data.worldNum;
-        this.heroStats  = data.heroStats;
-        this.difficulty = data.difficulty || 'normal';
+        this.type           = data.type;
+        this.worldNum       = data.worldNum;
+        this.heroStats      = data.heroStats;
+        this.difficulty     = data.difficulty || 'normal';
+        this.monstersKilled = data.monstersKilled || 0;
     }
 
     create() {
@@ -15,6 +16,18 @@ class GameOverScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
 
         this.add.rectangle(cx, cy, W, H, 0x08060f);
+
+        // Record to leaderboard
+        Leaderboard.record({
+            heroName:       this.heroStats.heroName || 'Helt',
+            race:           this.heroStats.race || 'human',
+            difficulty:     this.difficulty,
+            worldsCleared:  this.type === 'death' ? Math.max(0, this.worldNum - 1) : this.worldNum,
+            level:          this.heroStats.level || 1,
+            monstersKilled: this.monstersKilled,
+            goldEarned:     this.heroStats.gold || 0,
+            result:         this.type === 'death' ? 'death' : 'worldComplete'
+        });
 
         if (this.type === 'death') {
             this._deathScreen(cx, cy, W, H);

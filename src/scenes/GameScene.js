@@ -48,8 +48,12 @@ class GameScene extends Phaser.Scene {
 
         // ── Hero ─────────────────────────────────────────────────────────────
         this.hero = new Hero(this, 1, 1);
+        this._shownSynergies = [];
         if (this.heroStats) {
             this.hero.applyStats(this.heroStats, true);
+            // Re-apply synergies from saved skills
+            applySynergies(this.hero);
+            this._shownSynergies = getActiveSynergies(this.hero).map(s => s.id);
         } else {
             this.hero.applyRace(this.raceId);
             this.hero.heroName = this.heroName;
@@ -71,9 +75,14 @@ class GameScene extends Phaser.Scene {
         this.chests      = [];
         this._placeItems();
 
+        // ── Merchant NPC ──────────────────────────────────────────────────────
+        this.merchant = null;
+        this._placeMerchant();
+
         // ── Monsters ─────────────────────────────────────────────────────────
         this.monsters = [];
         this.boss     = null;
+        this.monstersKilled = 0;
         this._placeMonsters();
 
         // ── Fog overlay ───────────────────────────────────────────────────────
@@ -544,6 +553,10 @@ class GameScene extends Phaser.Scene {
                 onComplete: () => chest.graphic.destroy()
             });
 
+            // Gold from chest
+            const chestGold = GOLD_CHEST_BASE + Math.floor(Math.random() * 10) + this.worldNum * 5;
+            this.hero.gold += chestGold;
+
             // Contents: 2 items; first is equipment (weapon/armor), second is consumable
             const item1 = Math.random() < 0.5
                 ? randomItemByType(this.worldNum, 'weapon', new Set())
@@ -562,7 +575,16 @@ class GameScene extends Phaser.Scene {
                 }
             }
             Audio.playPickup();
-            this._floatingText(hx, hy, `📦 Kiste åpnet! (${givenCount} gjenstander)`, '#ffcc44');
+            // Show rarity of best item found
+            const bestItem = [item1, item2].filter(Boolean).reduce((best, it) => {
+                if (!best) return it;
+                const bIdx = RARITIES.findIndex(r => r.id === (best.rarity || 'common'));
+                const iIdx = RARITIES.findIndex(r => r.id === (it.rarity || 'common'));
+                return iIdx > bIdx ? it : best;
+            }, null);
+            const chestColor = (bestItem && bestItem.rarity && bestItem.rarity !== 'common')
+                ? RARITY_BY_ID[bestItem.rarity].textColor : '#ffcc44';
+            this._floatingText(hx, hy, `📦 +${chestGold}g, ${givenCount} gjenstander`, chestColor);
         }
     }
 
@@ -591,42 +613,192 @@ class GameScene extends Phaser.Scene {
         g.setDepth(2);
         const px = gx * TILE_SIZE, py = gy * TILE_SIZE, s = TILE_SIZE;
 
+        // Rarity glow for equipment
+        const rarityDef = itemDef.rarity ? RARITY_BY_ID[itemDef.rarity] : null;
+        if (rarityDef && itemDef.rarity !== 'common') {
+            g.fillStyle(rarityDef.color, 0.25);
+            g.fillRect(px, py, s, s);
+            g.lineStyle(2, rarityDef.color, 0.7);
+            g.strokeRect(px + 1, py + 1, s - 2, s - 2);
+        }
+
         g.fillStyle(itemDef.color, 0.15);
         g.fillRect(px + 2, py + 2, s - 4, s - 4);
         g.fillStyle(itemDef.color, 0.9);
 
-        if (itemDef.id === 'key') {
-            // Key: circle + stick
-            g.fillCircle(px + s / 2, py + s / 2 - 4, 5);
-            g.fillRect(px + s / 2 - 1, py + s / 2 + 1, 3, 9);
-            g.fillRect(px + s / 2 + 2, py + s / 2 + 5, 4, 2);
-            g.fillRect(px + s / 2 + 2, py + s / 2 + 8, 3, 2);
-        } else if (itemDef.id === 'pickaxe') {
-            // Pickaxe: handle + head
-            g.fillRect(px + s / 2 - 2, py + 8, 4, s - 16);
-            g.fillRoundedRect(px + 6, py + 6, s - 12, 6, 2);
-            g.fillTriangle(px + 8, py + 12, px + 4, py + 6, px + 14, py + 10);
-        } else if (itemDef.subtype === 'bow') {
-            g.lineStyle(3, itemDef.color, 0.9);
-            g.strokeCircle(px + s / 2, py + s / 2, s / 4);
-            g.fillStyle(itemDef.color, 0.7);
-            g.fillRect(px + s / 2 - 1, py + 6, 3, s - 12);
-        } else if (itemDef.type === 'weapon') {
-            g.fillRect(px + s / 2 - 3, py + 6, 6, s - 12);
-            g.fillRect(px + 8, py + s / 2 - 3, s - 16, 6);
-        } else if (itemDef.type === 'armor') {
-            g.fillRoundedRect(px + 8, py + 8, s - 16, s - 16, 3);
-        } else if (itemDef.type === 'tool') {
-            // Generic tool
-            g.fillRoundedRect(px + 6, py + 6, s - 12, s - 12, 4);
-        } else {
-            // Consumable: potion/scroll circle
-            g.fillCircle(px + s / 2, py + s / 2, s / 4.5);
-            g.fillStyle(0xffffff, 0.3);
-            g.fillCircle(px + s / 2 - 3, py + s / 2 - 3, s / 10);
-        }
+        this._drawItemGraphic(g, px, py, s, itemDef);
 
         this.itemObjects.push({ gridX: gx, gridY: gy, item: itemDef, graphic: g });
+    }
+
+    /** Draw a unique procedural icon for an item at pixel position (px, py) */
+    _drawItemGraphic(g, px, py, s, item) {
+        const cx = px + s / 2, cy = py + s / 2;
+        const col = item.color;
+        g.fillStyle(col, 0.9);
+
+        if (item.id === 'key') {
+            g.fillCircle(cx, cy - 4, 5);
+            g.fillRect(cx - 1, cy + 1, 3, 9);
+            g.fillRect(cx + 2, cy + 5, 4, 2);
+            g.fillRect(cx + 2, cy + 8, 3, 2);
+        } else if (item.id === 'pickaxe') {
+            g.fillRect(cx - 1, py + 10, 3, s - 18);
+            g.fillStyle(0x888888, 0.9);
+            g.fillTriangle(cx - 8, py + 10, cx + 8, py + 10, cx, py + 6);
+            g.fillStyle(col, 0.7);
+            g.fillRect(cx - 1, py + 8, 3, 4);
+        } else if (item.id === 'dagger') {
+            g.fillRect(cx - 1, py + 6, 3, 14);
+            g.fillStyle(0x665544, 0.9);
+            g.fillRect(cx - 4, py + 18, 9, 3);
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(cx - 2, py + 21, 5, 6);
+        } else if (item.id === 'wood_sword') {
+            g.fillRect(cx - 2, py + 5, 4, 16);
+            g.fillStyle(0x664422, 0.9);
+            g.fillRect(cx - 5, py + 19, 10, 3);
+            g.fillRect(cx - 2, py + 22, 4, 5);
+        } else if (item.id === 'spear') {
+            g.fillRect(cx - 1, py + 4, 3, 24);
+            g.fillStyle(0xaaaacc, 0.9);
+            g.fillTriangle(cx - 4, py + 8, cx + 4, py + 8, cx, py + 2);
+        } else if (item.id === 'iron_sword') {
+            g.fillStyle(0xaaaacc, 0.9);
+            g.fillRect(cx - 2, py + 4, 4, 16);
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(cx - 5, py + 18, 11, 3);
+            g.fillStyle(0x664422, 0.9);
+            g.fillRect(cx - 2, py + 21, 5, 6);
+        } else if (item.id === 'battle_axe') {
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(cx - 1, py + 4, 3, 22);
+            g.fillStyle(col, 0.9);
+            g.fillTriangle(cx - 8, py + 6, cx - 1, py + 6, cx - 1, py + 16);
+            g.fillTriangle(cx + 8, py + 6, cx + 1, py + 6, cx + 1, py + 16);
+        } else if (item.id === 'war_hammer') {
+            g.fillStyle(0x886644, 0.9);
+            g.fillRect(cx - 1, py + 10, 3, 18);
+            g.fillStyle(col, 0.9);
+            g.fillRoundedRect(cx - 7, py + 4, 14, 10, 2);
+        } else if (item.id === 'magic_staff') {
+            g.fillStyle(0x664422, 0.9);
+            g.fillRect(cx - 1, py + 8, 3, 20);
+            g.fillStyle(0xaa44ff, 0.8);
+            g.fillCircle(cx, py + 8, 5);
+            g.fillStyle(0xffffff, 0.4);
+            g.fillCircle(cx - 1, py + 7, 2);
+        } else if (item.subtype === 'bow') {
+            g.lineStyle(3, col, 0.9);
+            g.beginPath();
+            g.arc(cx + 3, cy, 10, -1.8, 1.8, false);
+            g.strokePath();
+            g.lineStyle(1, 0xccaa66, 0.7);
+            g.lineBetween(cx + 3, cy - 10, cx + 3, cy + 10);
+        } else if (item.id === 'leather_armor') {
+            g.fillStyle(0x886633, 0.9);
+            g.fillRoundedRect(cx - 8, py + 6, 16, 18, 2);
+            g.fillStyle(0x775522, 0.8);
+            g.fillRect(cx - 6, py + 12, 12, 2);
+        } else if (item.id === 'padded_vest') {
+            g.fillStyle(0x998866, 0.9);
+            g.fillRoundedRect(cx - 8, py + 6, 16, 18, 2);
+            g.fillStyle(0x887755, 0.8);
+            g.fillRect(cx - 6, py + 10, 12, 2);
+            g.fillRect(cx - 6, py + 14, 12, 2);
+            g.fillRect(cx - 6, py + 18, 12, 2);
+        } else if (item.id === 'chain_mail') {
+            g.fillStyle(0x8899aa, 0.9);
+            g.fillRoundedRect(cx - 8, py + 6, 16, 18, 2);
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 3; c++) {
+                    g.fillStyle(0x667788, 0.6);
+                    g.fillCircle(cx - 5 + c * 5, py + 10 + r * 4, 2);
+                }
+            }
+        } else if (item.id === 'plate_armor') {
+            g.fillStyle(0xccccdd, 0.9);
+            g.fillRoundedRect(cx - 9, py + 5, 18, 20, 3);
+            g.fillStyle(0xaaaacc, 0.7);
+            g.fillRect(cx - 1, py + 6, 2, 18);
+            g.fillRect(cx - 7, py + 13, 14, 2);
+        } else if (item.id === 'robe_magic') {
+            g.fillStyle(0x6633aa, 0.9);
+            g.fillRoundedRect(cx - 9, py + 5, 18, 22, 3);
+            g.fillStyle(0xaa66ff, 0.5);
+            g.fillCircle(cx, py + 14, 4);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(cx - 1, py + 13, 1);
+        } else if (item.id === 'dragon_scale') {
+            g.fillStyle(0xff6622, 0.9);
+            g.fillRoundedRect(cx - 9, py + 5, 18, 20, 3);
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    g.fillStyle(0xcc4411, 0.7);
+                    g.fillTriangle(cx - 6 + c * 5, py + 8 + r * 6, cx - 4 + c * 5, py + 12 + r * 6, cx - 8 + c * 5, py + 12 + r * 6);
+                }
+            }
+        } else if (item.type === 'armor') {
+            g.fillRoundedRect(cx - 8, py + 6, 16, 18, 3);
+        } else if (item.id === 'health_pot' || item.id === 'big_health_pot') {
+            g.fillStyle(col, 0.9);
+            g.fillRoundedRect(cx - 5, py + 10, 10, 14, 3);
+            g.fillRect(cx - 3, py + 7, 6, 5);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(cx - 2, py + 14, 2);
+        } else if (item.id === 'strength_brew' || item.id === 'defense_brew') {
+            g.fillStyle(col, 0.9);
+            g.fillRoundedRect(cx - 4, py + 12, 8, 12, 2);
+            g.fillRect(cx - 3, py + 8, 6, 5);
+            g.fillStyle(0xffffff, 0.25);
+            g.fillRect(cx - 1, py + 14, 2, 6);
+        } else if (item.id === 'antidote' || item.id === 'frost_salve' || item.id === 'burn_salve') {
+            g.fillStyle(col, 0.9);
+            g.fillRoundedRect(cx - 5, py + 10, 10, 14, 3);
+            g.fillRect(cx - 3, py + 7, 6, 5);
+            g.fillStyle(0xffffff, 0.2);
+            g.fillRect(cx - 3, py + 12, 1, 8);
+        } else if (item.id === 'bomb') {
+            g.fillStyle(0x333333, 0.9);
+            g.fillCircle(cx, cy + 2, 8);
+            g.fillStyle(0x111111, 0.9);
+            g.fillCircle(cx, cy + 2, 5);
+            g.fillStyle(0xff6600, 0.8);
+            g.fillRect(cx - 1, py + 6, 2, 6);
+            g.fillCircle(cx, py + 5, 3);
+        } else if (item.id === 'flashbang') {
+            g.fillStyle(col, 0.9);
+            g.fillCircle(cx, cy, 7);
+            g.fillStyle(0xffffff, 0.6);
+            g.fillCircle(cx, cy, 4);
+            g.fillStyle(0xffffff, 0.9);
+            g.fillCircle(cx - 1, cy - 1, 2);
+        } else if (item.id === 'xp_scroll' || item.id === 'map_scroll') {
+            g.fillStyle(col, 0.9);
+            g.fillRoundedRect(cx - 6, py + 8, 12, 18, 2);
+            g.fillStyle(col, 1);
+            g.fillCircle(cx - 6, py + 8, 3);
+            g.fillCircle(cx + 6, py + 8, 3);
+            g.fillCircle(cx - 6, py + 26, 3);
+            g.fillCircle(cx + 6, py + 26, 3);
+            g.fillStyle(0x000000, 0.3);
+            g.fillRect(cx - 3, py + 13, 6, 1);
+            g.fillRect(cx - 3, py + 16, 6, 1);
+            g.fillRect(cx - 3, py + 19, 4, 1);
+        } else if (item.id === 'heart_crystal') {
+            g.fillStyle(col, 0.9);
+            g.fillTriangle(cx, py + 26, cx - 9, py + 14, cx + 9, py + 14);
+            g.fillCircle(cx - 5, py + 12, 5);
+            g.fillCircle(cx + 5, py + 12, 5);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(cx - 3, py + 11, 2);
+        } else if (item.type === 'consumable') {
+            g.fillCircle(cx, cy, s / 4.5);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(cx - 3, cy - 3, s / 10);
+        } else {
+            g.fillRoundedRect(px + 6, py + 6, s - 12, s - 12, 4);
+        }
     }
 
     _checkItemPickup() {
@@ -638,12 +810,102 @@ class GameScene extends Phaser.Scene {
                     Audio.playPickup();
                     obj.graphic.destroy();
                     this.itemObjects.splice(i, 1);
-                    this._floatingText(hx, hy, `+ ${obj.item.name}`, '#ffee88');
+                    const rarDef = obj.item.rarity ? RARITY_BY_ID[obj.item.rarity] : null;
+                    const pickupColor = (rarDef && obj.item.rarity !== 'common') ? rarDef.textColor : '#ffee88';
+                    this._floatingText(hx, hy, `+ ${obj.item.name}`, pickupColor);
                 } else {
                     this._showMessage('Ryggsekken er full! (Høyreklikk for å droppe)', '#ff8844');
                 }
             }
         }
+    }
+
+    // ── Merchant NPC ─────────────────────────────────────────────────────────
+
+    _placeMerchant() {
+        const gen = this._gen;
+        const eligible = gen.getFloorTiles().filter(({ x, y }) => {
+            if (Math.abs(x - 1) + Math.abs(y - 1) < 8) return false;
+            if (x === this.exitX && y === this.exitY) return false;
+            if (this.chests.some(c => c.gridX === x && c.gridY === y)) return false;
+            if (this.itemObjects.some(o => o.gridX === x && o.gridY === y)) return false;
+            return true;
+        });
+        if (eligible.length === 0) return;
+
+        // Place near middle of map for accessibility
+        const midX = this.tileW / 2, midY = this.tileH / 2;
+        eligible.sort((a, b) => {
+            const da = Math.abs(a.x - midX) + Math.abs(a.y - midY);
+            const db = Math.abs(b.x - midX) + Math.abs(b.y - midY);
+            return da - db;
+        });
+        const pos = eligible[Math.floor(Math.random() * Math.min(5, eligible.length))];
+
+        const g = this.add.graphics();
+        g.setDepth(4);
+        const px = pos.x * TILE_SIZE, py = pos.y * TILE_SIZE, s = TILE_SIZE;
+
+        // Draw merchant sprite: hooded figure with coin bag
+        g.fillStyle(0x2244aa, 1);
+        g.fillRoundedRect(px + 6, py + 4, s - 12, s - 8, 3); // robe
+        g.fillStyle(0x1a338a, 1);
+        g.fillRoundedRect(px + 8, py + 2, s - 16, 10, 4); // hood
+        g.fillStyle(0xffddbb, 1);
+        g.fillCircle(px + s / 2, py + 8, 4); // face
+        g.fillStyle(0x1a1028, 1);
+        g.fillCircle(px + s / 2 - 2, py + 7, 1); // left eye
+        g.fillCircle(px + s / 2 + 2, py + 7, 1); // right eye
+        // Coin bag
+        g.fillStyle(0xaa7722, 1);
+        g.fillCircle(px + s / 2 + 6, py + s - 10, 5);
+        g.fillStyle(0xffcc00, 1);
+        g.fillCircle(px + s / 2 + 6, py + s - 10, 3);
+        g.fillStyle(0xaa7700, 1);
+        g.fillRect(px + s / 2 + 5, py + s - 14, 3, 3);
+        // Glow hint
+        g.fillStyle(0xffcc00, 0.08);
+        g.fillCircle(px + s / 2, py + s / 2, s / 2);
+
+        this.merchant = { gridX: pos.x, gridY: pos.y, graphic: g };
+
+        // Merchant stock: generate items for sale
+        this.merchant.stock = this._generateMerchantStock();
+    }
+
+    _generateMerchantStock() {
+        const stock = [];
+        const wn = this.worldNum;
+        // 2 consumables
+        for (let i = 0; i < 2; i++) {
+            const item = randomItemByType(wn, 'consumable', new Set());
+            if (item) stock.push({ item, price: this._itemPrice(item, wn) });
+        }
+        // 1 weapon
+        const wpn = randomItemByType(wn, 'weapon', new Set());
+        if (wpn) stock.push({ item: wpn, price: this._itemPrice(wpn, wn) });
+        // 1 armor
+        const arm = randomItemByType(wn, 'armor', new Set());
+        if (arm) stock.push({ item: arm, price: this._itemPrice(arm, wn) });
+        // 1 key (always useful)
+        stock.push({ item: ITEM_DEFS.key, price: 10 + wn * 3 });
+        return stock;
+    }
+
+    _itemPrice(item, worldNum) {
+        let base = 20;
+        if (item.type === 'consumable') base = 12;
+        if (item.type === 'tool') base = 8;
+        const tierMul = (item.tier || 1) * 10;
+        const rarityMul = item.rarity ? (RARITIES.findIndex(r => r.id === item.rarity) + 1) : 1;
+        return Math.round((base + tierMul) * rarityMul * MERCHANT_MARKUP + worldNum * 2);
+    }
+
+    _checkMerchant() {
+        if (!this.merchant) return;
+        if (this.hero.gridX !== this.merchant.gridX || this.hero.gridY !== this.merchant.gridY) return;
+        if (this.scene.isActive('MerchantScene')) return;
+        this.scene.launch('MerchantScene', { gameScene: this, stock: this.merchant.stock });
     }
 
     // ── Monster placement ─────────────────────────────────────────────────────
@@ -732,7 +994,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene');
 
         if (!blocked) {
             this._handleInput(delta);
@@ -757,6 +1019,8 @@ class GameScene extends Phaser.Scene {
     // ── Input / hero movement ─────────────────────────────────────────────────
 
     _handleInput(delta) {
+        // Stun blocks all input
+        if (this.hero.stunTurns > 0) return;
         this.moveTimer -= delta;
         if (this.moveTimer > 0) return;
         let dx = 0, dy = 0;
@@ -773,7 +1037,8 @@ class GameScene extends Phaser.Scene {
 
         if (dx !== 0 || dy !== 0) {
             this._tryMoveHero(dx, dy);
-            this.moveTimer = MOVE_DELAY_MS;
+            // Slow doubles movement delay
+            this.moveTimer = this.hero.slowTurns > 0 ? MOVE_DELAY_MS * 2 : MOVE_DELAY_MS;
         }
     }
 
@@ -835,12 +1100,14 @@ class GameScene extends Phaser.Scene {
         this._updateFog();
         this._checkItemPickup();
         this._checkChestPickup();
+        this._checkMerchant();
         if (this.maze[ny][nx] === TILE.EXIT) this._checkExit();
     }
 
     // ── Button-press Attack (SPACE / F) ───────────────────────────────────────
 
     _handleAttack() {
+        if (this.hero.stunTurns > 0) return;
         const spaceDown = Phaser.Input.Keyboard.JustDown(this.attackKey);
         const fDown     = Phaser.Input.Keyboard.JustDown(this.altAtkKey);
         const touchAtk  = this.game.registry.get('touch_attack');
@@ -1030,9 +1297,16 @@ class GameScene extends Phaser.Scene {
         const xp      = Math.round(monster.xpReward * this._diffMods().xpMul);
         const leveled = this.hero.gainXP(xp);
         this.monsters = this.monsters.filter(m => m !== monster);
+        this.monstersKilled++;
+
+        // Gold drop
+        const goldBase = GOLD_DROP[monster.type] || 5;
+        const gold = goldBase + Math.floor(Math.random() * goldBase * 0.5) + this.worldNum * 2;
+        this.hero.gold += gold;
+        this._floatingText(monster.gridX, monster.gridY, `+${gold}g`, '#ffcc00');
         if (monster.type === 'boss') {
-            // Boss always drops a guaranteed item from a higher tier
-            const bossItem = randomItemForWorld(Math.min(this.worldNum + 1, 7));
+            // Boss always drops a guaranteed item from a higher tier, at least rare rarity
+            const bossItem = randomItemForWorld(Math.min(this.worldNum + 1, 7), 1);
             if (bossItem) this._spawnItemAt(monster.gridX, monster.gridY, bossItem);
         } else if (Math.random() < 0.25) {
             // Favor consumables over equipment (70% consumable, 30% any)
@@ -1061,11 +1335,43 @@ class GameScene extends Phaser.Scene {
             }
         }
 
+        // Theme-based status effects
+        if (!died) {
+            const deco = this._theme.DECO;
+            if (deco === 'ice' && Math.random() < 0.25) {
+                this.hero.applySlow(4);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '❄ Frostbitt!', '#88ddff');
+            } else if (deco === 'volcanic' && Math.random() < 0.20) {
+                this.hero.applyBurn(3);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '🔥 Brenner!', '#ff6600');
+            }
+            // Boss phase 2 can stun
+            if (monster.type === 'boss' && monster.phase === 2 && Math.random() < 0.15) {
+                this.hero.applyStun(1);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '⚡ Lammet!', '#ffee00');
+            }
+        }
+
         if (died || !this.hero.alive) {
             this.cameras.main.shake(120, 0.008);
             this._heroDied();
         } else {
             this.cameras.main.shake(100, 0.006);
+            // Thorns synergy: reflect damage to attacker
+            if (this.hero.thornsDamage > 0 && monster.alive) {
+                const thornsResult = monster.takeDamage(this.hero.thornsDamage);
+                this._floatingText(monster.gridX, monster.gridY, `-${this.hero.thornsDamage} torner`, '#44ddaa');
+                if (thornsResult === 'enraged') this._onBossEnraged(monster);
+                else if (thornsResult === true) this._onMonsterKilled(monster);
+            }
+            // Counter-attack synergy
+            if (this.hero.counterChance > 0 && monster.alive && Math.random() < this.hero.counterChance) {
+                const counterDmg = Math.max(1, Math.floor(this.hero.attack * 0.5));
+                const counterResult = monster.takeDamage(counterDmg);
+                this._floatingText(monster.gridX, monster.gridY, `⚔ Motangrep -${counterDmg}`, '#ff8844');
+                if (counterResult === 'enraged') this._onBossEnraged(monster);
+                else if (counterResult === true) this._onMonsterKilled(monster);
+            }
         }
     }
 
@@ -1085,7 +1391,8 @@ class GameScene extends Phaser.Scene {
     _tickMonsters(delta) {
         this.monsterTick += delta;
 
-        // Poison ticks on its own slower timer (every ~900ms instead of every monster tick)
+        // ── Status effect ticks (each on ~900ms timer) ────────────────────────
+        // Poison
         if (this.hero.poisonTurns > 0) {
             this.poisonTickTimer += delta;
             if (this.poisonTickTimer >= 900) {
@@ -1098,6 +1405,48 @@ class GameScene extends Phaser.Scene {
             }
         } else {
             this.poisonTickTimer = 0;
+        }
+
+        // Burn (fire DoT – 2 damage per tick, ~800ms)
+        if (this.hero.burnTurns > 0) {
+            this.burnTickTimer = (this.burnTickTimer || 0) + delta;
+            if (this.burnTickTimer >= 800) {
+                this.burnTickTimer = 0;
+                this.hero.burnTurns--;
+                const died = this.hero.takeDamage(2);
+                this._floatingText(this.hero.gridX, this.hero.gridY, '🔥 -2', '#ff6600');
+                this.hero._drawSprite();
+                if (died) { this._heroDied(); return; }
+            }
+        } else {
+            this.burnTickTimer = 0;
+        }
+
+        // Slow (decrements once per second, effect handled in _handleInput)
+        if (this.hero.slowTurns > 0) {
+            this.slowTickTimer = (this.slowTickTimer || 0) + delta;
+            if (this.slowTickTimer >= 1000) {
+                this.slowTickTimer = 0;
+                this.hero.slowTurns--;
+                this.hero._drawSprite();
+            }
+        } else {
+            this.slowTickTimer = 0;
+        }
+
+        // Stun (decrements per monster tick – skips hero input while active)
+        if (this.hero.stunTurns > 0) {
+            this.stunTickTimer = (this.stunTickTimer || 0) + delta;
+            if (this.stunTickTimer >= 600) {
+                this.stunTickTimer = 0;
+                this.hero.stunTurns--;
+                this.hero._drawSprite();
+                if (this.hero.stunTurns <= 0) {
+                    this._floatingText(this.hero.gridX, this.hero.gridY, 'Ustunnet!', '#ffee00');
+                }
+            }
+        } else {
+            this.stunTickTimer = 0;
         }
 
         if (this.monsterTick < MONSTER_TICK_MS) return;
@@ -1136,6 +1485,7 @@ class GameScene extends Phaser.Scene {
             if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
             if (nx === hx && ny === hy) continue;
             if (this._monsterAt(nx, ny)) continue;
+            if (this.merchant && nx === this.merchant.gridX && ny === this.merchant.gridY) continue;
             m.moveTo(nx, ny); break;
         }
     }
@@ -1165,6 +1515,14 @@ class GameScene extends Phaser.Scene {
 
     _onSkillPicked(skill) {
         this._floatingText(this.hero.gridX, this.hero.gridY, `${skill.name}!`, '#f5e642');
+        // Check and apply cross-path synergies
+        const newSynergies = applySynergies(this.hero);
+        for (const syn of newSynergies) {
+            if (!(this._shownSynergies || []).includes(syn.id)) {
+                this._floatingText(this.hero.gridX, this.hero.gridY - 1, `✦ ${syn.name}!`, '#' + syn.color.toString(16).padStart(6, '0'));
+            }
+        }
+        this._shownSynergies = newSynergies.map(s => s.id);
         const ui = this.scene.get('UIScene');
         if (ui && ui.sys.isActive()) ui.refresh();
     }
@@ -1182,7 +1540,8 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
                 type: 'worldComplete', worldNum: this.worldNum,
-                heroStats: this.hero.getStats(), difficulty: this.difficulty
+                heroStats: this.hero.getStats(), difficulty: this.difficulty,
+                monstersKilled: this.monstersKilled
             });
         });
     }
@@ -1198,13 +1557,14 @@ class GameScene extends Phaser.Scene {
         this.time.delayedCall(700, () => {
             this.scene.start('GameOverScene', {
                 type: 'death', worldNum: this.worldNum,
-                heroStats: this.hero.getStats(), difficulty: this.difficulty
+                heroStats: this.hero.getStats(), difficulty: this.difficulty,
+                monstersKilled: this.monstersKilled
             });
         });
     }
 
     _stopOverlayScenes() {
-        ['SkillScene', 'InventoryScene', 'UIScene'].forEach(key => {
+        ['SkillScene', 'InventoryScene', 'MerchantScene', 'UIScene'].forEach(key => {
             if (this.scene.isActive(key) || this.scene.isVisible(key)) {
                 this.scene.stop(key);
             }

@@ -232,15 +232,25 @@ class Inventory {
     // ── Serialisation ─────────────────────────────────────────────────────────
 
     serialize() {
+        const serializeEquip = (item) => {
+            if (!item) return null;
+            return item.rarity && item.rarity !== 'common'
+                ? { id: item.id, rarity: item.rarity }
+                : item.id;
+        };
         return {
             equipped: {
-                weapon: this.equipped.weapon?.id || null,
-                armor:  this.equipped.armor?.id  || null
+                weapon: serializeEquip(this.equipped.weapon),
+                armor:  serializeEquip(this.equipped.armor)
             },
             quickUse: this.quickUse ? { id: this.quickUse.id, count: this.quickUse.count } : null,
             backpack: this.backpack.map(entry => {
                 if (!entry) return null;
                 if (entry.count !== undefined) return { id: entry.id, count: entry.count };
+                // Equipment: store rarity if non-common
+                if (entry.rarity && entry.rarity !== 'common') {
+                    return { id: entry.id, rarity: entry.rarity };
+                }
                 return entry.id || null;
             })
         };
@@ -250,10 +260,20 @@ class Inventory {
         const inv = new Inventory();
         if (!data) return inv;
 
-        const restoreItem = id => (id && ITEM_DEFS[id]) ? ITEM_DEFS[id] : null;
+        /** Restore an equipment entry (string id or {id, rarity}) */
+        const restoreEquip = (raw) => {
+            if (!raw) return null;
+            if (typeof raw === 'string') {
+                return ITEM_DEFS[raw] ? makeRarityItem(ITEM_DEFS[raw], 'common') : null;
+            }
+            if (raw.id && ITEM_DEFS[raw.id]) {
+                return makeRarityItem(ITEM_DEFS[raw.id], raw.rarity || 'common');
+            }
+            return null;
+        };
 
         ['weapon', 'armor'].forEach(slot => {
-            const item = restoreItem(data.equipped[slot]);
+            const item = restoreEquip(data.equipped[slot]);
             if (item) {
                 inv.equipped[slot] = item;
                 inv._apply(item, hero);
@@ -265,22 +285,25 @@ class Inventory {
             inv.quickUse = { id: data.quickUse.id, count: data.quickUse.count || 1 };
         }
 
-        // Restore backpack (supports both old format [id, ...] and new [{id, count}, ...])
+        // Restore backpack (supports old format [id], new [{id, count}], and rarity [{id, rarity}])
         if (data.backpack) {
             data.backpack.forEach((entry, i) => {
                 if (!entry) { inv.backpack[i] = null; return; }
                 if (typeof entry === 'string') {
-                    // Old format: plain item ID
-                    const def = restoreItem(entry);
-                    if (def && (def.type === 'consumable' || def.type === 'tool')) {
+                    const def = ITEM_DEFS[entry];
+                    if (!def) return;
+                    if (def.type === 'consumable' || def.type === 'tool') {
                         inv.backpack[i] = { id: entry, count: 1 };
                     } else {
-                        inv.backpack[i] = def;
+                        inv.backpack[i] = makeRarityItem(def, 'common');
                     }
-                } else if (entry.id) {
-                    // New format: { id, count }
-                    if (ITEM_DEFS[entry.id]) {
+                } else if (entry.id && ITEM_DEFS[entry.id]) {
+                    if (entry.count !== undefined) {
+                        // Stacked consumable/tool
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
+                    } else {
+                        // Equipment with optional rarity
+                        inv.backpack[i] = makeRarityItem(ITEM_DEFS[entry.id], entry.rarity || 'common');
                     }
                 }
             });

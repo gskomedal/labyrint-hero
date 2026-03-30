@@ -5,6 +5,64 @@
 // subtype: 'bow' marks ranged weapons
 // Tools: pickaxe, key – have special in-world interactions
 
+// ─── Rarity System ───────────────────────────────────────────────────────────
+const RARITIES = [
+    { id: 'common',    label: 'Vanlig',      color: 0xaaaaaa, textColor: '#aaaaaa', statMul: 1.0  },
+    { id: 'rare',      label: 'Sjelden',     color: 0x4488ff, textColor: '#4488ff', statMul: 1.25 },
+    { id: 'epic',      label: 'Episk',       color: 0xaa44ff, textColor: '#aa44ff', statMul: 1.5  },
+    { id: 'legendary', label: 'Legendarisk', color: 0xff8800, textColor: '#ff8800', statMul: 2.0  },
+    { id: 'mythic',    label: 'Mytisk',      color: 0xff2244, textColor: '#ff2244', statMul: 3.0  },
+];
+const RARITY_BY_ID = {};
+RARITIES.forEach(r => RARITY_BY_ID[r.id] = r);
+
+/** Roll a rarity based on world number. Higher worlds = better odds.
+ *  @param {number} worldNum Current world
+ *  @param {number} minIdx   Minimum rarity index (0=common, 1=rare, etc.)
+ */
+function rollRarity(worldNum, minIdx = 0) {
+    const baseWeights = [60, 25, 10, 4, 1];
+    const shift = Math.min(worldNum - 1, 6) * 3;
+    const weights = baseWeights.map((w, i) => {
+        if (i === 0) return Math.max(15, w - shift * 2);
+        return w + shift * (i * 0.5);
+    });
+    for (let i = 0; i < minIdx; i++) weights[i] = 0;
+    const total = weights.reduce((a, b) => a + b, 0);
+    let roll = Math.random() * total;
+    for (let i = 0; i < weights.length; i++) {
+        roll -= weights[i];
+        if (roll <= 0) return RARITIES[i];
+    }
+    return RARITIES[0];
+}
+
+/** Create a rarity-enhanced copy of a base item definition.
+ *  Consumables and tools are returned as-is (no rarity). */
+function makeRarityItem(baseDef, rarity) {
+    if (!baseDef) return baseDef;
+    if (baseDef.type === 'consumable' || baseDef.type === 'tool') return baseDef;
+
+    const r = typeof rarity === 'string' ? RARITY_BY_ID[rarity] : rarity;
+    if (!r) return { ...baseDef, rarity: 'common' };
+
+    const item = { ...baseDef, rarity: r.id, rarityColor: r.color, rarityLabel: r.label };
+    if (r.id === 'common') return item;
+
+    if (item.atk)    item.atk    = Math.max(1, Math.round(baseDef.atk * r.statMul));
+    if (item.def)    item.def    = Math.max(1, Math.round(baseDef.def * r.statMul));
+    if (item.hearts) item.hearts = Math.max(1, Math.round(baseDef.hearts * r.statMul));
+    item.name = `${r.label} ${baseDef.name}`;
+    // Rebuild description with boosted stats
+    const parts = [];
+    if (item.atk) parts.push(`+${item.atk} Angrep`);
+    if (item.def) parts.push(`+${item.def} Forsvar`);
+    if (item.hearts) parts.push(`+${item.hearts} Hjerte`);
+    if (item.subtype === 'bow' && item.atk) parts.push('(trykk R)');
+    if (parts.length) item.desc = parts.join(', ');
+    return item;
+}
+
 const ITEM_DEFS = {
     // ── Melee Weapons ─────────────────────────────────────────────────────────
     dagger: {
@@ -13,41 +71,41 @@ const ITEM_DEFS = {
     },
     wood_sword: {
         id: 'wood_sword', name: 'Tresverd', type: 'weapon',
-        color: 0xaa7733, desc: '+1 Angrep', atk: 1, tier: 1
+        color: 0xaa7733, desc: '+2 Angrep', atk: 2, tier: 1
     },
     spear: {
         id: 'spear', name: 'Spyd', type: 'weapon',
-        color: 0xccbb77, desc: '+2 Angrep', atk: 2, tier: 2
+        color: 0xccbb77, desc: '+3 Angrep', atk: 3, tier: 2
     },
     iron_sword: {
         id: 'iron_sword', name: 'Jernsverd', type: 'weapon',
-        color: 0xaaaacc, desc: '+2 Angrep', atk: 2, tier: 2
+        color: 0xaaaacc, desc: '+3 Angrep', atk: 3, tier: 2
     },
     battle_axe: {
         id: 'battle_axe', name: 'Stridsøks', type: 'weapon',
-        color: 0xcc6622, desc: '+3 Angrep', atk: 3, tier: 3
+        color: 0xcc6622, desc: '+4 Angrep', atk: 4, tier: 3
     },
     war_hammer: {
         id: 'war_hammer', name: 'Krigshammer', type: 'weapon',
-        color: 0x886644, desc: '+4 Angrep', atk: 4, tier: 4
+        color: 0x886644, desc: '+5 Angrep', atk: 5, tier: 4
     },
     magic_staff: {
         id: 'magic_staff', name: 'Trollstav', type: 'weapon',
-        color: 0xaa44ff, desc: '+2 Angrep, +1 Forsvar', atk: 2, def: 1, tier: 3
+        color: 0xaa44ff, desc: '+3 Angrep, +2 Forsvar', atk: 3, def: 2, tier: 3
     },
 
     // ── Ranged Weapons (subtype: 'bow') ───────────────────────────────────────
     shortbow: {
         id: 'shortbow', name: 'Kortbue', type: 'weapon', subtype: 'bow',
-        color: 0x996633, desc: '+2 Angrep på avstand (trykk R)', atk: 2, tier: 2
+        color: 0x996633, desc: '+3 Angrep på avstand (trykk R)', atk: 3, tier: 2
     },
     elven_bow: {
         id: 'elven_bow', name: 'Alvebue', type: 'weapon', subtype: 'bow',
-        color: 0x55cc88, desc: '+3 Angrep på avstand (trykk R)', atk: 3, tier: 3
+        color: 0x55cc88, desc: '+4 Angrep på avstand (trykk R)', atk: 4, tier: 3
     },
     crossbow: {
         id: 'crossbow', name: 'Armbrøst', type: 'weapon', subtype: 'bow',
-        color: 0x886644, desc: '+4 Angrep på avstand (trykk R)', atk: 4, tier: 4
+        color: 0x886644, desc: '+5 Angrep på avstand (trykk R)', atk: 5, tier: 4
     },
 
     // ── Armor ─────────────────────────────────────────────────────────────────
@@ -104,10 +162,29 @@ const ITEM_DEFS = {
     },
     antidote: {
         id: 'antidote', name: 'Motgift', type: 'consumable',
-        color: 0x88ee44, desc: 'Kurerer gift og gjenoppretter 1 hjerte', tier: 1,
+        color: 0x88ee44, desc: 'Kurerer alle statuseffekter og gjenoppretter 1 hjerte', tier: 1,
         use(hero) {
-            hero.poisonTurns = 0;
+            hero.clearAllEffects();
             hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            return true;
+        }
+    },
+    frost_salve: {
+        id: 'frost_salve', name: 'Frostsalve', type: 'consumable',
+        color: 0x88ddff, desc: 'Kurerer frostbitt og gir motstand mot kulde', tier: 2,
+        use(hero) {
+            hero.slowTurns = 0;
+            hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            hero._drawSprite();
+            return true;
+        }
+    },
+    burn_salve: {
+        id: 'burn_salve', name: 'Brannsalve', type: 'consumable',
+        color: 0xff8844, desc: 'Kurerer brannsår og gjenoppretter 2 hjerter', tier: 2,
+        use(hero) {
+            hero.burnTurns = 0;
+            hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts);
             hero._drawSprite();
             return true;
         }
@@ -181,26 +258,33 @@ const ITEM_POOL = {
     1: ['dagger', 'wood_sword', 'leather_armor', 'padded_vest', 'health_pot', 'antidote'],
     2: ['spear', 'iron_sword', 'shortbow', 'chain_mail',
         'health_pot', 'big_health_pot', 'strength_brew', 'defense_brew',
-        'xp_scroll', 'bomb', 'map_scroll'],
+        'xp_scroll', 'bomb', 'map_scroll', 'frost_salve', 'burn_salve'],
     3: ['battle_axe', 'war_hammer', 'elven_bow', 'plate_armor', 'robe_magic',
         'big_health_pot', 'strength_brew', 'defense_brew', 'bomb',
-        'flashbang', 'heart_crystal', 'map_scroll'],
+        'flashbang', 'heart_crystal', 'map_scroll', 'frost_salve', 'burn_salve'],
     4: ['war_hammer', 'crossbow', 'magic_staff', 'robe_magic', 'plate_armor',
         'dragon_scale', 'big_health_pot', 'strength_brew', 'bomb',
-        'heart_crystal', 'flashbang']
+        'heart_crystal', 'flashbang', 'frost_salve', 'burn_salve']
 };
 
-/** Return a random item def appropriate for the given world number */
-function randomItemForWorld(worldNum) {
+/** Return a random item def appropriate for the given world number.
+ *  Equipment gets a random rarity; consumables/tools are unaffected.
+ *  @param {number} minRarityIdx  Minimum rarity (0=common, 1=rare, etc.)
+ */
+function randomItemForWorld(worldNum, minRarityIdx = 0) {
     const tier = Math.min(4, Math.ceil(worldNum / 2));
     const pool = ITEM_POOL[tier];
-    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const baseDef = ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const rarity = rollRarity(worldNum, minRarityIdx);
+    return makeRarityItem(baseDef, rarity);
 }
 
 /** Return a random item of a specific type for the given tier, excluding ids in the exclude Set */
-function randomItemByType(worldNum, type, exclude = new Set()) {
+function randomItemByType(worldNum, type, exclude = new Set(), minRarityIdx = 0) {
     const tier = Math.min(4, Math.ceil(worldNum / 2));
     const pool = ITEM_POOL[tier].filter(id => ITEM_DEFS[id].type === type && !exclude.has(id));
     if (pool.length === 0) return null;
-    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const baseDef = ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const rarity = rollRarity(worldNum, minRarityIdx);
+    return makeRarityItem(baseDef, rarity);
 }

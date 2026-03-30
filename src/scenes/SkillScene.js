@@ -44,6 +44,9 @@ class SkillScene extends Phaser.Scene {
             this._drawPath(path, pi, colCX, py + 50, panelH - 80);
         });
 
+        // ── Synergies display ──────────────────────────────────────────────────
+        this._drawSynergies(cx, py + panelH - 60, panelW);
+
         // ── Footer ────────────────────────────────────────────────────────────
         this.add.rectangle(cx, py + panelH - 24, panelW - 30, 1, 0x1a1840);
         this.add.text(cx, py + panelH - 14, 'Grønne rammer = tilgjengelig · Grå = låst · Klikk for å velge', {
@@ -192,6 +195,40 @@ class SkillScene extends Phaser.Scene {
             });
             hitZone.on('pointerdown', () => this._pickSkill(skill));
         }
+    }
+
+    _drawSynergies(cx, y, panelW) {
+        const active = getActiveSynergies(this.heroRef);
+        const potential = SKILL_SYNERGIES.filter(s => !active.includes(s));
+
+        if (SKILL_SYNERGIES.length === 0) return;
+
+        this.add.text(cx, y - 10, 'SYNERGIER', {
+            fontSize: '9px', color: '#445566', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        const totalW = SKILL_SYNERGIES.length * 170;
+        const startX = cx - totalW / 2 + 85;
+
+        SKILL_SYNERGIES.forEach((syn, i) => {
+            const sx = startX + i * 170;
+            const isActive = active.some(a => a.id === syn.id);
+            const hexCol = '#' + syn.color.toString(16).padStart(6, '0');
+            const nameCol = isActive ? hexCol : '#333355';
+            const descCol = isActive ? '#8899bb' : '#222233';
+
+            const label = `${syn.paths.map(p => {
+                const path = SKILL_TREE_PATHS.find(pt => pt.id === p);
+                return path ? path.name[0] : '?';
+            }).join('+')} ${syn.name}`;
+
+            this.add.text(sx, y + 2, isActive ? '✦ ' + label : '○ ' + label, {
+                fontSize: '9px', color: nameCol, fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            this.add.text(sx, y + 14, syn.desc, {
+                fontSize: '8px', color: descCol, fontFamily: 'monospace'
+            }).setOrigin(0.5);
+        });
     }
 
     _pickSkill(skill) {

@@ -23,12 +23,17 @@ class Hero {
         this.dodgeChance  = 0;
         this.critChance   = 0;
         this.xpMultiplier = 1.0;
+        this.counterChance = 0;  // counter-attack on hit (synergy)
+        this.thornsDamage  = 0;  // damage reflected to attackers (synergy)
 
         // Progression
         this.level    = 1;
         this.xp       = 0;
         this.xpToNext = XP_BASE;
         this.skills   = [];
+
+        // Economy
+        this.gold = 0;
 
         // Inventory
         this.inventory = new Inventory();
@@ -38,6 +43,9 @@ class Hero {
 
         // Status effects
         this.poisonTurns = 0;   // turns of poison remaining
+        this.burnTurns   = 0;   // burn DoT (fire damage)
+        this.slowTurns   = 0;   // slowed movement
+        this.stunTurns   = 0;   // skip turns
 
         // Rendering
         this.graphics = scene.add.graphics();
@@ -73,9 +81,21 @@ class Hero {
         const g = this.graphics;
         g.clear();
         drawCharacterSprite(g, 0, 0, TILE_SIZE, this.appearance, this.race);
-        // Poison tint overlay
+        // Status effect tint overlays
         if (this.poisonTurns > 0) {
             g.fillStyle(COLORS.POISON, 0.20);
+            g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+        }
+        if (this.burnTurns > 0) {
+            g.fillStyle(0xff4400, 0.22);
+            g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+        }
+        if (this.slowTurns > 0) {
+            g.fillStyle(0x4488ff, 0.18);
+            g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+        }
+        if (this.stunTurns > 0) {
+            g.fillStyle(0xffee00, 0.25);
             g.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
         }
     }
@@ -108,7 +128,30 @@ class Hero {
 
     applyPoison(turns = 4) {
         this.poisonTurns = Math.max(this.poisonTurns, turns);
-        this._drawSprite();  // show tint immediately
+        this._drawSprite();
+    }
+
+    applyBurn(turns = 3) {
+        this.burnTurns = Math.max(this.burnTurns, turns);
+        this._drawSprite();
+    }
+
+    applySlow(turns = 4) {
+        this.slowTurns = Math.max(this.slowTurns, turns);
+        this._drawSprite();
+    }
+
+    applyStun(turns = 1) {
+        this.stunTurns = Math.max(this.stunTurns, turns);
+        this._drawSprite();
+    }
+
+    clearAllEffects() {
+        this.poisonTurns = 0;
+        this.burnTurns   = 0;
+        this.slowTurns   = 0;
+        this.stunTurns   = 0;
+        this._drawSprite();
     }
 
     // ── Stats / Progression ───────────────────────────────────────────────────
@@ -158,8 +201,15 @@ class Hero {
             defense:      this.defense,
             visionRadius: this.visionRadius,
             dodgeChance:  this.dodgeChance,
-            critChance:   this.critChance,
-            xpMultiplier: this.xpMultiplier,
+            critChance:    this.critChance,
+            xpMultiplier:  this.xpMultiplier,
+            counterChance: this.counterChance,
+            thornsDamage:  this.thornsDamage,
+            gold:         this.gold,
+            poisonTurns:  this.poisonTurns,
+            burnTurns:    this.burnTurns,
+            slowTurns:    this.slowTurns,
+            stunTurns:    this.stunTurns,
             skills:       [...this.skills],
             inventory:    this.inventory.serialize()
         };
@@ -178,8 +228,15 @@ class Hero {
         this.defense      = stats.defense      || 0;
         this.visionRadius = stats.visionRadius || VISION_RADIUS;
         this.dodgeChance  = stats.dodgeChance  || 0;
-        this.critChance   = stats.critChance   || 0;
-        this.xpMultiplier = stats.xpMultiplier || 1;
+        this.critChance    = stats.critChance    || 0;
+        this.xpMultiplier  = stats.xpMultiplier || 1;
+        this.counterChance = stats.counterChance || 0;
+        this.thornsDamage  = stats.thornsDamage  || 0;
+        this.gold         = stats.gold         || 0;
+        this.poisonTurns  = stats.poisonTurns  || 0;
+        this.burnTurns    = stats.burnTurns    || 0;
+        this.slowTurns    = stats.slowTurns    || 0;
+        this.stunTurns    = stats.stunTurns    || 0;
         this.skills       = stats.skills       ? [...stats.skills] : [];
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         this._draw();
