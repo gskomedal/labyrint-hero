@@ -5,6 +5,64 @@
 // subtype: 'bow' marks ranged weapons
 // Tools: pickaxe, key – have special in-world interactions
 
+// ─── Rarity System ───────────────────────────────────────────────────────────
+const RARITIES = [
+    { id: 'common',    label: 'Vanlig',      color: 0xaaaaaa, textColor: '#aaaaaa', statMul: 1.0  },
+    { id: 'rare',      label: 'Sjelden',     color: 0x4488ff, textColor: '#4488ff', statMul: 1.25 },
+    { id: 'epic',      label: 'Episk',       color: 0xaa44ff, textColor: '#aa44ff', statMul: 1.5  },
+    { id: 'legendary', label: 'Legendarisk', color: 0xff8800, textColor: '#ff8800', statMul: 2.0  },
+    { id: 'mythic',    label: 'Mytisk',      color: 0xff2244, textColor: '#ff2244', statMul: 3.0  },
+];
+const RARITY_BY_ID = {};
+RARITIES.forEach(r => RARITY_BY_ID[r.id] = r);
+
+/** Roll a rarity based on world number. Higher worlds = better odds.
+ *  @param {number} worldNum Current world
+ *  @param {number} minIdx   Minimum rarity index (0=common, 1=rare, etc.)
+ */
+function rollRarity(worldNum, minIdx = 0) {
+    const baseWeights = [60, 25, 10, 4, 1];
+    const shift = Math.min(worldNum - 1, 6) * 3;
+    const weights = baseWeights.map((w, i) => {
+        if (i === 0) return Math.max(15, w - shift * 2);
+        return w + shift * (i * 0.5);
+    });
+    for (let i = 0; i < minIdx; i++) weights[i] = 0;
+    const total = weights.reduce((a, b) => a + b, 0);
+    let roll = Math.random() * total;
+    for (let i = 0; i < weights.length; i++) {
+        roll -= weights[i];
+        if (roll <= 0) return RARITIES[i];
+    }
+    return RARITIES[0];
+}
+
+/** Create a rarity-enhanced copy of a base item definition.
+ *  Consumables and tools are returned as-is (no rarity). */
+function makeRarityItem(baseDef, rarity) {
+    if (!baseDef) return baseDef;
+    if (baseDef.type === 'consumable' || baseDef.type === 'tool') return baseDef;
+
+    const r = typeof rarity === 'string' ? RARITY_BY_ID[rarity] : rarity;
+    if (!r) return { ...baseDef, rarity: 'common' };
+
+    const item = { ...baseDef, rarity: r.id, rarityColor: r.color, rarityLabel: r.label };
+    if (r.id === 'common') return item;
+
+    if (item.atk)    item.atk    = Math.max(1, Math.round(baseDef.atk * r.statMul));
+    if (item.def)    item.def    = Math.max(1, Math.round(baseDef.def * r.statMul));
+    if (item.hearts) item.hearts = Math.max(1, Math.round(baseDef.hearts * r.statMul));
+    item.name = `${r.label} ${baseDef.name}`;
+    // Rebuild description with boosted stats
+    const parts = [];
+    if (item.atk) parts.push(`+${item.atk} Angrep`);
+    if (item.def) parts.push(`+${item.def} Forsvar`);
+    if (item.hearts) parts.push(`+${item.hearts} Hjerte`);
+    if (item.subtype === 'bow' && item.atk) parts.push('(trykk R)');
+    if (parts.length) item.desc = parts.join(', ');
+    return item;
+}
+
 const ITEM_DEFS = {
     // ── Melee Weapons ─────────────────────────────────────────────────────────
     dagger: {
@@ -190,17 +248,24 @@ const ITEM_POOL = {
         'heart_crystal', 'flashbang']
 };
 
-/** Return a random item def appropriate for the given world number */
-function randomItemForWorld(worldNum) {
+/** Return a random item def appropriate for the given world number.
+ *  Equipment gets a random rarity; consumables/tools are unaffected.
+ *  @param {number} minRarityIdx  Minimum rarity (0=common, 1=rare, etc.)
+ */
+function randomItemForWorld(worldNum, minRarityIdx = 0) {
     const tier = Math.min(4, Math.ceil(worldNum / 2));
     const pool = ITEM_POOL[tier];
-    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const baseDef = ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const rarity = rollRarity(worldNum, minRarityIdx);
+    return makeRarityItem(baseDef, rarity);
 }
 
 /** Return a random item of a specific type for the given tier, excluding ids in the exclude Set */
-function randomItemByType(worldNum, type, exclude = new Set()) {
+function randomItemByType(worldNum, type, exclude = new Set(), minRarityIdx = 0) {
     const tier = Math.min(4, Math.ceil(worldNum / 2));
     const pool = ITEM_POOL[tier].filter(id => ITEM_DEFS[id].type === type && !exclude.has(id));
     if (pool.length === 0) return null;
-    return ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const baseDef = ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
+    const rarity = rollRarity(worldNum, minRarityIdx);
+    return makeRarityItem(baseDef, rarity);
 }

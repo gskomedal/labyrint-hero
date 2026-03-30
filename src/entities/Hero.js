@@ -30,6 +30,9 @@ class Hero {
         this.xpToNext = XP_BASE;
         this.skills   = [];
 
+        // Economy
+        this.gold = 0;
+
         // Inventory
         this.inventory = new Inventory();
 
@@ -160,6 +163,7 @@ class Hero {
             dodgeChance:  this.dodgeChance,
             critChance:   this.critChance,
             xpMultiplier: this.xpMultiplier,
+            gold:         this.gold,
             skills:       [...this.skills],
             inventory:    this.inventory.serialize()
         };
@@ -180,6 +184,7 @@ class Hero {
         this.dodgeChance  = stats.dodgeChance  || 0;
         this.critChance   = stats.critChance   || 0;
         this.xpMultiplier = stats.xpMultiplier || 1;
+        this.gold         = stats.gold         || 0;
         this.skills       = stats.skills       ? [...stats.skills] : [];
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         this._draw();

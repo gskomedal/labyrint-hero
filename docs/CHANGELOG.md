@@ -2,6 +2,29 @@
 
 ---
 
+## v0.13 – 2026-03-30
+
+### Nye funksjoner
+- **Gjenstandssjeldenhetsystem (#21):** Våpen og rustning har nå sjeldenhetsgrader: Vanlig (grå), Sjelden (blå), Episk (lilla), Legendarisk (oransje), Mytisk (rød). Høyere sjeldenheter gir bedre stats (opp til ×3). Verden-nummer øker sjansen for sjeldne gjenstander. Boss-drops er garantert sjelden eller bedre. Sjeldenhetsfarger vises på gjenstandsnavn, rammer og glow-effekter
+- **Gull og handelsmann (#2):** Nytt økonomisystem med gullvaluta. Monstre dropper gull ved død (skalerer med type og verden). Skattekister inneholder gull. Handelsmann-NPC spawner i hver labyrint og selger forbruksvarer, utstyr og nøkler. Gull vises i HUD og inventory. Gull beholdes mellom dødsfall (myk permadeath)
+
+### Tekniske endringer
+- `items.js` – `RARITIES[]`, `RARITY_BY_ID{}`, `rollRarity()`, `makeRarityItem()` – fullstendig sjeldenhetsystem
+- `randomItemForWorld()` / `randomItemByType()` – støtter nå `minRarityIdx`-parameter; genererer gjenstander med sjeldenhet
+- `Inventory.serialize()` / `deserialize()` – lagrer og gjenoppretter sjeldenhetsinfo for utstyr
+- `Hero.gold` – nytt felt; inkludert i `getStats()` / `applyStats()`
+- `constants.js` – `GOLD_DROP`, `GOLD_CHEST_BASE`, `MERCHANT_MARKUP`
+- `GameScene._onMonsterKilled()` – gulldrop med flytende tekst
+- `GameScene._checkChestPickup()` – gull fra kister
+- `GameScene._placeMerchant()` – plasserer handelsmann-NPC med prosedyresprite
+- `GameScene._generateMerchantStock()` – genererer handelsvarer
+- `GameScene._spawnItemAt()` – sjeldenhetsglow og ramme for utstyr
+- Ny fil: `MerchantScene.js` – butikk-overlay med kjøpsfunksjon
+- `UIScene` – gullvisning i HUD; handelsmann på minikart (blå prikk)
+- `InventoryScene` – sjeldenhetsfarger på gjenstandsnavn og rammer; gull i stats-linje
+
+---
+
 ## v0.12 – 2026-03-30
 
 ### Nye funksjoner

@@ -71,6 +71,10 @@ class GameScene extends Phaser.Scene {
         this.chests      = [];
         this._placeItems();
 
+        // ── Merchant NPC ──────────────────────────────────────────────────────
+        this.merchant = null;
+        this._placeMerchant();
+
         // ── Monsters ─────────────────────────────────────────────────────────
         this.monsters = [];
         this.boss     = null;
@@ -544,6 +548,10 @@ class GameScene extends Phaser.Scene {
                 onComplete: () => chest.graphic.destroy()
             });
 
+            // Gold from chest
+            const chestGold = GOLD_CHEST_BASE + Math.floor(Math.random() * 10) + this.worldNum * 5;
+            this.hero.gold += chestGold;
+
             // Contents: 2 items; first is equipment (weapon/armor), second is consumable
             const item1 = Math.random() < 0.5
                 ? randomItemByType(this.worldNum, 'weapon', new Set())
@@ -562,7 +570,16 @@ class GameScene extends Phaser.Scene {
                 }
             }
             Audio.playPickup();
-            this._floatingText(hx, hy, `📦 Kiste åpnet! (${givenCount} gjenstander)`, '#ffcc44');
+            // Show rarity of best item found
+            const bestItem = [item1, item2].filter(Boolean).reduce((best, it) => {
+                if (!best) return it;
+                const bIdx = RARITIES.findIndex(r => r.id === (best.rarity || 'common'));
+                const iIdx = RARITIES.findIndex(r => r.id === (it.rarity || 'common'));
+                return iIdx > bIdx ? it : best;
+            }, null);
+            const chestColor = (bestItem && bestItem.rarity && bestItem.rarity !== 'common')
+                ? RARITY_BY_ID[bestItem.rarity].textColor : '#ffcc44';
+            this._floatingText(hx, hy, `📦 +${chestGold}g, ${givenCount} gjenstander`, chestColor);
         }
     }
 
@@ -590,6 +607,15 @@ class GameScene extends Phaser.Scene {
         const g  = this.add.graphics();
         g.setDepth(2);
         const px = gx * TILE_SIZE, py = gy * TILE_SIZE, s = TILE_SIZE;
+
+        // Rarity glow for equipment
+        const rarityDef = itemDef.rarity ? RARITY_BY_ID[itemDef.rarity] : null;
+        if (rarityDef && itemDef.rarity !== 'common') {
+            g.fillStyle(rarityDef.color, 0.25);
+            g.fillRect(px, py, s, s);
+            g.lineStyle(2, rarityDef.color, 0.7);
+            g.strokeRect(px + 1, py + 1, s - 2, s - 2);
+        }
 
         g.fillStyle(itemDef.color, 0.15);
         g.fillRect(px + 2, py + 2, s - 4, s - 4);
@@ -638,12 +664,102 @@ class GameScene extends Phaser.Scene {
                     Audio.playPickup();
                     obj.graphic.destroy();
                     this.itemObjects.splice(i, 1);
-                    this._floatingText(hx, hy, `+ ${obj.item.name}`, '#ffee88');
+                    const rarDef = obj.item.rarity ? RARITY_BY_ID[obj.item.rarity] : null;
+                    const pickupColor = (rarDef && obj.item.rarity !== 'common') ? rarDef.textColor : '#ffee88';
+                    this._floatingText(hx, hy, `+ ${obj.item.name}`, pickupColor);
                 } else {
                     this._showMessage('Ryggsekken er full! (Høyreklikk for å droppe)', '#ff8844');
                 }
             }
         }
+    }
+
+    // ── Merchant NPC ─────────────────────────────────────────────────────────
+
+    _placeMerchant() {
+        const gen = this._gen;
+        const eligible = gen.getFloorTiles().filter(({ x, y }) => {
+            if (Math.abs(x - 1) + Math.abs(y - 1) < 8) return false;
+            if (x === this.exitX && y === this.exitY) return false;
+            if (this.chests.some(c => c.gridX === x && c.gridY === y)) return false;
+            if (this.itemObjects.some(o => o.gridX === x && o.gridY === y)) return false;
+            return true;
+        });
+        if (eligible.length === 0) return;
+
+        // Place near middle of map for accessibility
+        const midX = this.tileW / 2, midY = this.tileH / 2;
+        eligible.sort((a, b) => {
+            const da = Math.abs(a.x - midX) + Math.abs(a.y - midY);
+            const db = Math.abs(b.x - midX) + Math.abs(b.y - midY);
+            return da - db;
+        });
+        const pos = eligible[Math.floor(Math.random() * Math.min(5, eligible.length))];
+
+        const g = this.add.graphics();
+        g.setDepth(4);
+        const px = pos.x * TILE_SIZE, py = pos.y * TILE_SIZE, s = TILE_SIZE;
+
+        // Draw merchant sprite: hooded figure with coin bag
+        g.fillStyle(0x2244aa, 1);
+        g.fillRoundedRect(px + 6, py + 4, s - 12, s - 8, 3); // robe
+        g.fillStyle(0x1a338a, 1);
+        g.fillRoundedRect(px + 8, py + 2, s - 16, 10, 4); // hood
+        g.fillStyle(0xffddbb, 1);
+        g.fillCircle(px + s / 2, py + 8, 4); // face
+        g.fillStyle(0x1a1028, 1);
+        g.fillCircle(px + s / 2 - 2, py + 7, 1); // left eye
+        g.fillCircle(px + s / 2 + 2, py + 7, 1); // right eye
+        // Coin bag
+        g.fillStyle(0xaa7722, 1);
+        g.fillCircle(px + s / 2 + 6, py + s - 10, 5);
+        g.fillStyle(0xffcc00, 1);
+        g.fillCircle(px + s / 2 + 6, py + s - 10, 3);
+        g.fillStyle(0xaa7700, 1);
+        g.fillRect(px + s / 2 + 5, py + s - 14, 3, 3);
+        // Glow hint
+        g.fillStyle(0xffcc00, 0.08);
+        g.fillCircle(px + s / 2, py + s / 2, s / 2);
+
+        this.merchant = { gridX: pos.x, gridY: pos.y, graphic: g };
+
+        // Merchant stock: generate items for sale
+        this.merchant.stock = this._generateMerchantStock();
+    }
+
+    _generateMerchantStock() {
+        const stock = [];
+        const wn = this.worldNum;
+        // 2 consumables
+        for (let i = 0; i < 2; i++) {
+            const item = randomItemByType(wn, 'consumable', new Set());
+            if (item) stock.push({ item, price: this._itemPrice(item, wn) });
+        }
+        // 1 weapon
+        const wpn = randomItemByType(wn, 'weapon', new Set());
+        if (wpn) stock.push({ item: wpn, price: this._itemPrice(wpn, wn) });
+        // 1 armor
+        const arm = randomItemByType(wn, 'armor', new Set());
+        if (arm) stock.push({ item: arm, price: this._itemPrice(arm, wn) });
+        // 1 key (always useful)
+        stock.push({ item: ITEM_DEFS.key, price: 10 + wn * 3 });
+        return stock;
+    }
+
+    _itemPrice(item, worldNum) {
+        let base = 20;
+        if (item.type === 'consumable') base = 12;
+        if (item.type === 'tool') base = 8;
+        const tierMul = (item.tier || 1) * 10;
+        const rarityMul = item.rarity ? (RARITIES.findIndex(r => r.id === item.rarity) + 1) : 1;
+        return Math.round((base + tierMul) * rarityMul * MERCHANT_MARKUP + worldNum * 2);
+    }
+
+    _checkMerchant() {
+        if (!this.merchant) return;
+        if (this.hero.gridX !== this.merchant.gridX || this.hero.gridY !== this.merchant.gridY) return;
+        if (this.scene.isActive('MerchantScene')) return;
+        this.scene.launch('MerchantScene', { gameScene: this, stock: this.merchant.stock });
     }
 
     // ── Monster placement ─────────────────────────────────────────────────────
@@ -732,7 +848,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene');
 
         if (!blocked) {
             this._handleInput(delta);
@@ -835,6 +951,7 @@ class GameScene extends Phaser.Scene {
         this._updateFog();
         this._checkItemPickup();
         this._checkChestPickup();
+        this._checkMerchant();
         if (this.maze[ny][nx] === TILE.EXIT) this._checkExit();
     }
 
@@ -1030,9 +1147,15 @@ class GameScene extends Phaser.Scene {
         const xp      = Math.round(monster.xpReward * this._diffMods().xpMul);
         const leveled = this.hero.gainXP(xp);
         this.monsters = this.monsters.filter(m => m !== monster);
+
+        // Gold drop
+        const goldBase = GOLD_DROP[monster.type] || 5;
+        const gold = goldBase + Math.floor(Math.random() * goldBase * 0.5) + this.worldNum * 2;
+        this.hero.gold += gold;
+        this._floatingText(monster.gridX, monster.gridY, `+${gold}g`, '#ffcc00');
         if (monster.type === 'boss') {
-            // Boss always drops a guaranteed item from a higher tier
-            const bossItem = randomItemForWorld(Math.min(this.worldNum + 1, 7));
+            // Boss always drops a guaranteed item from a higher tier, at least rare rarity
+            const bossItem = randomItemForWorld(Math.min(this.worldNum + 1, 7), 1);
             if (bossItem) this._spawnItemAt(monster.gridX, monster.gridY, bossItem);
         } else if (Math.random() < 0.25) {
             // Favor consumables over equipment (70% consumable, 30% any)
@@ -1136,6 +1259,7 @@ class GameScene extends Phaser.Scene {
             if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
             if (nx === hx && ny === hy) continue;
             if (this._monsterAt(nx, ny)) continue;
+            if (this.merchant && nx === this.merchant.gridX && ny === this.merchant.gridY) continue;
             m.moveTo(nx, ny); break;
         }
     }
@@ -1204,7 +1328,7 @@ class GameScene extends Phaser.Scene {
     }
 
     _stopOverlayScenes() {
-        ['SkillScene', 'InventoryScene', 'UIScene'].forEach(key => {
+        ['SkillScene', 'InventoryScene', 'MerchantScene', 'UIScene'].forEach(key => {
             if (this.scene.isActive(key) || this.scene.isVisible(key)) {
                 this.scene.stop(key);
             }

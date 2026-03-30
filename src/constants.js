@@ -73,6 +73,11 @@ const XP_GROWTH         = 1.55;  // multiplier per level
 
 const AGGRO_RADIUS      = 12;    // tiles; monster won't chase beyond this
 
+// Gold economy
+const GOLD_DROP         = { goblin: 5, orc: 12, troll: 25, boss: 100 };
+const GOLD_CHEST_BASE   = 15;   // base gold per chest (+ worldNum scaling)
+const MERCHANT_MARKUP    = 1.0;  // price multiplier for merchant items
+
 // Camera zoom limits
 const ZOOM_MIN     = 0.5;
 const ZOOM_MAX     = 2.5;

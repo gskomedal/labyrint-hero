@@ -84,7 +84,7 @@ class InventoryScene extends Phaser.Scene {
         // Update stats line
         const h = this.hero;
         this._statsText.setText(
-            `${h.heroName || 'Helten'}  ·  Nivå ${h.level}  ·  ATK ${h.attack}  ·  DEF ${h.defense}`
+            `${h.heroName || 'Helten'}  ·  Nivå ${h.level}  ·  ATK ${h.attack}  ·  DEF ${h.defense}  ·  💰 ${h.gold}g`
         );
 
         // Equipment slots
@@ -121,13 +121,27 @@ class InventoryScene extends Phaser.Scene {
 
     // ── Equipment slot ────────────────────────────────────────────────────────
 
+    _rarityBorderColor(item) {
+        if (!item) return 0x223344;
+        const r = item.rarity ? RARITY_BY_ID[item.rarity] : null;
+        if (r && item.rarity !== 'common') return r.color;
+        return item.type === 'weapon' ? 0xff8800 : item.type === 'armor' ? 0x4488ff : 0x223344;
+    }
+
+    _rarityTextColor(item) {
+        if (!item) return '#ccddff';
+        const r = item.rarity ? RARITY_BY_ID[item.rarity] : null;
+        if (r && item.rarity !== 'common') return r.textColor;
+        return '#ccddff';
+    }
+
     _makeEquipSlot(x, y, slot, label) {
         const size = 64;
         const item = this.inv.equipped[slot];
+        const borderCol = this._rarityBorderColor(item);
 
         const bg = this._d(this.add.rectangle(x, y, size, size, 0x0a0918).setStrokeStyle(
-            item ? 2 : 1,
-            item ? (item.type === 'weapon' ? 0xff8800 : 0x4488ff) : 0x223344
+            item ? 2 : 1, borderCol
         ));
 
         this._d(this.add.text(x, y + size / 2 + 10, label, {
@@ -137,7 +151,7 @@ class InventoryScene extends Phaser.Scene {
         if (item) {
             this._drawItemIcon(x, y, item, size - 12);
             this._d(this.add.text(x, y - size / 2 - 10, item.name, {
-                fontSize: '10px', color: '#ccddff', fontFamily: 'monospace'
+                fontSize: '10px', color: this._rarityTextColor(item), fontFamily: 'monospace'
             }).setOrigin(0.5));
 
             bg.setInteractive({ useHandCursor: true });
@@ -241,16 +255,24 @@ class InventoryScene extends Phaser.Scene {
         const entry   = this.inv.backpack[index];
         const itemDef = this.inv._getItemDef(entry);
         const count   = this.inv._getCount(entry);
-        const col     = itemDef
-            ? (itemDef.type === 'weapon' ? 0xff8800 : itemDef.type === 'armor' ? 0x4488ff : 0xff2244)
-            : 0x112233;
+        // Use rarity color for equipment border, fallback to type color
+        let col = 0x112233;
+        if (itemDef) {
+            const r = itemDef.rarity ? RARITY_BY_ID[itemDef.rarity] : null;
+            if (r && itemDef.rarity !== 'common') {
+                col = r.color;
+            } else {
+                col = itemDef.type === 'weapon' ? 0xff8800 : itemDef.type === 'armor' ? 0x4488ff : 0xff2244;
+            }
+        }
 
         const bg = this._d(this.add.rectangle(x, y, size, size, 0x0a0918).setStrokeStyle(1, col));
 
         if (itemDef) {
             this._drawItemIcon(x, y, itemDef, size - 10);
+            const nameCol = this._rarityTextColor(itemDef);
             this._d(this.add.text(x, y + size / 2 - 2, this._shortName(itemDef.name), {
-                fontSize: '8px', color: '#aabbcc', fontFamily: 'monospace'
+                fontSize: '8px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5, 1));
 
             // Stack count badge
@@ -354,9 +376,12 @@ class InventoryScene extends Phaser.Scene {
 
     _showTooltip(x, y, item) {
         this._hideTooltip();
-        const lines = [item.name, item.desc || ''];
+        const rarDef = item.rarity ? RARITY_BY_ID[item.rarity] : null;
+        const rarTag = (rarDef && item.rarity !== 'common') ? `[${rarDef.label}]  ` : '';
+        const lines = [rarTag + item.name, item.desc || ''];
+        const txtCol = this._rarityTextColor(item);
         this._tooltip = this.add.text(x, y, lines.join('\n'), {
-            fontSize: '10px', color: '#eeeeff', fontFamily: 'monospace',
+            fontSize: '10px', color: txtCol, fontFamily: 'monospace',
             backgroundColor: '#0a0918', padding: { x: 6, y: 4 },
             stroke: '#334466', strokeThickness: 1
         }).setOrigin(0.5, 1).setDepth(30);

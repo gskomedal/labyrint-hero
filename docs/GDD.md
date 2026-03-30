@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.12
+**Versjon:** 0.13
 **Sist oppdatert:** 2026-03-30
 
 ---
@@ -32,7 +32,7 @@ src/
   maze.js                   – MazeGenerator (DFS + ekstra passasjer)
   utils/SaveManager.js      – localStorage persistens
   data/skills.js            – 12 passive evner
-  data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy)
+  data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy) + sjeldenhetsystem
   graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser, 2 kjønn, 10 frisyrer, 4 klesstiler)
   systems/Inventory.js      – 2 utstyrsplasser + 10-spors ryggsekk
   systems/AudioManager.js   – prosedyremusikk (5 temaer) + SFX-motoren
@@ -158,12 +158,37 @@ Trykk R med bue utstyrt – pilen flyr i facing-retning til første hinder. Anim
 ### Designprinsipp (v0.7)
 Gjenstander er sjeldne og verdifulle. Spilleren må kjempe seg til utstyr, ikke bare plukke opp alt de ser. Labyrinten er ikke et supermarked.
 
+### Sjeldenhetsgrader (v0.13)
+Våpen og rustning har sjeldenhetsgrader som påvirker stats:
+
+| Sjeldenhet | Farge | Droprate | Stat-bonus |
+|-----------|-------|----------|------------|
+| Vanlig | Grå | ~60% | Basisstats |
+| Sjelden | Blå | ~25% | +25% stats |
+| Episk | Lilla | ~10% | +50% stats |
+| Legendarisk | Oransje | ~4% | ×2 stats |
+| Mytisk | Rød | ~1% | ×3 stats |
+
+- Høyere verdener øker sjansen for bedre sjeldenhet
+- Boss-drops er garantert sjelden eller bedre
+- Sjeldenhetsfarge vises på gjenstandsnavn, rammer og glow i labyrinten
+
+### Gull og handelsmann (v0.13)
+- Monstre dropper gull ved død (goblin: ~5g, orc: ~12g, troll: ~25g, boss: ~100g + verdensbonus)
+- Skattekister gir gull (~15g base + verdensbonus)
+- Handelsmann-NPC spawner i hver labyrint (blå figur med pengesekk)
+- Gå over handelsmannen for å åpne butikken
+- Butikken selger 2 forbruksvarer, 1 våpen, 1 rustning og 1 nøkkel
+- Priser skalerer med tier, sjeldenhet og verdensnummer
+- Gull beholdes ved død (myk permadeath)
+
 ### Kilder til gjenstander
 | Kilde | Frekvens | Innhold |
 |-------|----------|---------|
-| Skattekiste | 2–3 per verden (faste) | 2 tilfeldige gjenstander |
-| Monster-drop | ~45% sjanse per drap | 1 tilfeldig gjenstand |
-| Boss-drop | Garantert | 1 gjenstand fra høyere tier |
+| Skattekiste | 2–3 per verden (faste) | Gull + 2 tilfeldige gjenstander |
+| Monster-drop | ~25% sjanse per drap | 1 tilfeldig gjenstand + gull |
+| Boss-drop | Garantert | 1 gjenstand (sjelden+) + mye gull |
+| Handelsmann | 1 per verden | 5 varer til salgs for gull |
 | Nøkler/hakker | Automatisk plassert | Proporsjonalt med dører/sprukne vegger |
 
 ### Inventory
@@ -277,8 +302,9 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Lydinnstillinger | ✅ Ferdig | SettingsScene |
 | SaveManager (localStorage) | ✅ Ferdig | |
 | Balanse-simulator | ✅ Ferdig | simulator.html |
-| Butikk / handelsmann | ❌ Mangler | |
-| Gull + økonomi | ❌ Mangler | |
+| Butikk / handelsmann | ✅ Ferdig | Handelsmann-NPC i hver labyrint |
+| Gull + økonomi | ✅ Ferdig | Gullvaluta fra monstre/kister; handelsmann |
+| Gjenstandssjeldenhet | ✅ Ferdig | 5 sjeldenhetsgrader med stat-boost |
 | Touch/mobil-støtte | ✅ Ferdig | D-pad, handlingsknapper, responsiv skalering, langt-trykk drop |
 | Leaderboard | ❌ Mangler | |
 
@@ -320,8 +346,9 @@ Spilleren kan spre poeng på tvers av veier (generalist) eller gå dypt i én (s
 
 ## 13. Neste steg (prioritert)
 
-1. **Gull + handelsmann** – Valuta fra monstre; handelsmann i labyrinten selger forbruksgjenstander.
+1. ~~**Gull + handelsmann**~~ – ✅ Implementert i v0.13.
 2. **Skilltre-utvidelse** – Legg til 2–3 ekstra ferdigheter per vei; kryss-vei-synergier.
 3. ~~**Touch/mobil-støtte**~~ – ✅ Implementert i v0.9.
 4. **Leaderboard** – Lokal high-score-liste (verdensrekord per rase/vanskelighetsgrad).
 5. **Frostbrent statuseffekt** – Isbaserte monstre (fremtidig verdenstema) setter ned bevegelsestakten.
+6. **Refaktorering** – Splitte GameScene.js i mindre moduler (CombatManager, MapRenderer, etc.).
