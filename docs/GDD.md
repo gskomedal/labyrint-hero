@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.15
+**Versjon:** 0.16
 **Sist oppdatert:** 2026-03-30
 
 ---
@@ -83,11 +83,11 @@ Kun ekstra passasje-vegger kan være SECRET/CRACKED/DOOR – DFS-stien er alltid
 ### Visuelle temaer
 | Tema | Verdener | Stil |
 |------|----------|------|
-| Skogslabyrint | 1–2 | Grønne hekker, gressgulv, blomster |
-| Steingrotte | 3–4 | Grå stein, fuktighetsdrypp, grus |
-| Iskrystall | 5 | Blå iskrystaller, frostsprekker |
-| Vulkandungeon | 6 | Basalt, glødende lavasprekker, aske |
-| Oldtidstempel | 7+ | Sandstein, gullinnlegg, søylerelieff |
+| Skogslabyrint | 1–2 | Grønne hekker, gressgulv, blomster, mose, vinstokker med blad |
+| Steingrotte | 3–4 | Grå stein, fuktighetsdrypp, grus, stalaktitter, vannpytter |
+| Iskrystall | 5 | Blå iskrystaller, frostsprekker med forgreninger, snøstøv, istapper |
+| Vulkandungeon | 6 | Basalt, glødende lavasprekker, aske, glødepytter, svimerker |
+| Oldtidstempel | 7+ | Sandstein, gullinnlegg, søylerelieff med kapitel, utslitte hjørner |
 
 ---
 
@@ -285,7 +285,7 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Labyrintgenerering (DFS) | ✅ Ferdig | |
 | Tile-typer (6 typer inkl. TRAP) | ✅ Ferdig | SECRET, CRACKED_WALL, DOOR, TRAP |
 | Fog of War | ✅ Ferdig | 3 nivåer |
-| Visuelle verdenstemaer | ✅ Ferdig | 5 temaer med per-tile dekorasjoner |
+| Visuelle verdenstemaer | ✅ Ferdig | 5 temaer med detaljerte per-tile dekorasjoner, murverk, vegg-skygger |
 | Karakterskaper (4 raser) | ✅ Ferdig | Alv, Dverg, Menneske, Hobbit; kjønnsvalg |
 | Prosedyrekaraktergrafikk | ✅ Ferdig | 2 kjønn, 10 frisyrer, 4 klesstiler, øynefarge, skjegg, tilbehør per rase |
 | Vanskelighetsgrad (MenuScene) | ✅ Ferdig | LETT/NORMAL/VANSKELIG – prominent i startmenyen |
@@ -317,7 +317,7 @@ Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaring
 | Gull + økonomi | ✅ Ferdig | Gullvaluta fra monstre/kister; handelsmann |
 | Gjenstandssjeldenhet | ✅ Ferdig | 5 sjeldenhetsgrader med stat-boost |
 | Touch/mobil-støtte | ✅ Ferdig | D-pad, handlingsknapper, responsiv skalering, langt-trykk drop |
-| Leaderboard | ✅ Ferdig | Ledertavle med filtrering |
+| Leaderboard | ✅ Ferdig | Ledertavle med filtrering og tidssporing per verden |
 
 ---
 

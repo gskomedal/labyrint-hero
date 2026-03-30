@@ -2,6 +2,34 @@
 
 ---
 
+## v0.16 – 2026-03-30
+
+### Nye funksjoner
+- **Tidssporing per verden (#25):** Ledertavlen viser nå tid brukt per verden:
+  - Timer starter ved verdenstart (GameScene.create) og stopper ved exit/død
+  - Tid vises i mm:ss-format i ledertavle og på game-over/victory-skjerm
+  - Ny «Tid»-kolonne i LeaderboardScene
+  - Bakoverkompatibel med eldre lagrede resultater (viser 0:00)
+- **Forbedret labyrintgrafikk (#20):** Mer detaljerte og varierte fliser:
+  - Mur-/steinmønster med murverk og variasjon per flis
+  - Vegg-gulv-skygger langs tilstøtende vegger
+  - Skog: Mosepatcher, vinstokker med blad, blomsterstilker, jordflekker
+  - Grotte: Stalaktitter, vannpytter, gulvsprekker, grussprut
+  - Is: Forgreinende sprekker, snøstøv, frostring på kanter, istapper
+  - Vulkan: Glødepytter med halo, svimerker, lavaseep fra vegger
+  - Tempel: Søylekapitel, utslitte hjørner, støvpartikler, utskåret motiv
+
+### Tekniske endringer
+- `GameScene.create()` – `_worldStartTime` timer initialiseres
+- `GameScene._checkExit()` / `_heroDied()` – beregner og sender `timeSeconds`
+- `GameOverScene` – mottar og viser tid, sender til Leaderboard
+- `Leaderboard.record()` – lagrer `timeSeconds`-felt
+- `LeaderboardScene` – ny «Tid»-kolonne med mm:ss-formatering
+- `GameScene._drawMap()` – murverk/brickwork på vegger, skygger på gulv
+- `GameScene._drawWallDeco()` / `_drawFloorDeco()` – utvidet med ~30 nye dekorasjoner
+
+---
+
 ## v0.15 – 2026-03-30
 
 ### Nye funksjoner

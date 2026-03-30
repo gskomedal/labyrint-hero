@@ -16,6 +16,7 @@ const Leaderboard = {
             level:          entry.level || 1,
             monstersKilled: entry.monstersKilled || 0,
             goldEarned:     entry.goldEarned || 0,
+            timeSeconds:    entry.timeSeconds || 0,
             result:         entry.result || 'death',
             date:           new Date().toISOString().slice(0, 10)
         });
