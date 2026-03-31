@@ -157,12 +157,12 @@ class MonsterManager {
             scene.stunTickTimer = 0;
         }
 
+        // Tick temporary buffs every frame (time-based, not turn-based)
+        scene.hero.tickTempBuffs(delta);
+
         scene.monsterTick += delta;
         if (scene.monsterTick < MONSTER_TICK_MS) return;
         scene.monsterTick = 0;
-
-        // Tick temporary buffs (brews etc.)
-        scene.hero.tickTempBuffs();
 
         for (const m of [...scene.monsters]) {
             if (!m.alive) continue;

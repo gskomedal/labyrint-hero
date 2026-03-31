@@ -156,7 +156,7 @@ class GameScene extends Phaser.Scene {
 
         if (!blocked) {
             this.inputHandler.handleInput(delta);
-            this.combat.handleAttack();
+            this.combat.handleAttack(delta);
             this.combat.handleBow();
             this.combat.handleUseItem();
             this.inputHandler.handleZoom();

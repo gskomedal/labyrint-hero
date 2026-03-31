@@ -309,7 +309,8 @@ class UIScene extends Phaser.Scene {
         if (hero.stunTurns > 0)   effects.push(`⚡ Lammet (${hero.stunTurns})`);
         for (const b of (hero.tempBuffs || [])) {
             const label = b.stat === 'attack' ? 'ATK' : b.stat === 'defense' ? 'DEF' : b.stat;
-            effects.push(`+${b.amount} ${label} (${b.turnsLeft})`);
+            const secs = Math.ceil((b.msLeft || 0) / 1000);
+            effects.push(`+${b.amount} ${label} (${secs}s)`);
         }
         if (effects.length > 0) {
             this.statusText.setText(effects.join('  '));

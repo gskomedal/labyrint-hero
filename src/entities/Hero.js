@@ -52,8 +52,12 @@ class Hero {
         this.slowTurns   = 0;   // slowed movement
         this.stunTurns   = 0;   // skip turns
 
-        // Temporary buffs from brews [{stat, amount, turnsLeft}]
+        // Temporary buffs from brews [{stat, amount, msLeft}]
         this.tempBuffs = [];
+
+        // Attack cooldown
+        this.attackCooldown = 0;
+        this.attackSpeedBonus = 0;  // ms reduction from skills
 
         // Rendering
         this.graphics = scene.add.graphics();
@@ -164,15 +168,15 @@ class Hero {
 
     // ── Temporary buffs ──────────────────────────────────────────────────────
 
-    addTempBuff(stat, amount, turns) {
+    addTempBuff(stat, amount, durationMs) {
         this[stat] += amount;
-        this.tempBuffs.push({ stat, amount, turnsLeft: turns });
+        this.tempBuffs.push({ stat, amount, msLeft: durationMs });
     }
 
-    tickTempBuffs() {
+    tickTempBuffs(deltaMs) {
         for (let i = this.tempBuffs.length - 1; i >= 0; i--) {
-            this.tempBuffs[i].turnsLeft--;
-            if (this.tempBuffs[i].turnsLeft <= 0) {
+            this.tempBuffs[i].msLeft -= deltaMs;
+            if (this.tempBuffs[i].msLeft <= 0) {
                 const b = this.tempBuffs[i];
                 this[b.stat] -= b.amount;
                 this.tempBuffs.splice(i, 1);
@@ -237,8 +241,9 @@ class Hero {
             dodgeChance:  this.dodgeChance,
             critChance:    this.critChance,
             xpMultiplier:  this.xpMultiplier,
-            counterChance: this.counterChance,
-            thornsDamage:  this.thornsDamage,
+            counterChance:    this.counterChance,
+            thornsDamage:     this.thornsDamage,
+            attackSpeedBonus: this.attackSpeedBonus,
             petBonusAtk:  this.petBonusAtk,
             petBonusHp:   this.petBonusHp,
             petBonusDef:  this.petBonusDef,
@@ -267,8 +272,9 @@ class Hero {
         this.dodgeChance  = stats.dodgeChance  || 0;
         this.critChance    = stats.critChance    || 0;
         this.xpMultiplier  = stats.xpMultiplier || 1;
-        this.counterChance = stats.counterChance || 0;
-        this.thornsDamage  = stats.thornsDamage  || 0;
+        this.counterChance    = stats.counterChance || 0;
+        this.thornsDamage     = stats.thornsDamage  || 0;
+        this.attackSpeedBonus = stats.attackSpeedBonus || 0;
         this.petBonusAtk  = stats.petBonusAtk  || 0;
         this.petBonusHp   = stats.petBonusHp   || 0;
         this.petBonusDef  = stats.petBonusDef  || 0;

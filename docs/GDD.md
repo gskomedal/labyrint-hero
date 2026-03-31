@@ -168,7 +168,8 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 Verdensnummer V brukes til å skalere både HP og skade – kamp bør alltid føles risikofylt.
 
 ### Kamptempo (v0.19)
-Monstre har 900ms avkjøling mellom angrep. Dette gir spilleren tid til å bruke gjenstander, brygg og evner under kamp, i stedet for at angrep skjer hvert 380ms-tick.
+- **Heltens angrep:** 600ms avkjøling mellom angrep (reduseres med Kampherdet-evnen: −100ms per nivå, minimum 150ms)
+- **Monsterangrep:** 900ms avkjøling mellom angrep. Gir spilleren tid til å bruke gjenstander og brygg i kamp
 
 ### Statuseffekter (v0.14)
 | Effekt | Ikon | Varighet | Skade | Kilde | Kur |
@@ -244,7 +245,7 @@ Lærpansring, Vattert vest (+1 hjerte), Ringbrynje, Platedrakt, Magikappe, Drage
 - **Hakke:** konsumeres ved SPACE/F mot CRACKED_WALL
 
 ### Forbruksgjenstander
-Livspotte, Stor livspotte, Styrkebrygg (midlertidig +2 ATK i 10 trekk), Forsvarsbrygg (midlertidig +1 DEF i 10 trekk), Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe, Blendgranate, Motgift
+Livspotte, Stor livspotte, Styrkebrygg (midlertidig +2 ATK i 60 sek), Forsvarsbrygg (midlertidig +1 DEF i 60 sek), Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe, Blendgranate, Motgift
 
 ---
 
@@ -371,7 +372,7 @@ Fem spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever at T1 er
 
 | Vei | Fokus | T1 | T2 | T3 |
 |-----|-------|----|----|-----|
-| **Krigar** | Kamp | Kraftig slag (+2 ATK) | Kampherdet (+2 ATK +1 DEF) | Jotunstyrke (+5 ATK) |
+| **Krigar** | Kamp | Kraftig slag (+2 ATK) | Kampherdet (+2 ATK +1 DEF, raskere angrep) | Jotunstyrke (+5 ATK) |
 | **Vokter** | Forsvar | Tykk hud (+1 DEF) | Festning (+1 DEF +1 HP) | Jernhelse (+2 HP) |
 | **Jeger** | Syn/Krit | Skarpsyn (+2 syn) | Vitalt anslag (+25% krit) | Presisjon (+3 ATK) |
 | **Skurk** | Nytte | Kunnskap (+30% XP) | Unnvikelse (+20% dodge) | Blomstersaft (hel 2 HP) |

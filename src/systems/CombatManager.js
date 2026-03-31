@@ -8,14 +8,22 @@ class CombatManager {
 
     // ── Button-press Attack (SPACE / F) ───────────────────────────────────────
 
-    handleAttack() {
+    handleAttack(delta) {
         const scene = this.scene;
-        if (scene.hero.stunTurns > 0) return;
+        const hero = scene.hero;
+        if (hero.stunTurns > 0) return;
+
+        // Tick hero attack cooldown
+        if (hero.attackCooldown > 0) hero.attackCooldown -= delta;
+
         const spaceDown = Phaser.Input.Keyboard.JustDown(scene.attackKey);
         const fDown     = Phaser.Input.Keyboard.JustDown(scene.altAtkKey);
         const touchAtk  = scene.game.registry.get('touch_attack');
         if (touchAtk) scene.game.registry.set('touch_attack', false);
         if (!spaceDown && !fDown && !touchAtk) return;
+
+        // Enforce cooldown
+        if (hero.attackCooldown > 0) return;
 
         const { dx, dy } = scene.hero.facing;
         const fx = scene.hero.gridX + dx, fy = scene.hero.gridY + dy;
@@ -92,7 +100,10 @@ class CombatManager {
 
     _heroAttack(monster) {
         const scene = this.scene;
-        let dmg  = scene.hero.attack + Math.floor(Math.random() * 3);
+        const hero = scene.hero;
+        // Set attack cooldown (reduced by attackSpeedBonus from skills)
+        hero.attackCooldown = Math.max(150, HERO_ATTACK_COOLDOWN_MS - (hero.attackSpeedBonus || 0));
+        let dmg  = hero.attack + Math.floor(Math.random() * 3);
         const crit = scene.hero.critChance > 0 && Math.random() < scene.hero.critChance;
         if (crit) dmg *= 2;
 
