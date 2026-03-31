@@ -218,24 +218,23 @@ class UIScene extends Phaser.Scene {
     refresh() {
         if (!this.gameScene?.hero) return;
         const hero  = this.gameScene.hero;
-        const stats = hero.getStats();
         const W     = this.cameras.main.width;
 
         // ── Hearts ────────────────────────────────────────────────────────────
         const g = this.heartGfx;
         g.clear();
         const hs = 15, gap = 3, sx = 10, sy = 10;
-        for (let i = 0; i < stats.maxHearts; i++) {
+        for (let i = 0; i < hero.maxHearts; i++) {
             const x = sx + i * (hs + gap);
-            g.fillStyle(i < stats.hearts ? COLORS.HEART_FULL : COLORS.HEART_EMPTY);
+            g.fillStyle(i < hero.hearts ? COLORS.HEART_FULL : COLORS.HEART_EMPTY);
             g.fillRect(x, sy + 4, hs, hs - 4);
             g.fillRect(x + 2, sy + 2, 5, 4);
             g.fillRect(x + hs - 7, sy + 2, 5, 4);
         }
 
         // ── XP bar ────────────────────────────────────────────────────────────
-        const xpX = 10, xpY = 38, xpW = Math.min(220, stats.maxHearts * 22);
-        const frac = stats.xpToNext > 0 ? stats.xp / stats.xpToNext : 0;
+        const xpX = 10, xpY = 38, xpW = Math.min(220, hero.maxHearts * 22);
+        const frac = hero.xpToNext > 0 ? hero.xp / hero.xpToNext : 0;
         this.xpBg.clear();
         this.xpBg.fillStyle(COLORS.XP_BG);
         this.xpBg.fillRect(xpX, xpY, xpW, 8);
@@ -245,8 +244,8 @@ class UIScene extends Phaser.Scene {
 
         // ── Labels ────────────────────────────────────────────────────────────
         this.worldText.setText(`Verden ${this.gameScene.worldNum}`);
-        this.levelText.setText(`Nivå ${stats.level}  XP ${stats.xp}/${stats.xpToNext}`);
-        this.atkText.setText(`ATK ${stats.attack}  DEF ${stats.defense}  Syn ${stats.visionRadius}`);
+        this.levelText.setText(`Nivå ${hero.level}  XP ${hero.xp}/${hero.xpToNext}`);
+        this.atkText.setText(`ATK ${hero.attack}  DEF ${hero.defense}  Syn ${hero.visionRadius}`);
         this.goldText.setText(`💰 ${hero.gold}g`);
 
         // ── Equipped items ─────────────────────────────────────────────────────
