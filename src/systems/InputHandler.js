@@ -115,6 +115,7 @@ class InputHandler {
 
         scene.hero.moveTo(nx, ny);
         scene.mapRenderer.updateFog();
+        scene.itemSpawner.checkPetEggPickup();
         scene.itemSpawner.checkItemPickup();
         scene.itemSpawner.checkChestPickup();
         scene.itemSpawner.checkMerchant();

@@ -81,6 +81,16 @@ class GameScene extends Phaser.Scene {
             this.hero._draw();
         }
 
+        // ── Pet companion ────────────────────────────────────────────────────
+        this.pet = null;
+        if (this.heroStats && this.heroStats.pet) {
+            this.pet = Pet.deserialize(this.heroStats.pet, this, this.hero.gridX, this.hero.gridY);
+            if (this.pet && this.pet.alive) {
+                this.pet.revive(this.hero.gridX, this.hero.gridY);
+            }
+        }
+        this.petTickTimer = 0;
+
         // ── World items (chests + tools only; loot comes from monster kills) ────
         this.itemObjects = [];
         this.chests      = [];
@@ -158,6 +168,7 @@ class GameScene extends Phaser.Scene {
             }
 
             this.monsterMgr.tickMonsters(delta);
+            this._tickPet(delta);
         }
 
         const ui = this.scene.get('UIScene');
@@ -171,6 +182,28 @@ class GameScene extends Phaser.Scene {
             if (!entry) return false;
             return entry.id === id;
         });
+    }
+
+    // ── Pet AI tick ──────────────────────────────────────────────────────
+
+    _tickPet(delta) {
+        if (!this.pet || !this.pet.alive) return;
+        this.petTickTimer += delta;
+        if (this.petTickTimer < MONSTER_TICK_MS) return;
+        this.petTickTimer = 0;
+
+        // Pet attacks adjacent monster first
+        const hit = this.pet.tryAttack(this.monsters);
+        if (hit) {
+            const result = hit.monster.takeDamage(hit.damage);
+            this._floatingText(hit.monster.gridX, hit.monster.gridY, `-${hit.damage}`, '#ffaadd');
+            if (result === 'enraged') this.combat._onBossEnraged(hit.monster);
+            else if (result === true)  this.combat._onMonsterKilled(hit.monster);
+            return;
+        }
+
+        // Otherwise follow hero
+        this.pet.followHero(this.hero, this.maze, this.tileW, this.tileH, this.monsters);
     }
 
     // ── Level up ──────────────────────────────────────────────────────────────
@@ -195,6 +228,13 @@ class GameScene extends Phaser.Scene {
         if (ui && ui.sys.isActive()) ui.refresh();
     }
 
+    /** Hero stats with pet data attached for save/load */
+    _getFullStats() {
+        const stats = this._getFullStats();
+        if (this.pet) stats.pet = this.pet.serialize();
+        return stats;
+    }
+
     // ── World progression ─────────────────────────────────────────────────────
 
     _checkExit() {
@@ -204,12 +244,12 @@ class GameScene extends Phaser.Scene {
         }
         Audio.playExit();
         this._stopOverlayScenes();
-        SaveManager.save(this.worldNum + 1, this.hero.getStats());
+        SaveManager.save(this.worldNum + 1, this._getFullStats());
         const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
                 type: 'worldComplete', worldNum: this.worldNum,
-                heroStats: this.hero.getStats(), difficulty: this.difficulty,
+                heroStats: this._getFullStats(), difficulty: this.difficulty,
                 monstersKilled: this.monstersKilled,
                 timeSeconds: worldTime
             });
@@ -223,12 +263,12 @@ class GameScene extends Phaser.Scene {
         Audio.playDeath();
         Audio.stopMusic();
         this._stopOverlayScenes();
-        SaveManager.save(this.worldNum, this.hero.getStats());
+        SaveManager.save(this.worldNum, this._getFullStats());
         const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
         this.time.delayedCall(700, () => {
             this.scene.start('GameOverScene', {
                 type: 'death', worldNum: this.worldNum,
-                heroStats: this.hero.getStats(), difficulty: this.difficulty,
+                heroStats: this._getFullStats(), difficulty: this.difficulty,
                 monstersKilled: this.monstersKilled,
                 timeSeconds: worldTime
             });

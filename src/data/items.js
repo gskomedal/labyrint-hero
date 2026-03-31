@@ -238,6 +238,14 @@ const ITEM_DEFS = {
         }
     },
 
+    // ── Pet eggs ──────────────────────────────────────────────────────────────
+    pet_egg: {
+        id: 'pet_egg', name: 'Kjæledyr-egg', type: 'consumable',
+        color: 0xffaadd, desc: 'Et mystisk egg. Brukes automatisk.', tier: 2,
+        isPetEgg: true,
+        use() { return false; }  // Handled by ItemSpawner on pickup
+    },
+
     // ── Tools (in-world use, not manual use from inventory) ───────────────────
     key: {
         id: 'key', name: 'Nøkkel', type: 'tool',
