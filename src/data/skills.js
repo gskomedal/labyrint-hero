@@ -24,10 +24,10 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'battle_hardened',
                 name:     'Kampherdet',
-                desc:     '+2 ATK, +1 DEF\nRaskere angrep',
+                desc:     '+2 Angrep\n+1 Forsvar',
                 category: 'ATK',
                 maxStack: 2,
-                apply(hero) { hero.attack += 2; hero.defense += 1; hero.attackSpeedBonus = (hero.attackSpeedBonus || 0) + 100; }
+                apply(hero) { hero.attack += 2; hero.defense += 1; }
             },
             {
                 id:       'giant_strength',

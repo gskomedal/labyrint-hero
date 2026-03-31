@@ -8,24 +8,14 @@ class CombatManager {
 
     // ── Button-press Attack (SPACE / F) ───────────────────────────────────────
 
-    handleAttack(delta) {
+    handleAttack() {
         const scene = this.scene;
-        const hero = scene.hero;
-        if (hero.stunTurns > 0) return;
-
-        // Tick hero attack cooldown
-        if (hero.attackCooldown > 0) hero.attackCooldown -= delta;
-
+        if (scene.hero.stunTurns > 0) return;
         const spaceDown = Phaser.Input.Keyboard.JustDown(scene.attackKey);
         const fDown     = Phaser.Input.Keyboard.JustDown(scene.altAtkKey);
         const touchAtk  = scene.game.registry.get('touch_attack');
         if (touchAtk) scene.game.registry.set('touch_attack', false);
-
-        const pressed = spaceDown || fDown || touchAtk;
-        if (!pressed) return;
-
-        // Enforce cooldown – but don't consume the press intent if cooldown active
-        if (hero.attackCooldown > 0) return;
+        if (!spaceDown && !fDown && !touchAtk) return;
 
         const { dx, dy } = scene.hero.facing;
         const fx = scene.hero.gridX + dx, fy = scene.hero.gridY + dy;
@@ -102,11 +92,7 @@ class CombatManager {
 
     _heroAttack(monster) {
         const scene = this.scene;
-        const hero = scene.hero;
-        // Set attack cooldown (reduced by attackSpeedBonus from skills)
-        const baseCooldown = (typeof HERO_ATTACK_COOLDOWN_MS !== 'undefined') ? HERO_ATTACK_COOLDOWN_MS : 600;
-        hero.attackCooldown = Math.max(150, baseCooldown - (hero.attackSpeedBonus || 0));
-        let dmg  = hero.attack + Math.floor(Math.random() * 3);
+        let dmg  = scene.hero.attack + Math.floor(Math.random() * 3);
         const crit = scene.hero.critChance > 0 && Math.random() < scene.hero.critChance;
         if (crit) dmg *= 2;
 

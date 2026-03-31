@@ -55,10 +55,6 @@ class Hero {
         // Temporary buffs from brews [{stat, amount, msLeft}]
         this.tempBuffs = [];
 
-        // Attack cooldown
-        this.attackCooldown = 0;
-        this.attackSpeedBonus = 0;  // ms reduction from skills
-
         // Rendering
         this.graphics = scene.add.graphics();
         this.graphics.setDepth(5);
@@ -241,9 +237,8 @@ class Hero {
             dodgeChance:  this.dodgeChance,
             critChance:    this.critChance,
             xpMultiplier:  this.xpMultiplier,
-            counterChance:    this.counterChance,
-            thornsDamage:     this.thornsDamage,
-            attackSpeedBonus: this.attackSpeedBonus,
+            counterChance: this.counterChance,
+            thornsDamage:  this.thornsDamage,
             petBonusAtk:  this.petBonusAtk,
             petBonusHp:   this.petBonusHp,
             petBonusDef:  this.petBonusDef,
@@ -272,9 +267,8 @@ class Hero {
         this.dodgeChance  = stats.dodgeChance  || 0;
         this.critChance    = stats.critChance    || 0;
         this.xpMultiplier  = stats.xpMultiplier || 1;
-        this.counterChance    = stats.counterChance || 0;
-        this.thornsDamage     = stats.thornsDamage  || 0;
-        this.attackSpeedBonus = stats.attackSpeedBonus || 0;
+        this.counterChance = stats.counterChance || 0;
+        this.thornsDamage  = stats.thornsDamage  || 0;
         this.petBonusAtk  = stats.petBonusAtk  || 0;
         this.petBonusHp   = stats.petBonusHp   || 0;
         this.petBonusDef  = stats.petBonusDef  || 0;

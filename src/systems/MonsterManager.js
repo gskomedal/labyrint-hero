@@ -1,67 +1,6 @@
 // ─── Labyrint Hero – MonsterManager ──────────────────────────────────────────
 // Handles monster spawning, AI movement, pathfinding, and status effect ticking.
 
-/**
- * BFS pathfinding – returns the first step [dx, dy] toward the target,
- * or null if no path exists. Shared by monster AI and pet follow.
- */
-function bfsNextStep(startX, startY, goalX, goalY, maze, tileW, tileH, blockedFn) {
-    if (startX === goalX && startY === goalY) return null;
-    const key = (x, y) => y * tileW + x;
-    const visited = new Set();
-    visited.add(key(startX, startY));
-    const queue = [];
-    for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
-        const nx = startX + dx, ny = startY + dy;
-        if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
-        const t = maze[ny][nx];
-        if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
-        if (nx === goalX && ny === goalY) return [dx, dy];
-        if (blockedFn && blockedFn(nx, ny)) continue;
-        visited.add(key(nx, ny));
-        queue.push({ x: nx, y: ny, firstDx: dx, firstDy: dy });
-    }
-    const maxNodes = 600;
-    let head = 0;
-    while (head < queue.length && head < maxNodes) {
-        const cur = queue[head++];
-        for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
-            const nx = cur.x + dx, ny = cur.y + dy;
-            if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
-            const k = key(nx, ny);
-            if (visited.has(k)) continue;
-            const t = maze[ny][nx];
-            if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
-            if (nx === goalX && ny === goalY) return [cur.firstDx, cur.firstDy];
-            if (blockedFn && blockedFn(nx, ny)) continue;
-            visited.add(k);
-            queue.push({ x: nx, y: ny, firstDx: cur.firstDx, firstDy: cur.firstDy });
-        }
-    }
-    return null;
-}
-
-/**
- * Greedy fallback – tries to move one step closer to target.
- * Used when BFS can't find a path (e.g. target too far away).
- */
-function greedyStep(startX, startY, goalX, goalY, maze, tileW, tileH, blockedFn) {
-    const ddx = goalX - startX, ddy = goalY - startY;
-    const dirs = Math.abs(ddx) >= Math.abs(ddy)
-        ? [[Math.sign(ddx), 0], [0, Math.sign(ddy)], [0, -Math.sign(ddy)], [-Math.sign(ddx), 0]]
-        : [[0, Math.sign(ddy)], [Math.sign(ddx), 0], [-Math.sign(ddx), 0], [0, -Math.sign(ddy)]];
-    for (const [dx, dy] of dirs) {
-        const nx = startX + dx, ny = startY + dy;
-        if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
-        const t = maze[ny][nx];
-        if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
-        if (nx === goalX && ny === goalY) return [dx, dy];
-        if (blockedFn && blockedFn(nx, ny)) continue;
-        return [dx, dy];
-    }
-    return null;
-}
-
 class MonsterManager {
     constructor(scene) {
         this.scene = scene;
@@ -192,23 +131,14 @@ class MonsterManager {
     _moveMonster(m) {
         const scene = this.scene;
         if (!scene.hero.alive) return;
-
-        // Tick down attack cooldown
-        if (m.attackCooldown > 0) {
-            m.attackCooldown -= MONSTER_TICK_MS;
-        }
-
         const hx = scene.hero.gridX, hy = scene.hero.gridY;
         const dist = Math.abs(hx - m.gridX) + Math.abs(hy - m.gridY);
         if (dist > AGGRO_RADIUS || scene.fog[m.gridY][m.gridX] === FOG.DARK) return;
         if (dist === 1) {
-            if (m.attackCooldown <= 0) {
+            scene.combat.monsterAttack(m);
+            // Phase 2 boss attacks a second time each tick!
+            if (m.type === 'boss' && m.phase === 2 && scene.hero.alive) {
                 scene.combat.monsterAttack(m);
-                m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 600;
-                // Phase 2 boss attacks a second time!
-                if (m.type === 'boss' && m.phase === 2 && scene.hero.alive) {
-                    scene.combat.monsterAttack(m);
-                }
             }
             return;
         }
@@ -217,25 +147,25 @@ class MonsterManager {
         if (scene.pet && scene.pet.alive) {
             const petDist = Math.abs(scene.pet.gridX - m.gridX) + Math.abs(scene.pet.gridY - m.gridY);
             if (petDist === 1) {
-                if (m.attackCooldown <= 0) {
-                    scene.combat.monsterAttack(m);
-                    m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 600;
-                }
+                scene.combat.monsterAttack(m);
                 return;
             }
         }
 
-        const self = this;
-        const blocked = (nx, ny) => {
-            if (self.monsterAt(nx, ny)) return true;
-            if (scene.merchant && nx === scene.merchant.gridX && ny === scene.merchant.gridY) return true;
-            return false;
-        };
-        // Try BFS first, fall back to greedy if BFS can't find a path
-        const step = bfsNextStep(m.gridX, m.gridY, hx, hy, scene.maze, scene.tileW, scene.tileH, blocked)
-                  || greedyStep(m.gridX, m.gridY, hx, hy, scene.maze, scene.tileW, scene.tileH, blocked);
-        if (step) {
-            m.moveTo(m.gridX + step[0], m.gridY + step[1]);
+        const ddx = hx - m.gridX, ddy = hy - m.gridY;
+        const dirs = Math.abs(ddx) >= Math.abs(ddy)
+            ? [[Math.sign(ddx), 0], [0, Math.sign(ddy)], [0, -Math.sign(ddy)], [-Math.sign(ddx), 0]]
+            : [[0, Math.sign(ddy)], [Math.sign(ddx), 0], [-Math.sign(ddx), 0], [0, -Math.sign(ddy)]];
+
+        for (const [dx, dy] of dirs) {
+            const nx = m.gridX + dx, ny = m.gridY + dy;
+            if (nx < 0 || nx >= scene.tileW || ny < 0 || ny >= scene.tileH) continue;
+            const t = scene.maze[ny][nx];
+            if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
+            if (nx === hx && ny === hy) continue;
+            if (this.monsterAt(nx, ny)) continue;
+            if (scene.merchant && nx === scene.merchant.gridX && ny === scene.merchant.gridY) continue;
+            m.moveTo(nx, ny); break;
         }
     }
 

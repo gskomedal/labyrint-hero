@@ -56,8 +56,6 @@ const COLORS = {
 // Gameplay tuning
 const VISION_RADIUS   = 5;    // tiles
 const MONSTER_TICK_MS = 380;  // ms between monster AI ticks
-const COMBAT_COOLDOWN_MS = 600;  // ms between monster attacks on same target
-const HERO_ATTACK_COOLDOWN_MS = 600;  // ms between hero attacks (reducible via skills)
 const MOVE_DELAY_MS   = 140;  // ms between steps when key held
 const MOVE_ANIM_MS    = 90;   // ms for hero/monster slide tween
 

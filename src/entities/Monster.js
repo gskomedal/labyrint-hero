@@ -30,9 +30,6 @@ class Monster {
         this.phase   = 1;
         this.enraged = false;
 
-        // Combat cooldown – prevents attacking every tick
-        this.attackCooldown = 0;
-
         this.graphics = scene.add.graphics();
         this.hpBar    = scene.add.graphics();
         this.graphics.setDepth(3);
