@@ -258,10 +258,12 @@ class Pet {
         const dist = Math.abs(hero.gridX - this.gridX) + Math.abs(hero.gridY - this.gridY);
         if (dist <= 1) return;
 
-        const step = bfsNextStep(this.gridX, this.gridY, hero.gridX, hero.gridY, maze, tileW, tileH, (nx, ny) => {
+        const blocked = (nx, ny) => {
             if (monsters.some(m => m.alive && m.gridX === nx && m.gridY === ny)) return true;
             return false;
-        });
+        };
+        const step = bfsNextStep(this.gridX, this.gridY, hero.gridX, hero.gridY, maze, tileW, tileH, blocked)
+                  || greedyStep(this.gridX, this.gridY, hero.gridX, hero.gridY, maze, tileW, tileH, blocked);
         if (step) {
             this.moveTo(this.gridX + step[0], this.gridY + step[1]);
         }

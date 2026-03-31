@@ -10,7 +10,6 @@ function bfsNextStep(startX, startY, goalX, goalY, maze, tileW, tileH, blockedFn
     const key = (x, y) => y * tileW + x;
     const visited = new Set();
     visited.add(key(startX, startY));
-    // Each entry: { x, y, firstDx, firstDy } – track the first step direction
     const queue = [];
     for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
         const nx = startX + dx, ny = startY + dy;
@@ -22,8 +21,7 @@ function bfsNextStep(startX, startY, goalX, goalY, maze, tileW, tileH, blockedFn
         visited.add(key(nx, ny));
         queue.push({ x: nx, y: ny, firstDx: dx, firstDy: dy });
     }
-    // BFS with max depth to avoid performance issues on large mazes
-    const maxNodes = 200;
+    const maxNodes = 600;
     let head = 0;
     while (head < queue.length && head < maxNodes) {
         const cur = queue[head++];
@@ -40,7 +38,28 @@ function bfsNextStep(startX, startY, goalX, goalY, maze, tileW, tileH, blockedFn
             queue.push({ x: nx, y: ny, firstDx: cur.firstDx, firstDy: cur.firstDy });
         }
     }
-    return null; // No path found within limit
+    return null;
+}
+
+/**
+ * Greedy fallback – tries to move one step closer to target.
+ * Used when BFS can't find a path (e.g. target too far away).
+ */
+function greedyStep(startX, startY, goalX, goalY, maze, tileW, tileH, blockedFn) {
+    const ddx = goalX - startX, ddy = goalY - startY;
+    const dirs = Math.abs(ddx) >= Math.abs(ddy)
+        ? [[Math.sign(ddx), 0], [0, Math.sign(ddy)], [0, -Math.sign(ddy)], [-Math.sign(ddx), 0]]
+        : [[0, Math.sign(ddy)], [Math.sign(ddx), 0], [-Math.sign(ddx), 0], [0, -Math.sign(ddy)]];
+    for (const [dx, dy] of dirs) {
+        const nx = startX + dx, ny = startY + dy;
+        if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
+        const t = maze[ny][nx];
+        if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
+        if (nx === goalX && ny === goalY) return [dx, dy];
+        if (blockedFn && blockedFn(nx, ny)) continue;
+        return [dx, dy];
+    }
+    return null;
 }
 
 class MonsterManager {
@@ -185,7 +204,7 @@ class MonsterManager {
         if (dist === 1) {
             if (m.attackCooldown <= 0) {
                 scene.combat.monsterAttack(m);
-                m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 900;
+                m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 600;
                 // Phase 2 boss attacks a second time!
                 if (m.type === 'boss' && m.phase === 2 && scene.hero.alive) {
                     scene.combat.monsterAttack(m);
@@ -200,18 +219,21 @@ class MonsterManager {
             if (petDist === 1) {
                 if (m.attackCooldown <= 0) {
                     scene.combat.monsterAttack(m);
-                    m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 900;
+                    m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 600;
                 }
                 return;
             }
         }
 
         const self = this;
-        const step = bfsNextStep(m.gridX, m.gridY, hx, hy, scene.maze, scene.tileW, scene.tileH, (nx, ny) => {
+        const blocked = (nx, ny) => {
             if (self.monsterAt(nx, ny)) return true;
             if (scene.merchant && nx === scene.merchant.gridX && ny === scene.merchant.gridY) return true;
             return false;
-        });
+        };
+        // Try BFS first, fall back to greedy if BFS can't find a path
+        const step = bfsNextStep(m.gridX, m.gridY, hx, hy, scene.maze, scene.tileW, scene.tileH, blocked)
+                  || greedyStep(m.gridX, m.gridY, hx, hy, scene.maze, scene.tileW, scene.tileH, blocked);
         if (step) {
             m.moveTo(m.gridX + step[0], m.gridY + step[1]);
         }
