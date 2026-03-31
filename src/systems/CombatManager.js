@@ -161,12 +161,13 @@ class CombatManager {
 
     monsterAttack(monster) {
         const scene = this.scene;
+        const heroDist = Math.abs(monster.gridX - scene.hero.gridX) + Math.abs(monster.gridY - scene.hero.gridY);
 
-        // 25% chance monster targets the pet if adjacent
-        if (scene.pet && scene.pet.alive) {
+        // Monster targets pet when it can't reach the hero
+        if (scene.pet && scene.pet.alive && heroDist > 1) {
             const petDist = Math.abs(monster.gridX - scene.pet.gridX) + Math.abs(monster.gridY - scene.pet.gridY);
-            if (petDist === 1 && Math.random() < 0.25) {
-                const petDmg = Math.max(1, monster.attack - 1);
+            if (petDist === 1) {
+                const petDmg = Math.max(1, monster.attack);
                 const petDied = scene.pet.takeDamage(petDmg);
                 Audio.playHurt();
                 scene._floatingText(scene.pet.gridX, scene.pet.gridY, `-${petDmg}`, '#ffaadd');
