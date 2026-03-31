@@ -26,6 +26,11 @@ class Hero {
         this.counterChance = 0;  // counter-attack on hit (synergy)
         this.thornsDamage  = 0;  // damage reflected to attackers (synergy)
 
+        // Pet bonuses (from Dyrevokter skill path)
+        this.petBonusAtk = 0;
+        this.petBonusHp  = 0;
+        this.petBonusDef = 0;
+
         // Progression
         this.level    = 1;
         this.xp       = 0;
@@ -213,6 +218,9 @@ class Hero {
             xpMultiplier:  this.xpMultiplier,
             counterChance: this.counterChance,
             thornsDamage:  this.thornsDamage,
+            petBonusAtk:  this.petBonusAtk,
+            petBonusHp:   this.petBonusHp,
+            petBonusDef:  this.petBonusDef,
             gold:         this.gold,
             poisonTurns:  this.poisonTurns,
             burnTurns:    this.burnTurns,
@@ -239,6 +247,9 @@ class Hero {
         this.xpMultiplier  = stats.xpMultiplier || 1;
         this.counterChance = stats.counterChance || 0;
         this.thornsDamage  = stats.thornsDamage  || 0;
+        this.petBonusAtk  = stats.petBonusAtk  || 0;
+        this.petBonusHp   = stats.petBonusHp   || 0;
+        this.petBonusDef  = stats.petBonusDef  || 0;
         this.gold         = stats.gold         || 0;
         this.poisonTurns  = stats.poisonTurns  || 0;
         this.burnTurns    = stats.burnTurns    || 0;

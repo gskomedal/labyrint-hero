@@ -276,6 +276,23 @@ class Pet {
         }
     }
 
+    // ── Effective stats (base + hero's pet bonuses) ─────────────────────────
+
+    /** Get hero's pet skill bonuses */
+    _heroBonuses() {
+        const hero = this.scene.hero;
+        if (!hero) return { atk: 0, hp: 0, def: 0 };
+        return {
+            atk: hero.petBonusAtk || 0,
+            hp:  hero.petBonusHp  || 0,
+            def: hero.petBonusDef || 0,
+        };
+    }
+
+    get effectiveAttack() { return this.attack + this._heroBonuses().atk; }
+    get effectiveMaxHp()  { return this.maxHp  + this._heroBonuses().hp; }
+    get effectiveDef()    { return this._heroBonuses().def; }
+
     // ── Combat ────────────────────────────────────────────────────────────────
 
     /** Pet attacks an adjacent monster. Returns damage dealt or 0 */
@@ -284,7 +301,7 @@ class Pet {
             if (!m.alive) continue;
             const d = Math.abs(m.gridX - this.gridX) + Math.abs(m.gridY - this.gridY);
             if (d === 1) {
-                const dmg = Math.max(1, this.attack + Math.floor(Math.random() * 2));
+                const dmg = Math.max(1, this.effectiveAttack + Math.floor(Math.random() * 2));
                 return { monster: m, damage: dmg };
             }
         }
@@ -292,7 +309,8 @@ class Pet {
     }
 
     takeDamage(amount) {
-        this.hp -= amount;
+        const dmg = Math.max(1, amount - this.effectiveDef);
+        this.hp -= dmg;
         if (this.hp <= 0) {
             this.hp    = 0;
             this.alive = false;
@@ -328,7 +346,7 @@ class Pet {
     /** Revive pet at full HP (e.g. on new world) */
     revive(gridX, gridY) {
         this.alive = true;
-        this.hp    = this.maxHp;
+        this.hp    = this.effectiveMaxHp;
         this.gridX = gridX;
         this.gridY = gridY;
         if (!this.graphics || !this.graphics.scene) {

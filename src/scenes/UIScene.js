@@ -282,14 +282,16 @@ class UIScene extends Phaser.Scene {
         const pet = this.gameScene.pet;
         this.petHpGfx.clear();
         if (pet) {
-            const pLabel = pet.alive ? `${pet.petName} HP:${pet.hp}/${pet.maxHp} ATK:${pet.attack}` : `${pet.petName} (falt)`;
+            const eHp = pet.effectiveMaxHp, eAtk = pet.effectiveAttack, eDef = pet.effectiveDef;
+            const defStr = eDef > 0 ? ` DEF:${eDef}` : '';
+            const pLabel = pet.alive ? `${pet.petName} HP:${pet.hp}/${eHp} ATK:${eAtk}${defStr}` : `${pet.petName} (falt)`;
             this.petText.setText(pLabel);
             this.petText.setVisible(true);
             if (pet.alive) {
                 const phx = this.petText.x + this.petText.width + 6;
                 const phy = this.petText.y + 3;
                 const phw = 40;
-                const pFrac = pet.hp / pet.maxHp;
+                const pFrac = pet.hp / eHp;
                 this.petHpGfx.fillStyle(0x442233);
                 this.petHpGfx.fillRect(phx, phy, phw, 6);
                 this.petHpGfx.fillStyle(0xff88aa);

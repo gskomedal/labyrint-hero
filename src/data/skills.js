@@ -144,6 +144,41 @@ const SKILL_TREE_PATHS = [
             },
         ]
     },
+
+    // ── DYREVOKTER (Beast Keeper) ─────────────────────────────────────────────
+    {
+        id:    'dyrevokter',
+        name:  'Dyrevokter',
+        desc:  'Styrk ditt kjæledyr',
+        color: 0xffaa44,
+        icon:  'D',
+        tiers: [
+            {
+                id:       'beast_ferocity',
+                name:     'Villskap',
+                desc:     '+2 kjæledyr-\nangrep',
+                category: 'PET',
+                maxStack: 3,
+                apply(hero) { hero.petBonusAtk = (hero.petBonusAtk || 0) + 2; }
+            },
+            {
+                id:       'beast_vitality',
+                name:     'Dyrisk livskraft',
+                desc:     '+3 kjæledyr-HP\n+1 kjæledyr-forsvar',
+                category: 'PET',
+                maxStack: 2,
+                apply(hero) { hero.petBonusHp = (hero.petBonusHp || 0) + 3; hero.petBonusDef = (hero.petBonusDef || 0) + 1; }
+            },
+            {
+                id:       'beast_bond',
+                name:     'Sjelsbånd',
+                desc:     '+3 kjæledyr-angrep\n+3 kjæledyr-HP\n(krever T2)',
+                category: 'PET',
+                maxStack: 1,
+                apply(hero) { hero.petBonusAtk = (hero.petBonusAtk || 0) + 3; hero.petBonusHp = (hero.petBonusHp || 0) + 3; }
+            },
+        ]
+    },
 ];
 
 // ── Flat list for backward compat (save/load, apply) ──────────────────────────
@@ -230,6 +265,24 @@ const SKILL_SYNERGIES = [
         color: 0x9966ff,
         apply(hero) { hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.15); hero.visionRadius += 1; },
         unapply(hero) { hero.dodgeChance = Math.max(0, hero.dodgeChance - 0.15); hero.visionRadius -= 1; },
+    },
+    {
+        id:    'pack_leader',
+        name:  'Flokkleder',
+        desc:  '+2 Angrep, +2 kjæledyr-angrep',
+        paths: ['krigar', 'dyrevokter'],
+        color: 0xff7733,
+        apply(hero) { hero.attack += 2; hero.petBonusAtk = (hero.petBonusAtk || 0) + 2; },
+        unapply(hero) { hero.attack -= 2; hero.petBonusAtk = Math.max(0, (hero.petBonusAtk || 0) - 2); },
+    },
+    {
+        id:    'natures_ward',
+        name:  'Naturens vern',
+        desc:  '+2 kjæledyr-HP, +1 Forsvar',
+        paths: ['vokter', 'dyrevokter'],
+        color: 0x44aa88,
+        apply(hero) { hero.defense += 1; hero.petBonusHp = (hero.petBonusHp || 0) + 2; },
+        unapply(hero) { hero.defense -= 1; hero.petBonusHp = Math.max(0, (hero.petBonusHp || 0) - 2); },
     },
 ];
 
