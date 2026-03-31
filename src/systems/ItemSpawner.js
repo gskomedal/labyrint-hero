@@ -29,10 +29,12 @@ class ItemSpawner {
         if (!scene.pet) {
             const eggChance = scene.worldNum === 1 ? 0.8 : 0.35;
             if (Math.random() < eggChance) {
-                const idx = chestCount + 2;
-                if (idx < eligible.length) {
-                    this.spawnPetEgg(eligible[idx].x, eligible[idx].y);
-                }
+                // Find a free floor tile not used by chests or items
+                const eggTile = eligible.find(t =>
+                    !scene.chests.some(c => c.gridX === t.x && c.gridY === t.y) &&
+                    !scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)
+                );
+                if (eggTile) this.spawnPetEgg(eggTile.x, eggTile.y);
             }
         }
 

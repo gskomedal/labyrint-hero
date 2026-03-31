@@ -224,7 +224,7 @@ const ITEM_DEFS = {
             for (let y = 0; y < scene.tileH; y++)
                 for (let x = 0; x < scene.tileW; x++)
                     if (scene.fog[y][x] === FOG.DARK) scene.fog[y][x] = FOG.DIM;
-            scene._drawFog();
+            scene.mapRenderer.updateFog();
             return true;
         }
     },
