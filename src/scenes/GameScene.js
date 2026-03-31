@@ -230,7 +230,7 @@ class GameScene extends Phaser.Scene {
 
     /** Hero stats with pet data attached for save/load */
     _getFullStats() {
-        const stats = this._getFullStats();
+        const stats = this.hero.getStats();
         if (this.pet) stats.pet = this.pet.serialize();
         return stats;
     }
