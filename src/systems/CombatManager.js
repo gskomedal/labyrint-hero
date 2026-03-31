@@ -20,9 +20,11 @@ class CombatManager {
         const fDown     = Phaser.Input.Keyboard.JustDown(scene.altAtkKey);
         const touchAtk  = scene.game.registry.get('touch_attack');
         if (touchAtk) scene.game.registry.set('touch_attack', false);
-        if (!spaceDown && !fDown && !touchAtk) return;
 
-        // Enforce cooldown
+        const pressed = spaceDown || fDown || touchAtk;
+        if (!pressed) return;
+
+        // Enforce cooldown – but don't consume the press intent if cooldown active
         if (hero.attackCooldown > 0) return;
 
         const { dx, dy } = scene.hero.facing;
@@ -102,7 +104,8 @@ class CombatManager {
         const scene = this.scene;
         const hero = scene.hero;
         // Set attack cooldown (reduced by attackSpeedBonus from skills)
-        hero.attackCooldown = Math.max(150, HERO_ATTACK_COOLDOWN_MS - (hero.attackSpeedBonus || 0));
+        const baseCooldown = (typeof HERO_ATTACK_COOLDOWN_MS !== 'undefined') ? HERO_ATTACK_COOLDOWN_MS : 600;
+        hero.attackCooldown = Math.max(150, baseCooldown - (hero.attackSpeedBonus || 0));
         let dmg  = hero.attack + Math.floor(Math.random() * 3);
         const crit = scene.hero.critChance > 0 && Math.random() < scene.hero.critChance;
         if (crit) dmg *= 2;

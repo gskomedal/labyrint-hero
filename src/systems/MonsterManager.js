@@ -185,7 +185,7 @@ class MonsterManager {
         if (dist === 1) {
             if (m.attackCooldown <= 0) {
                 scene.combat.monsterAttack(m);
-                m.attackCooldown = COMBAT_COOLDOWN_MS;
+                m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 900;
                 // Phase 2 boss attacks a second time!
                 if (m.type === 'boss' && m.phase === 2 && scene.hero.alive) {
                     scene.combat.monsterAttack(m);
@@ -200,7 +200,7 @@ class MonsterManager {
             if (petDist === 1) {
                 if (m.attackCooldown <= 0) {
                     scene.combat.monsterAttack(m);
-                    m.attackCooldown = COMBAT_COOLDOWN_MS;
+                    m.attackCooldown = (typeof COMBAT_COOLDOWN_MS !== 'undefined') ? COMBAT_COOLDOWN_MS : 900;
                 }
                 return;
             }
