@@ -6,7 +6,8 @@
 
 ### Feilrettinger
 - **HUD overlapper spillkartet (#30):** Kameraets viewport er nå forskjøvet 54px ned slik at kartinnhold ikke skjules bak HUD-baren
-- **Helse øker ved utstyrsbytte og level-up (#31):** Utstyr og ferdigheter som gir maks-hjerter øker nå kun kapasiteten, uten å helbrede spilleren. Utstyrsbonuser og synergier dobles ikke lenger ved lagring/lasting eller verdensovergang
+- **Helse øker ved utstyrsbytte og level-up (#31):** Utstyr og ferdigheter som gir maks-hjerter øker nå kun kapasiteten, uten å helbrede spilleren
+- **Utstyrsbonuser er nå midlertidige (#31):** Attack, defense og maxHearts fra utstyr lagres som base stats uten utstyrsbonuser, og påføres kun mens utstyret er aktivt. Forhindrer permanent stacking ved lagring/lasting
 
 ---
 

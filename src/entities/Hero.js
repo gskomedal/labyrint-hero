@@ -188,6 +188,14 @@ class Hero {
     // ── Serialisation ─────────────────────────────────────────────────────────
 
     getStats() {
+        // Subtract equipment bonuses so we save base stats only.
+        // Equipment is serialised separately and re-applied on load.
+        const eq = this.inventory.equipped;
+        const eqAtk    = (eq.weapon && eq.weapon.atk    || 0) + (eq.armor && eq.armor.atk    || 0);
+        const eqDef    = (eq.weapon && eq.weapon.def    || 0) + (eq.armor && eq.armor.def    || 0);
+        const eqHearts = (eq.weapon && eq.weapon.hearts || 0) + (eq.armor && eq.armor.hearts || 0);
+
+        const baseMaxHearts = this.maxHearts - eqHearts;
         return {
             race:         this.race,
             heroName:     this.heroName,
@@ -195,10 +203,10 @@ class Hero {
             level:        this.level,
             xp:           this.xp,
             xpToNext:     this.xpToNext,
-            hearts:       this.hearts,
-            maxHearts:    this.maxHearts,
-            attack:       this.attack,
-            defense:      this.defense,
+            hearts:       Math.min(this.hearts, baseMaxHearts),
+            maxHearts:    baseMaxHearts,
+            attack:       this.attack  - eqAtk,
+            defense:      this.defense - eqDef,
             visionRadius: this.visionRadius,
             dodgeChance:  this.dodgeChance,
             critChance:    this.critChance,
@@ -223,7 +231,6 @@ class Hero {
         this.xp           = stats.xp;
         this.xpToNext     = stats.xpToNext;
         this.maxHearts    = stats.maxHearts;
-        this.hearts       = fullHeal ? stats.maxHearts : Math.max(1, stats.hearts);
         this.attack       = stats.attack;
         this.defense      = stats.defense      || 0;
         this.visionRadius = stats.visionRadius || VISION_RADIUS;
@@ -238,7 +245,10 @@ class Hero {
         this.slowTurns    = stats.slowTurns    || 0;
         this.stunTurns    = stats.stunTurns    || 0;
         this.skills       = stats.skills       ? [...stats.skills] : [];
+        // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
+        // Set hearts after equipment is applied so maxHearts includes equipment bonus
+        this.hearts       = fullHeal ? this.maxHearts : Math.min(Math.max(1, stats.hearts), this.maxHearts);
         this._draw();
     }
 
