@@ -2,6 +2,26 @@
 
 ---
 
+## v0.18 – 2026-03-31
+
+### Nye funksjoner
+- **Kjæledyr-system (#32):** Finn et mystisk egg i labyrinten og få en følgesvenn:
+  - Fire kjæledyrtyper: Rev, Katt, Drage og Ugle – med unike sprites og stats
+  - Kjæledyret følger helten automatisk gjennom labyrinten
+  - Angriper monstre som er i nærheten (1 rute)
+  - Monstre kan angripe kjæledyret (25% sjanse når nærme)
+  - Vises i HUD med navn, HP-bar og angrepsverdi
+  - Vises som rosa prikk på minikartet
+  - Lagres og gjenopprettes mellom verdener
+  - Egg spawner med 80% sjanse i verden 1, deretter 35%
+
+### Feilrettinger
+- **HUD overlapper spillkartet (#30):** Kameraets viewport er nå forskjøvet 54px ned slik at kartinnhold ikke skjules bak HUD-baren
+- **Helse øker ved utstyrsbytte og level-up (#31):** Utstyr og ferdigheter som gir maks-hjerter øker nå kun kapasiteten, uten å helbrede spilleren
+- **Utstyrsbonuser er nå midlertidige (#31):** Attack, defense og maxHearts fra utstyr lagres som base stats uten utstyrsbonuser, og påføres kun mens utstyret er aktivt. Forhindrer permanent stacking ved lagring/lasting
+
+---
+
 ## v0.17 – 2026-03-30
 
 ### Tekniske endringer

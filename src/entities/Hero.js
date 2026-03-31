@@ -26,6 +26,11 @@ class Hero {
         this.counterChance = 0;  // counter-attack on hit (synergy)
         this.thornsDamage  = 0;  // damage reflected to attackers (synergy)
 
+        // Pet bonuses (from Dyrevokter skill path)
+        this.petBonusAtk = 0;
+        this.petBonusHp  = 0;
+        this.petBonusDef = 0;
+
         // Progression
         this.level    = 1;
         this.xp       = 0;
@@ -188,6 +193,14 @@ class Hero {
     // ── Serialisation ─────────────────────────────────────────────────────────
 
     getStats() {
+        // Subtract equipment bonuses so we save base stats only.
+        // Equipment is serialised separately and re-applied on load.
+        const eq = this.inventory.equipped;
+        const eqAtk    = (eq.weapon && eq.weapon.atk    || 0) + (eq.armor && eq.armor.atk    || 0);
+        const eqDef    = (eq.weapon && eq.weapon.def    || 0) + (eq.armor && eq.armor.def    || 0);
+        const eqHearts = (eq.weapon && eq.weapon.hearts || 0) + (eq.armor && eq.armor.hearts || 0);
+
+        const baseMaxHearts = this.maxHearts - eqHearts;
         return {
             race:         this.race,
             heroName:     this.heroName,
@@ -195,16 +208,19 @@ class Hero {
             level:        this.level,
             xp:           this.xp,
             xpToNext:     this.xpToNext,
-            hearts:       this.hearts,
-            maxHearts:    this.maxHearts,
-            attack:       this.attack,
-            defense:      this.defense,
+            hearts:       Math.min(this.hearts, baseMaxHearts),
+            maxHearts:    baseMaxHearts,
+            attack:       this.attack  - eqAtk,
+            defense:      this.defense - eqDef,
             visionRadius: this.visionRadius,
             dodgeChance:  this.dodgeChance,
             critChance:    this.critChance,
             xpMultiplier:  this.xpMultiplier,
             counterChance: this.counterChance,
             thornsDamage:  this.thornsDamage,
+            petBonusAtk:  this.petBonusAtk,
+            petBonusHp:   this.petBonusHp,
+            petBonusDef:  this.petBonusDef,
             gold:         this.gold,
             poisonTurns:  this.poisonTurns,
             burnTurns:    this.burnTurns,
@@ -223,7 +239,6 @@ class Hero {
         this.xp           = stats.xp;
         this.xpToNext     = stats.xpToNext;
         this.maxHearts    = stats.maxHearts;
-        this.hearts       = fullHeal ? stats.maxHearts : Math.max(1, stats.hearts);
         this.attack       = stats.attack;
         this.defense      = stats.defense      || 0;
         this.visionRadius = stats.visionRadius || VISION_RADIUS;
@@ -232,13 +247,19 @@ class Hero {
         this.xpMultiplier  = stats.xpMultiplier || 1;
         this.counterChance = stats.counterChance || 0;
         this.thornsDamage  = stats.thornsDamage  || 0;
+        this.petBonusAtk  = stats.petBonusAtk  || 0;
+        this.petBonusHp   = stats.petBonusHp   || 0;
+        this.petBonusDef  = stats.petBonusDef  || 0;
         this.gold         = stats.gold         || 0;
         this.poisonTurns  = stats.poisonTurns  || 0;
         this.burnTurns    = stats.burnTurns    || 0;
         this.slowTurns    = stats.slowTurns    || 0;
         this.stunTurns    = stats.stunTurns    || 0;
         this.skills       = stats.skills       ? [...stats.skills] : [];
+        // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
+        // Set hearts after equipment is applied so maxHearts includes equipment bonus
+        this.hearts       = fullHeal ? this.maxHearts : Math.min(Math.max(1, stats.hearts), this.maxHearts);
         this._draw();
     }
 

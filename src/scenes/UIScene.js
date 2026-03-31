@@ -45,6 +45,12 @@ class UIScene extends Phaser.Scene {
         });
         this.statusText.setVisible(false);
 
+        // Pet info
+        this.petText = this.add.text(W / 2 - 60, 30, '', {
+            fontSize: '10px', color: '#ffaadd', fontFamily: 'monospace'
+        });
+        this.petHpGfx = this.add.graphics();
+
         // Settings gear button
         const gearBtn = this.add.text(W - 14, 10, '⚙', { fontSize: '18px', color: '#445566', fontFamily: 'monospace' })
             .setOrigin(1, 0)
@@ -175,6 +181,14 @@ class UIScene extends Phaser.Scene {
             g.fillRect(px, py, sc, sc);
         }
 
+        // Pet (pink dot)
+        if (gs.pet && gs.pet.alive) {
+            const ppx = mx + gs.pet.gridX * sc;
+            const ppy = my + gs.pet.gridY * sc;
+            g.fillStyle(0xffaadd);
+            g.fillRect(ppx, ppy, sc, sc);
+        }
+
         // Hero (bright white dot)
         const hpx = mx + gs.hero.gridX * sc;
         const hpy = my + gs.hero.gridY * sc;
@@ -218,24 +232,23 @@ class UIScene extends Phaser.Scene {
     refresh() {
         if (!this.gameScene?.hero) return;
         const hero  = this.gameScene.hero;
-        const stats = hero.getStats();
         const W     = this.cameras.main.width;
 
         // ── Hearts ────────────────────────────────────────────────────────────
         const g = this.heartGfx;
         g.clear();
         const hs = 15, gap = 3, sx = 10, sy = 10;
-        for (let i = 0; i < stats.maxHearts; i++) {
+        for (let i = 0; i < hero.maxHearts; i++) {
             const x = sx + i * (hs + gap);
-            g.fillStyle(i < stats.hearts ? COLORS.HEART_FULL : COLORS.HEART_EMPTY);
+            g.fillStyle(i < hero.hearts ? COLORS.HEART_FULL : COLORS.HEART_EMPTY);
             g.fillRect(x, sy + 4, hs, hs - 4);
             g.fillRect(x + 2, sy + 2, 5, 4);
             g.fillRect(x + hs - 7, sy + 2, 5, 4);
         }
 
         // ── XP bar ────────────────────────────────────────────────────────────
-        const xpX = 10, xpY = 38, xpW = Math.min(220, stats.maxHearts * 22);
-        const frac = stats.xpToNext > 0 ? stats.xp / stats.xpToNext : 0;
+        const xpX = 10, xpY = 38, xpW = Math.min(220, hero.maxHearts * 22);
+        const frac = hero.xpToNext > 0 ? hero.xp / hero.xpToNext : 0;
         this.xpBg.clear();
         this.xpBg.fillStyle(COLORS.XP_BG);
         this.xpBg.fillRect(xpX, xpY, xpW, 8);
@@ -245,8 +258,8 @@ class UIScene extends Phaser.Scene {
 
         // ── Labels ────────────────────────────────────────────────────────────
         this.worldText.setText(`Verden ${this.gameScene.worldNum}`);
-        this.levelText.setText(`Nivå ${stats.level}  XP ${stats.xp}/${stats.xpToNext}`);
-        this.atkText.setText(`ATK ${stats.attack}  DEF ${stats.defense}  Syn ${stats.visionRadius}`);
+        this.levelText.setText(`Nivå ${hero.level}  XP ${hero.xp}/${hero.xpToNext}`);
+        this.atkText.setText(`ATK ${hero.attack}  DEF ${hero.defense}  Syn ${hero.visionRadius}`);
         this.goldText.setText(`💰 ${hero.gold}g`);
 
         // ── Equipped items ─────────────────────────────────────────────────────
@@ -264,6 +277,29 @@ class UIScene extends Phaser.Scene {
             return r && RARITIES.indexOf(r) > best ? RARITIES.indexOf(r) : best;
         }, -1);
         this.eqText.setColor(bestRarity > 0 ? RARITIES[bestRarity].textColor : '#556677');
+
+        // ── Pet info ──────────────────────────────────────────────────────────
+        const pet = this.gameScene.pet;
+        this.petHpGfx.clear();
+        if (pet) {
+            const eHp = pet.effectiveMaxHp, eAtk = pet.effectiveAttack, eDef = pet.effectiveDef;
+            const defStr = eDef > 0 ? ` DEF:${eDef}` : '';
+            const pLabel = pet.alive ? `${pet.petName} HP:${pet.hp}/${eHp} ATK:${eAtk}${defStr}` : `${pet.petName} (falt)`;
+            this.petText.setText(pLabel);
+            this.petText.setVisible(true);
+            if (pet.alive) {
+                const phx = this.petText.x + this.petText.width + 6;
+                const phy = this.petText.y + 3;
+                const phw = 40;
+                const pFrac = pet.hp / eHp;
+                this.petHpGfx.fillStyle(0x442233);
+                this.petHpGfx.fillRect(phx, phy, phw, 6);
+                this.petHpGfx.fillStyle(0xff88aa);
+                this.petHpGfx.fillRect(phx, phy, Math.floor(phw * pFrac), 6);
+            }
+        } else {
+            this.petText.setVisible(false);
+        }
 
         // ── Status effect indicators ──────────────────────────────────────────
         const effects = [];

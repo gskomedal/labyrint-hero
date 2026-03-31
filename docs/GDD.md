@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.17
-**Sist oppdatert:** 2026-03-30
+**Versjon:** 0.18
+**Sist oppdatert:** 2026-03-31
 
 ---
 
@@ -43,6 +43,7 @@ src/
   systems/InputHandler.js   – tastatur/touch-inndata, bevegelse, zoom
   entities/Hero.js          – spillerkarakter
   entities/Monster.js       – fiender med unike sprites per type
+  entities/Pet.js           – kjæledyr-følgesvenn (rev, katt, drage, ugle)
   scenes/
     MenuScene.js
     CharacterCreatorScene.js
@@ -113,6 +114,22 @@ Kun ekstra passasje-vegger kan være SECRET/CRACKED/DOOR – DFS-stien er alltid
 - **XP-kurve:** `XP_BASE = 100`, vokser med `XP_GROWTH = 1.55` per nivå → merkbart slakere progresjon
 - **Nivå opp:** Åpner SkillScene (velg én av tre tilfeldige evner). **Ingen automatisk stats-boost** – all styrke kommer fra evner og utstyr.
 - **Facing-retning:** Siste bevegelsesretning brukes av SPACE/F og pilskyting
+
+### Kjæledyr-følgesvenn
+Helten kan finne et mystisk egg i labyrinten. Egget klekkes til et tilfeldig kjæledyr som følger helten.
+
+| Type | Navn | Farge | Angrep | HP |
+|------|------|-------|--------|----|
+| fox | Rev | Oransje | 1 | 4 |
+| cat | Katt | Gyllen | 1 | 3 |
+| dragon | Drage | Rød | 2 | 5 |
+| owl | Ugle | Blå | 1 | 3 |
+
+- **Oppdagelse:** Egg spawner på gulvet (80% sjanse i verden 1, 35% deretter). Kun om helten ikke allerede har et kjæledyr.
+- **AI:** Følger helten (beveger seg ett steg mot helten per monster-tick). Angriper monster som er innen 1 rute.
+- **Kamp:** Kjæledyret gjør automatisk skade mot nærliggende monstre. Monstre har 25% sjanse for å angripe kjæledyret i stedet for helten.
+- **Død:** Kjæledyret kan dø. Det gjenopplives med full HP ved neste verdensovergang.
+- **Persistens:** Lagres med hero-stats mellom verdener og sessions.
 
 ### Kamp – skalering
 Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner er nødvendig for å overleve videre. Design-målet er at boss alltid skal kreve ca. halvparten av heltens hjerter selv med OK utstyr.

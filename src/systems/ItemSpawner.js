@@ -25,7 +25,20 @@ class ItemSpawner {
         const toolStart  = chestCount;
         this._placeTools(eligible, Math.min(toolStart, eligible.length));
 
-        // 3. Hidden spike traps
+        // 3. Pet egg (one per world, only if hero has no pet)
+        if (!scene.pet) {
+            const eggChance = scene.worldNum === 1 ? 0.8 : 0.35;
+            if (Math.random() < eggChance) {
+                // Find a free floor tile not used by chests or items
+                const eggTile = eligible.find(t =>
+                    !scene.chests.some(c => c.gridX === t.x && c.gridY === t.y) &&
+                    !scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)
+                );
+                if (eggTile) this.spawnPetEgg(eggTile.x, eggTile.y);
+            }
+        }
+
+        // 4. Hidden spike traps
         const mods = scene._diffMods();
         const baseTrapCount = scene.difficulty === 'easy' && scene.worldNum <= 1
             ? 0
@@ -343,6 +356,57 @@ class ItemSpawner {
             g.fillCircle(cx - 3, cy - 3, s / 10);
         } else {
             g.fillRoundedRect(px + 6, py + 6, s - 12, s - 12, 4);
+        }
+    }
+
+    // ── Pet egg spawning ────────────────────────────────────────────────────
+
+    spawnPetEgg(gx, gy) {
+        const scene = this.scene;
+        if (scene.itemObjects.some(o => o.gridX === gx && o.gridY === gy)) return;
+
+        const g  = scene.add.graphics();
+        g.setDepth(2);
+        const px = gx * TILE_SIZE, py = gy * TILE_SIZE, s = TILE_SIZE;
+
+        // Glowing background
+        g.fillStyle(0xffaadd, 0.2);
+        g.fillCircle(px + s / 2, py + s / 2, s / 2);
+
+        // Egg shape
+        const cx = px + s / 2, cy = py + s / 2 + 2;
+        g.fillStyle(0xffddee);
+        g.fillEllipse(cx, cy, 8, 10);
+        // Spots
+        g.fillStyle(0xffaacc);
+        g.fillCircle(cx - 3, cy - 3, 2);
+        g.fillCircle(cx + 2, cy + 1, 2);
+        g.fillCircle(cx - 1, cy + 4, 1);
+        // Shine
+        g.fillStyle(0xffffff, 0.5);
+        g.fillCircle(cx - 2, cy - 5, 2);
+
+        scene.itemObjects.push({ gridX: gx, gridY: gy, item: ITEM_DEFS.pet_egg, graphic: g, isPetEgg: true });
+    }
+
+    checkPetEggPickup() {
+        const scene = this.scene;
+        if (scene.pet) return;
+        const hx = scene.hero.gridX, hy = scene.hero.gridY;
+        for (let i = scene.itemObjects.length - 1; i >= 0; i--) {
+            const obj = scene.itemObjects[i];
+            if (!obj.isPetEgg || obj.gridX !== hx || obj.gridY !== hy) continue;
+
+            Audio.playPickup();
+            obj.graphic.destroy();
+            scene.itemObjects.splice(i, 1);
+
+            // Hatch a random pet
+            const types = Object.keys(PET_TYPES);
+            const typeId = types[Math.floor(Math.random() * types.length)];
+            scene.pet = new Pet(scene, hx, hy, typeId);
+            scene._floatingText(hx, hy, `🥚 ${scene.pet.petName} ble med deg!`, '#ffaadd');
+            return;
         }
     }
 

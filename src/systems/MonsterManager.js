@@ -139,6 +139,15 @@ class MonsterManager {
             return;
         }
 
+        // Attack pet if adjacent and can't reach hero
+        if (scene.pet && scene.pet.alive) {
+            const petDist = Math.abs(scene.pet.gridX - m.gridX) + Math.abs(scene.pet.gridY - m.gridY);
+            if (petDist === 1) {
+                scene.combat.monsterAttack(m);
+                return;
+            }
+        }
+
         const ddx = hx - m.gridX, ddy = hy - m.gridY;
         const dirs = Math.abs(ddx) >= Math.abs(ddy)
             ? [[Math.sign(ddx), 0], [0, Math.sign(ddy)], [0, -Math.sign(ddy)], [-Math.sign(ddx), 0]]

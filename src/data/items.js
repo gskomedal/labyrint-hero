@@ -224,7 +224,7 @@ const ITEM_DEFS = {
             for (let y = 0; y < scene.tileH; y++)
                 for (let x = 0; x < scene.tileW; x++)
                     if (scene.fog[y][x] === FOG.DARK) scene.fog[y][x] = FOG.DIM;
-            scene._drawFog();
+            scene.mapRenderer.updateFog();
             return true;
         }
     },
@@ -236,6 +236,14 @@ const ITEM_DEFS = {
             hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
             return true;
         }
+    },
+
+    // ── Pet eggs ──────────────────────────────────────────────────────────────
+    pet_egg: {
+        id: 'pet_egg', name: 'Kjæledyr-egg', type: 'consumable',
+        color: 0xffaadd, desc: 'Et mystisk egg. Brukes automatisk.', tier: 2,
+        isPetEgg: true,
+        use() { return false; }  // Handled by ItemSpawner on pickup
     },
 
     // ── Tools (in-world use, not manual use from inventory) ───────────────────

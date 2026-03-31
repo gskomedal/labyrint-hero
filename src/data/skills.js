@@ -62,7 +62,7 @@ const SKILL_TREE_PATHS = [
                 desc:     '+1 Forsvar\n+1 Hjerte',
                 category: 'DEF',
                 maxStack: 2,
-                apply(hero) { hero.defense += 1; hero.maxHearts++; hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); }
+                apply(hero) { hero.defense += 1; hero.maxHearts++; }
             },
             {
                 id:       'iron_health',
@@ -70,7 +70,7 @@ const SKILL_TREE_PATHS = [
                 desc:     '+2 maks hjerter\n(krever T2)',
                 category: 'HP',
                 maxStack: 1,
-                apply(hero) { hero.maxHearts += 2; hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); }
+                apply(hero) { hero.maxHearts += 2; }
             },
         ]
     },
@@ -141,6 +141,41 @@ const SKILL_TREE_PATHS = [
                 category: 'HP',
                 maxStack: 99,
                 apply(hero) { hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); }
+            },
+        ]
+    },
+
+    // ── DYREVOKTER (Beast Keeper) ─────────────────────────────────────────────
+    {
+        id:    'dyrevokter',
+        name:  'Dyrevokter',
+        desc:  'Styrk ditt kjæledyr',
+        color: 0xffaa44,
+        icon:  'D',
+        tiers: [
+            {
+                id:       'beast_ferocity',
+                name:     'Villskap',
+                desc:     '+2 kjæledyr-\nangrep',
+                category: 'PET',
+                maxStack: 3,
+                apply(hero) { hero.petBonusAtk = (hero.petBonusAtk || 0) + 2; }
+            },
+            {
+                id:       'beast_vitality',
+                name:     'Dyrisk livskraft',
+                desc:     '+3 kjæledyr-HP\n+1 kjæledyr-forsvar',
+                category: 'PET',
+                maxStack: 2,
+                apply(hero) { hero.petBonusHp = (hero.petBonusHp || 0) + 3; hero.petBonusDef = (hero.petBonusDef || 0) + 1; }
+            },
+            {
+                id:       'beast_bond',
+                name:     'Sjelsbånd',
+                desc:     '+3 kjæledyr-angrep\n+3 kjæledyr-HP\n(krever T2)',
+                category: 'PET',
+                maxStack: 1,
+                apply(hero) { hero.petBonusAtk = (hero.petBonusAtk || 0) + 3; hero.petBonusHp = (hero.petBonusHp || 0) + 3; }
             },
         ]
     },
@@ -219,7 +254,7 @@ const SKILL_SYNERGIES = [
         desc:  '+2 Angrep, +1 Forsvar, +1 Hjerte',
         paths: ['krigar', 'vokter'],
         color: 0xff6644,
-        apply(hero) { hero.attack += 2; hero.defense += 1; hero.maxHearts += 1; hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); },
+        apply(hero) { hero.attack += 2; hero.defense += 1; hero.maxHearts += 1; },
         unapply(hero) { hero.attack -= 2; hero.defense -= 1; hero.maxHearts -= 1; hero.hearts = Math.min(hero.hearts, hero.maxHearts); },
     },
     {
@@ -230,6 +265,24 @@ const SKILL_SYNERGIES = [
         color: 0x9966ff,
         apply(hero) { hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.15); hero.visionRadius += 1; },
         unapply(hero) { hero.dodgeChance = Math.max(0, hero.dodgeChance - 0.15); hero.visionRadius -= 1; },
+    },
+    {
+        id:    'pack_leader',
+        name:  'Flokkleder',
+        desc:  '+2 Angrep, +2 kjæledyr-angrep',
+        paths: ['krigar', 'dyrevokter'],
+        color: 0xff7733,
+        apply(hero) { hero.attack += 2; hero.petBonusAtk = (hero.petBonusAtk || 0) + 2; },
+        unapply(hero) { hero.attack -= 2; hero.petBonusAtk = Math.max(0, (hero.petBonusAtk || 0) - 2); },
+    },
+    {
+        id:    'natures_ward',
+        name:  'Naturens vern',
+        desc:  '+2 kjæledyr-HP, +1 Forsvar',
+        paths: ['vokter', 'dyrevokter'],
+        color: 0x44aa88,
+        apply(hero) { hero.defense += 1; hero.petBonusHp = (hero.petBonusHp || 0) + 2; },
+        unapply(hero) { hero.defense -= 1; hero.petBonusHp = Math.max(0, (hero.petBonusHp || 0) - 2); },
     },
 ];
 

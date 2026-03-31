@@ -216,7 +216,6 @@ class Inventory {
         if (item.def)    hero.defense   += item.def;
         if (item.hearts) {
             hero.maxHearts += item.hearts;
-            hero.hearts    += item.hearts;
         }
     }
 

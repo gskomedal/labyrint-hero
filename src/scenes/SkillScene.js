@@ -1,5 +1,5 @@
 // ─── Labyrint Hero – SkillScene (Skill Tree) ──────────────────────────────────
-// Shows a 4-column × 3-tier skill tree on level-up.
+// Shows a 5-column × 3-tier skill tree on level-up.
 // Available skills glow; locked skills are greyed with a lock indicator.
 // Player picks exactly one skill per level-up.
 
@@ -18,7 +18,7 @@ class SkillScene extends Phaser.Scene {
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
 
         // ── Panel ─────────────────────────────────────────────────────────────
-        const panelW = Math.min(W - 20, 760);
+        const panelW = Math.min(W - 10, 940);
         const panelH = 430;
         const px = cx - panelW / 2;
         const py = cy - panelH / 2;
@@ -37,8 +37,9 @@ class SkillScene extends Phaser.Scene {
 
         this.add.rectangle(cx, py + 38, panelW - 30, 1, 0x2a2060);
 
-        // ── Draw the 4-path tree ───────────────────────────────────────────────
-        const colW = panelW / 4;
+        // ── Draw the 5-path tree ───────────────────────────────────────────────
+        const colW = panelW / SKILL_TREE_PATHS.length;
+        this._colW = colW;
         SKILL_TREE_PATHS.forEach((path, pi) => {
             const colCX = px + pi * colW + colW / 2;
             this._drawPath(path, pi, colCX, py + 50, panelH - 80);
@@ -58,13 +59,14 @@ class SkillScene extends Phaser.Scene {
         const hero    = this.heroRef;
         const colColor = path.color;
         const hexCol  = '#' + colColor.toString(16).padStart(6, '0');
+        const hdrW = Math.min(160, this._colW - 8);
 
         // Path header
         const hdrBg = this.add.graphics();
         hdrBg.fillStyle(colColor, 0.12);
-        hdrBg.fillRoundedRect(colCX - 80, areaTop, 160, 26, 4);
+        hdrBg.fillRoundedRect(colCX - hdrW / 2, areaTop, hdrW, 26, 4);
         hdrBg.lineStyle(1, colColor, 0.5);
-        hdrBg.strokeRoundedRect(colCX - 80, areaTop, 160, 26, 4);
+        hdrBg.strokeRoundedRect(colCX - hdrW / 2, areaTop, hdrW, 26, 4);
 
         this.add.text(colCX, areaTop + 6, `── ${path.name.toUpperCase()} ──`, {
             fontSize: '11px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
@@ -74,7 +76,7 @@ class SkillScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         const tierH    = 90;
-        const cardW    = 148, cardH = 80;
+        const cardW    = Math.min(148, this._colW - 12), cardH = 80;
         const tierGapY = areaTop + 32;
 
         path.tiers.forEach((skill, tierIndex) => {
