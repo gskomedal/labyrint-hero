@@ -275,7 +275,8 @@ class Inventory {
             const item = restoreEquip(data.equipped[slot]);
             if (item) {
                 inv.equipped[slot] = item;
-                inv._apply(item, hero);
+                // Don't call _apply() here – saved hero stats already include
+                // equipment bonuses, so re-applying would double them.
             }
         });
 

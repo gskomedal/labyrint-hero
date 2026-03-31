@@ -61,8 +61,11 @@ class GameScene extends Phaser.Scene {
         this._shownSynergies = [];
         if (this.heroStats) {
             this.hero.applyStats(this.heroStats, true);
-            applySynergies(this.hero);
-            this._shownSynergies = getActiveSynergies(this.hero).map(s => s.id);
+            // Mark active synergies as already applied – saved stats already
+            // include their bonuses, so we must NOT re-apply them.
+            const active = getActiveSynergies(this.hero);
+            this.hero._appliedSynergies = active.map(s => s.id);
+            this._shownSynergies = active.map(s => s.id);
         } else {
             this.hero.applyRace(this.raceId);
             this.hero.heroName = this.heroName;
