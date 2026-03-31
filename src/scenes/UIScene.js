@@ -307,6 +307,11 @@ class UIScene extends Phaser.Scene {
         if (hero.burnTurns > 0)   effects.push(`🔥 Brann (${hero.burnTurns})`);
         if (hero.slowTurns > 0)   effects.push(`❄ Frostbitt (${hero.slowTurns})`);
         if (hero.stunTurns > 0)   effects.push(`⚡ Lammet (${hero.stunTurns})`);
+        for (const b of (hero.tempBuffs || [])) {
+            const label = b.stat === 'attack' ? 'ATK' : b.stat === 'defense' ? 'DEF' : b.stat;
+            const secs = Math.ceil((b.msLeft || 0) / 1000);
+            effects.push(`+${b.amount} ${label} (${secs}s)`);
+        }
         if (effects.length > 0) {
             this.statusText.setText(effects.join('  '));
             this.statusText.setVisible(true);

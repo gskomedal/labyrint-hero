@@ -19,7 +19,7 @@ class SkillScene extends Phaser.Scene {
 
         // ── Panel ─────────────────────────────────────────────────────────────
         const panelW = Math.min(W - 10, 940);
-        const panelH = 430;
+        const panelH = Math.min(H - 10, 380);
         const px = cx - panelW / 2;
         const py = cy - panelH / 2;
 
@@ -46,7 +46,7 @@ class SkillScene extends Phaser.Scene {
         });
 
         // ── Synergies display ──────────────────────────────────────────────────
-        this._drawSynergies(cx, py + panelH - 60, panelW);
+        this._drawSynergies(cx, py + panelH - 50, panelW);
 
         // ── Footer ────────────────────────────────────────────────────────────
         this.add.rectangle(cx, py + panelH - 24, panelW - 30, 1, 0x1a1840);
@@ -75,9 +75,9 @@ class SkillScene extends Phaser.Scene {
             fontSize: '8px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        const tierH    = 90;
-        const cardW    = Math.min(148, this._colW - 12), cardH = 80;
-        const tierGapY = areaTop + 32;
+        const tierH    = 72;
+        const cardW    = Math.min(148, this._colW - 12), cardH = 62;
+        const tierGapY = areaTop + 28;
 
         path.tiers.forEach((skill, tierIndex) => {
             const cardY  = tierGapY + tierIndex * (tierH + 10);
@@ -90,10 +90,10 @@ class SkillScene extends Phaser.Scene {
             // Connector arrow between tiers
             if (tierIndex < path.tiers.length - 1) {
                 const arrowG = this.add.graphics();
-                const ay = cardY + cardH + 2;
+                const ay = cardY + cardH + 1;
                 const unlNext = !isSkillUnlocked(hero, pathIndex, tierIndex + 1);
                 arrowG.fillStyle(unlNext ? 0x1a1535 : colColor, unlNext ? 0.4 : 0.6);
-                arrowG.fillTriangle(colCX - 6, ay, colCX + 6, ay, colCX, ay + 8);
+                arrowG.fillTriangle(colCX - 4, ay, colCX + 4, ay, colCX, ay + 6);
             }
         });
     }
@@ -149,31 +149,27 @@ class SkillScene extends Phaser.Scene {
         }
 
         // Skill name
-        this.add.text(cx, y + 20, skill.name, {
-            fontSize: '12px',
+        this.add.text(cx, y + 16, skill.name, {
+            fontSize: '11px',
             color: maxed ? '#445566' : (locked ? '#333355' : '#e8e8ff'),
             fontFamily: 'monospace', fontStyle: 'bold',
-            align: 'center', wordWrap: { width: w - 16 }
+            align: 'center', wordWrap: { width: w - 12 }
         }).setOrigin(0.5, 0);
 
-        // Category badge
+        // Category badge + description combined
         const catHex = locked ? '#222233' : '#' + colColor.toString(16).padStart(6, '0');
-        this.add.text(cx, y + 36, `[${skill.category}]`, {
-            fontSize: '9px', color: catHex, fontFamily: 'monospace'
-        }).setOrigin(0.5);
-
-        // Description
-        this.add.text(cx, y + 50, skill.desc, {
-            fontSize: '9px',
+        const descLine = skill.desc.replace(/\n/g, ', ');
+        this.add.text(cx, y + 30, `[${skill.category}] ${descLine}`, {
+            fontSize: '8px',
             color: locked ? '#1e1e30' : (maxed ? '#334455' : '#8899bb'),
             fontFamily: 'monospace', align: 'center',
-            wordWrap: { width: w - 16 }
+            wordWrap: { width: w - 10 }
         }).setOrigin(0.5, 0);
 
         // Maxed label
         if (maxed) {
-            this.add.text(cx, y + h / 2 + 2, 'MAKS', {
-                fontSize: '14px', color: '#2a2a44', fontFamily: 'monospace', fontStyle: 'bold'
+            this.add.text(cx, y + h / 2, 'MAKS', {
+                fontSize: '12px', color: '#2a2a44', fontFamily: 'monospace', fontStyle: 'bold'
             }).setOrigin(0.5);
         }
 

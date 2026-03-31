@@ -206,9 +206,9 @@ function isSkillUnlocked(hero, pathIndex, tierIndex) {
 
     if (tierIndex === 0) return true;   // T1 always unlocked
 
-    // Needs at least 1 pick from previous tier of SAME path
+    // Needs previous tier to be fully maxed before advancing
     const prevSkill = path.tiers[tierIndex - 1];
-    return _countSkill(hero, prevSkill.id) >= 1;
+    return _countSkill(hero, prevSkill.id) >= prevSkill.maxStack;
 }
 
 /**

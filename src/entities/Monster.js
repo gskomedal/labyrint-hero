@@ -10,19 +10,20 @@ class Monster {
 
         // Stats from lookup tables in constants.js
         const worldMul = scene.worldNum || 1;
-        const hpScale  = 1 + (worldMul - 1) * 0.3;
+        const hpScale  = 1 + (worldMul - 1) * 0.5;
+        const atkScale = 1 + (worldMul - 1) * 0.25;
 
         this.maxHp    = Math.round((MONSTER_BASE_HP[type]  || 4) * hpScale);
         this.hp       = this.maxHp;
-        this.attack   = MONSTER_ATTACK[type]  || 1;
+        this.attack   = Math.round((MONSTER_ATTACK[type]  || 1) * atkScale);
         this.color    = MONSTER_COLOR[type]   || COLORS.MONSTER;
         this.xpReward = MONSTER_XP[type]      || 10;
 
         // Bosses scale aggressively – always a significant threat
         if (type === 'boss') {
-            this.maxHp  = 35 + worldMul * 18;
+            this.maxHp  = 35 + worldMul * 25;
             this.hp     = this.maxHp;
-            this.attack = 3 + worldMul;
+            this.attack = 3 + worldMul * 2;
         }
 
         // Boss phase tracking (1 = normal, 2 = enraged at ≤50% HP)

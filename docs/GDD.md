@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.18
+**Versjon:** 0.19
 **Sist oppdatert:** 2026-03-31
 
 ---
@@ -157,15 +157,18 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 - **Monsterangrep:** `attack + 30% sjanse: +1`
 - **Forsvar:** trekkes fra innkommende skade, minimum 1
 
-### Monstere (v0.7 balanse)
-| Type | Base-HP | Angrep | XP | HP-skala per verden |
-|------|---------|--------|-----|---------------------|
-| Goblin | 10 | 2 | 10 | +30% per verden |
-| Orc | 18 | 4 | 25 | +30% per verden |
-| Troll | 30 | 6 | 50 | +30% per verden |
-| Boss | 35 + V×18 | 3 + V | 150 | – (eget uttrykk) |
+### Monstere (v0.19 balanse)
+| Type | Base-HP | Base-ATK | XP | HP-skala | ATK-skala |
+|------|---------|----------|-----|----------|-----------|
+| Goblin | 10 | 2 | 10 | +50% per verden | +25% per verden |
+| Orc | 18 | 4 | 25 | +50% per verden | +25% per verden |
+| Troll | 30 | 6 | 50 | +50% per verden | +25% per verden |
+| Boss | 35 + V×25 | 3 + V×2 | 150 | – (eget uttrykk) | – (eget uttrykk) |
 
 Verdensnummer V brukes til å skalere både HP og skade – kamp bør alltid føles risikofylt.
+
+### Bump-mekanikk
+Bevegelse inn i monster-rute: helten setter facing uten å angripe (visuell flash). Trykk SPACE/F for å angripe i facing-retning.
 
 ### Statuseffekter (v0.14)
 | Effekt | Ikon | Varighet | Skade | Kilde | Kur |
@@ -241,7 +244,7 @@ Lærpansring, Vattert vest (+1 hjerte), Ringbrynje, Platedrakt, Magikappe, Drage
 - **Hakke:** konsumeres ved SPACE/F mot CRACKED_WALL
 
 ### Forbruksgjenstander
-Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe, Blendgranate, Motgift
+Livspotte, Stor livspotte, Styrkebrygg (midlertidig +2 ATK i 60 sek), Forsvarsbrygg (midlertidig +1 DEF i 60 sek), Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe, Blendgranate, Motgift
 
 ---
 
@@ -364,7 +367,7 @@ Hobbiter har karakteristiske store, lodne føtter (ingen sko). Alver har spisse 
 
 ## 7b. Skilltre (v0.8)
 
-Fire spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever ≥1 T1 fra samme vei; T3 krever ≥1 T2.
+Fem spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever at T1 er fullt oppgradert (maks stack); T3 krever at T2 er fullt oppgradert.
 
 | Vei | Fokus | T1 | T2 | T3 |
 |-----|-------|----|----|-----|

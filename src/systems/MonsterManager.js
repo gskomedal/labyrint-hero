@@ -46,9 +46,10 @@ class MonsterManager {
     _monsterPool() {
         const wn = this.scene.worldNum;
         if (wn <= 1) return ['goblin'];
-        if (wn <= 2) return ['goblin', 'goblin', 'orc'];
-        if (wn <= 4) return ['goblin', 'orc', 'troll'];
-        return ['orc', 'troll', 'troll'];
+        if (wn <= 2) return ['goblin', 'orc', 'orc'];
+        if (wn <= 3) return ['orc', 'orc', 'troll'];
+        if (wn <= 5) return ['orc', 'troll', 'troll'];
+        return ['troll', 'troll', 'troll'];
     }
 
     // ── Monster AI tick ───────────────────────────────────────────────────────
@@ -113,6 +114,9 @@ class MonsterManager {
         } else {
             scene.stunTickTimer = 0;
         }
+
+        // Tick temporary buffs every frame (time-based, not turn-based)
+        scene.hero.tickTempBuffs(delta);
 
         scene.monsterTick += delta;
         if (scene.monsterTick < MONSTER_TICK_MS) return;
