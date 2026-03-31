@@ -62,7 +62,7 @@ const SKILL_TREE_PATHS = [
                 desc:     '+1 Forsvar\n+1 Hjerte',
                 category: 'DEF',
                 maxStack: 2,
-                apply(hero) { hero.defense += 1; hero.maxHearts++; hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); }
+                apply(hero) { hero.defense += 1; hero.maxHearts++; }
             },
             {
                 id:       'iron_health',
@@ -70,7 +70,7 @@ const SKILL_TREE_PATHS = [
                 desc:     '+2 maks hjerter\n(krever T2)',
                 category: 'HP',
                 maxStack: 1,
-                apply(hero) { hero.maxHearts += 2; hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); }
+                apply(hero) { hero.maxHearts += 2; }
             },
         ]
     },
@@ -219,7 +219,7 @@ const SKILL_SYNERGIES = [
         desc:  '+2 Angrep, +1 Forsvar, +1 Hjerte',
         paths: ['krigar', 'vokter'],
         color: 0xff6644,
-        apply(hero) { hero.attack += 2; hero.defense += 1; hero.maxHearts += 1; hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts); },
+        apply(hero) { hero.attack += 2; hero.defense += 1; hero.maxHearts += 1; },
         unapply(hero) { hero.attack -= 2; hero.defense -= 1; hero.maxHearts -= 1; hero.hearts = Math.min(hero.hearts, hero.maxHearts); },
     },
     {

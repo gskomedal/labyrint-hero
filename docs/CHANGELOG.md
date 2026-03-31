@@ -2,6 +2,14 @@
 
 ---
 
+## v0.18 – 2026-03-31
+
+### Feilrettinger
+- **HUD overlapper spillkartet (#30):** Kameraets viewport er nå forskjøvet 54px ned slik at kartinnhold ikke skjules bak HUD-baren
+- **Helse øker ved utstyrsbytte og level-up (#31):** Utstyr og ferdigheter som gir maks-hjerter øker nå kun kapasiteten, uten å helbrede spilleren
+
+---
+
 ## v0.17 – 2026-03-30
 
 ### Tekniske endringer

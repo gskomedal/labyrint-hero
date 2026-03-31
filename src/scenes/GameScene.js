@@ -98,11 +98,14 @@ class GameScene extends Phaser.Scene {
         this.fogGraphics.setDepth(10);
         this.mapRenderer.updateFog();
 
-        // ── Camera ───────────────────────────────────────────────────────────
-        this.cameras.main.setBounds(0, 0, this.tileW * TILE_SIZE, this.tileH * TILE_SIZE);
-        this.cameras.main.startFollow(this.hero.graphics, true, 0.08, 0.08);
-        this.cameras.main.setFollowOffset(0, -30);
-        this.cameras.main.setZoom(ZOOM_DEFAULT);
+        // ── Camera (offset viewport below the 54px HUD bar) ────────────────
+        const HUD_H = 54;
+        const cam = this.cameras.main;
+        cam.setViewport(0, HUD_H, cam.width, cam.height - HUD_H);
+        cam.setBounds(0, 0, this.tileW * TILE_SIZE, this.tileH * TILE_SIZE);
+        cam.startFollow(this.hero.graphics, true, 0.08, 0.08);
+        cam.setFollowOffset(0, 0);
+        cam.setZoom(ZOOM_DEFAULT);
 
         // ── Input ─────────────────────────────────────────────────────────────
         this.inputHandler.setupKeys();
