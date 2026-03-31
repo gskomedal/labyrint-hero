@@ -2,6 +2,22 @@
 
 ---
 
+## v0.19 – 2026-03-31
+
+### Nye funksjoner
+- **Midlertidige styrke-/forsvarsbrygg (#34):** Styrkebrygg (+2 ATK) og Forsvarsbrygg (+1 DEF) gir nå midlertidige buffs som varer i 10 trekk, i stedet for permanente stat-økninger. Aktive buffs vises med nedtelling i HUD-statuslinjen
+- **Smartere NPC-pathfinding (#37):** Monstre og kjæledyr bruker nå BFS-pathfinding for å navigere rundt vegger og hindringer, i stedet for greedy retningsbevegelse. Maks 200 noder per søk for ytelse
+
+### Balanseendringer
+- **Hardere monsterskalering (#35):** Monster-HP skalerer nå +50% per verden (opp fra +30%). Monsterangrep skalerer +25% per verden (nytt). Boss-HP: 35 + verden×25 (opp fra ×18). Boss-ATK: 3 + verden×2 (opp fra +1). Sterkere monstertyper dukker opp tidligere
+- **Tregere kamptempo (#36):** Monstre har nå 900ms avkjøling mellom angrep (før: kunne angripe hvert 380ms-tick). Gir spilleren tid til å bruke gjenstander og brygg i kamp
+
+### UI-forbedringer
+- **Kompakt evnevelger (#38):** SkillScene-panelet er mer kompakt (mindre kort, reduserte fontstørrelser) slik at alle 5 spesialiseringsveier passer i vinduet
+- **Strengere evneprogresjon (#38):** Man må nå fullføre alle nivåer (maks stack) av en evne før neste tier i samme vei låses opp
+
+---
+
 ## v0.18 – 2026-03-31
 
 ### Nye funksjoner

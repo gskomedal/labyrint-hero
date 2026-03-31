@@ -52,6 +52,9 @@ class Hero {
         this.slowTurns   = 0;   // slowed movement
         this.stunTurns   = 0;   // skip turns
 
+        // Temporary buffs from brews [{stat, amount, turnsLeft}]
+        this.tempBuffs = [];
+
         // Rendering
         this.graphics = scene.add.graphics();
         this.graphics.setDepth(5);
@@ -159,6 +162,24 @@ class Hero {
         this._drawSprite();
     }
 
+    // ── Temporary buffs ──────────────────────────────────────────────────────
+
+    addTempBuff(stat, amount, turns) {
+        this[stat] += amount;
+        this.tempBuffs.push({ stat, amount, turnsLeft: turns });
+    }
+
+    tickTempBuffs() {
+        for (let i = this.tempBuffs.length - 1; i >= 0; i--) {
+            this.tempBuffs[i].turnsLeft--;
+            if (this.tempBuffs[i].turnsLeft <= 0) {
+                const b = this.tempBuffs[i];
+                this[b.stat] -= b.amount;
+                this.tempBuffs.splice(i, 1);
+            }
+        }
+    }
+
     // ── Stats / Progression ───────────────────────────────────────────────────
 
     gainXP(amount) {
@@ -227,6 +248,7 @@ class Hero {
             slowTurns:    this.slowTurns,
             stunTurns:    this.stunTurns,
             skills:       [...this.skills],
+            tempBuffs:    this.tempBuffs.map(b => ({ ...b })),
             inventory:    this.inventory.serialize()
         };
     }
@@ -256,6 +278,7 @@ class Hero {
         this.slowTurns    = stats.slowTurns    || 0;
         this.stunTurns    = stats.stunTurns    || 0;
         this.skills       = stats.skills       ? [...stats.skills] : [];
+        this.tempBuffs    = (stats.tempBuffs || []).map(b => ({ ...b }));
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus

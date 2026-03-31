@@ -253,26 +253,17 @@ class Pet {
 
     // ── Follow AI ─────────────────────────────────────────────────────────────
 
-    /** Move one step toward the hero if more than 1 tile away */
+    /** Move one step toward the hero if more than 1 tile away (BFS pathfinding) */
     followHero(hero, maze, tileW, tileH, monsters) {
         const dist = Math.abs(hero.gridX - this.gridX) + Math.abs(hero.gridY - this.gridY);
         if (dist <= 1) return;
 
-        const ddx = hero.gridX - this.gridX;
-        const ddy = hero.gridY - this.gridY;
-        const dirs = Math.abs(ddx) >= Math.abs(ddy)
-            ? [[Math.sign(ddx), 0], [0, Math.sign(ddy)]]
-            : [[0, Math.sign(ddy)], [Math.sign(ddx), 0]];
-
-        for (const [dx, dy] of dirs) {
-            const nx = this.gridX + dx, ny = this.gridY + dy;
-            if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
-            const t = maze[ny][nx];
-            if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
-            if (nx === hero.gridX && ny === hero.gridY) continue;
-            if (monsters.some(m => m.alive && m.gridX === nx && m.gridY === ny)) continue;
-            this.moveTo(nx, ny);
-            return;
+        const step = bfsNextStep(this.gridX, this.gridY, hero.gridX, hero.gridY, maze, tileW, tileH, (nx, ny) => {
+            if (monsters.some(m => m.alive && m.gridX === nx && m.gridY === ny)) return true;
+            return false;
+        });
+        if (step) {
+            this.moveTo(this.gridX + step[0], this.gridY + step[1]);
         }
     }
 

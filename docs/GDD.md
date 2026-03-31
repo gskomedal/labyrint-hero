@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.18
+**Versjon:** 0.19
 **Sist oppdatert:** 2026-03-31
 
 ---
@@ -126,7 +126,7 @@ Helten kan finne et mystisk egg i labyrinten. Egget klekkes til et tilfeldig kj�
 | owl | Ugle | Blå | 1 | 3 |
 
 - **Oppdagelse:** Egg spawner på gulvet (80% sjanse i verden 1, 35% deretter). Kun om helten ikke allerede har et kjæledyr.
-- **AI:** Følger helten (beveger seg ett steg mot helten per monster-tick). Angriper monster som er innen 1 rute.
+- **AI:** Følger helten med BFS-pathfinding (navigerer rundt vegger). Angriper monster som er innen 1 rute.
 - **Kamp:** Kjæledyret gjør automatisk skade mot nærliggende monstre. Monstre har 25% sjanse for å angripe kjæledyret i stedet for helten.
 - **Død:** Kjæledyret kan dø. Det gjenopplives med full HP ved neste verdensovergang.
 - **Persistens:** Lagres med hero-stats mellom verdener og sessions.
@@ -157,15 +157,18 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 - **Monsterangrep:** `attack + 30% sjanse: +1`
 - **Forsvar:** trekkes fra innkommende skade, minimum 1
 
-### Monstere (v0.7 balanse)
-| Type | Base-HP | Angrep | XP | HP-skala per verden |
-|------|---------|--------|-----|---------------------|
-| Goblin | 10 | 2 | 10 | +30% per verden |
-| Orc | 18 | 4 | 25 | +30% per verden |
-| Troll | 30 | 6 | 50 | +30% per verden |
-| Boss | 35 + V×18 | 3 + V | 150 | – (eget uttrykk) |
+### Monstere (v0.19 balanse)
+| Type | Base-HP | Base-ATK | XP | HP-skala | ATK-skala |
+|------|---------|----------|-----|----------|-----------|
+| Goblin | 10 | 2 | 10 | +50% per verden | +25% per verden |
+| Orc | 18 | 4 | 25 | +50% per verden | +25% per verden |
+| Troll | 30 | 6 | 50 | +50% per verden | +25% per verden |
+| Boss | 35 + V×25 | 3 + V×2 | 150 | – (eget uttrykk) | – (eget uttrykk) |
 
 Verdensnummer V brukes til å skalere både HP og skade – kamp bør alltid føles risikofylt.
+
+### Kamptempo (v0.19)
+Monstre har 900ms avkjøling mellom angrep. Dette gir spilleren tid til å bruke gjenstander, brygg og evner under kamp, i stedet for at angrep skjer hvert 380ms-tick.
 
 ### Statuseffekter (v0.14)
 | Effekt | Ikon | Varighet | Skade | Kilde | Kur |
@@ -241,7 +244,7 @@ Lærpansring, Vattert vest (+1 hjerte), Ringbrynje, Platedrakt, Magikappe, Drage
 - **Hakke:** konsumeres ved SPACE/F mot CRACKED_WALL
 
 ### Forbruksgjenstander
-Livspotte, Stor livspotte, Styrkebrygg, Forsvarsbrygg, Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe, Blendgranate, Motgift
+Livspotte, Stor livspotte, Styrkebrygg (midlertidig +2 ATK i 10 trekk), Forsvarsbrygg (midlertidig +1 DEF i 10 trekk), Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe, Blendgranate, Motgift
 
 ---
 
@@ -364,7 +367,7 @@ Hobbiter har karakteristiske store, lodne føtter (ingen sko). Alver har spisse 
 
 ## 7b. Skilltre (v0.8)
 
-Fire spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever ≥1 T1 fra samme vei; T3 krever ≥1 T2.
+Fem spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever at T1 er fullt oppgradert (maks stack); T3 krever at T2 er fullt oppgradert.
 
 | Vei | Fokus | T1 | T2 | T3 |
 |-----|-------|----|----|-----|

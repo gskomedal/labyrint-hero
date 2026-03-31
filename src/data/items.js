@@ -147,13 +147,13 @@ const ITEM_DEFS = {
     },
     strength_brew: {
         id: 'strength_brew', name: 'Styrkebrygg', type: 'consumable',
-        color: 0xff8800, desc: '+2 Angrep (permanent)', tier: 2,
-        use(hero) { hero.attack += 2; return true; }
+        color: 0xff8800, desc: '+2 Angrep (10 trekk)', tier: 2,
+        use(hero) { hero.addTempBuff('attack', 2, 10); return true; }
     },
     defense_brew: {
         id: 'defense_brew', name: 'Forsvarsbrygg', type: 'consumable',
-        color: 0x4488ff, desc: '+1 Forsvar (permanent)', tier: 2,
-        use(hero) { hero.defense += 1; return true; }
+        color: 0x4488ff, desc: '+1 Forsvar (10 trekk)', tier: 2,
+        use(hero) { hero.addTempBuff('defense', 1, 10); return true; }
     },
     xp_scroll: {
         id: 'xp_scroll', name: 'Erfaringsrulle', type: 'consumable',

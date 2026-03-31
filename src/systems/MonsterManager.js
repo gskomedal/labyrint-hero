@@ -1,6 +1,48 @@
 // ─── Labyrint Hero – MonsterManager ──────────────────────────────────────────
 // Handles monster spawning, AI movement, pathfinding, and status effect ticking.
 
+/**
+ * BFS pathfinding – returns the first step [dx, dy] toward the target,
+ * or null if no path exists. Shared by monster AI and pet follow.
+ */
+function bfsNextStep(startX, startY, goalX, goalY, maze, tileW, tileH, blockedFn) {
+    if (startX === goalX && startY === goalY) return null;
+    const key = (x, y) => y * tileW + x;
+    const visited = new Set();
+    visited.add(key(startX, startY));
+    // Each entry: { x, y, firstDx, firstDy } – track the first step direction
+    const queue = [];
+    for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+        const nx = startX + dx, ny = startY + dy;
+        if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
+        const t = maze[ny][nx];
+        if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
+        if (nx === goalX && ny === goalY) return [dx, dy];
+        if (blockedFn && blockedFn(nx, ny)) continue;
+        visited.add(key(nx, ny));
+        queue.push({ x: nx, y: ny, firstDx: dx, firstDy: dy });
+    }
+    // BFS with max depth to avoid performance issues on large mazes
+    const maxNodes = 200;
+    let head = 0;
+    while (head < queue.length && head < maxNodes) {
+        const cur = queue[head++];
+        for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+            const nx = cur.x + dx, ny = cur.y + dy;
+            if (nx < 0 || nx >= tileW || ny < 0 || ny >= tileH) continue;
+            const k = key(nx, ny);
+            if (visited.has(k)) continue;
+            const t = maze[ny][nx];
+            if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
+            if (nx === goalX && ny === goalY) return [cur.firstDx, cur.firstDy];
+            if (blockedFn && blockedFn(nx, ny)) continue;
+            visited.add(k);
+            queue.push({ x: nx, y: ny, firstDx: cur.firstDx, firstDy: cur.firstDy });
+        }
+    }
+    return null; // No path found within limit
+}
+
 class MonsterManager {
     constructor(scene) {
         this.scene = scene;
@@ -46,9 +88,10 @@ class MonsterManager {
     _monsterPool() {
         const wn = this.scene.worldNum;
         if (wn <= 1) return ['goblin'];
-        if (wn <= 2) return ['goblin', 'goblin', 'orc'];
-        if (wn <= 4) return ['goblin', 'orc', 'troll'];
-        return ['orc', 'troll', 'troll'];
+        if (wn <= 2) return ['goblin', 'orc', 'orc'];
+        if (wn <= 3) return ['orc', 'orc', 'troll'];
+        if (wn <= 5) return ['orc', 'troll', 'troll'];
+        return ['troll', 'troll', 'troll'];
     }
 
     // ── Monster AI tick ───────────────────────────────────────────────────────
@@ -118,6 +161,9 @@ class MonsterManager {
         if (scene.monsterTick < MONSTER_TICK_MS) return;
         scene.monsterTick = 0;
 
+        // Tick temporary buffs (brews etc.)
+        scene.hero.tickTempBuffs();
+
         for (const m of [...scene.monsters]) {
             if (!m.alive) continue;
             this._moveMonster(m);
@@ -127,14 +173,23 @@ class MonsterManager {
     _moveMonster(m) {
         const scene = this.scene;
         if (!scene.hero.alive) return;
+
+        // Tick down attack cooldown
+        if (m.attackCooldown > 0) {
+            m.attackCooldown -= MONSTER_TICK_MS;
+        }
+
         const hx = scene.hero.gridX, hy = scene.hero.gridY;
         const dist = Math.abs(hx - m.gridX) + Math.abs(hy - m.gridY);
         if (dist > AGGRO_RADIUS || scene.fog[m.gridY][m.gridX] === FOG.DARK) return;
         if (dist === 1) {
-            scene.combat.monsterAttack(m);
-            // Phase 2 boss attacks a second time each tick!
-            if (m.type === 'boss' && m.phase === 2 && scene.hero.alive) {
+            if (m.attackCooldown <= 0) {
                 scene.combat.monsterAttack(m);
+                m.attackCooldown = COMBAT_COOLDOWN_MS;
+                // Phase 2 boss attacks a second time!
+                if (m.type === 'boss' && m.phase === 2 && scene.hero.alive) {
+                    scene.combat.monsterAttack(m);
+                }
             }
             return;
         }
@@ -143,25 +198,22 @@ class MonsterManager {
         if (scene.pet && scene.pet.alive) {
             const petDist = Math.abs(scene.pet.gridX - m.gridX) + Math.abs(scene.pet.gridY - m.gridY);
             if (petDist === 1) {
-                scene.combat.monsterAttack(m);
+                if (m.attackCooldown <= 0) {
+                    scene.combat.monsterAttack(m);
+                    m.attackCooldown = COMBAT_COOLDOWN_MS;
+                }
                 return;
             }
         }
 
-        const ddx = hx - m.gridX, ddy = hy - m.gridY;
-        const dirs = Math.abs(ddx) >= Math.abs(ddy)
-            ? [[Math.sign(ddx), 0], [0, Math.sign(ddy)], [0, -Math.sign(ddy)], [-Math.sign(ddx), 0]]
-            : [[0, Math.sign(ddy)], [Math.sign(ddx), 0], [-Math.sign(ddx), 0], [0, -Math.sign(ddy)]];
-
-        for (const [dx, dy] of dirs) {
-            const nx = m.gridX + dx, ny = m.gridY + dy;
-            if (nx < 0 || nx >= scene.tileW || ny < 0 || ny >= scene.tileH) continue;
-            const t = scene.maze[ny][nx];
-            if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
-            if (nx === hx && ny === hy) continue;
-            if (this.monsterAt(nx, ny)) continue;
-            if (scene.merchant && nx === scene.merchant.gridX && ny === scene.merchant.gridY) continue;
-            m.moveTo(nx, ny); break;
+        const self = this;
+        const step = bfsNextStep(m.gridX, m.gridY, hx, hy, scene.maze, scene.tileW, scene.tileH, (nx, ny) => {
+            if (self.monsterAt(nx, ny)) return true;
+            if (scene.merchant && nx === scene.merchant.gridX && ny === scene.merchant.gridY) return true;
+            return false;
+        });
+        if (step) {
+            m.moveTo(m.gridX + step[0], m.gridY + step[1]);
         }
     }
 
