@@ -30,6 +30,7 @@ class Hero {
         this.petBonusAtk = 0;
         this.petBonusHp  = 0;
         this.petBonusDef = 0;
+        this.petHealShare = false; // life potions also heal pet
 
         // Progression
         this.level    = 1;
@@ -239,9 +240,10 @@ class Hero {
             xpMultiplier:  this.xpMultiplier,
             counterChance: this.counterChance,
             thornsDamage:  this.thornsDamage,
-            petBonusAtk:  this.petBonusAtk,
-            petBonusHp:   this.petBonusHp,
-            petBonusDef:  this.petBonusDef,
+            petBonusAtk:   this.petBonusAtk,
+            petBonusHp:    this.petBonusHp,
+            petBonusDef:   this.petBonusDef,
+            petHealShare:  this.petHealShare,
             gold:         this.gold,
             poisonTurns:  this.poisonTurns,
             burnTurns:    this.burnTurns,
@@ -272,6 +274,7 @@ class Hero {
         this.petBonusAtk  = stats.petBonusAtk  || 0;
         this.petBonusHp   = stats.petBonusHp   || 0;
         this.petBonusDef  = stats.petBonusDef  || 0;
+        this.petHealShare = stats.petHealShare  || false;
         this.gold         = stats.gold         || 0;
         this.poisonTurns  = stats.poisonTurns  || 0;
         this.burnTurns    = stats.burnTurns    || 0;

@@ -2,6 +2,17 @@
 
 ---
 
+## v0.20 – 2026-04-01
+
+### Nye funksjoner
+- **Forbedret kjæledyr-system (#41):**
+  - **Pet re-spawn:** Når kjæledyret dør i et level, kan nye kjæledyr-egg spawne i neste level (35% sjanse) slik at helten kan få en ny følgesvenn
+  - **Økt kjæledyr-HP:** Alle kjæledyr har nå dobbelt så mye base-HP (Rev: 8, Katt: 6, Drage: 10, Ugle: 6) for bedre overlevelse mot monstre
+  - **Kjæledyr-healing:** Dyrevokter T2 «Dyrisk livskraft» lar nå livspotion også heale kjæledyret. Vanlig livspotte healer 2 HP, stor livspotte full-healer kjæledyret
+  - **Kjæledyr-ryggsekk:** Kjæledyret har nå 4 ekstra ryggsekk-plasser for å bære gjenstander for helten. Gjenstander overflyter automatisk til kjæledyrets ryggsekk når heltens er full. Visning i inventory-overlay med mulighet for å flytte gjenstander mellom helt og kjæledyr
+
+---
+
 ## v0.19 – 2026-03-31
 
 ### Nye funksjoner
