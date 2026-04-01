@@ -2,6 +2,13 @@
 
 ---
 
+## v0.21 – 2026-04-01
+
+### Balanseendringer
+- **Saktere boss-angrep, mer boss-HP (#40):** Boss angriper nå hvert 570ms (opp fra 380ms), ca. 50% saktere. Fase 2 dobbeltangrep fjernet. Boss-HP økt til 50 + verden×35 (opp fra 35 + verden×25). Gir spilleren mer tid til å bruke potions og reagere i bosskamp
+
+---
+
 ## v0.20 – 2026-04-01
 
 ### Nye funksjoner
