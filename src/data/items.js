@@ -138,12 +138,20 @@ const ITEM_DEFS = {
     health_pot: {
         id: 'health_pot', name: 'Livspotte', type: 'consumable',
         color: 0xff2244, desc: 'Gjenoppretter 2 hjerter', tier: 1,
-        use(hero) { hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); return true; }
+        use(hero, scene) {
+            hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts);
+            if (hero.petHealShare && scene && scene.pet && scene.pet.alive) scene.pet.heal(2);
+            return true;
+        }
     },
     big_health_pot: {
         id: 'big_health_pot', name: 'Stor livspotte', type: 'consumable',
         color: 0xff0000, desc: 'Gjenoppretter alle hjerter', tier: 2,
-        use(hero) { hero.hearts = hero.maxHearts; return true; }
+        use(hero, scene) {
+            hero.hearts = hero.maxHearts;
+            if (hero.petHealShare && scene && scene.pet && scene.pet.alive) scene.pet.heal(scene.pet.effectiveMaxHp);
+            return true;
+        }
     },
     strength_brew: {
         id: 'strength_brew', name: 'Styrkebrygg', type: 'consumable',

@@ -25,8 +25,10 @@ class ItemSpawner {
         const toolStart  = chestCount;
         this._placeTools(eligible, Math.min(toolStart, eligible.length));
 
-        // 3. Pet egg (one per world, only if hero has no pet)
-        if (!scene.pet) {
+        // 3. Pet egg (one per world, if hero has no pet or pet is dead)
+        if (!scene.pet || !scene.pet.alive) {
+            // Clear dead pet so a new one can be hatched
+            if (scene.pet && !scene.pet.alive) scene.pet = null;
             const eggChance = scene.worldNum === 1 ? 0.8 : 0.35;
             if (Math.random() < eggChance) {
                 // Find a free floor tile not used by chests or items
@@ -416,13 +418,21 @@ class ItemSpawner {
         for (let i = scene.itemObjects.length - 1; i >= 0; i--) {
             const obj = scene.itemObjects[i];
             if (obj.gridX === hx && obj.gridY === hy) {
-                if (scene.hero.inventory.addItem(obj.item)) {
+                // Try hero backpack first, then pet backpack as overflow
+                let picked = scene.hero.inventory.addItem(obj.item);
+                let toPet = false;
+                if (!picked && scene.pet && scene.pet.alive) {
+                    picked = scene.pet.addItem(obj.item);
+                    toPet = true;
+                }
+                if (picked) {
                     Audio.playPickup();
                     obj.graphic.destroy();
                     scene.itemObjects.splice(i, 1);
                     const rarDef = obj.item.rarity ? RARITY_BY_ID[obj.item.rarity] : null;
                     const pickupColor = (rarDef && obj.item.rarity !== 'common') ? rarDef.textColor : '#ffee88';
-                    scene._floatingText(hx, hy, `+ ${obj.item.name}`, pickupColor);
+                    const suffix = toPet ? ` (${scene.pet.petName})` : '';
+                    scene._floatingText(hx, hy, `+ ${obj.item.name}${suffix}`, pickupColor);
                 } else {
                     scene._showMessage('Ryggsekken er full! (Høyreklikk for å droppe)', '#ff8844');
                 }

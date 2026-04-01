@@ -2,10 +2,10 @@
 // A companion that follows the hero, assists in combat, and persists across worlds.
 
 const PET_TYPES = {
-    fox:    { name: 'Rev',      color: 0xff8833, attack: 1, maxHp: 4, desc: 'Rask og lojal' },
-    cat:    { name: 'Katt',     color: 0xccaa66, attack: 1, maxHp: 3, desc: 'Stille og presis' },
-    dragon: { name: 'Drage',    color: 0xff4466, attack: 2, maxHp: 5, desc: 'Liten men farlig' },
-    owl:    { name: 'Ugle',     color: 0x88aacc, attack: 1, maxHp: 3, desc: 'Klok og skarpsynt' },
+    fox:    { name: 'Rev',      color: 0xff8833, attack: 1, maxHp: 8,  desc: 'Rask og lojal' },
+    cat:    { name: 'Katt',     color: 0xccaa66, attack: 1, maxHp: 6,  desc: 'Stille og presis' },
+    dragon: { name: 'Drage',    color: 0xff4466, attack: 2, maxHp: 10, desc: 'Liten men farlig' },
+    owl:    { name: 'Ugle',     color: 0x88aacc, attack: 1, maxHp: 6,  desc: 'Klok og skarpsynt' },
 };
 
 class Pet {
@@ -22,6 +22,9 @@ class Pet {
         this.maxHp    = def.maxHp;
         this.hp       = def.maxHp;
         this.attack   = def.attack;
+
+        // Pet backpack (4 slots for carrying items)
+        this.backpack = new Array(4).fill(null);
 
         this.graphics = scene.add.graphics();
         this.graphics.setDepth(4);
@@ -343,6 +346,12 @@ class Pet {
         });
     }
 
+    /** Heal pet by amount, capped at effectiveMaxHp */
+    heal(amount) {
+        if (!this.alive) return;
+        this.hp = Math.min(this.hp + amount, this.effectiveMaxHp);
+    }
+
     /** Revive pet at full HP (e.g. on new world) */
     revive(gridX, gridY) {
         this.alive = true;
@@ -356,15 +365,77 @@ class Pet {
         this._draw();
     }
 
+    // ── Pet Inventory ─────────────────────────────────────────────────────────
+
+    get backpackFull() { return !this.backpack.includes(null); }
+    get backpackCount() { return this.backpack.filter(Boolean).length; }
+
+    /** Add item to pet backpack. Returns true on success. */
+    addItem(itemDef) {
+        const isStackable = itemDef.type === 'consumable' || itemDef.type === 'tool';
+        if (isStackable) {
+            for (let i = 0; i < this.backpack.length; i++) {
+                const entry = this.backpack[i];
+                if (entry && entry.id === itemDef.id && entry.count < 10) {
+                    entry.count++;
+                    return true;
+                }
+            }
+            const slot = this.backpack.indexOf(null);
+            if (slot === -1) return false;
+            this.backpack[slot] = { id: itemDef.id, count: 1 };
+            return true;
+        }
+        const slot = this.backpack.indexOf(null);
+        if (slot === -1) return false;
+        this.backpack[slot] = itemDef;
+        return true;
+    }
+
+    /** Remove item from pet backpack slot. Returns itemDef or null. */
+    dropSlot(index) {
+        const entry = this.backpack[index];
+        if (!entry) return null;
+        let itemDef;
+        if (entry.id && entry.count !== undefined) {
+            itemDef = ITEM_DEFS[entry.id];
+            entry.count--;
+            if (entry.count <= 0) this.backpack[index] = null;
+        } else {
+            itemDef = entry;
+            this.backpack[index] = null;
+        }
+        return itemDef;
+    }
+
+    /** Get item def for a backpack entry */
+    getItemDef(entry) {
+        if (!entry) return null;
+        if (entry.id && entry.count !== undefined) return ITEM_DEFS[entry.id];
+        return entry;
+    }
+
+    getCount(entry) {
+        if (!entry) return 0;
+        if (entry.count !== undefined) return entry.count;
+        return 1;
+    }
+
     // ── Serialisation ─────────────────────────────────────────────────────────
 
     serialize() {
         return {
-            typeId: this.typeId,
-            hp:     this.hp,
-            maxHp:  this.maxHp,
-            attack: this.attack,
-            alive:  this.alive,
+            typeId:   this.typeId,
+            hp:       this.hp,
+            maxHp:    this.maxHp,
+            attack:   this.attack,
+            alive:    this.alive,
+            backpack: this.backpack.map(entry => {
+                if (!entry) return null;
+                if (entry.count !== undefined) return { id: entry.id, count: entry.count };
+                if (entry.rarity && entry.rarity !== 'common') return { id: entry.id, rarity: entry.rarity };
+                return entry.id || null;
+            }),
         };
     }
 
@@ -377,6 +448,24 @@ class Pet {
         pet.alive  = data.alive !== false;
         if (!pet.alive) {
             pet.graphics.setVisible(false);
+        }
+        // Restore pet backpack
+        if (data.backpack) {
+            data.backpack.forEach((entry, i) => {
+                if (i >= 4 || !entry) return;
+                if (typeof entry === 'string') {
+                    const def = ITEM_DEFS[entry];
+                    if (!def) return;
+                    pet.backpack[i] = (def.type === 'consumable' || def.type === 'tool')
+                        ? { id: entry, count: 1 } : makeRarityItem(def, 'common');
+                } else if (entry.id && ITEM_DEFS[entry.id]) {
+                    if (entry.count !== undefined) {
+                        pet.backpack[i] = { id: entry.id, count: entry.count || 1 };
+                    } else {
+                        pet.backpack[i] = makeRarityItem(ITEM_DEFS[entry.id], entry.rarity || 'common');
+                    }
+                }
+            });
         }
         return pet;
     }

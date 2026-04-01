@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.19
-**Sist oppdatert:** 2026-03-31
+**Versjon:** 0.20
+**Sist oppdatert:** 2026-04-01
 
 ---
 
@@ -120,15 +120,17 @@ Helten kan finne et mystisk egg i labyrinten. Egget klekkes til et tilfeldig kj�
 
 | Type | Navn | Farge | Angrep | HP |
 |------|------|-------|--------|----|
-| fox | Rev | Oransje | 1 | 4 |
-| cat | Katt | Gyllen | 1 | 3 |
-| dragon | Drage | Rød | 2 | 5 |
-| owl | Ugle | Blå | 1 | 3 |
+| fox | Rev | Oransje | 1 | 8 |
+| cat | Katt | Gyllen | 1 | 6 |
+| dragon | Drage | Rød | 2 | 10 |
+| owl | Ugle | Blå | 1 | 6 |
 
-- **Oppdagelse:** Egg spawner på gulvet (80% sjanse i verden 1, 35% deretter). Kun om helten ikke allerede har et kjæledyr.
+- **Oppdagelse:** Egg spawner på gulvet (80% sjanse i verden 1, 35% deretter). Spawner også når kjæledyret har dødd i forrige level.
 - **AI:** Følger helten (beveger seg ett steg mot helten per monster-tick). Angriper monster som er innen 1 rute.
 - **Kamp:** Kjæledyret gjør automatisk skade mot nærliggende monstre. Monstre har 25% sjanse for å angripe kjæledyret i stedet for helten.
-- **Død:** Kjæledyret kan dø. Det gjenopplives med full HP ved neste verdensovergang.
+- **Død:** Kjæledyret kan dø. Nye egg kan spawne i neste level (35% sjanse).
+- **Healing:** Med Dyrevokter T2-evnen «Dyrisk livskraft» healer livspotion også kjæledyret.
+- **Kjæledyr-ryggsekk:** Kjæledyret har 4 ryggsekk-plasser. Gjenstander overflyter automatisk til kjæledyrets ryggsekk ved full helte-ryggsekk. Gjenstander kan flyttes mellom helt og kjæledyr i inventory.
 - **Persistens:** Lagres med hero-stats mellom verdener og sessions.
 
 ### Kamp – skalering
@@ -229,8 +231,9 @@ Våpen og rustning har sjeldenhetsgrader som påvirker stats:
 ### Inventory
 - 2 utstyrsplasser (Våpen + Rustning)
 - 10-spors ryggsekk
+- Kjæledyr-ryggsekk (4 plasser, kun når kjæledyr er i live)
 - **E** åpner/lukker; bruk holder inventory åpent (refresh-in-place)
-- **Venstreklikk:** bruk/utstyr — **Høyreklikk:** slipp gjenstand på gulvet
+- **Venstreklikk:** bruk/utstyr — **Høyreklikk/Hold:** flytt til kjæledyr (eller slipp på gulvet)
 
 ### Våpen (tier 1–4)
 Melee: Dolk, Tresverd, Spyd, Jernsverd, Stridsøks, Krigshammer, Trollstav
@@ -375,6 +378,7 @@ Fem spesialiseringsveier med 3 tiers. T1 alltid tilgjengelig; T2 krever at T1 er
 | **Vokter** | Forsvar | Tykk hud (+1 DEF) | Festning (+1 DEF +1 HP) | Jernhelse (+2 HP) |
 | **Jeger** | Syn/Krit | Skarpsyn (+2 syn) | Vitalt anslag (+25% krit) | Presisjon (+3 ATK) |
 | **Skurk** | Nytte | Kunnskap (+30% XP) | Unnvikelse (+20% dodge) | Blomstersaft (hel 2 HP) |
+| **Dyrevokter** | Kjæledyr | Villskap (+2 pet ATK) | Dyrisk livskraft (+3 pet HP, +1 pet DEF, potion healer pet) | Sjelsbånd (+3 pet ATK, +3 pet HP) |
 
 Spilleren kan spre poeng på tvers av veier (generalist) eller gå dypt i én (spesialist).
 

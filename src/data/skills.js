@@ -164,10 +164,10 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'beast_vitality',
                 name:     'Dyrisk livskraft',
-                desc:     '+3 kjæledyr-HP\n+1 kjæledyr-forsvar',
+                desc:     '+3 kjæledyr-HP\n+1 kjæledyr-forsvar\nPotion healer kjæledyr',
                 category: 'PET',
                 maxStack: 2,
-                apply(hero) { hero.petBonusHp = (hero.petBonusHp || 0) + 3; hero.petBonusDef = (hero.petBonusDef || 0) + 1; }
+                apply(hero) { hero.petBonusHp = (hero.petBonusHp || 0) + 3; hero.petBonusDef = (hero.petBonusDef || 0) + 1; hero.petHealShare = true; }
             },
             {
                 id:       'beast_bond',

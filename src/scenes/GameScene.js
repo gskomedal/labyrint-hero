@@ -84,10 +84,13 @@ class GameScene extends Phaser.Scene {
         // ── Pet companion ────────────────────────────────────────────────────
         this.pet = null;
         if (this.heroStats && this.heroStats.pet) {
-            this.pet = Pet.deserialize(this.heroStats.pet, this, this.hero.gridX, this.hero.gridY);
-            if (this.pet && this.pet.alive) {
-                this.pet.revive(this.hero.gridX, this.hero.gridY);
+            if (this.heroStats.pet.alive !== false) {
+                this.pet = Pet.deserialize(this.heroStats.pet, this, this.hero.gridX, this.hero.gridY);
+                if (this.pet && this.pet.alive) {
+                    this.pet.revive(this.hero.gridX, this.hero.gridY);
+                }
             }
+            // Dead pet: leave this.pet null so a new egg can spawn
         }
         this.petTickTimer = 0;
 

@@ -12,6 +12,7 @@ class InventoryScene extends Phaser.Scene {
         this.hero = gs.hero;
         this.inv  = gs.hero.inventory;
         this.gs   = gs;
+        this.pet  = gs.pet;
 
         this._dyn = [];  // dynamic objects – destroyed on _refresh()
 
@@ -19,33 +20,38 @@ class InventoryScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
 
-        const panelW = 520, panelH = 420;
-        this.add.rectangle(cx, cy, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x334466);
+        const panelW = 520;
+        const hasPet = this.pet && this.pet.alive;
+        const panelH = hasPet ? 500 : 420;
+        const panelY = cy;
+        this.add.rectangle(cx, panelY, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x334466);
 
-        this.add.text(cx, cy - panelH / 2 + 18, 'INVENTAR', {
+        this.add.text(cx, panelY - panelH / 2 + 18, 'INVENTAR', {
             fontSize: '20px', color: '#ccddff', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.rectangle(cx, cy - panelH / 2 + 54, panelW - 40, 1, 0x223344);
+        this.add.rectangle(cx, panelY - panelH / 2 + 54, panelW - 40, 1, 0x223344);
 
         // Stats line – dynamic so it refreshes
-        this._statsText = this.add.text(cx, cy - panelH / 2 + 40, '', {
+        this._statsText = this.add.text(cx, panelY - panelH / 2 + 40, '', {
             fontSize: '11px', color: '#667788', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Section labels (static)
-        this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 62, 'UTSTYR', {
+        this.add.text(cx - panelW / 2 + 20, panelY - panelH / 2 + 62, 'UTSTYR', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         });
-        this.add.text(cx, cy - panelH / 2 + 168, 'EVNER', {
+        this.add.text(cx, panelY - panelH / 2 + 168, 'EVNER', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 220, 'RYGGSEKK', {
+        this.add.text(cx - panelW / 2 + 20, panelY - panelH / 2 + 220, 'RYGGSEKK', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         });
 
-        this.add.text(cx, cy + panelH / 2 - 14,
-            '[Trykk] Bruk/utstyr  ·  [Hold] Slipp  ·  [E/ESC] Lukk', {
+        const helpText = hasPet
+            ? '[Trykk] Bruk/utstyr  ·  [Hold] → Kjæledyr/Slipp  ·  [E/ESC] Lukk'
+            : '[Trykk] Bruk/utstyr  ·  [Hold] Slipp  ·  [E/ESC] Lukk';
+        this.add.text(cx, panelY + panelH / 2 - 14, helpText, {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
@@ -79,7 +85,10 @@ class InventoryScene extends Phaser.Scene {
 
         const { width: W, height: H } = this.cameras.main;
         const cx = W / 2, cy = H / 2;
-        const panelW = 520, panelH = 420;
+        const hasPet = this.pet && this.pet.alive;
+        const panelW = 520;
+        const panelH = hasPet ? 500 : 420;
+        const panelY = cy;
 
         // Update stats line
         const h = this.hero;
@@ -88,22 +97,22 @@ class InventoryScene extends Phaser.Scene {
         );
 
         // Equipment slots
-        const eqY = cy - panelH / 2 + 110;
+        const eqY = panelY - panelH / 2 + 110;
         this._makeEquipSlot(cx - 120, eqY, 'weapon', 'Våpen');
         this._makeEquipSlot(cx,       eqY, 'armor',  'Rustning');
         this._makeQuickUseSlot(cx + 120, eqY);
 
         // Skills
-        this._drawSkills(cx, cy - panelH / 2 + 185);
+        this._drawSkills(cx, panelY - panelH / 2 + 185);
 
         // Backpack label with count
-        this._d(this.add.text(cx + 80, cy - panelH / 2 + 220,
+        this._d(this.add.text(cx + 80, panelY - panelH / 2 + 220,
             `(${this.inv.itemCount}/10)`, {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }));
 
         // Backpack slots
-        const bpY     = cy - panelH / 2 + 245;
+        const bpY     = panelY - panelH / 2 + 245;
         const slotSize = 52, cols = 5, gap = 8;
         const bpTotalW = cols * slotSize + (cols - 1) * gap;
         const bpStartX = cx - bpTotalW / 2;
@@ -113,6 +122,11 @@ class InventoryScene extends Phaser.Scene {
             const sx  = bpStartX + col * (slotSize + gap) + slotSize / 2;
             const sy  = bpY + row * (slotSize + gap) + slotSize / 2;
             this._makeBackpackSlot(sx, sy, slotSize, i);
+        }
+
+        // Pet inventory section
+        if (hasPet) {
+            this._drawPetInventory(cx, panelY - panelH / 2, panelW);
         }
     }
 
@@ -295,15 +309,27 @@ class InventoryScene extends Phaser.Scene {
             bg.on('pointerdown', (pointer) => {
                 this._hideTooltip();
                 if (pointer.rightButtonDown()) {
-                    const dropped = this.inv.dropSlot(index);
-                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    // Right-click: move to pet if possible, otherwise drop
+                    const item = this.inv._getItemDef(this.inv.backpack[index]);
+                    if (item && this.pet && this.pet.alive && this.pet.addItem(item)) {
+                        this.inv.dropSlot(index);
+                    } else {
+                        const dropped = this.inv.dropSlot(index);
+                        if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    }
                     this._refresh();
                     return;
                 }
                 bg._lpTimer = this.time.delayedCall(500, () => {
                     bg._lpTimer = null;
-                    const dropped = this.inv.dropSlot(index);
-                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    // Long press: move to pet if possible, otherwise drop
+                    const item = this.inv._getItemDef(this.inv.backpack[index]);
+                    if (item && this.pet && this.pet.alive && this.pet.addItem(item)) {
+                        this.inv.dropSlot(index);
+                    } else {
+                        const dropped = this.inv.dropSlot(index);
+                        if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    }
                     this._refresh();
                 });
             });
@@ -315,6 +341,116 @@ class InventoryScene extends Phaser.Scene {
                     this._refresh();
                 }
             });
+        }
+    }
+
+    // ── Pet inventory ──────────────────────────────────────────────────────────
+
+    _drawPetInventory(cx, panelTop, panelW) {
+        const pet = this.pet;
+        const baseY = panelTop + 370;
+
+        // Separator
+        this._d(this.add.rectangle(cx, baseY - 8, panelW - 40, 1, 0x223344));
+
+        // Pet label with name and HP
+        const hpText = `${pet.petName}  HP: ${pet.hp}/${pet.effectiveMaxHp}  ATK: ${pet.effectiveAttack}`;
+        this._d(this.add.text(cx - panelW / 2 + 20, baseY, `KJÆLEDYR  ·  ${hpText}`, {
+            fontSize: '11px', color: '#ffaadd', fontFamily: 'monospace'
+        }));
+        this._d(this.add.text(cx + panelW / 2 - 20, baseY,
+            `(${pet.backpackCount}/4)`, {
+            fontSize: '11px', color: '#334455', fontFamily: 'monospace'
+        }).setOrigin(1, 0));
+
+        // Pet backpack slots (4 slots in a row)
+        const slotSize = 52, gap = 8;
+        const totalW = 4 * slotSize + 3 * gap;
+        const startX = cx - totalW / 2;
+        const slotsY = baseY + 20;
+
+        for (let i = 0; i < 4; i++) {
+            const sx = startX + i * (slotSize + gap) + slotSize / 2;
+            const sy = slotsY + slotSize / 2;
+            this._makePetBackpackSlot(sx, sy, slotSize, i);
+        }
+    }
+
+    _makePetBackpackSlot(x, y, size, index) {
+        const pet = this.pet;
+        const entry   = pet.backpack[index];
+        const itemDef = pet.getItemDef(entry);
+        const count   = pet.getCount(entry);
+
+        let col = 0x112233;
+        if (itemDef) {
+            const r = itemDef.rarity ? RARITY_BY_ID[itemDef.rarity] : null;
+            if (r && itemDef.rarity !== 'common') {
+                col = r.color;
+            } else {
+                col = itemDef.type === 'weapon' ? 0xff8800 : itemDef.type === 'armor' ? 0x4488ff : 0xff2244;
+            }
+        }
+
+        // Pink tint to distinguish pet slots
+        const bg = this._d(this.add.rectangle(x, y, size, size, 0x120a18).setStrokeStyle(1, col));
+
+        if (itemDef) {
+            this._drawItemIcon(x, y, itemDef, size - 10);
+            const nameCol = this._rarityTextColor(itemDef);
+            this._d(this.add.text(x, y + size / 2 - 2, this._shortName(itemDef.name), {
+                fontSize: '8px', color: nameCol, fontFamily: 'monospace'
+            }).setOrigin(0.5, 1));
+
+            if (count > 1) {
+                this._d(this.add.text(x + size / 2 - 4, y - size / 2 + 2, `${count}`, {
+                    fontSize: '10px', color: '#ffee88', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setOrigin(1, 0));
+            }
+
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => {
+                bg.setFillStyle(0x1a1830);
+                const tip = count > 1 ? { ...itemDef, name: `${itemDef.name} ×${count}` } : itemDef;
+                this._showTooltip(x, y - size / 2 - 4, tip);
+            });
+            bg.on('pointerout', () => {
+                bg.setFillStyle(0x120a18);
+                this._hideTooltip();
+            });
+            bg.on('pointerdown', (pointer) => {
+                this._hideTooltip();
+                if (pointer.rightButtonDown()) {
+                    // Drop from pet backpack to ground
+                    const dropped = pet.dropSlot(index);
+                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    this._refresh();
+                    return;
+                }
+                bg._lpTimer = this.time.delayedCall(500, () => {
+                    bg._lpTimer = null;
+                    const dropped = pet.dropSlot(index);
+                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    this._refresh();
+                });
+            });
+            bg.on('pointerup', () => {
+                if (bg._lpTimer) {
+                    bg._lpTimer.remove();
+                    bg._lpTimer = null;
+                    // Tap: move item from pet to hero backpack
+                    const item = pet.getItemDef(pet.backpack[index]);
+                    if (item && this.inv.addItem(item)) {
+                        pet.dropSlot(index);
+                    }
+                    this._refresh();
+                }
+            });
+        } else {
+            // Empty slot: allow moving from hero to pet by checking if hero inventory is the source
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => bg.setFillStyle(0x1a1830));
+            bg.on('pointerout',  () => bg.setFillStyle(0x120a18));
         }
     }
 
