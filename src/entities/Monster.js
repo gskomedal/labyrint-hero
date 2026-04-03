@@ -21,7 +21,7 @@ class Monster {
 
         // Bosses scale aggressively – always a significant threat
         if (type === 'boss') {
-            this.maxHp  = 35 + worldMul * 25;
+            this.maxHp  = 50 + worldMul * 35;
             this.hp     = this.maxHp;
             this.attack = 3 + worldMul * 2;
         }

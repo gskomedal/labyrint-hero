@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.20
+**Versjon:** 0.21
 **Sist oppdatert:** 2026-04-01
 
 ---
@@ -165,7 +165,7 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 | Goblin | 10 | 2 | 10 | +50% per verden | +25% per verden |
 | Orc | 18 | 4 | 25 | +50% per verden | +25% per verden |
 | Troll | 30 | 6 | 50 | +50% per verden | +25% per verden |
-| Boss | 35 + V×25 | 3 + V×2 | 150 | – (eget uttrykk) | – (eget uttrykk) |
+| Boss | 50 + V×35 | 3 + V×2 | 150 | – (eget uttrykk) | – (570ms tick) |
 
 Verdensnummer V brukes til å skalere både HP og skade – kamp bør alltid føles risikofylt.
 

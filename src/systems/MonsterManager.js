@@ -119,11 +119,23 @@ class MonsterManager {
         scene.hero.tickTempBuffs(delta);
 
         scene.monsterTick += delta;
-        if (scene.monsterTick < MONSTER_TICK_MS) return;
-        scene.monsterTick = 0;
+        scene.bossTickTimer = (scene.bossTickTimer || 0) + delta;
+
+        // Regular monsters tick
+        const regularReady = scene.monsterTick >= MONSTER_TICK_MS;
+        if (regularReady) scene.monsterTick = 0;
+
+        // Boss uses slower tick for attacks, giving player time to use potions
+        const bossReady = scene.bossTickTimer >= BOSS_TICK_MS;
+        if (bossReady) scene.bossTickTimer = 0;
+
+        if (!regularReady && !bossReady) return;
 
         for (const m of [...scene.monsters]) {
             if (!m.alive) continue;
+            const isBoss = m.type === 'boss';
+            if (isBoss && !bossReady) continue;
+            if (!isBoss && !regularReady) continue;
             this._moveMonster(m);
         }
     }
@@ -136,10 +148,6 @@ class MonsterManager {
         if (dist > AGGRO_RADIUS || scene.fog[m.gridY][m.gridX] === FOG.DARK) return;
         if (dist === 1) {
             scene.combat.monsterAttack(m);
-            // Phase 2 boss attacks a second time each tick!
-            if (m.type === 'boss' && m.phase === 2 && scene.hero.alive) {
-                scene.combat.monsterAttack(m);
-            }
             return;
         }
 
