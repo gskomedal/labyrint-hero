@@ -2,6 +2,13 @@
 
 ---
 
+## v0.22 – 2026-04-03
+
+### Feilrettinger
+- **Fjerne gjenstander fra inventar på touchskjerm (#45):** Lang-trykk for å droppe gjenstander fra utstyr, hurtigplass og ryggsekk frøs skjermen. Årsaken var kall til en ikke-eksisterende metode (`_spawnItemAt`), nå rettet til `itemSpawner.spawnItemAt()`
+
+---
+
 ## v0.21 – 2026-04-01
 
 ### Balanseendringer

@@ -172,7 +172,7 @@ class InventoryScene extends Phaser.Scene {
             bg.on('pointerdown', (pointer) => {
                 if (pointer.rightButtonDown()) {
                     const dropped = this.inv.dropEquipped(slot, this.hero);
-                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
                     this._refresh();
                     return;
                 }
@@ -180,7 +180,7 @@ class InventoryScene extends Phaser.Scene {
                 bg._lpTimer = this.time.delayedCall(500, () => {
                     bg._lpTimer = null;
                     const dropped = this.inv.dropEquipped(slot, this.hero);
-                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
                     this._refresh();
                 });
             });
@@ -231,14 +231,14 @@ class InventoryScene extends Phaser.Scene {
             bg.on('pointerdown', (pointer) => {
                 if (pointer.rightButtonDown()) {
                     const dropped = this.inv.dropQuickUse();
-                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
                     this._refresh();
                     return;
                 }
                 bg._lpTimer = this.time.delayedCall(500, () => {
                     bg._lpTimer = null;
                     const dropped = this.inv.dropQuickUse();
-                    if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
                     this._refresh();
                 });
             });
@@ -315,7 +315,7 @@ class InventoryScene extends Phaser.Scene {
                         this.inv.dropSlot(index);
                     } else {
                         const dropped = this.inv.dropSlot(index);
-                        if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                        if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
                     }
                     this._refresh();
                     return;
@@ -328,7 +328,7 @@ class InventoryScene extends Phaser.Scene {
                         this.inv.dropSlot(index);
                     } else {
                         const dropped = this.inv.dropSlot(index);
-                        if (dropped) this.gs._spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                        if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
                     }
                     this._refresh();
                 });
