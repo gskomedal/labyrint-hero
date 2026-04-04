@@ -431,7 +431,7 @@ Synergi: **Jordens kraft** (Geolog + Vokter) → +1 forsvar, +1 mineralsynsradiu
 
 Smelting, legeringer og smiing av utstyr.
 
-**Leirplass (Camp Room):** Spesialrom fra verden 2+ med smelteovn. Trygg sone der spilleren kan smelte mineraler, crafre legeringer og smi utstyr. Åpnes med V-tast.
+**Leirplass (Camp Room):** Garantert fra verden 2+, 50% sjanse i verden 1. Trygg sone med smelteovn og **persistent lager (stash)** der spilleren kan lagre mineraler, brensel og andre ressurser mellom besøk. Frigjør ryggsekken for kamp. Åpnes med V-tast.
 
 **Smelting:** Mineraler + brensel → rene grunnstoffer. Brensel (tre=1, kull=3 energi) spawner i labyrinten.
 

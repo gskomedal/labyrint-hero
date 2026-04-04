@@ -69,6 +69,10 @@ class Hero {
         this.oreEfficiencyChance = 0;
         this.alloyInventory = {};  // { 'bronze': 2, 'steel': 1, ... }
 
+        // Camp stash – persistent storage for minerals, fuel, etc.
+        // Array of { id, count } entries (like backpack slots but unlimited size)
+        this.campStash = [];
+
         // Temporary buffs from brews [{stat, amount, msLeft}]
         this.tempBuffs = [];
 
@@ -282,6 +286,7 @@ class Hero {
             alloyStatBonus:       this.alloyStatBonus,
             oreEfficiencyChance:  this.oreEfficiencyChance,
             alloyInventory:       { ...this.alloyInventory },
+            campStash:            this.campStash.map(e => ({ ...e })),
         };
     }
 
@@ -326,6 +331,7 @@ class Hero {
         this.alloyStatBonus       = stats.alloyStatBonus       || 0;
         this.oreEfficiencyChance  = stats.oreEfficiencyChance  || 0;
         this.alloyInventory       = stats.alloyInventory       ? { ...stats.alloyInventory } : {};
+        this.campStash            = (stats.campStash || []).map(e => ({ ...e }));
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus

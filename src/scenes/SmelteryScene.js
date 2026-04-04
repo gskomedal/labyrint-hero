@@ -16,7 +16,7 @@ class SmelteryScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
         this.smelter = new SmeltingSystem();
         this._dyn = [];
-        this._tab = 'smelt'; // 'smelt' | 'alloy' | 'forge'
+        this._tab = 'stash'; // 'stash' | 'smelt' | 'alloy' | 'forge'
 
         // ── Dim overlay ───────────────────────────────────────────────────────
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.82);
@@ -56,11 +56,12 @@ class SmelteryScene extends Phaser.Scene {
         // ── Tab buttons ───────────────────────────────────────────────────────
         this._tabBtns = [];
         const tabs = [
-            { id: 'smelt', label: 'Smelt mineral' },
-            { id: 'alloy', label: 'Lag legering' },
-            { id: 'forge', label: 'Smi utstyr' },
+            { id: 'stash', label: 'Lager' },
+            { id: 'smelt', label: 'Smelt' },
+            { id: 'alloy', label: 'Legering' },
+            { id: 'forge', label: 'Smi' },
         ];
-        const tabW = 140, tabY = this.py + 50;
+        const tabW = 110, tabY = this.py + 50;
         tabs.forEach((tab, i) => {
             const tx = this.px + 30 + i * (tabW + 10) + tabW / 2;
             const active = this._tab === tab.id;
@@ -93,7 +94,7 @@ class SmelteryScene extends Phaser.Scene {
         this._dyn = [];
 
         // Update tab button colors
-        const tabs = ['smelt', 'alloy', 'forge'];
+        const tabs = ['stash', 'smelt', 'alloy', 'forge'];
         this._tabBtns.forEach((btn, i) => {
             btn.setColor(this._tab === tabs[i] ? '#ff7722' : '#554433');
             btn.setFontStyle(this._tab === tabs[i] ? 'bold' : 'normal');
@@ -103,10 +104,12 @@ class SmelteryScene extends Phaser.Scene {
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
         this._fuelText.setText(`Brensel: ${fuel} energi`);
 
+        const stashCount = this.heroRef.campStash.reduce((s, e) => s + (e.count || 0), 0);
         const elemCount = Object.keys(this.heroRef.elementTracker.collected).length;
-        this._elemText.setText(`Grunnstoffer: ${elemCount}`);
+        this._elemText.setText(`Grunnstoffer: ${elemCount} | Lager: ${stashCount}`);
 
         switch (this._tab) {
+            case 'stash': this._drawStashTab(); break;
             case 'smelt': this._drawSmeltTab(); break;
             case 'alloy': this._drawAlloyTab(); break;
             case 'forge': this._drawForgeTab(); break;
@@ -114,6 +117,150 @@ class SmelteryScene extends Phaser.Scene {
     }
 
     _d(obj) { this._dyn.push(obj); return obj; }
+
+    // ── STASH TAB: Deposit/Withdraw items ──────────────────────────────────
+
+    _drawStashTab() {
+        const hero = this.heroRef;
+        const cx = this.px + this.panelW / 2;
+        let y = this.contentY;
+        const colW = Math.min(320, this.panelW / 2 - 30);
+        const leftX = this.px + 20;
+        const rightX = cx + 10;
+
+        // ── Left side: Backpack (deposit from) ──────────────────────────────
+        this._d(this.add.text(leftX, y, 'RYGGSEKK → Lager', {
+            fontSize: '10px', color: '#887766', fontFamily: 'monospace', fontStyle: 'bold'
+        }));
+        y += 16;
+
+        let bpY = y;
+        let hasDepositable = false;
+        for (let i = 0; i < hero.inventory.backpack.length; i++) {
+            const entry = hero.inventory.backpack[i];
+            if (!entry) continue;
+            const def = hero.inventory._getItemDef(entry);
+            if (!def) continue;
+            // Only allow depositing minerals, fuel, and alloy-type items
+            if (def.type !== 'mineral' && def.type !== 'fuel') continue;
+            if (bpY > this.py + this.panelH - 60) break;
+            hasDepositable = true;
+
+            const col = def.color || 0xaaaaaa;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+
+            this._d(this.add.text(leftX + 4, bpY, `${def.name} ×${entry.count}`, {
+                fontSize: '10px', color: hexCol, fontFamily: 'monospace'
+            }));
+
+            const btn = this._d(this.add.text(leftX + colW - 10, bpY, '→', {
+                fontSize: '12px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+            }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
+            const slotIdx = i;
+            btn.on('pointerover', () => btn.setColor('#ffaa44'));
+            btn.on('pointerout', () => btn.setColor('#ff7722'));
+            btn.on('pointerdown', () => this._depositItem(slotIdx));
+            bpY += 20;
+        }
+        if (!hasDepositable) {
+            this._d(this.add.text(leftX + 4, bpY, 'Ingen mineraler/brensel', {
+                fontSize: '9px', color: '#444433', fontFamily: 'monospace'
+            }));
+        }
+
+        // ── Right side: Stash (withdraw from) ──────────────────────────────
+        let sY = this.contentY;
+        this._d(this.add.text(rightX, sY, 'LAGER → Ryggsekk', {
+            fontSize: '10px', color: '#887766', fontFamily: 'monospace', fontStyle: 'bold'
+        }));
+        sY += 16;
+
+        if (hero.campStash.length === 0) {
+            this._d(this.add.text(rightX + 4, sY, 'Lageret er tomt.', {
+                fontSize: '9px', color: '#444433', fontFamily: 'monospace'
+            }));
+        } else {
+            for (let si = 0; si < hero.campStash.length; si++) {
+                const stashEntry = hero.campStash[si];
+                if (!stashEntry || stashEntry.count <= 0) continue;
+                if (sY > this.py + this.panelH - 60) break;
+
+                const def = this._getStashItemDef(stashEntry.id);
+                const name = def ? def.name : stashEntry.id;
+                const col = def ? def.color : 0xaaaaaa;
+                const hexCol = '#' + col.toString(16).padStart(6, '0');
+
+                this._d(this.add.text(rightX + 4, sY, `${name} ×${stashEntry.count}`, {
+                    fontSize: '10px', color: hexCol, fontFamily: 'monospace'
+                }));
+
+                const btn = this._d(this.add.text(rightX + colW - 10, sY, '←', {
+                    fontSize: '12px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
+                const idx = si;
+                btn.on('pointerover', () => btn.setColor('#ffaa44'));
+                btn.on('pointerout', () => btn.setColor('#ff7722'));
+                btn.on('pointerdown', () => this._withdrawItem(idx));
+                sY += 20;
+            }
+        }
+
+        // Stash capacity label
+        const totalStashed = hero.campStash.reduce((s, e) => s + (e.count || 0), 0);
+        this._d(this.add.text(cx, this.py + this.panelH - 30, `Lagret: ${totalStashed} gjenstander  |  Klikk → for å lagre, ← for å hente`, {
+            fontSize: '9px', color: '#665544', fontFamily: 'monospace'
+        }).setOrigin(0.5));
+    }
+
+    _depositItem(backpackSlot) {
+        const hero = this.heroRef;
+        const entry = hero.inventory.backpack[backpackSlot];
+        if (!entry) return;
+
+        // Move one item to stash
+        const existing = hero.campStash.find(s => s.id === entry.id);
+        if (existing) {
+            existing.count++;
+        } else {
+            hero.campStash.push({ id: entry.id, count: 1 });
+        }
+
+        entry.count--;
+        if (entry.count <= 0) hero.inventory.backpack[backpackSlot] = null;
+
+        Audio.playPickup();
+        this._refresh();
+    }
+
+    _withdrawItem(stashIndex) {
+        const hero = this.heroRef;
+        const stashEntry = hero.campStash[stashIndex];
+        if (!stashEntry || stashEntry.count <= 0) return;
+
+        // Check if backpack has space
+        const def = this._getStashItemDef(stashEntry.id);
+        if (!def) return;
+
+        if (!hero.inventory.addItem(def)) {
+            // No space
+            return;
+        }
+
+        stashEntry.count--;
+        if (stashEntry.count <= 0) {
+            hero.campStash.splice(stashIndex, 1);
+        }
+
+        Audio.playPickup();
+        this._refresh();
+    }
+
+    _getStashItemDef(id) {
+        if (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[id]) return MINERAL_DEFS[id];
+        if (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[id]) return FUEL_DEFS[id];
+        if (typeof ITEM_DEFS !== 'undefined' && ITEM_DEFS[id]) return ITEM_DEFS[id];
+        return null;
+    }
 
     // ── SMELT TAB: Minerals → Elements ──────────────────────────────────────
 

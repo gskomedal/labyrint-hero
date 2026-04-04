@@ -144,8 +144,9 @@ class MazeGenerator {
             }
         }
 
-        // Camp Room (Smeltery): world 2+, 35% chance, max 1
-        if (worldNum >= 2 && deadEnds.length > 0 && Math.random() < 0.35) {
+        // Camp Room (Smeltery + Storage): guaranteed world 2+, 50% in world 1
+        const campChance = worldNum >= 2 ? 1.0 : 0.50;
+        if (deadEnds.length > 0 && Math.random() < campChance) {
             const de = deadEnds.shift();
             const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 2));
             if (tiles.length >= 1) {
