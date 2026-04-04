@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.23
+**Versjon:** 0.24
 **Sist oppdatert:** 2026-04-04
 
 ---
@@ -427,8 +427,26 @@ Låses opp ved første mineral-funn. 3 tiers:
 
 Synergi: **Jordens kraft** (Geolog + Vokter) → +1 forsvar, +1 mineralsynsradius.
 
+### Fase 2: Metallurgi (v0.24)
+
+Smelting, legeringer og smiing av utstyr.
+
+**Leirplass (Camp Room):** Garantert fra verden 2+, 50% sjanse i verden 1. Trygg sone med smelteovn og **persistent lager (stash)** der spilleren kan lagre mineraler, brensel og andre ressurser mellom besøk. Frigjør ryggsekken for kamp. Åpnes med V-tast.
+
+**Smelting:** Mineraler + brensel → rene grunnstoffer. Brensel (tre=1, kull=3 energi) spawner i labyrinten.
+
+**Legeringer:** 8 legeringer fra Bronse (T2) til Pt-Ir (T6). Krever rene grunnstoffer + energi.
+
+**Smiing:** 12 nye våpen/rustninger fra legeringer. Stats overgår vanlig utstyr.
+
+**Metallurg-skillsti (#8):**
+| Tier | Skill | Effekt |
+|------|-------|--------|
+| T1 | Rask smelting | -25% energi og smeltetid per stack (maks 3) |
+| T2 | Legeringsmester | +15% legering-stats per stack (maks 2) |
+| T3 | Mestersmie | +25% stats på smidd utstyr (maks 1) |
+
 ### Fremtidige faser (ikke implementert)
-- Fase 2: Metallurgi (smelting, legeringer, energisystem)
 - Fase 3: Kjemi (molekyler, potions, bomber)
 - Fase 4: Verdensekspansjon (soner, dybde-skalering)
 - Fase 5: Fysikk og endgame (halvledere, fisjon, fusjon)

@@ -155,7 +155,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene');
 
         if (!blocked) {
             this.inputHandler.handleInput(delta);
@@ -172,6 +172,14 @@ class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.elementBookKey) && !this.scene.isActive('ElementBookScene')) {
                 this.scene.launch('ElementBookScene', { heroRef: this.hero });
             }
+            const touchSmelt = this.game.registry.get('touch_smeltery');
+            if (touchSmelt) this.game.registry.set('touch_smeltery', false);
+            if ((Phaser.Input.Keyboard.JustDown(this.smelteryKey) || touchSmelt) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
+                this.scene.launch('SmelteryScene', { heroRef: this.hero, gameScene: this });
+            }
+
+            // Auto-open smeltery prompt when entering Camp Room
+            this._checkCampRoom();
 
             this.monsterMgr.tickMonsters(delta);
             this._tickPet(delta);
@@ -179,6 +187,25 @@ class GameScene extends Phaser.Scene {
 
         const ui = this.scene.get('UIScene');
         if (ui && ui.sys.isActive()) ui.refresh();
+    }
+
+    // ── Camp Room helpers ────────────────────────────────────────────────────
+
+    _isInCampRoom() {
+        if (!this._gen || !this._gen.specialRooms) return false;
+        const hx = this.hero.gridX, hy = this.hero.gridY;
+        return this._gen.specialRooms.some(room =>
+            room.type === 'camp_room' && room.tiles.some(t => t.x === hx && t.y === hy)
+        );
+    }
+
+    _checkCampRoom() {
+        if (!this._campRoomShown && this._isInCampRoom()) {
+            this._campRoomShown = true;
+            this._showMessage('Leirplass! Trykk V for å smelte og smi.', '#ff7722');
+        } else if (!this._isInCampRoom()) {
+            this._campRoomShown = false;
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

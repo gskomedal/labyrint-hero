@@ -15,21 +15,21 @@ const MINERAL_DEFS = {
     hematite: {
         id: 'hematite', name: 'Hematitt', type: 'mineral', subtype: 'ore',
         formula: 'Fe\u2082O\u2083', tier: 1, color: 0x8b3a3a,
-        yields: [{ symbol: 'Fe', amount: 2, chance: 1.0 }, { symbol: 'O', amount: 3, chance: 0.3 }],
+        yields: [{ symbol: 'Fe', amount: 5, chance: 1.0 }, { symbol: 'O', amount: 3, chance: 0.3 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
-        desc: 'R\u00f8dlig jernmalm. Viktigste jernkilde.'
+        desc: 'R\u00f8dlig jernmalm. Rik jernkilde.'
     },
     magnetite: {
         id: 'magnetite', name: 'Magnetitt', type: 'mineral', subtype: 'ore',
         formula: 'Fe\u2083O\u2084', tier: 1, color: 0x333344,
-        yields: [{ symbol: 'Fe', amount: 3, chance: 1.0 }],
+        yields: [{ symbol: 'Fe', amount: 6, chance: 1.0 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
-        desc: 'Sort jernmalm. Magnetisk!'
+        desc: 'Sort jernmalm. Magnetisk! Rikeste jernkilden.'
     },
     limestone: {
         id: 'limestone', name: 'Kalkstein', type: 'mineral', subtype: 'ore',
         formula: 'CaCO\u2083', tier: 1, color: 0xccccbb,
-        yields: [{ symbol: 'Ca', amount: 1, chance: 1.0 }, { symbol: 'C', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'Ca', amount: 2, chance: 1.0 }, { symbol: 'C', amount: 3, chance: 0.8 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
         desc: 'Hvitlig stein. Gir kalsium og karbon.'
     },
@@ -43,14 +43,14 @@ const MINERAL_DEFS = {
     bauxite: {
         id: 'bauxite', name: 'Bauxitt', type: 'mineral', subtype: 'ore',
         formula: 'Al\u2082O\u2083', tier: 1, color: 0x995533,
-        yields: [{ symbol: 'Al', amount: 2, chance: 1.0 }],
+        yields: [{ symbol: 'Al', amount: 5, chance: 1.0 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
-        desc: 'R\u00f8dbrun jord. Aluminiumskilde.'
+        desc: 'R\u00f8dbrun jord. Rik aluminiumskilde.'
     },
     olivine: {
         id: 'olivine', name: 'Olivin', type: 'mineral', subtype: 'ore',
         formula: '(Mg,Fe)\u2082SiO\u2084', tier: 1, color: 0x88aa44,
-        yields: [{ symbol: 'Mg', amount: 1, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }, { symbol: 'Si', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'Mg', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.5 }, { symbol: 'Si', amount: 2, chance: 0.3 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Gr\u00f8nt silikatmineral fra dypet.'
     },
@@ -59,14 +59,14 @@ const MINERAL_DEFS = {
     pyrite: {
         id: 'pyrite', name: 'Pyritt', type: 'mineral', subtype: 'ore',
         formula: 'FeS\u2082', tier: 2, color: 0xccbb44,
-        yields: [{ symbol: 'Fe', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.8 }],
+        yields: [{ symbol: 'Fe', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 4, chance: 0.8 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
-        desc: 'Narregull! Gulaktig, men det er jern og svovel.'
+        desc: 'Narregull! Gulaktig, men gir mye jern og svovel.'
     },
     ilmenite: {
         id: 'ilmenite', name: 'Ilmenitt', type: 'mineral', subtype: 'ore',
         formula: 'FeTiO\u2083', tier: 2, color: 0x222233,
-        yields: [{ symbol: 'Fe', amount: 1, chance: 0.7 }, { symbol: 'Ti', amount: 1, chance: 1.0 }],
+        yields: [{ symbol: 'Fe', amount: 2, chance: 0.7 }, { symbol: 'Ti', amount: 3, chance: 1.0 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Sort mineral. Titankilde.'
     },
@@ -82,28 +82,28 @@ const MINERAL_DEFS = {
     chalcopyrite: {
         id: 'chalcopyrite', name: 'Kalkopyritt', type: 'mineral', subtype: 'ore',
         formula: 'CuFeS\u2082', tier: 3, color: 0xbb9933,
-        yields: [{ symbol: 'Cu', amount: 1, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }, { symbol: 'S', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'Cu', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.5 }, { symbol: 'S', amount: 2, chance: 0.3 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
-        desc: 'Messinggul. Viktigste kobberkilde.'
+        desc: 'Messinggul. Rik kobberkilde.'
     },
     malachite: {
         id: 'malachite', name: 'Malakit', type: 'mineral', subtype: 'ore',
         formula: 'Cu\u2082CO\u2083(OH)\u2082', tier: 3, color: 0x22bb66,
-        yields: [{ symbol: 'Cu', amount: 2, chance: 1.0 }],
+        yields: [{ symbol: 'Cu', amount: 5, chance: 1.0 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
-        desc: 'Vakker klargr\u00f8nn. Ren kobberkilde.'
+        desc: 'Vakker klargr\u00f8nn. Svært rik kobberkilde.'
     },
     sphalerite: {
         id: 'sphalerite', name: 'Sfaleritt', type: 'mineral', subtype: 'ore',
         formula: 'ZnS', tier: 3, color: 0x554433,
-        yields: [{ symbol: 'Zn', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        yields: [{ symbol: 'Zn', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.6 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Sort/brun. Viktigste sinkkilde.'
     },
     chromite: {
         id: 'chromite', name: 'Kromitt', type: 'mineral', subtype: 'ore',
         formula: 'FeCr\u2082O\u2084', tier: 3, color: 0x334433,
-        yields: [{ symbol: 'Cr', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.4 }],
+        yields: [{ symbol: 'Cr', amount: 4, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.4 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'M\u00f8rk malmstein. Eneste kromkilde.'
     },
@@ -112,16 +112,16 @@ const MINERAL_DEFS = {
     galena: {
         id: 'galena', name: 'Galena', type: 'mineral', subtype: 'ore',
         formula: 'PbS', tier: 4, color: 0x667788,
-        yields: [{ symbol: 'Pb', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.5 }, { symbol: 'Ag', amount: 1, chance: 0.1 }],
+        yields: [{ symbol: 'Pb', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.5 }, { symbol: 'Ag', amount: 1, chance: 0.15 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Gr\u00e5 metallisk. Bly-kilde, noen ganger med s\u00f8lv.'
     },
     cassiterite: {
         id: 'cassiterite', name: 'Kassiteritt', type: 'mineral', subtype: 'ore',
         formula: 'SnO\u2082', tier: 4, color: 0x554422,
-        yields: [{ symbol: 'Sn', amount: 1, chance: 1.0 }],
+        yields: [{ symbol: 'Sn', amount: 3, chance: 1.0 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
-        desc: 'Brun/sort. Tinnkilde – n\u00f8dvendig for bronse.'
+        desc: 'Brun/sort. Rik tinnkilde – n\u00f8dvendig for bronse.'
     },
     cinnabar: {
         id: 'cinnabar', name: 'Sinnobar', type: 'mineral', subtype: 'ore',
@@ -135,21 +135,21 @@ const MINERAL_DEFS = {
     argentite: {
         id: 'argentite', name: 'Argentitt', type: 'mineral', subtype: 'ore',
         formula: 'Ag\u2082S', tier: 5, color: 0xaaaacc,
-        yields: [{ symbol: 'Ag', amount: 2, chance: 1.0 }],
+        yields: [{ symbol: 'Ag', amount: 4, chance: 1.0 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
-        desc: 'S\u00f8lvgr\u00e5 malm. S\u00f8lvkilde.'
+        desc: 'S\u00f8lvgr\u00e5 malm. Rik s\u00f8lvkilde.'
     },
     native_gold: {
         id: 'native_gold', name: 'Nativt gull', type: 'mineral', subtype: 'ore',
         formula: 'Au', tier: 5, color: 0xffcc00,
-        yields: [{ symbol: 'Au', amount: 1, chance: 1.0 }],
+        yields: [{ symbol: 'Au', amount: 3, chance: 1.0 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
-        desc: 'Rent gull! Funnet som klumper i bergarten.'
+        desc: 'Rent gull! Store klumper i bergarten.'
     },
     native_silver: {
         id: 'native_silver', name: 'Nativt s\u00f8lv', type: 'mineral', subtype: 'ore',
         formula: 'Ag', tier: 5, color: 0xddddee,
-        yields: [{ symbol: 'Ag', amount: 1, chance: 1.0 }],
+        yields: [{ symbol: 'Ag', amount: 3, chance: 1.0 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
         desc: 'Rent s\u00f8lv i tr\u00e5dform. Sjeldent funn.'
     },

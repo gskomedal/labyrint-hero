@@ -143,6 +143,16 @@ class MazeGenerator {
                 this.specialRooms.push({ type: 'crystal_cave', tiles });
             }
         }
+
+        // Camp Room (Smeltery + Storage): guaranteed world 2+, 50% in world 1
+        const campChance = worldNum >= 2 ? 1.0 : 0.50;
+        if (deadEnds.length > 0 && Math.random() < campChance) {
+            const de = deadEnds.shift();
+            const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 2));
+            if (tiles.length >= 1) {
+                this.specialRooms.push({ type: 'camp_room', tiles });
+            }
+        }
     }
 
     /** Gather up to maxSize floor tiles around a starting point (BFS). */

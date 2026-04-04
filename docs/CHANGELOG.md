@@ -2,6 +2,22 @@
 
 ---
 
+## v0.24 – 2026-04-04
+
+### Nye funksjoner
+- **Elements-mod Fase 2 – Metallurgi:**
+  - **Smelting:** Mineraler kan nå smeltes til rene grunnstoffer i leirplasser. Bruker brensel (tre/kull) som energikilde
+  - **Legeringer:** 8 legeringer kan craftes fra rene grunnstoffer: Bronse, Messing, Stål, Rustfritt stål, Elektrum, Duraluminium, Titanleger., Pt-Ir
+  - **Smiing:** Legeringer kan smis til våpen og rustning (12 nye utstyrsgjenstander) med stats som overgår vanlig utstyr
+  - **Leirplass (Camp Room):** Garantert fra verden 2+, 50% sjanse i verden 1. Trygg sone med smelteovn og lager. Trykk V for å åpne
+  - **Lager (Stash):** Lagre mineraler og brensel i leirplassen mellom besøk – frigjør ryggsekken for utstyr og potions
+  - **Brensel:** Tre og kull spawner i labyrinten (1-3 per etasje). Kull fra verden 3+
+  - **Metallurg-skillsti:** Ny 8. spesialiseringsvei (låses opp ved første smelting) med 3 tiers: Rask smelting (-25% energi/tid), Legeringsmester (+15% stats), Mestersmie (+25% smidd utstyr)
+  - **Synergier:** «Smiekunst» (Metallurg + Krigar) → +3 ATK, +20% malmeffekt. «Malmkjenne» (Metallurg + Geolog) → +1 mineralsynsradius, -10% smeltetid
+  - **Smelteovn-UI:** Fire faner – Lager, Smelt mineral, Lag legering, Smi utstyr – med oversikt over grunnstoffer, oppskrifter og brensel
+
+---
+
 ## v0.23 – 2026-04-04
 
 ### Nye funksjoner

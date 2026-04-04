@@ -25,7 +25,8 @@ const config = {
         LeaderboardScene,
         GameOverScene,
         SettingsScene,
-        ElementBookScene
+        ElementBookScene,
+        SmelteryScene
     ]
 };
 

@@ -44,9 +44,7 @@ class InventoryScene extends Phaser.Scene {
         this.add.text(cx, panelY - panelH / 2 + 168, 'EVNER', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
-        this.add.text(cx - panelW / 2 + 20, panelY - panelH / 2 + 220, 'RYGGSEKK', {
-            fontSize: '11px', color: '#445566', fontFamily: 'monospace'
-        });
+        // RYGGSEKK label is drawn dynamically in _refresh() to show slot count
 
         const helpText = hasPet
             ? '[Trykk] Bruk/utstyr  ·  [Hold] → Kjæledyr/Slipp  ·  [E/ESC] Lukk'
@@ -124,13 +122,20 @@ class InventoryScene extends Phaser.Scene {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }));
 
-        // Backpack slots
+        // Backpack slots (dynamic size – base 10 + skill expansions)
         const bpY     = panelY - panelH / 2 + 245;
-        const slotSize = 52, cols = 5, gap = 8;
+        const bpCount = this.inv.backpack.length;
+        const cols = 5, gap = 8;
+        const slotSize = bpCount > 15 ? 44 : 52;
         const bpTotalW = cols * slotSize + (cols - 1) * gap;
         const bpStartX = cx - bpTotalW / 2;
 
-        for (let i = 0; i < 10; i++) {
+        const bpLabel = `RYGGSEKK (${this.inv.itemCount}/${bpCount})`;
+        this._d(this.add.text(cx - panelW / 2 + 20, bpY - 22, bpLabel, {
+            fontSize: '11px', color: '#445566', fontFamily: 'monospace'
+        }));
+
+        for (let i = 0; i < bpCount; i++) {
             const col = i % cols, row = Math.floor(i / cols);
             const sx  = bpStartX + col * (slotSize + gap) + slotSize / 2;
             const sy  = bpY + row * (slotSize + gap) + slotSize / 2;
@@ -616,6 +621,16 @@ class InventoryScene extends Phaser.Scene {
             g.fillTriangle(x - 8, y + 5, x + 3, y + 6, x - 4, y - 5);
             g.fillStyle(0xffffff, 0.2);
             g.fillTriangle(x - 2, y - 6, x + 4, y - 2, x - 4, y);
+        } else if (item.type === 'fuel' && item.id === 'coal') {
+            g.fillStyle(0x222222, 0.85);
+            g.fillCircle(x - 2, y + 2, 5);
+            g.fillCircle(x + 3, y - 1, 4);
+        } else if (item.type === 'fuel') {
+            // Wood log
+            g.fillRoundedRect(x - 7, y - 3, 14, 6, 2);
+            g.fillStyle(0x664422, 0.7);
+            g.fillCircle(x - 7, y, 3);
+            g.fillCircle(x + 7, y, 3);
         } else {
             g.fillCircle(x, y, s / 3.5);
             g.fillStyle(0xffffff, 0.35);
