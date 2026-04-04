@@ -172,7 +172,9 @@ class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.elementBookKey) && !this.scene.isActive('ElementBookScene')) {
                 this.scene.launch('ElementBookScene', { heroRef: this.hero });
             }
-            if (Phaser.Input.Keyboard.JustDown(this.smelteryKey) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
+            const touchSmelt = this.game.registry.get('touch_smeltery');
+            if (touchSmelt) this.game.registry.set('touch_smeltery', false);
+            if ((Phaser.Input.Keyboard.JustDown(this.smelteryKey) || touchSmelt) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
                 this.scene.launch('SmelteryScene', { heroRef: this.hero, gameScene: this });
             }
 

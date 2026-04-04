@@ -18,6 +18,7 @@ class TouchControls {
         reg.set('touch_inventory', false);
         reg.set('touch_minimap', false);
         reg.set('touch_use', false);
+        reg.set('touch_smeltery', false);
 
         this._createDpad();
         this._createActionButtons();
@@ -95,6 +96,7 @@ class TouchControls {
             { label: 'USE', key: 'touch_use',       color: 0x339988, ox: -(sz + gap) * 2, oy: 0       },
             { label: 'INV', key: 'touch_inventory', color: 0x335588, ox: 0,           oy: -(sz + gap) },
             { label: 'MAP', key: 'touch_minimap',   color: 0x338844, ox: -(sz + gap), oy: -(sz + gap) },
+            { label: 'SMI', key: 'touch_smeltery',  color: 0xff7722, ox: -(sz + gap) * 2, oy: -(sz + gap) },
         ];
 
         for (const btn of buttons) {
