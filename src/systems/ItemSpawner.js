@@ -40,7 +40,10 @@ class ItemSpawner {
             }
         }
 
-        // 4. Hidden spike traps
+        // 4. Minerals (Elements mod)
+        this.placeMinerals(eligible);
+
+        // 5. Hidden spike traps
         const mods = scene._diffMods();
         const baseTrapCount = scene.difficulty === 'easy' && scene.worldNum <= 1
             ? 0
@@ -361,6 +364,129 @@ class ItemSpawner {
         }
     }
 
+    // ── Mineral spawning (Elements mod) ─────────────────────────────────────
+
+    placeMinerals(eligible) {
+        if (typeof MINERAL_DEFS === 'undefined') return;
+        const scene = this.scene;
+        const wn = scene.worldNum;
+        const mineralCount = 2 + Math.floor(wn * 0.5);
+
+        // Special room concentrated minerals
+        const gen = scene._gen;
+        if (gen && gen.specialRooms) {
+            for (const room of gen.specialRooms) {
+                const roomMinerals = room.type === 'quarry' ? 3 + Math.floor(Math.random() * 3) : 2 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < roomMinerals && room.tiles.length > 0; i++) {
+                    const tIdx = Math.floor(Math.random() * room.tiles.length);
+                    const tile = room.tiles[tIdx];
+                    if (scene.itemObjects.some(o => o.gridX === tile.x && o.gridY === tile.y)) continue;
+                    if (scene.chests.some(c => c.gridX === tile.x && c.gridY === tile.y)) continue;
+                    const mineralDef = room.type === 'quarry'
+                        ? rollMineralForWorld(Math.max(1, wn))     // ores for quarry
+                        : this._rollCrystalForWorld(wn);            // crystals for crystal cave
+                    this.spawnMineralAt(tile.x, tile.y, mineralDef);
+                }
+            }
+        }
+
+        // Scatter minerals on regular floor tiles
+        let placed = 0;
+        for (const t of eligible) {
+            if (placed >= mineralCount) break;
+            if (scene.chests.some(c => c.gridX === t.x && c.gridY === t.y)) continue;
+            if (scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)) continue;
+            const mineralDef = rollMineralForWorld(wn);
+            this.spawnMineralAt(t.x, t.y, mineralDef);
+            placed++;
+        }
+
+        // Guaranteed rare mineral if hero has master_prospector skill
+        if (scene.hero && scene.hero.guaranteedRareMineral && placed > 0) {
+            const rareTier = Math.max(4, Math.ceil(wn / 2) + 2);
+            const pool = MINERAL_POOL[Math.min(rareTier, 6)] || MINERAL_POOL[4];
+            const rareId = pool[Math.floor(Math.random() * pool.length)];
+            const rareDef = MINERAL_DEFS[rareId];
+            // Place on a random remaining eligible tile
+            for (const t of eligible) {
+                if (scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)) continue;
+                if (scene.chests.some(c => c.gridX === t.x && c.gridY === t.y)) continue;
+                this.spawnMineralAt(t.x, t.y, rareDef);
+                break;
+            }
+        }
+    }
+
+    _rollCrystalForWorld(worldNum) {
+        const tier = rollMineralTier(worldNum);
+        for (let t = tier; t >= 1; t--) {
+            if (CRYSTAL_POOL[t] && CRYSTAL_POOL[t].length > 0) {
+                const id = CRYSTAL_POOL[t][Math.floor(Math.random() * CRYSTAL_POOL[t].length)];
+                return MINERAL_DEFS[id];
+            }
+        }
+        return MINERAL_DEFS.clear_quartz;
+    }
+
+    spawnMineralAt(gx, gy, mineralDef) {
+        if (!mineralDef) return;
+        const scene = this.scene;
+        if (scene.itemObjects.some(o => o.gridX === gx && o.gridY === gy)) return;
+
+        const g  = scene.add.graphics();
+        g.setDepth(2);
+        const px = gx * TILE_SIZE, py = gy * TILE_SIZE, s = TILE_SIZE;
+        const cx = px + s / 2, cy = py + s / 2;
+
+        // Tier glow background
+        const tierColor = (typeof MINERAL_TIER_COLORS !== 'undefined')
+            ? MINERAL_TIER_COLORS[mineralDef.tier] || 0x888888
+            : 0x888888;
+        if (mineralDef.tier >= 3) {
+            g.fillStyle(tierColor, 0.15);
+            g.fillCircle(cx, cy, s / 2.5);
+        }
+
+        if (mineralDef.subtype === 'crystal') {
+            this._drawCrystalIcon(g, px, py, s, mineralDef);
+        } else {
+            this._drawOreIcon(g, px, py, s, mineralDef);
+        }
+
+        scene.itemObjects.push({ gridX: gx, gridY: gy, item: mineralDef, graphic: g, isMineral: true });
+    }
+
+    _drawOreIcon(g, px, py, s, mineral) {
+        const cx = px + s / 2, cy = py + s / 2;
+        const col = mineral.color;
+        // Rocky chunk shape
+        g.fillStyle(col, 0.85);
+        g.fillTriangle(cx - 7, cy + 5, cx + 8, cy + 6, cx + 2, cy - 7);
+        g.fillTriangle(cx - 8, cy + 5, cx + 3, cy + 6, cx - 4, cy - 5);
+        // Highlight facet
+        g.fillStyle(0xffffff, 0.2);
+        g.fillTriangle(cx - 2, cy - 6, cx + 4, cy - 2, cx - 4, cy);
+        // Dark edge
+        g.fillStyle(0x000000, 0.15);
+        g.fillTriangle(cx - 7, cy + 5, cx + 8, cy + 6, cx, cy + 8);
+    }
+
+    _drawCrystalIcon(g, px, py, s, crystal) {
+        const cx = px + s / 2, cy = py + s / 2;
+        const col = crystal.color;
+        // Faceted gem shape
+        g.fillStyle(col, 0.9);
+        // Main diamond shape
+        g.fillTriangle(cx, cy - 8, cx - 6, cy, cx + 6, cy);   // top
+        g.fillTriangle(cx - 6, cy, cx + 6, cy, cx, cy + 8);    // bottom
+        // Highlight
+        g.fillStyle(0xffffff, 0.4);
+        g.fillTriangle(cx, cy - 8, cx - 3, cy - 1, cx + 2, cy - 1);
+        // Inner sparkle
+        g.fillStyle(0xffffff, 0.6);
+        g.fillCircle(cx - 1, cy - 3, 1);
+    }
+
     // ── Pet egg spawning ────────────────────────────────────────────────────
 
     spawnPetEgg(gx, gy) {
@@ -429,8 +555,37 @@ class ItemSpawner {
                     Audio.playPickup();
                     obj.graphic.destroy();
                     scene.itemObjects.splice(i, 1);
+
+                    // Element discovery for minerals
+                    if (obj.isMineral && obj.item.yields && scene.hero.elementTracker) {
+                        // Unlock geologist path on first mineral pickup
+                        if (!scene.hero.geologistUnlocked) {
+                            scene.hero.geologistUnlocked = true;
+                            scene._floatingText(hx, hy - 1, 'Geolog-stien er ulåst!', '#997755');
+                        }
+                        for (const y of obj.item.yields) {
+                            const isNew = scene.hero.elementTracker.discover(y.symbol);
+                            if (isNew && typeof ELEMENTS !== 'undefined') {
+                                const elem = ELEMENTS[y.symbol];
+                                if (elem) {
+                                    const hexCol = '#' + elem.color.toString(16).padStart(6, '0');
+                                    scene._floatingText(hx, hy, `${elem.symbol} (${elem.name}) oppdaget!`, hexCol);
+                                }
+                            }
+                        }
+                        // Check for completion bonuses
+                        const newBonuses = scene.hero.elementTracker.checkCompletions();
+                        for (const bonus of newBonuses) {
+                            scene._floatingText(hx, hy, `${bonus.name} fullført! ${bonus.desc}`, '#ffcc00');
+                        }
+                    }
+
                     const rarDef = obj.item.rarity ? RARITY_BY_ID[obj.item.rarity] : null;
-                    const pickupColor = (rarDef && obj.item.rarity !== 'common') ? rarDef.textColor : '#ffee88';
+                    const tierColor = obj.isMineral && typeof MINERAL_TIER_COLORS !== 'undefined'
+                        ? '#' + (MINERAL_TIER_COLORS[obj.item.tier] || 0xffee88).toString(16).padStart(6, '0')
+                        : null;
+                    const pickupColor = tierColor
+                        || ((rarDef && obj.item.rarity !== 'common') ? rarDef.textColor : '#ffee88');
                     const suffix = toPet ? ` (${scene.pet.petName})` : '';
                     scene._floatingText(hx, hy, `+ ${obj.item.name}${suffix}`, pickupColor);
                 } else {

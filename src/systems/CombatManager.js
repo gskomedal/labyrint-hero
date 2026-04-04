@@ -154,6 +154,18 @@ class CombatManager {
                 : randomItemForWorld(scene.worldNum);
             scene.itemSpawner.spawnItemAt(monster.gridX, monster.gridY, item);
         }
+
+        // Mineral drops (Elements mod)
+        if (typeof rollMineralForWorld !== 'undefined') {
+            const mineralDropChance = monster.type === 'boss' ? 1.0 : 0.15;
+            if (Math.random() < mineralDropChance) {
+                const mineralDef = monster.type === 'boss'
+                    ? rollBossMineral(scene.worldNum)
+                    : rollMineralForWorld(scene.worldNum);
+                scene.itemSpawner.spawnMineralAt(monster.gridX, monster.gridY, mineralDef);
+            }
+        }
+
         if (leveled) scene._onLevelUp();
     }
 

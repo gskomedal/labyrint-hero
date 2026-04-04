@@ -16,7 +16,7 @@ class MazeGenerator {
         this.exitY  = 0;
     }
 
-    generate() {
+    generate(worldNum) {
         // Initialise all as walls
         for (let y = 0; y < this.tileH; y++) {
             this.grid[y] = new Array(this.tileW).fill(TILE.WALL);
@@ -36,6 +36,10 @@ class MazeGenerator {
         this.exitX = this.tileW - 2;
         this.exitY = this.tileH - 2;
         this.grid[this.exitY][this.exitX] = TILE.EXIT;
+
+        // Identify special rooms (Elements mod)
+        this.specialRooms = [];
+        this._placeSpecialRooms(worldNum || 1);
 
         return this.grid;
     }
@@ -95,6 +99,76 @@ class MazeGenerator {
             else if (r < 0.75) this.grid[wy][wx] = TILE.CRACKED_WALL;   // Breakable
             else               this.grid[wy][wx] = TILE.DOOR;           // Locked door
         }
+    }
+
+    /**
+     * Identify dead-end cells and designate some as special rooms (Elements mod).
+     * Special rooms are clusters of floor tiles with a type tag.
+     */
+    _placeSpecialRooms(worldNum) {
+        // Find dead-end cells (floor tiles with only 1 open neighbour)
+        const deadEnds = [];
+        for (let y = 1; y < this.tileH - 1; y++) {
+            for (let x = 1; x < this.tileW - 1; x++) {
+                if (this.grid[y][x] !== TILE.FLOOR) continue;
+                // Skip tiles near start (1,1) or exit
+                if (Math.abs(x - 1) + Math.abs(y - 1) < 4) continue;
+                if (x === this.exitX && y === this.exitY) continue;
+                let openNeighbours = 0;
+                for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+                    const t = this.grid[y + dy]?.[x + dx];
+                    if (t === TILE.FLOOR || t === TILE.EXIT || t === TILE.SECRET || t === TILE.DOOR) {
+                        openNeighbours++;
+                    }
+                }
+                if (openNeighbours === 1) deadEnds.push({ x, y });
+            }
+        }
+        MazeGenerator.shuffle(deadEnds);
+
+        // Quarry: world 1+, 30% chance, max 1
+        if (worldNum >= 1 && deadEnds.length > 0 && Math.random() < 0.30) {
+            const de = deadEnds.shift();
+            const tiles = this._gatherRoomTiles(de.x, de.y, 3 + Math.floor(Math.random() * 3));
+            if (tiles.length >= 2) {
+                this.specialRooms.push({ type: 'quarry', tiles });
+            }
+        }
+
+        // Crystal Cave: world 3+, 20% chance, max 1
+        if (worldNum >= 3 && deadEnds.length > 0 && Math.random() < 0.20) {
+            const de = deadEnds.shift();
+            const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 3));
+            if (tiles.length >= 2) {
+                this.specialRooms.push({ type: 'crystal_cave', tiles });
+            }
+        }
+    }
+
+    /** Gather up to maxSize floor tiles around a starting point (BFS). */
+    _gatherRoomTiles(sx, sy, maxSize) {
+        const tiles = [{ x: sx, y: sy }];
+        const visited = new Set([`${sx},${sy}`]);
+        const queue = [{ x: sx, y: sy }];
+
+        while (queue.length > 0 && tiles.length < maxSize) {
+            const { x, y } = queue.shift();
+            for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+                const nx = x + dx, ny = y + dy;
+                const key = `${nx},${ny}`;
+                if (visited.has(key)) continue;
+                visited.add(key);
+                if (this.grid[ny]?.[nx] === TILE.FLOOR) {
+                    // Skip near start/exit
+                    if (Math.abs(nx - 1) + Math.abs(ny - 1) < 4) continue;
+                    if (nx === this.exitX && ny === this.exitY) continue;
+                    tiles.push({ x: nx, y: ny });
+                    queue.push({ x: nx, y: ny });
+                    if (tiles.length >= maxSize) break;
+                }
+            }
+        }
+        return tiles;
     }
 
     /**

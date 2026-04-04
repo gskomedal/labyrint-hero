@@ -53,6 +53,13 @@ class Hero {
         this.slowTurns   = 0;   // slowed movement
         this.stunTurns   = 0;   // skip turns
 
+        // Elements mod
+        this.elementTracker = new ElementTracker();
+        this.geologistUnlocked = false;
+        this.mineralVisionRadius = 0;
+        this.miningYieldBonus = 0;
+        this.guaranteedRareMineral = false;
+
         // Temporary buffs from brews [{stat, amount, msLeft}]
         this.tempBuffs = [];
 
@@ -251,7 +258,13 @@ class Hero {
             stunTurns:    this.stunTurns,
             skills:       [...this.skills],
             tempBuffs:    this.tempBuffs.map(b => ({ ...b })),
-            inventory:    this.inventory.serialize()
+            inventory:    this.inventory.serialize(),
+            // Elements mod
+            elementTracker:       this.elementTracker.serialize(),
+            geologistUnlocked:    this.geologistUnlocked,
+            mineralVisionRadius:  this.mineralVisionRadius,
+            miningYieldBonus:     this.miningYieldBonus,
+            guaranteedRareMineral: this.guaranteedRareMineral,
         };
     }
 
@@ -282,6 +295,12 @@ class Hero {
         this.stunTurns    = stats.stunTurns    || 0;
         this.skills       = stats.skills       ? [...stats.skills] : [];
         this.tempBuffs    = (stats.tempBuffs || []).map(b => ({ ...b }));
+        // Elements mod
+        this.elementTracker       = ElementTracker.deserialize(stats.elementTracker || null);
+        this.geologistUnlocked    = stats.geologistUnlocked    || false;
+        this.mineralVisionRadius  = stats.mineralVisionRadius  || 0;
+        this.miningYieldBonus     = stats.miningYieldBonus     || 0;
+        this.guaranteedRareMineral = stats.guaranteedRareMineral || false;
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus

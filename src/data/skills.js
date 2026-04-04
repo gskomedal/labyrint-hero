@@ -179,6 +179,41 @@ const SKILL_TREE_PATHS = [
             },
         ]
     },
+    // ── GEOLOG (Geologist – Elements mod) ───────────────────────────────────────
+    {
+        id:    'geolog',
+        name:  'Geolog',
+        desc:  'Mineralfunn og utvinning',
+        color: 0x997755,
+        icon:  'G',
+        unlockCondition: 'mineral_pickup',
+        tiers: [
+            {
+                id:       'mineral_eye',
+                name:     'Malmøye',
+                desc:     '+1 mineral-\nsynsradius',
+                category: 'GEO',
+                maxStack: 3,
+                apply(hero) { hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1; }
+            },
+            {
+                id:       'efficient_mining',
+                name:     'Effektiv utvinning',
+                desc:     '+25% mineral-\nutbytte',
+                category: 'GEO',
+                maxStack: 3,
+                apply(hero) { hero.miningYieldBonus = (hero.miningYieldBonus || 0) + 0.25; }
+            },
+            {
+                id:       'master_prospector',
+                name:     'Mesterprospektør',
+                desc:     'Garantert T4+\nmineral per etasje',
+                category: 'GEO',
+                maxStack: 1,
+                apply(hero) { hero.guaranteedRareMineral = true; }
+            },
+        ]
+    },
 ];
 
 // ── Flat list for backward compat (save/load, apply) ──────────────────────────
@@ -200,6 +235,9 @@ function _countSkill(hero, id) {
 function isSkillUnlocked(hero, pathIndex, tierIndex) {
     const path  = SKILL_TREE_PATHS[pathIndex];
     const skill = path.tiers[tierIndex];
+
+    // Check path-level unlock condition
+    if (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked) return false;
 
     // Already at max stack → not available
     if (_countSkill(hero, skill.id) >= skill.maxStack) return false;
@@ -283,6 +321,15 @@ const SKILL_SYNERGIES = [
         color: 0x44aa88,
         apply(hero) { hero.defense += 1; hero.petBonusHp = (hero.petBonusHp || 0) + 2; },
         unapply(hero) { hero.defense -= 1; hero.petBonusHp = Math.max(0, (hero.petBonusHp || 0) - 2); },
+    },
+    {
+        id:    'earthen_might',
+        name:  'Jordens kraft',
+        desc:  '+1 Forsvar, +1 mineralsynsradius',
+        paths: ['geolog', 'vokter'],
+        color: 0x886644,
+        apply(hero) { hero.defense += 1; hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1; },
+        unapply(hero) { hero.defense -= 1; hero.mineralVisionRadius = Math.max(0, (hero.mineralVisionRadius || 0) - 1); },
     },
 ];
 

@@ -22,13 +22,17 @@ class Inventory {
     // ── Stack helpers ─────────────────────────────────────────────────────────
 
     _isStackable(itemDef) {
-        return itemDef.type === 'consumable' || itemDef.type === 'tool';
+        return itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'mineral';
     }
 
     _getItemDef(entry) {
         if (!entry) return null;
         // Stacked entry: { id, count }
-        if (entry.id && entry.count !== undefined) return ITEM_DEFS[entry.id];
+        if (entry.id && entry.count !== undefined) {
+            return ITEM_DEFS[entry.id]
+                || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
+                || null;
+        }
         // Plain item def (equipment)
         return entry;
     }
@@ -245,7 +249,15 @@ class Inventory {
             quickUse: this.quickUse ? { id: this.quickUse.id, count: this.quickUse.count } : null,
             backpack: this.backpack.map(entry => {
                 if (!entry) return null;
-                if (entry.count !== undefined) return { id: entry.id, count: entry.count };
+                if (entry.count !== undefined) {
+                    // Mark mineral entries so deserialization looks in MINERAL_DEFS
+                    const def = ITEM_DEFS[entry.id]
+                        || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id]);
+                    const isMineral = def && def.type === 'mineral';
+                    return isMineral
+                        ? { id: entry.id, count: entry.count, isMineral: true }
+                        : { id: entry.id, count: entry.count };
+                }
                 // Equipment: store rarity if non-common
                 if (entry.rarity && entry.rarity !== 'common') {
                     return { id: entry.id, rarity: entry.rarity };
@@ -296,13 +308,18 @@ class Inventory {
                     } else {
                         inv.backpack[i] = makeRarityItem(def, 'common');
                     }
-                } else if (entry.id && ITEM_DEFS[entry.id]) {
-                    if (entry.count !== undefined) {
-                        // Stacked consumable/tool
+                } else if (entry.id) {
+                    // Check if it's a mineral entry
+                    if (entry.isMineral && typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id]) {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
-                    } else {
-                        // Equipment with optional rarity
-                        inv.backpack[i] = makeRarityItem(ITEM_DEFS[entry.id], entry.rarity || 'common');
+                    } else if (ITEM_DEFS[entry.id]) {
+                        if (entry.count !== undefined) {
+                            // Stacked consumable/tool
+                            inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
+                        } else {
+                            // Equipment with optional rarity
+                            inv.backpack[i] = makeRarityItem(ITEM_DEFS[entry.id], entry.rarity || 'common');
+                        }
                     }
                 }
             });

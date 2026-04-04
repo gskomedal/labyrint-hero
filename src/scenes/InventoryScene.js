@@ -55,6 +55,19 @@ class InventoryScene extends Phaser.Scene {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
+        // Element Book button
+        const ebBtn = this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 18, 'Elementbok [B]', {
+            fontSize: '10px', color: '#997755', fontFamily: 'monospace'
+        }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
+        ebBtn.on('pointerover', () => ebBtn.setColor('#ccaa77'));
+        ebBtn.on('pointerout',  () => ebBtn.setColor('#997755'));
+        ebBtn.on('pointerdown', () => {
+            const gs = this.scene.get('GameScene');
+            if (gs && gs.hero) {
+                this.scene.launch('ElementBookScene', { heroRef: gs.hero });
+            }
+        });
+
         // Close button (touch-friendly)
         const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
             fontSize: '20px', color: '#667788', fontFamily: 'monospace'
@@ -275,6 +288,8 @@ class InventoryScene extends Phaser.Scene {
             const r = itemDef.rarity ? RARITY_BY_ID[itemDef.rarity] : null;
             if (r && itemDef.rarity !== 'common') {
                 col = r.color;
+            } else if (itemDef.type === 'mineral' && typeof MINERAL_TIER_COLORS !== 'undefined') {
+                col = MINERAL_TIER_COLORS[itemDef.tier] || 0x997755;
             } else {
                 col = itemDef.type === 'weapon' ? 0xff8800 : itemDef.type === 'armor' ? 0x4488ff : 0xff2244;
             }
@@ -284,7 +299,9 @@ class InventoryScene extends Phaser.Scene {
 
         if (itemDef) {
             this._drawItemIcon(x, y, itemDef, size - 10);
-            const nameCol = this._rarityTextColor(itemDef);
+            const nameCol = itemDef.type === 'mineral' && typeof MINERAL_TIER_COLORS !== 'undefined'
+                ? '#' + (MINERAL_TIER_COLORS[itemDef.tier] || 0x997755).toString(16).padStart(6, '0')
+                : this._rarityTextColor(itemDef);
             this._d(this.add.text(x, y + size / 2 - 2, this._shortName(itemDef.name), {
                 fontSize: '8px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5, 1));
@@ -585,6 +602,20 @@ class InventoryScene extends Phaser.Scene {
         } else if (item.type === 'weapon') {
             g.fillRect(x - 2, y - hs + 2, 4, s * 0.55);
             g.fillRect(x - hs / 2, y, hs, s / 5);
+        } else if (item.type === 'mineral' && item.subtype === 'crystal') {
+            // Crystal gem shape
+            g.fillTriangle(x, y - 8, x - 6, y, x + 6, y);
+            g.fillTriangle(x - 6, y, x + 6, y, x, y + 8);
+            g.fillStyle(0xffffff, 0.4);
+            g.fillTriangle(x, y - 8, x - 3, y - 1, x + 2, y - 1);
+            g.fillStyle(0xffffff, 0.6);
+            g.fillCircle(x - 1, y - 3, 1);
+        } else if (item.type === 'mineral') {
+            // Rocky ore chunk
+            g.fillTriangle(x - 7, y + 5, x + 8, y + 6, x + 2, y - 7);
+            g.fillTriangle(x - 8, y + 5, x + 3, y + 6, x - 4, y - 5);
+            g.fillStyle(0xffffff, 0.2);
+            g.fillTriangle(x - 2, y - 6, x + 4, y - 2, x - 4, y);
         } else {
             g.fillCircle(x, y, s / 3.5);
             g.fillStyle(0xffffff, 0.35);

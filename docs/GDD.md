@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.21
-**Sist oppdatert:** 2026-04-01
+**Versjon:** 0.23
+**Sist oppdatert:** 2026-04-04
 
 ---
 
@@ -393,6 +393,47 @@ Automatiske bonuser som aktiveres når helten har evner fra to forskjellige veie
 | Skyggejeger | Jeger + Skurk | +15% unnvikelse, +1 synsfelt |
 
 Synergier gir insentiv til å investere bredt istedenfor å spesialisere seg.
+
+---
+
+## 13b. Elements-mod – Fase 1: Geologi (v0.23)
+
+Elements-modifikasjonen fletter det periodiske system, geologi, metallurgi og kjemi inn i spillet. Fase 1 legger geologi-grunnlaget.
+
+### Nye datafiler
+- `src/data/elements.js` – ~50 grunnstoffer med symbol, atomnummer, kategori, tier (1-6), farge
+- `src/data/minerals.js` – ~20 malmer og ~10 krystaller med utbyttetabell (yields), energikostnad, smeltetid
+- `src/systems/ElementTracker.js` – Sporer oppdagelser og gruppeprestasjoner
+
+### Mineraler i labyrinten
+- 2-5 mineraler spawner per etasje, skalert etter verden (tier-gulv med tilfeldig oppover-spredning)
+- Monstre har 15% sjanse for mineral-drop (boss = 100%, høyere tier)
+- Mineraler stabler til 10 per ryggsekk-plass
+
+### Spesialrom
+- **Steinbrott** (verden 1+, 30% sjanse): 3-5 malmer, T1-T2
+- **Krystallhule** (verden 3+, 20% sjanse): 2-4 edelstener
+
+### Elementbok (B-tast)
+Periodisk system-overlay med 18×9 rutenett. Oppdagede grunnstoffer vises med symbol og kategori-farge. Gruppeprestasjoner (f.eks. Jernmetaller → +2 HP) vises nederst.
+
+### Geolog-skillsti (#6)
+Låses opp ved første mineral-funn. 3 tiers:
+| Tier | Skill | Effekt |
+|------|-------|--------|
+| T1 | Malmøye | +1 mineral-synsradius per stack (maks 3) |
+| T2 | Effektiv utvinning | +25% mineralutbytte per stack (maks 3) |
+| T3 | Mesterprospektør | Garantert T4+ mineral per etasje (maks 1) |
+
+Synergi: **Jordens kraft** (Geolog + Vokter) → +1 forsvar, +1 mineralsynsradius.
+
+### Fremtidige faser (ikke implementert)
+- Fase 2: Metallurgi (smelting, legeringer, energisystem)
+- Fase 3: Kjemi (molekyler, potions, bomber)
+- Fase 4: Verdensekspansjon (soner, dybde-skalering)
+- Fase 5: Fysikk og endgame (halvledere, fisjon, fusjon)
+
+Se `docs/Elements-mod.md` for fullstendig designdokument.
 
 ---
 

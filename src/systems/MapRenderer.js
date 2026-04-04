@@ -384,6 +384,34 @@ class MapRenderer {
                 break;
             }
         }
+
+        // Special room decoration (Elements mod)
+        const scene = this.scene;
+        if (scene._gen && scene._gen.specialRooms) {
+            for (const room of scene._gen.specialRooms) {
+                if (!room.tiles.some(t => t.x === gx && t.y === gy)) continue;
+                if (room.type === 'quarry') {
+                    // Rocky debris: small brown/grey rectangles
+                    g.fillStyle(0x887755, 0.35);
+                    g.fillRect(px + (seed & 7) + 2, py + (seed2 & 7) + 8, 4, 3);
+                    g.fillRect(px + (seed >> 2 & 7) + 14, py + (seed2 >> 2 & 7) + 4, 3, 4);
+                    g.fillStyle(0x776644, 0.25);
+                    g.fillCircle(px + (seed & 11) + 6, py + (seed2 & 11) + 12, 2);
+                } else if (room.type === 'crystal_cave') {
+                    // Sparkling crystals: small colored triangles
+                    const crystCol = [0xeeeeff, 0xaa44cc, 0x44bbdd, 0x22cc44][seed & 3];
+                    g.fillStyle(crystCol, 0.35);
+                    g.fillTriangle(
+                        px + (seed & 7) + 8, py + (seed2 & 7) + 4,
+                        px + (seed & 7) + 5, py + (seed2 & 7) + 10,
+                        px + (seed & 7) + 11, py + (seed2 & 7) + 10
+                    );
+                    g.fillStyle(0xffffff, 0.15);
+                    g.fillCircle(px + (seed >> 3 & 11) + 6, py + (seed2 >> 3 & 11) + 6, 1);
+                }
+                break;
+            }
+        }
     }
 
     // ── Exit portal pulsing overlay ───────────────────────────────────────────
@@ -429,6 +457,24 @@ class MapRenderer {
                 }
             }
         }
+
+        // Mineral vision: reveal mineral tiles through fog if hero has mineral_eye skill
+        const mr = scene.hero.mineralVisionRadius || 0;
+        if (mr > 0 && scene.itemObjects) {
+            for (const obj of scene.itemObjects) {
+                if (!obj.isMineral) continue;
+                const dist = Math.abs(obj.gridX - hx) + Math.abs(obj.gridY - hy);
+                if (dist <= mr + r) {
+                    const fx = obj.gridX, fy = obj.gridY;
+                    if (fx >= 0 && fx < scene.tileW && fy >= 0 && fy < scene.tileH) {
+                        if (scene.fog[fy][fx] === FOG.DARK) {
+                            scene.fog[fy][fx] = FOG.DIM;
+                        }
+                    }
+                }
+            }
+        }
+
         this._drawFog();
     }
 

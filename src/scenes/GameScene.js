@@ -41,7 +41,7 @@ class GameScene extends Phaser.Scene {
         const cellW = BASE_CELL_W + extra * 2;
         const cellH = BASE_CELL_H + extra;
         this._gen   = new MazeGenerator(cellW, cellH);
-        this.maze   = this._gen.generate();
+        this.maze   = this._gen.generate(this.worldNum);
         this.tileW  = this._gen.tileW;
         this.tileH  = this._gen.tileH;
         this.exitX  = this._gen.exitX;
@@ -155,7 +155,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene');
 
         if (!blocked) {
             this.inputHandler.handleInput(delta);
@@ -168,6 +168,9 @@ class GameScene extends Phaser.Scene {
             if (touchInv) this.game.registry.set('touch_inventory', false);
             if (Phaser.Input.Keyboard.JustDown(this.eKey) || touchInv) {
                 this.scene.launch('InventoryScene');
+            }
+            if (Phaser.Input.Keyboard.JustDown(this.elementBookKey) && !this.scene.isActive('ElementBookScene')) {
+                this.scene.launch('ElementBookScene', { heroRef: this.hero });
             }
 
             this.monsterMgr.tickMonsters(delta);

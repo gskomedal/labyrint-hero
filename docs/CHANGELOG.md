@@ -2,6 +2,24 @@
 
 ---
 
+## v0.23 – 2026-04-04
+
+### Nye funksjoner
+- **Elements-mod Fase 1 – Geologi-grunnlag:**
+  - **Grunnstoff-dataset:** ~50 grunnstoffer fra det periodiske system med tier 1-6 (sjeldenhetsgrad basert på geokjemisk forekomst)
+  - **Mineral-dataset:** ~20 malmer og ~10 krystaller/edelstener som kan finnes i labyrinten
+  - **Mineral-spawning:** Mineraler spawner på gulvet i labyrinten (2-5 per etasje, skalerer med verden). Monstre har 15% sjanse for mineral-drop (boss = 100%)
+  - **Spesialrom:** Steinbrott (verden 1+, konsentrerte malmer) og Krystallhule (verden 3+, edelstener) genereres i dead-ends
+  - **Element-oppdagelse:** Å plukke opp et mineral avslører automatisk dets bestanddeler i det periodiske system med flytende tekst
+  - **Elementbok-UI:** Nytt periodisk system-overlay (B-tast eller knapp i inventar) som viser oppdagede/uoppdagede grunnstoffer, gruppeprestasjoner og tooltip-info
+  - **Geolog-skillsti:** Ny 6. spesialiseringsvei (låses opp ved første mineral-funn) med 3 tiers: Malmøye (mineralsynsradius), Effektiv utvinning (+25% utbytte), Mesterprospektør (garantert T4+ mineral)
+  - **Synergi:** «Jordens kraft» (Geolog + Vokter) gir +1 forsvar og +1 mineralsynsradius
+  - **Mineralsynsradius:** Malmøye-skillen avslører mineraler gjennom tåke innen ekstra radius
+  - **Inventarstøtte:** Mineraler stabler til 10 per plass, med prosedyrelle ikoner (malm = steinbit, krystall = fasettert edelsten)
+  - **Bakoverkompatibilitet:** Gamle saves laster uten problemer – nye felter får standardverdier
+
+---
+
 ## v0.22 – 2026-04-03
 
 ### Feilrettinger
