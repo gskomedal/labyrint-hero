@@ -61,19 +61,31 @@ class SkillScene extends Phaser.Scene {
         const hexCol  = '#' + colColor.toString(16).padStart(6, '0');
         const hdrW = Math.min(160, this._colW - 8);
 
+        // Check if entire path is locked (e.g. Geologist before first mineral)
+        const pathLocked = path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked;
+
         // Path header
         const hdrBg = this.add.graphics();
-        hdrBg.fillStyle(colColor, 0.12);
+        hdrBg.fillStyle(pathLocked ? 0x111118 : colColor, pathLocked ? 0.15 : 0.12);
         hdrBg.fillRoundedRect(colCX - hdrW / 2, areaTop, hdrW, 26, 4);
-        hdrBg.lineStyle(1, colColor, 0.5);
+        hdrBg.lineStyle(1, pathLocked ? 0x222233 : colColor, pathLocked ? 0.3 : 0.5);
         hdrBg.strokeRoundedRect(colCX - hdrW / 2, areaTop, hdrW, 26, 4);
 
         this.add.text(colCX, areaTop + 6, `── ${path.name.toUpperCase()} ──`, {
-            fontSize: '11px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '11px', color: pathLocked ? '#333344' : hexCol, fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
-        this.add.text(colCX, areaTop + 18, path.desc, {
-            fontSize: '8px', color: '#445566', fontFamily: 'monospace'
+        this.add.text(colCX, areaTop + 18, pathLocked ? 'Finn et mineral!' : path.desc, {
+            fontSize: '8px', color: pathLocked ? '#333344' : '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
+
+        // If entire path is locked, show a lock overlay and skip drawing skill cards
+        if (pathLocked) {
+            this.add.text(colCX, areaTop + 80, '🔒', { fontSize: '24px' }).setOrigin(0.5);
+            this.add.text(colCX, areaTop + 110, 'Plukk opp et\nmineral for å\nlåse opp', {
+                fontSize: '9px', color: '#333344', fontFamily: 'monospace', align: 'center'
+            }).setOrigin(0.5);
+            return;
+        }
 
         const tierH    = 72;
         const cardW    = Math.min(148, this._colW - 12), cardH = 62;

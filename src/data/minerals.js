@@ -1,0 +1,327 @@
+// ─── Labyrint Hero – Minerals & Crystals Dataset ─────────────────────────────
+// Minerals are collectible items found in the labyrinth.
+// Each mineral yields one or more elements when smelted (Phase 2).
+// In Phase 1, picking up a mineral auto-discovers its constituent elements.
+
+const MINERAL_DEFS = {
+    // ── Tier 1 – Common ores ─────────────────────────────────────────────────
+    quartz: {
+        id: 'quartz', name: 'Kvarts', type: 'mineral', subtype: 'ore',
+        formula: 'SiO\u2082', tier: 1, color: 0xeeeeff,
+        yields: [{ symbol: 'Si', amount: 1, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.5 }],
+        energyCost: 1, smeltingTime: 2, stackSize: 10,
+        desc: 'Vanlig mineral. Gir silisium og oksygen.'
+    },
+    hematite: {
+        id: 'hematite', name: 'Hematitt', type: 'mineral', subtype: 'ore',
+        formula: 'Fe\u2082O\u2083', tier: 1, color: 0x8b3a3a,
+        yields: [{ symbol: 'Fe', amount: 2, chance: 1.0 }, { symbol: 'O', amount: 3, chance: 0.3 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'R\u00f8dlig jernmalm. Viktigste jernkilde.'
+    },
+    magnetite: {
+        id: 'magnetite', name: 'Magnetitt', type: 'mineral', subtype: 'ore',
+        formula: 'Fe\u2083O\u2084', tier: 1, color: 0x333344,
+        yields: [{ symbol: 'Fe', amount: 3, chance: 1.0 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Sort jernmalm. Magnetisk!'
+    },
+    limestone: {
+        id: 'limestone', name: 'Kalkstein', type: 'mineral', subtype: 'ore',
+        formula: 'CaCO\u2083', tier: 1, color: 0xccccbb,
+        yields: [{ symbol: 'Ca', amount: 1, chance: 1.0 }, { symbol: 'C', amount: 1, chance: 0.5 }],
+        energyCost: 1, smeltingTime: 2, stackSize: 10,
+        desc: 'Hvitlig stein. Gir kalsium og karbon.'
+    },
+    halite: {
+        id: 'halite', name: 'Halit', type: 'mineral', subtype: 'ore',
+        formula: 'NaCl', tier: 1, color: 0xeeeedd,
+        yields: [{ symbol: 'Na', amount: 1, chance: 1.0 }, { symbol: 'Cl', amount: 1, chance: 0.7 }],
+        energyCost: 1, smeltingTime: 1, stackSize: 10,
+        desc: 'Steinsalt. Kubiske krystaller.'
+    },
+    bauxite: {
+        id: 'bauxite', name: 'Bauxitt', type: 'mineral', subtype: 'ore',
+        formula: 'Al\u2082O\u2083', tier: 1, color: 0x995533,
+        yields: [{ symbol: 'Al', amount: 2, chance: 1.0 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'R\u00f8dbrun jord. Aluminiumskilde.'
+    },
+    olivine: {
+        id: 'olivine', name: 'Olivin', type: 'mineral', subtype: 'ore',
+        formula: '(Mg,Fe)\u2082SiO\u2084', tier: 1, color: 0x88aa44,
+        yields: [{ symbol: 'Mg', amount: 1, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }, { symbol: 'Si', amount: 1, chance: 0.3 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Gr\u00f8nt silikatmineral fra dypet.'
+    },
+
+    // ── Tier 2 – Uncommon ores ───────────────────────────────────────────────
+    pyrite: {
+        id: 'pyrite', name: 'Pyritt', type: 'mineral', subtype: 'ore',
+        formula: 'FeS\u2082', tier: 2, color: 0xccbb44,
+        yields: [{ symbol: 'Fe', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.8 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Narregull! Gulaktig, men det er jern og svovel.'
+    },
+    ilmenite: {
+        id: 'ilmenite', name: 'Ilmenitt', type: 'mineral', subtype: 'ore',
+        formula: 'FeTiO\u2083', tier: 2, color: 0x222233,
+        yields: [{ symbol: 'Fe', amount: 1, chance: 0.7 }, { symbol: 'Ti', amount: 1, chance: 1.0 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Sort mineral. Titankilde.'
+    },
+    apatite: {
+        id: 'apatite', name: 'Apatitt', type: 'mineral', subtype: 'ore',
+        formula: 'Ca\u2085(PO\u2084)\u2083(OH)', tier: 2, color: 0x44aa88,
+        yields: [{ symbol: 'Ca', amount: 1, chance: 0.5 }, { symbol: 'P', amount: 1, chance: 1.0 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Gr\u00f8nn/bl\u00e5 mineral. Fosforkilde.'
+    },
+
+    // ── Tier 3 – Rare ores ──────────────────────────────────────────────────
+    chalcopyrite: {
+        id: 'chalcopyrite', name: 'Kalkopyritt', type: 'mineral', subtype: 'ore',
+        formula: 'CuFeS\u2082', tier: 3, color: 0xbb9933,
+        yields: [{ symbol: 'Cu', amount: 1, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }, { symbol: 'S', amount: 1, chance: 0.3 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Messinggul. Viktigste kobberkilde.'
+    },
+    malachite: {
+        id: 'malachite', name: 'Malakit', type: 'mineral', subtype: 'ore',
+        formula: 'Cu\u2082CO\u2083(OH)\u2082', tier: 3, color: 0x22bb66,
+        yields: [{ symbol: 'Cu', amount: 2, chance: 1.0 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Vakker klargr\u00f8nn. Ren kobberkilde.'
+    },
+    sphalerite: {
+        id: 'sphalerite', name: 'Sfaleritt', type: 'mineral', subtype: 'ore',
+        formula: 'ZnS', tier: 3, color: 0x554433,
+        yields: [{ symbol: 'Zn', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Sort/brun. Viktigste sinkkilde.'
+    },
+    chromite: {
+        id: 'chromite', name: 'Kromitt', type: 'mineral', subtype: 'ore',
+        formula: 'FeCr\u2082O\u2084', tier: 3, color: 0x334433,
+        yields: [{ symbol: 'Cr', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.4 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'M\u00f8rk malmstein. Eneste kromkilde.'
+    },
+
+    // ── Tier 4 – Epic ores ──────────────────────────────────────────────────
+    galena: {
+        id: 'galena', name: 'Galena', type: 'mineral', subtype: 'ore',
+        formula: 'PbS', tier: 4, color: 0x667788,
+        yields: [{ symbol: 'Pb', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.5 }, { symbol: 'Ag', amount: 1, chance: 0.1 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Gr\u00e5 metallisk. Bly-kilde, noen ganger med s\u00f8lv.'
+    },
+    cassiterite: {
+        id: 'cassiterite', name: 'Kassiteritt', type: 'mineral', subtype: 'ore',
+        formula: 'SnO\u2082', tier: 4, color: 0x554422,
+        yields: [{ symbol: 'Sn', amount: 1, chance: 1.0 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Brun/sort. Tinnkilde – n\u00f8dvendig for bronse.'
+    },
+    cinnabar: {
+        id: 'cinnabar', name: 'Sinnobar', type: 'mineral', subtype: 'ore',
+        formula: 'HgS', tier: 4, color: 0xcc2222,
+        yields: [{ symbol: 'Hg', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.7 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Knallr\u00f8d. Kvikks\u00f8lvkilde. Giftig!'
+    },
+
+    // ── Tier 5 – Legendary ──────────────────────────────────────────────────
+    argentite: {
+        id: 'argentite', name: 'Argentitt', type: 'mineral', subtype: 'ore',
+        formula: 'Ag\u2082S', tier: 5, color: 0xaaaacc,
+        yields: [{ symbol: 'Ag', amount: 2, chance: 1.0 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'S\u00f8lvgr\u00e5 malm. S\u00f8lvkilde.'
+    },
+    native_gold: {
+        id: 'native_gold', name: 'Nativt gull', type: 'mineral', subtype: 'ore',
+        formula: 'Au', tier: 5, color: 0xffcc00,
+        yields: [{ symbol: 'Au', amount: 1, chance: 1.0 }],
+        energyCost: 1, smeltingTime: 2, stackSize: 10,
+        desc: 'Rent gull! Funnet som klumper i bergarten.'
+    },
+    native_silver: {
+        id: 'native_silver', name: 'Nativt s\u00f8lv', type: 'mineral', subtype: 'ore',
+        formula: 'Ag', tier: 5, color: 0xddddee,
+        yields: [{ symbol: 'Ag', amount: 1, chance: 1.0 }],
+        energyCost: 1, smeltingTime: 2, stackSize: 10,
+        desc: 'Rent s\u00f8lv i tr\u00e5dform. Sjeldent funn.'
+    },
+
+    // ── Tier 6 – Mythic ─────────────────────────────────────────────────────
+    uraninite: {
+        id: 'uraninite', name: 'Uraninitt', type: 'mineral', subtype: 'ore',
+        formula: 'UO\u2082', tier: 6, color: 0x224422,
+        yields: [{ symbol: 'U', amount: 1, chance: 1.0 }],
+        energyCost: 5, smeltingTime: 8, stackSize: 10,
+        desc: 'Sort og tung. Radioaktivt! Urankilde.'
+    },
+
+    // ── Crystals / Gemstones (subtype: 'crystal') ───────────────────────────
+    clear_quartz: {
+        id: 'clear_quartz', name: 'Klar kvarts', type: 'mineral', subtype: 'crystal',
+        formula: 'SiO\u2082', tier: 1, color: 0xffffff,
+        yields: [{ symbol: 'Si', amount: 1, chance: 0.5 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { visionRadius: 1 },
+        desc: 'Gjennomsiktig krystall. Svak magisk resonans.'
+    },
+    amethyst: {
+        id: 'amethyst', name: 'Ametyst', type: 'mineral', subtype: 'crystal',
+        formula: 'SiO\u2082 + Mn', tier: 2, color: 0xaa44cc,
+        yields: [{ symbol: 'Si', amount: 1, chance: 0.3 }, { symbol: 'Mn', amount: 1, chance: 0.2 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { poisonResist: 0.15 },
+        desc: 'Lilla kvarts. Beskytter mot gift.'
+    },
+    citrine: {
+        id: 'citrine', name: 'Citrin', type: 'mineral', subtype: 'crystal',
+        formula: 'SiO\u2082 + Fe', tier: 2, color: 0xddaa22,
+        yields: [{ symbol: 'Si', amount: 1, chance: 0.3 }, { symbol: 'Fe', amount: 1, chance: 0.2 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { goldMultiplier: 0.2 },
+        desc: 'Gul kvarts. Tiltrekker gull.'
+    },
+    emerald: {
+        id: 'emerald', name: 'Smaragd', type: 'mineral', subtype: 'crystal',
+        formula: 'Be\u2083Al\u2082Si\u2086O\u2081\u2088 + Cr', tier: 3, color: 0x22cc44,
+        yields: [{ symbol: 'Cr', amount: 1, chance: 0.3 }, { symbol: 'Be', amount: 1, chance: 0.1 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { poisonResist: 0.3 },
+        desc: 'Dyp gr\u00f8nn edelsten. Sterk giftresistans.'
+    },
+    aquamarine: {
+        id: 'aquamarine', name: 'Akvamarin', type: 'mineral', subtype: 'crystal',
+        formula: 'Be\u2083Al\u2082Si\u2086O\u2081\u2088', tier: 3, color: 0x44bbdd,
+        yields: [{ symbol: 'Be', amount: 1, chance: 0.2 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { burnResist: 0.3 },
+        desc: 'Lysbl\u00e5 beryll. Beskytter mot brann.'
+    },
+    ruby: {
+        id: 'ruby', name: 'Rubin', type: 'mineral', subtype: 'crystal',
+        formula: 'Al\u2082O\u2083 + Cr', tier: 4, color: 0xdd2244,
+        yields: [{ symbol: 'Al', amount: 1, chance: 0.3 }, { symbol: 'Cr', amount: 1, chance: 0.2 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { attack: 1 },
+        desc: 'Blodr\u00f8d edelsten. \u00d8ker angrepskraft.'
+    },
+    sapphire: {
+        id: 'sapphire', name: 'Safir', type: 'mineral', subtype: 'crystal',
+        formula: 'Al\u2082O\u2083 + Fe/Ti', tier: 4, color: 0x2244cc,
+        yields: [{ symbol: 'Al', amount: 1, chance: 0.3 }, { symbol: 'Ti', amount: 1, chance: 0.1 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { defense: 1 },
+        desc: 'Dyp bl\u00e5 edelsten. \u00d8ker forsvar.'
+    },
+    diamond: {
+        id: 'diamond', name: 'Diamant', type: 'mineral', subtype: 'crystal',
+        formula: 'C', tier: 5, color: 0xeeffff,
+        yields: [{ symbol: 'C', amount: 1, chance: 1.0 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { attack: 1, defense: 1, maxHearts: 1 },
+        desc: 'Det hardeste naturlige materialet. Ren karbon.'
+    },
+    red_beryl: {
+        id: 'red_beryl', name: 'R\u00f8d beryll', type: 'mineral', subtype: 'crystal',
+        formula: 'Be\u2083Al\u2082Si\u2086O\u2081\u2088 + Mn', tier: 6, color: 0xee4466,
+        yields: [{ symbol: 'Be', amount: 1, chance: 0.3 }],
+        energyCost: 0, smeltingTime: 0, stackSize: 10,
+        effect: { critChance: 0.1, dodgeChance: 0.1 },
+        desc: 'Ekstremt sjelden. Tidsforvrengning.'
+    },
+};
+
+// ── Mineral pools grouped by tier ────────────────────────────────────────────
+
+const MINERAL_POOL = {
+    1: ['quartz', 'hematite', 'magnetite', 'limestone', 'halite', 'bauxite', 'olivine'],
+    2: ['pyrite', 'ilmenite', 'apatite'],
+    3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite'],
+    4: ['galena', 'cassiterite', 'cinnabar'],
+    5: ['argentite', 'native_gold', 'native_silver'],
+    6: ['uraninite'],
+};
+
+const CRYSTAL_POOL = {
+    1: ['clear_quartz'],
+    2: ['amethyst', 'citrine'],
+    3: ['emerald', 'aquamarine'],
+    4: ['ruby', 'sapphire'],
+    5: ['diamond'],
+    6: ['red_beryl'],
+};
+
+// ── Roll functions ───────────────────────────────────────────────────────────
+
+/**
+ * Roll a mineral tier based on world number.
+ * Zone as floor-tier with random upward spread.
+ * World 1-2 → mostly T1, World 3-4 → T1-T2, World 5 → T2-T3, etc.
+ */
+function rollMineralTier(worldNum) {
+    // Base tier: 1 for worlds 1-2, 2 for worlds 3-4, 3 for worlds 5-6, etc.
+    const baseTier = Math.max(1, Math.ceil(worldNum / 2));
+    let tier = baseTier;
+
+    // 12% chance to roll one tier higher, 3% for two tiers higher
+    const roll = Math.random();
+    if (roll < 0.03)      tier += 2;
+    else if (roll < 0.15) tier += 1;
+
+    return Math.min(tier, 6);
+}
+
+/**
+ * Pick a random mineral for a given world.
+ * 15% chance of crystal instead of ore.
+ */
+function rollMineralForWorld(worldNum) {
+    const tier = rollMineralTier(worldNum);
+    const isCrystal = Math.random() < 0.15;
+    const pool = isCrystal ? CRYSTAL_POOL : MINERAL_POOL;
+
+    // Find the best available tier (fall back to lower tiers if pool is empty)
+    for (let t = tier; t >= 1; t--) {
+        if (pool[t] && pool[t].length > 0) {
+            const id = pool[t][Math.floor(Math.random() * pool[t].length)];
+            return MINERAL_DEFS[id];
+        }
+    }
+    // Fallback: quartz
+    return MINERAL_DEFS.quartz;
+}
+
+/**
+ * Roll a mineral for boss drops – one tier higher than normal, minimum tier 3.
+ */
+function rollBossMineral(worldNum) {
+    const baseTier = Math.max(3, Math.ceil(worldNum / 2) + 1);
+    const tier = Math.min(baseTier + (Math.random() < 0.2 ? 1 : 0), 6);
+    const isCrystal = Math.random() < 0.3; // bosses more likely to drop crystals
+    const pool = isCrystal ? CRYSTAL_POOL : MINERAL_POOL;
+
+    for (let t = tier; t >= 1; t--) {
+        if (pool[t] && pool[t].length > 0) {
+            const id = pool[t][Math.floor(Math.random() * pool[t].length)];
+            return MINERAL_DEFS[id];
+        }
+    }
+    return MINERAL_DEFS.malachite;
+}
+
+// Rarity color mapping for mineral tiers (matches existing rarity system visuals)
+const MINERAL_TIER_COLORS = {
+    1: 0x888888, // grey – common
+    2: 0x44bb44, // green – uncommon
+    3: 0x4488ff, // blue – rare
+    4: 0xaa44ff, // purple – epic
+    5: 0xffcc00, // gold – legendary
+    6: 0xff44ff, // rainbow/pink – mythic
+};

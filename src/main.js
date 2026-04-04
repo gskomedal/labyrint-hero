@@ -24,7 +24,8 @@ const config = {
         MerchantScene,
         LeaderboardScene,
         GameOverScene,
-        SettingsScene
+        SettingsScene,
+        ElementBookScene
     ]
 };
 
