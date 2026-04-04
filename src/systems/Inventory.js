@@ -9,6 +9,13 @@ class Inventory {
         this.backpack = new Array(10).fill(null); // null or { id, count } for stackable, or itemDef for equipment
     }
 
+    /** Add extra slots to the backpack (e.g. from skills). */
+    expandBackpack(extraSlots) {
+        for (let i = 0; i < extraSlots; i++) {
+            this.backpack.push(null);
+        }
+    }
+
     // ── Queries ───────────────────────────────────────────────────────────────
 
     get isFull() {
@@ -243,6 +250,7 @@ class Inventory {
                 : item.id;
         };
         return {
+            backpackSize: this.backpack.length,
             equipped: {
                 weapon: serializeEquip(this.equipped.weapon),
                 armor:  serializeEquip(this.equipped.armor)
@@ -273,6 +281,12 @@ class Inventory {
     static deserialize(data, hero) {
         const inv = new Inventory();
         if (!data) return inv;
+
+        // Restore expanded backpack size
+        const savedSize = data.backpackSize || 10;
+        if (savedSize > inv.backpack.length) {
+            inv.expandBackpack(savedSize - inv.backpack.length);
+        }
 
         /** Restore an equipment entry (string id or {id, rarity}) */
         const restoreEquip = (raw) => {

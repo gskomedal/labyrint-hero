@@ -59,10 +59,10 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'bulwark',
                 name:     'Festning',
-                desc:     '+1 Forsvar\n+1 Hjerte',
+                desc:     '+1 Forsvar\n+1 Hjerte\n+2 ryggsekk',
                 category: 'DEF',
                 maxStack: 2,
-                apply(hero) { hero.defense += 1; hero.maxHearts++; }
+                apply(hero) { hero.defense += 1; hero.maxHearts++; hero.inventory.expandBackpack(2); }
             },
             {
                 id:       'iron_health',
