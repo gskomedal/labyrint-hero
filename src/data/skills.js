@@ -214,6 +214,44 @@ const SKILL_TREE_PATHS = [
             },
         ]
     },
+    // ── METALLURG (Metallurgist – Elements mod Phase 2) ────────────────────────
+    {
+        id:    'metallurg',
+        name:  'Metallurg',
+        desc:  'Smelting og legeringer',
+        color: 0xff7722,
+        icon:  'M',
+        unlockCondition: 'first_smelt',
+        tiers: [
+            {
+                id:       'fast_smelting',
+                name:     'Rask smelting',
+                desc:     '-25% smeltetid\nog energikost',
+                category: 'UTIL',
+                maxStack: 3,
+                apply(hero) {
+                    hero.smeltingSpeedMul = (hero.smeltingSpeedMul || 1.0) * 0.75;
+                    hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) * 0.75;
+                }
+            },
+            {
+                id:       'alloy_mastery',
+                name:     'Legeringsmester',
+                desc:     '+15% legering-\nstats per stack',
+                category: 'UTIL',
+                maxStack: 2,
+                apply(hero) { hero.alloyMasteryBonus = (hero.alloyMasteryBonus || 0) + 0.15; }
+            },
+            {
+                id:       'master_smith',
+                name:     'Mestersmie',
+                desc:     '+25% stats på\nsmidd utstyr',
+                category: 'ATK',
+                maxStack: 1,
+                apply(hero) { hero.alloyStatBonus = (hero.alloyStatBonus || 0) + 0.25; }
+            },
+        ]
+    },
 ];
 
 // ── Flat list for backward compat (save/load, apply) ──────────────────────────
@@ -238,6 +276,7 @@ function isSkillUnlocked(hero, pathIndex, tierIndex) {
 
     // Check path-level unlock condition
     if (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked) return false;
+    if (path.unlockCondition === 'first_smelt' && !hero.metallurgistUnlocked) return false;
 
     // Already at max stack → not available
     if (_countSkill(hero, skill.id) >= skill.maxStack) return false;
@@ -330,6 +369,24 @@ const SKILL_SYNERGIES = [
         color: 0x886644,
         apply(hero) { hero.defense += 1; hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1; },
         unapply(hero) { hero.defense -= 1; hero.mineralVisionRadius = Math.max(0, (hero.mineralVisionRadius || 0) - 1); },
+    },
+    {
+        id:    'forge_master',
+        name:  'Smiekunst',
+        desc:  '+3 Angrep, +20% malmeffekt',
+        paths: ['metallurg', 'krigar'],
+        color: 0xff6622,
+        apply(hero) { hero.attack += 3; hero.oreEfficiencyChance = (hero.oreEfficiencyChance || 0) + 0.20; },
+        unapply(hero) { hero.attack -= 3; hero.oreEfficiencyChance = Math.max(0, (hero.oreEfficiencyChance || 0) - 0.20); },
+    },
+    {
+        id:    'geologist_metallurg',
+        name:  'Malmkjenne',
+        desc:  '+1 mineral-syn, -10% smeltetid',
+        paths: ['metallurg', 'geolog'],
+        color: 0xbb7733,
+        apply(hero) { hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1; hero.smeltingSpeedMul = (hero.smeltingSpeedMul || 1.0) * 0.9; },
+        unapply(hero) { hero.mineralVisionRadius = Math.max(0, (hero.mineralVisionRadius || 0) - 1); hero.smeltingSpeedMul = (hero.smeltingSpeedMul || 1.0) / 0.9; },
     },
 ];
 

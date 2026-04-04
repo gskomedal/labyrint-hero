@@ -616,6 +616,16 @@ class InventoryScene extends Phaser.Scene {
             g.fillTriangle(x - 8, y + 5, x + 3, y + 6, x - 4, y - 5);
             g.fillStyle(0xffffff, 0.2);
             g.fillTriangle(x - 2, y - 6, x + 4, y - 2, x - 4, y);
+        } else if (item.type === 'fuel' && item.id === 'coal') {
+            g.fillStyle(0x222222, 0.85);
+            g.fillCircle(x - 2, y + 2, 5);
+            g.fillCircle(x + 3, y - 1, 4);
+        } else if (item.type === 'fuel') {
+            // Wood log
+            g.fillRoundedRect(x - 7, y - 3, 14, 6, 2);
+            g.fillStyle(0x664422, 0.7);
+            g.fillCircle(x - 7, y, 3);
+            g.fillCircle(x + 7, y, 3);
         } else {
             g.fillCircle(x, y, s / 3.5);
             g.fillStyle(0xffffff, 0.35);

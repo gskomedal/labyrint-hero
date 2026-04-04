@@ -61,8 +61,9 @@ class SkillScene extends Phaser.Scene {
         const hexCol  = '#' + colColor.toString(16).padStart(6, '0');
         const hdrW = Math.min(160, this._colW - 8);
 
-        // Check if entire path is locked (e.g. Geologist before first mineral)
-        const pathLocked = path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked;
+        // Check if entire path is locked
+        const pathLocked = (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked)
+            || (path.unlockCondition === 'first_smelt' && !hero.metallurgistUnlocked);
 
         // Path header
         const hdrBg = this.add.graphics();
@@ -74,14 +75,18 @@ class SkillScene extends Phaser.Scene {
         this.add.text(colCX, areaTop + 6, `── ${path.name.toUpperCase()} ──`, {
             fontSize: '11px', color: pathLocked ? '#333344' : hexCol, fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
-        this.add.text(colCX, areaTop + 18, pathLocked ? 'Finn et mineral!' : path.desc, {
+        const lockHint = path.unlockCondition === 'first_smelt' ? 'Smelt et mineral!' : 'Finn et mineral!';
+        this.add.text(colCX, areaTop + 18, pathLocked ? lockHint : path.desc, {
             fontSize: '8px', color: pathLocked ? '#333344' : '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // If entire path is locked, show a lock overlay and skip drawing skill cards
         if (pathLocked) {
             this.add.text(colCX, areaTop + 80, '🔒', { fontSize: '24px' }).setOrigin(0.5);
-            this.add.text(colCX, areaTop + 110, 'Plukk opp et\nmineral for å\nlåse opp', {
+            const lockMsg = path.unlockCondition === 'first_smelt'
+                ? 'Smelt et mineral\ni leirplassen\nfor å låse opp'
+                : 'Plukk opp et\nmineral for å\nlåse opp';
+            this.add.text(colCX, areaTop + 110, lockMsg, {
                 fontSize: '9px', color: '#333344', fontFamily: 'monospace', align: 'center'
             }).setOrigin(0.5);
             return;

@@ -43,7 +43,10 @@ class ItemSpawner {
         // 4. Minerals (Elements mod)
         this.placeMinerals(eligible);
 
-        // 5. Hidden spike traps
+        // 5. Fuel items (Elements mod Phase 2)
+        this.placeFuel(eligible);
+
+        // 6. Hidden spike traps
         const mods = scene._diffMods();
         const baseTrapCount = scene.difficulty === 'easy' && scene.worldNum <= 1
             ? 0
@@ -362,6 +365,62 @@ class ItemSpawner {
         } else {
             g.fillRoundedRect(px + 6, py + 6, s - 12, s - 12, 4);
         }
+    }
+
+    // ── Mineral spawning (Elements mod) ─────────────────────────────────────
+
+    // ── Fuel spawning (Elements mod Phase 2) ────────────────────────────────
+
+    placeFuel(eligible) {
+        if (typeof FUEL_DEFS === 'undefined') return;
+        const scene = this.scene;
+        const wn = scene.worldNum;
+        // 1-3 fuel per level, more in later worlds
+        const fuelCount = 1 + Math.floor(Math.random() * 2) + (wn >= 3 ? 1 : 0);
+        let placed = 0;
+
+        for (const t of eligible) {
+            if (placed >= fuelCount) break;
+            if (scene.chests.some(c => c.gridX === t.x && c.gridY === t.y)) continue;
+            if (scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)) continue;
+
+            // Wood in all worlds, coal from world 3+
+            const fuelId = (wn >= 3 && Math.random() < 0.5) ? 'coal' : 'wood';
+            const fuelDef = FUEL_DEFS[fuelId];
+            this._spawnFuelAt(t.x, t.y, fuelDef);
+            placed++;
+        }
+    }
+
+    _spawnFuelAt(gx, gy, fuelDef) {
+        if (!fuelDef) return;
+        const scene = this.scene;
+        if (scene.itemObjects.some(o => o.gridX === gx && o.gridY === gy)) return;
+
+        const g = scene.add.graphics();
+        g.setDepth(2);
+        const px = gx * TILE_SIZE, py = gy * TILE_SIZE, s = TILE_SIZE;
+        const cx = px + s / 2, cy = py + s / 2;
+
+        if (fuelDef.id === 'coal') {
+            // Dark lump
+            g.fillStyle(0x222222, 0.85);
+            g.fillCircle(cx - 2, cy + 2, 5);
+            g.fillCircle(cx + 3, cy - 1, 4);
+            g.fillStyle(0x111111, 0.6);
+            g.fillCircle(cx, cy, 3);
+        } else {
+            // Wood log
+            g.fillStyle(0x886633, 0.85);
+            g.fillRoundedRect(cx - 7, cy - 3, 14, 6, 2);
+            g.fillStyle(0x664422, 0.7);
+            g.fillCircle(cx - 7, cy, 3);
+            g.fillCircle(cx + 7, cy, 3);
+            g.fillStyle(0xaa8844, 0.3);
+            g.fillRect(cx - 5, cy - 2, 10, 1);
+        }
+
+        scene.itemObjects.push({ gridX: gx, gridY: gy, item: fuelDef, graphic: g, isFuel: true });
     }
 
     // ── Mineral spawning (Elements mod) ─────────────────────────────────────

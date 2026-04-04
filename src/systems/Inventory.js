@@ -22,7 +22,7 @@ class Inventory {
     // ── Stack helpers ─────────────────────────────────────────────────────────
 
     _isStackable(itemDef) {
-        return itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'mineral';
+        return itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'mineral' || itemDef.type === 'fuel';
     }
 
     _getItemDef(entry) {
@@ -31,6 +31,7 @@ class Inventory {
         if (entry.id && entry.count !== undefined) {
             return ITEM_DEFS[entry.id]
                 || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
+                || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
                 || null;
         }
         // Plain item def (equipment)
@@ -250,13 +251,15 @@ class Inventory {
             backpack: this.backpack.map(entry => {
                 if (!entry) return null;
                 if (entry.count !== undefined) {
-                    // Mark mineral entries so deserialization looks in MINERAL_DEFS
+                    // Mark mineral/fuel entries so deserialization looks in correct DEF
                     const def = ITEM_DEFS[entry.id]
-                        || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id]);
+                        || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
+                        || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id]);
                     const isMineral = def && def.type === 'mineral';
-                    return isMineral
-                        ? { id: entry.id, count: entry.count, isMineral: true }
-                        : { id: entry.id, count: entry.count };
+                    const isFuel = def && def.type === 'fuel';
+                    if (isMineral) return { id: entry.id, count: entry.count, isMineral: true };
+                    if (isFuel) return { id: entry.id, count: entry.count, isFuel: true };
+                    return { id: entry.id, count: entry.count };
                 }
                 // Equipment: store rarity if non-common
                 if (entry.rarity && entry.rarity !== 'common') {
@@ -311,6 +314,8 @@ class Inventory {
                 } else if (entry.id) {
                     // Check if it's a mineral entry
                     if (entry.isMineral && typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id]) {
+                        inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
+                    } else if (entry.isFuel && typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id]) {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
                     } else if (ITEM_DEFS[entry.id]) {
                         if (entry.count !== undefined) {

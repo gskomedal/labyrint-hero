@@ -408,6 +408,15 @@ class MapRenderer {
                     );
                     g.fillStyle(0xffffff, 0.15);
                     g.fillCircle(px + (seed >> 3 & 11) + 6, py + (seed2 >> 3 & 11) + 6, 1);
+                } else if (room.type === 'camp_room') {
+                    // Warm campfire glow
+                    g.fillStyle(0xff7722, 0.12);
+                    g.fillCircle(px + S / 2, py + S / 2, S / 2.5);
+                    // Anvil/furnace hint
+                    g.fillStyle(0x886644, 0.3);
+                    g.fillRect(px + (seed & 5) + 4, py + (seed2 & 5) + 10, 6, 4);
+                    g.fillStyle(0xff4400, 0.2);
+                    g.fillCircle(px + (seed & 7) + 12, py + (seed2 & 7) + 8, 2);
                 }
                 break;
             }

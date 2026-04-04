@@ -60,6 +60,15 @@ class Hero {
         this.miningYieldBonus = 0;
         this.guaranteedRareMineral = false;
 
+        // Metallurgy mod (Phase 2)
+        this.metallurgistUnlocked = false;
+        this.smeltingSpeedMul = 1.0;
+        this.smeltingEfficiency = 1.0;
+        this.alloyMasteryBonus = 0;
+        this.alloyStatBonus = 0;
+        this.oreEfficiencyChance = 0;
+        this.alloyInventory = {};  // { 'bronze': 2, 'steel': 1, ... }
+
         // Temporary buffs from brews [{stat, amount, msLeft}]
         this.tempBuffs = [];
 
@@ -265,6 +274,14 @@ class Hero {
             mineralVisionRadius:  this.mineralVisionRadius,
             miningYieldBonus:     this.miningYieldBonus,
             guaranteedRareMineral: this.guaranteedRareMineral,
+            // Metallurgy mod
+            metallurgistUnlocked: this.metallurgistUnlocked,
+            smeltingSpeedMul:     this.smeltingSpeedMul,
+            smeltingEfficiency:   this.smeltingEfficiency,
+            alloyMasteryBonus:    this.alloyMasteryBonus,
+            alloyStatBonus:       this.alloyStatBonus,
+            oreEfficiencyChance:  this.oreEfficiencyChance,
+            alloyInventory:       { ...this.alloyInventory },
         };
     }
 
@@ -301,6 +318,14 @@ class Hero {
         this.mineralVisionRadius  = stats.mineralVisionRadius  || 0;
         this.miningYieldBonus     = stats.miningYieldBonus     || 0;
         this.guaranteedRareMineral = stats.guaranteedRareMineral || false;
+        // Metallurgy mod
+        this.metallurgistUnlocked = stats.metallurgistUnlocked || false;
+        this.smeltingSpeedMul     = stats.smeltingSpeedMul     || 1.0;
+        this.smeltingEfficiency   = stats.smeltingEfficiency   || 1.0;
+        this.alloyMasteryBonus    = stats.alloyMasteryBonus    || 0;
+        this.alloyStatBonus       = stats.alloyStatBonus       || 0;
+        this.oreEfficiencyChance  = stats.oreEfficiencyChance  || 0;
+        this.alloyInventory       = stats.alloyInventory       ? { ...stats.alloyInventory } : {};
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus

@@ -22,6 +22,7 @@ class InputHandler {
         scene.zoomOutAlt   = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_SUBTRACT);
         scene.useItemKey   = scene.input.keyboard.addKey('Q');
         scene.elementBookKey = scene.input.keyboard.addKey('B');
+        scene.smelteryKey    = scene.input.keyboard.addKey('V');
         scene.moveTimer    = 0;
 
         // Mouse wheel zoom
