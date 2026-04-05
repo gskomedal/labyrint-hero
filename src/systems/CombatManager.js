@@ -140,11 +140,44 @@ class CombatManager {
         scene.monsters = scene.monsters.filter(m => m !== monster);
         scene.monstersKilled++;
 
-        const goldBase = GOLD_DROP[monster.type] || 5;
+        const goldBase = GOLD_DROP[monster.type] || (monster.type === 'zone_boss' ? 200 : 5);
         const gold = goldBase + Math.floor(Math.random() * goldBase * 0.5) + scene.worldNum * 2;
         scene.hero.gold += gold;
         scene._floatingText(monster.gridX, monster.gridY, `+${gold}g`, '#ffcc00');
-        if (monster.type === 'boss') {
+
+        if (monster.type === 'zone_boss') {
+            // ── Zone boss killed – spectacular reward ────────────────────────
+            const zoneName = typeof getZone !== 'undefined' ? getZone(scene.worldNum).name : 'Sone';
+
+            // Drop guaranteed high-tier mineral + best item
+            const bossItem = randomItemForWorld(Math.min(scene.worldNum + 2, 10), 1);
+            if (bossItem) scene.itemSpawner.spawnItemAt(monster.gridX, monster.gridY, bossItem);
+            if (typeof rollBossMineral !== 'undefined') {
+                scene.itemSpawner.spawnMineralAt(monster.gridX, monster.gridY, rollBossMineral(scene.worldNum));
+                scene.itemSpawner.spawnMineralAt(monster.gridX + 1, monster.gridY, rollBossMineral(scene.worldNum));
+            }
+
+            // Unlock Chem Lab in Camp Room on first zone boss kill
+            if (!scene.hero.chemLabUnlocked) {
+                scene.hero.chemLabUnlocked = true;
+                scene._floatingText(monster.gridX, monster.gridY - 2, 'Kjemisk lab ulåst i leirplassen!', '#33dd88');
+            }
+
+            // Screen flash effect
+            const flash = scene.add.rectangle(
+                scene.cameras.main.width / 2, scene.cameras.main.height / 2,
+                scene.cameras.main.width, scene.cameras.main.height,
+                0xffcc00, 0.6
+            ).setDepth(100).setScrollFactor(0);
+            scene.tweens.add({
+                targets: flash, alpha: 0, duration: 800,
+                onComplete: () => flash.destroy()
+            });
+
+            // Victory text
+            scene._floatingText(monster.gridX, monster.gridY - 1, `${zoneName} beseiret!`, '#ffcc00');
+
+        } else if (monster.type === 'boss') {
             const bossItem = randomItemForWorld(Math.min(scene.worldNum + 1, 7), 1);
             if (bossItem) scene.itemSpawner.spawnItemAt(monster.gridX, monster.gridY, bossItem);
         } else if (Math.random() < 0.25) {
@@ -157,9 +190,9 @@ class CombatManager {
 
         // Mineral drops (Elements mod)
         if (typeof rollMineralForWorld !== 'undefined') {
-            const mineralDropChance = monster.type === 'boss' ? 1.0 : 0.15;
+            const mineralDropChance = (monster.type === 'boss' || monster.type === 'zone_boss') ? 1.0 : 0.15;
             if (Math.random() < mineralDropChance) {
-                const mineralDef = monster.type === 'boss'
+                const mineralDef = (monster.type === 'boss' || monster.type === 'zone_boss')
                     ? rollBossMineral(scene.worldNum)
                     : rollMineralForWorld(scene.worldNum);
                 scene.itemSpawner.spawnMineralAt(monster.gridX, monster.gridY, mineralDef);

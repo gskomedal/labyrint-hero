@@ -75,6 +75,36 @@ const Audio = (function () {
             bassWave: 'triangle', melWave: 'sine',
             melVol: 0.09, bassVol: 0.14, chordVol: 0.045,
         },
+        // 5 – Deep Magma: heavy low-end, relentless Locrian
+        {
+            name:   'Dyplag',
+            bpm:    80,
+            bass:   [0, 0, -1, 0,  -3, 0, -1, -5],
+            melody: [12, -1, 11, -1, 8, -1, 7, -1,  5, -1, 3, -1, 5, 7, -1, -1],
+            chord:  [[0,3,6], [0,3,6], [-1,-1,-1], [5,8,11]],
+            bassWave: 'sawtooth', melWave: 'square',
+            melVol: 0.06, bassVol: 0.22, chordVol: 0.04,
+        },
+        // 6 – Underworld: eerie whole-tone, ethereal pads
+        {
+            name:   'Underverden',
+            bpm:    50,
+            bass:   [0, -1, -1, 2,  -1, -1, 4, -1],
+            melody: [24, -1, 26, -1, -1, 22, -1, -1,  20, -1, -1, 18, -1, -1, 16, -1],
+            chord:  [[0,4,8], [-1,-1,-1], [2,6,10], [-1,-1,-1]],
+            bassWave: 'sine', melWave: 'sine',
+            melVol: 0.08, bassVol: 0.16, chordVol: 0.06,
+        },
+        // 7 – Earth's Core: triumphant Lydian, epic climax
+        {
+            name:   'Kjerne',
+            bpm:    70,
+            bass:   [0, 0, 7, 0,  5, 0, 7, 9],
+            melody: [12, 14, 16, 18, 19, -1, 16, -1,  14, -1, 12, -1, 14, 16, 18, -1],
+            chord:  [[0,4,7], [0,4,7], [5,9,12], [7,11,14]],
+            bassWave: 'sawtooth', melWave: 'triangle',
+            melVol: 0.10, bassVol: 0.18, chordVol: 0.06,
+        },
     ];
 
     // ── Reverb impulse (simple convolver) ────────────────────────────────────
@@ -211,8 +241,18 @@ const Audio = (function () {
         /** Start themed background music for a given world number */
         startMusic(worldNum) {
             if (!ctx) return;
-            const themeIdx = Math.min(Math.floor((worldNum - 1) / 2), THEMES.length - 1);
-            if (themeIdx === _seqTheme) return; // already playing
+            // Map world number to music theme using same logic as visual themes
+            let themeIdx;
+            if (worldNum <= 7) {
+                // Match visual theme mapping exactly
+                themeIdx = Math.min(Math.floor((worldNum - 1) / 2), THEMES.length - 1);
+            } else if (typeof getZone !== 'undefined') {
+                const zone = getZone(worldNum);
+                themeIdx = Math.min(zone.themeIdx, THEMES.length - 1);
+            } else {
+                themeIdx = THEMES.length - 1;
+            }
+            // Always restart music on new world (theme may be same but feels fresh)
             this.stopMusic();
             _seqTheme = themeIdx;
             _seqStep  = 0;

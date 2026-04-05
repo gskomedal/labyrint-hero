@@ -65,17 +65,44 @@ const HERO_BASE_HEARTS  = 5;
 // v0.7 balance: monsters are significantly tougher
 const MONSTER_BASE_HP   = { goblin: 10, orc: 18,  troll: 30,  boss: 35 };
 const MONSTER_ATTACK    = { goblin: 2,  orc: 4,   troll: 6,   boss: 3  };
-const MONSTER_COLOR     = { goblin: COLORS.MONSTER, orc: COLORS.MONSTER_ORC, troll: COLORS.MONSTER_TRL, boss: COLORS.BOSS };
-const MONSTER_XP        = { goblin: 10, orc: 25,  troll: 50,  boss: 150 };
+const MONSTER_COLOR     = { goblin: COLORS.MONSTER, orc: COLORS.MONSTER_ORC, troll: COLORS.MONSTER_TRL, boss: COLORS.BOSS, zone_boss: 0xff22ff };
+const MONSTER_XP        = { goblin: 10, orc: 25,  troll: 50,  boss: 150, zone_boss: 300 };
 
 // v0.7 balance: much slower XP curve → less frequent skill picks
 const XP_BASE           = 100;   // XP needed for level 2
 const XP_GROWTH         = 1.55;  // multiplier per level
 
+// ── Zone system (Phase 4) ────────────────────────────────────────────────────
+// Zones group worlds into geological regions. Zone boss at last world of each.
+const ZONES = [
+    { id: 'surface',    name: 'Overflatelag',   worlds: [1, 2, 3],      mineralTierBase: 1, themeIdx: 0 },
+    { id: 'bedrock',    name: 'Grunnfjell',      worlds: [4, 5, 6, 7],   mineralTierBase: 2, themeIdx: 1 },
+    { id: 'deep',       name: 'Dyplag',          worlds: [8, 9, 10, 11, 12], mineralTierBase: 3, themeIdx: 5 },
+    { id: 'underworld', name: 'Underverden',     worlds: [13, 14, 15, 16, 17, 18], mineralTierBase: 4, themeIdx: 6 },
+    { id: 'core',       name: 'Jordens kjerne',  worlds: [19, 20, 21, 22, 23, 24, 25], mineralTierBase: 5, themeIdx: 7 },
+];
+
+function getZone(worldNum) {
+    for (const zone of ZONES) {
+        if (zone.worlds.includes(worldNum)) return zone;
+    }
+    return ZONES[ZONES.length - 1]; // fallback to core for worlds > 25
+}
+
+function getZoneFloor(worldNum) {
+    const zone = getZone(worldNum);
+    return zone.worlds.indexOf(worldNum) + 1;
+}
+
+function isZoneBossWorld(worldNum) {
+    const zone = getZone(worldNum);
+    return worldNum === zone.worlds[zone.worlds.length - 1];
+}
+
 const AGGRO_RADIUS      = 12;    // tiles; monster won't chase beyond this
 
 // Gold economy
-const GOLD_DROP         = { goblin: 5, orc: 12, troll: 25, boss: 100 };
+const GOLD_DROP         = { goblin: 5, orc: 12, troll: 25, boss: 100, zone_boss: 200 };
 const GOLD_CHEST_BASE   = 15;   // base gold per chest (+ worldNum scaling)
 const MERCHANT_MARKUP    = 1.0;  // price multiplier for merchant items
 
@@ -152,7 +179,7 @@ const WORLD_THEMES = [
         ACCENT:       0xff5500,
         DECO:         'volcanic',
     },
-    {   // 4 – Worlds 7+: Ancient Temple
+    {   // 4 – Worlds 7: Ancient Temple
         name:         'Oldtidstempel',
         WALL:         0x281e0e,
         WALL_TOP:     0x3a2c14,
@@ -168,9 +195,64 @@ const WORLD_THEMES = [
         ACCENT:       0xffcc44,
         DECO:         'temple',
     },
+    {   // 5 – Worlds 8-12: Deep Magma (Dyplag)
+        name:         'Dyplag',
+        WALL:         0x1a0800,
+        WALL_TOP:     0x2a1204,
+        WALL_MID:     0x140600,
+        FLOOR_A:      0x120500,
+        FLOOR_B:      0x0e0300,
+        CRACKED_WALL: 0x2a0e04,
+        CRACKED_LINE: 0xff6622,
+        DOOR:         0x3a1a08,
+        DOOR_FRAME:   0xff8844,
+        SECRET_COLOR: 0x1a0800,
+        FOG_TINT:     0x0a0200,
+        ACCENT:       0xff6622,
+        DECO:         'deep',
+    },
+    {   // 6 – Worlds 13-18: Underworld (Underverden)
+        name:         'Underverden',
+        WALL:         0x0a0418,
+        WALL_TOP:     0x140828,
+        WALL_MID:     0x080310,
+        FLOOR_A:      0x0a0414,
+        FLOOR_B:      0x080310,
+        CRACKED_WALL: 0x120620,
+        CRACKED_LINE: 0x8844cc,
+        DOOR:         0x201040,
+        DOOR_FRAME:   0xaa66ff,
+        SECRET_COLOR: 0x0a0418,
+        FOG_TINT:     0x020008,
+        ACCENT:       0xaa66ff,
+        DECO:         'underworld',
+    },
+    {   // 7 – Worlds 19-25: Earth's Core (Jordens kjerne)
+        name:         'Jordens kjerne',
+        WALL:         0x1a1400,
+        WALL_TOP:     0x2a2200,
+        WALL_MID:     0x141000,
+        FLOOR_A:      0x161200,
+        FLOOR_B:      0x120e00,
+        CRACKED_WALL: 0x221a00,
+        CRACKED_LINE: 0xffaa00,
+        DOOR:         0x3a2a00,
+        DOOR_FRAME:   0xffdd44,
+        SECRET_COLOR: 0x1a1400,
+        FOG_TINT:     0x080600,
+        ACCENT:       0xffcc00,
+        DECO:         'core',
+    },
 ];
 
 function getWorldTheme(worldNum) {
-    const idx = Math.floor((worldNum - 1) / 2);
-    return WORLD_THEMES[Math.min(idx, WORLD_THEMES.length - 1)];
+    // Surface and Bedrock zones use the original per-world theme rotation
+    // Deeper zones use their dedicated new themes
+    if (worldNum <= 7) {
+        const idx = Math.floor((worldNum - 1) / 2);
+        return WORLD_THEMES[Math.min(idx, 4)]; // 0-4: forest, cave, ice, volcanic, temple
+    }
+    const zone = typeof getZone !== 'undefined' ? getZone(worldNum) : null;
+    if (zone) return WORLD_THEMES[Math.min(zone.themeIdx, WORLD_THEMES.length - 1)];
+    return WORLD_THEMES[WORLD_THEMES.length - 1];
 }

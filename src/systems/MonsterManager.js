@@ -22,7 +22,10 @@ class MonsterManager {
             return da - db;
         });
         const bossTile = byExit[0];
-        scene.boss = new Monster(scene, bossTile.x, bossTile.y, 'boss');
+        // Zone boss on the last world of each zone, regular boss otherwise
+        const bossType = (typeof isZoneBossWorld !== 'undefined' && isZoneBossWorld(scene.worldNum))
+            ? 'zone_boss' : 'boss';
+        scene.boss = new Monster(scene, bossTile.x, bossTile.y, bossType);
         scene.monsters.push(scene.boss);
 
         const regular = allFloor.filter(t => t !== bossTile);

@@ -71,11 +71,15 @@ class Hero {
 
         // Chemistry mod (Phase 3)
         this.chemistUnlocked = false;
+        this.chemLabUnlocked = false; // unlocked by defeating first zone boss
         this.potionDurationBonus = 0;
         this.potionPotencyBonus = 0;
         this.chemBombBonus = 0;
         this.chemRadiusBonus = 0;
         this.toxicBladeChance = 0;
+
+        // Zone progression (Phase 4)
+        this.completedZones = []; // ['surface', 'bedrock', ...]
 
         // Camp stash – persistent storage for minerals, fuel, etc.
         // Array of { id, count } entries (like backpack slots but unlimited size)
@@ -297,11 +301,13 @@ class Hero {
             campStash:            this.campStash.map(e => ({ ...e })),
             // Chemistry mod
             chemistUnlocked:      this.chemistUnlocked,
+            chemLabUnlocked:      this.chemLabUnlocked,
             potionDurationBonus:  this.potionDurationBonus,
             potionPotencyBonus:   this.potionPotencyBonus,
             chemBombBonus:        this.chemBombBonus,
             chemRadiusBonus:      this.chemRadiusBonus,
             toxicBladeChance:     this.toxicBladeChance,
+            completedZones:       [...this.completedZones],
         };
     }
 
@@ -349,11 +355,13 @@ class Hero {
         this.campStash            = (stats.campStash || []).map(e => ({ ...e }));
         // Chemistry mod
         this.chemistUnlocked      = stats.chemistUnlocked      || false;
+        this.chemLabUnlocked      = stats.chemLabUnlocked      || false;
         this.potionDurationBonus  = stats.potionDurationBonus  || 0;
         this.potionPotencyBonus   = stats.potionPotencyBonus   || 0;
         this.chemBombBonus        = stats.chemBombBonus        || 0;
         this.chemRadiusBonus      = stats.chemRadiusBonus      || 0;
         this.toxicBladeChance     = stats.toxicBladeChance     || 0;
+        this.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus

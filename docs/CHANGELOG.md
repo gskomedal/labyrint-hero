@@ -2,6 +2,20 @@
 
 ---
 
+## v0.26 – 2026-04-05
+
+### Nye funksjoner
+- **Elements-mod Fase 4 – Verdensekspansjon:**
+  - **Sonesystem:** Verdener 1-25 delt inn i 5 geologiske soner: Overflatelag (1-3), Grunnfjell (4-7), Dyplag (8-12), Underverden (13-18), Jordens kjerne (19-25)
+  - **3 nye visuelle temaer:** Dyplag (magma-sprekker), Underverden (lilla krystaller), Jordens kjerne (smeltende gull)
+  - **Soneboss:** Ekstra tøff boss på siste etasje i hver sone med høyere HP/ATK/XP og forsvar
+  - **4 nye spesialrom:** Malmkammer (verden 5+, T2-T3 årer), Hydrotermalkilde (verden 8+, T4 mineraler), Gasslomme (verden 10+, ekstra kull), Magmakammer (verden 18+, T5-T6 mineraler)
+  - **Sone-UI:** HUD viser nå «Sonens navn Etasje/Total» i stedet for bare verdensnummer
+  - **Soneprogresjon:** Fullførte soner lagres for fremtidig hurtigreise-funksjon
+  - **Gulvdekorasjoner:** Alle 3 nye temaer har unike prosedyrelle gulvmønstre
+
+---
+
 ## v0.25 – 2026-04-05
 
 ### Nye funksjoner

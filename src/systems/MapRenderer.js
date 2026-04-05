@@ -383,6 +383,56 @@ class MapRenderer {
                 }
                 break;
             }
+            case 'deep': {
+                // Lava cracks and ember particles
+                if (seed > 200) {
+                    g.lineStyle(1, 0xff4400, 0.3);
+                    g.lineBetween(px + 2, py + (seed & 15) + 4, px + S - 2, py + (seed2 & 15) + 4);
+                }
+                if (seed2 > 230) {
+                    g.fillStyle(0xff6622, 0.4);
+                    g.fillCircle(px + (seed & 11) + 6, py + (seed2 & 9) + 6, 2);
+                    g.fillStyle(0xff6622, 0.1);
+                    g.fillCircle(px + (seed & 11) + 6, py + (seed2 & 9) + 6, 5);
+                }
+                if (seed < 30) {
+                    g.fillStyle(0x000000, 0.2);
+                    g.fillCircle(px + S/2, py + S/2, 4);
+                }
+                break;
+            }
+            case 'underworld': {
+                // Purple crystal shards and mist
+                if (seed > 220) {
+                    g.fillStyle(0x8844cc, 0.3);
+                    g.fillTriangle(px + (seed & 7) + 6, py + 4, px + (seed & 7) + 3, py + 12, px + (seed & 7) + 9, py + 12);
+                }
+                if (seed2 < 40) {
+                    g.fillStyle(0xaa66ff, 0.08);
+                    g.fillCircle(px + S/2, py + S/2, 6);
+                }
+                if (seed > 150 && seed <= 170) {
+                    g.fillStyle(0x6633aa, 0.15);
+                    g.fillCircle(px + (seed2 & 11) + 6, py + (seed2 >> 3 & 11) + 6, 2);
+                }
+                break;
+            }
+            case 'core': {
+                // Molten gold streams and heat shimmer
+                if (seed > 200) {
+                    g.lineStyle(1, 0xffaa00, 0.35);
+                    g.lineBetween(px + (seed & 7) + 2, py + S/2, px + S - (seed2 & 7) - 2, py + S/2 + (seed & 3));
+                }
+                if ((gx + gy) % 3 === 0) {
+                    g.fillStyle(0xffcc00, 0.15);
+                    g.fillCircle(px + S/2, py + S/2, 3);
+                }
+                if (seed2 > 240) {
+                    g.fillStyle(0xffdd44, 0.4);
+                    g.fillCircle(px + (seed & 13) + 5, py + (seed2 & 11) + 5, 2);
+                }
+                break;
+            }
         }
 
         // Special room decoration (Elements mod)
@@ -408,18 +458,6 @@ class MapRenderer {
                     );
                     g.fillStyle(0xffffff, 0.15);
                     g.fillCircle(px + (seed >> 3 & 11) + 6, py + (seed2 >> 3 & 11) + 6, 1);
-                } else if (room.type === 'chem_lab') {
-                    // Green chemical glow
-                    g.fillStyle(0x33dd88, 0.10);
-                    g.fillCircle(px + S / 2, py + S / 2, S / 2.5);
-                    // Flask hint
-                    g.fillStyle(0x33dd88, 0.25);
-                    g.fillRoundedRect(px + (seed & 5) + 6, py + (seed2 & 5) + 8, 4, 8, 1);
-                    g.fillRect(px + (seed & 5) + 5, py + (seed2 & 5) + 6, 6, 3);
-                    // Bubbles
-                    g.fillStyle(0x66ffaa, 0.2);
-                    g.fillCircle(px + (seed >> 2 & 7) + 14, py + (seed2 >> 2 & 5) + 6, 1);
-                    g.fillCircle(px + (seed >> 3 & 5) + 10, py + (seed2 >> 3 & 5) + 4, 1);
                 } else if (room.type === 'camp_room') {
                     // Warm campfire glow
                     g.fillStyle(0xff7722, 0.12);
@@ -429,6 +467,35 @@ class MapRenderer {
                     g.fillRect(px + (seed & 5) + 4, py + (seed2 & 5) + 10, 6, 4);
                     g.fillStyle(0xff4400, 0.2);
                     g.fillCircle(px + (seed & 7) + 12, py + (seed2 & 7) + 8, 2);
+                } else if (room.type === 'ore_chamber') {
+                    // Dense ore veins
+                    g.fillStyle(0xbb9933, 0.3);
+                    g.fillCircle(px + (seed & 9) + 4, py + (seed2 & 9) + 4, 3);
+                    g.fillCircle(px + (seed >> 2 & 7) + 14, py + (seed2 >> 2 & 7) + 14, 2);
+                    g.fillStyle(0x887733, 0.2);
+                    g.fillRect(px + (seed & 5) + 6, py + (seed2 & 5) + 8, 5, 3);
+                } else if (room.type === 'hydrothermal') {
+                    // Steam vents and mineral deposits
+                    g.fillStyle(0x44dddd, 0.15);
+                    g.fillCircle(px + S / 2, py + S / 2, S / 2.5);
+                    g.fillStyle(0x88ffff, 0.1);
+                    g.fillCircle(px + (seed & 7) + 8, py + (seed2 & 5) + 6, 2);
+                    g.fillStyle(0xffaa44, 0.2);
+                    g.fillCircle(px + (seed >> 2 & 7) + 12, py + (seed2 >> 2 & 7) + 14, 2);
+                } else if (room.type === 'gas_pocket') {
+                    // Yellowish gas haze
+                    g.fillStyle(0xdddd44, 0.12);
+                    g.fillCircle(px + S / 2, py + S / 2, S / 2);
+                    g.fillStyle(0xeeee66, 0.08);
+                    g.fillCircle(px + (seed & 9) + 6, py + (seed2 & 9) + 6, 4);
+                } else if (room.type === 'magma_chamber') {
+                    // Glowing lava
+                    g.fillStyle(0xff4400, 0.2);
+                    g.fillCircle(px + S / 2, py + S / 2, S / 2.5);
+                    g.fillStyle(0xff6600, 0.3);
+                    g.fillCircle(px + (seed & 7) + 8, py + (seed2 & 5) + 8, 3);
+                    g.fillStyle(0xffaa00, 0.15);
+                    g.fillCircle(px + (seed >> 2 & 5) + 12, py + (seed2 >> 2 & 5) + 6, 2);
                 }
                 break;
             }
