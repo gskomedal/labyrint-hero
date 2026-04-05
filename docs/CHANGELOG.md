@@ -18,6 +18,10 @@
   - **Synergier:** «Giftklinger» (Kjemiker + Krigar) → +2 ATK, 15% gift ved angrep. «Alkymist» (Kjemiker + Metallurg) → +20% potens, -15% energi
   - **Touch-støtte:** Ny grønn LAB-knapp for touch-enheter
 
+### Balanseendringer
+- **Nye mineraler for kjemi:** Iskrystall (H×5, O×3), Sylvitt (K×4, Cl×3) og Salpeter-mineral (K×3, N×3) lagt til i MINERAL_POOL slik at hydrogen, kalium og nitrogen faktisk kan samles
+- **Forenklede kjemi-oppskrifter:** Alle oppskrifter redusert til 1-3 elementer (ned fra 4-8). Fokus på spillbarhet fremfor kjemisk nøyaktighet
+
 ---
 
 ## v0.24 – 2026-04-04
