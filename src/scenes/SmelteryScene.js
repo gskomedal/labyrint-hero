@@ -61,11 +61,7 @@ class SmelteryScene extends Phaser.Scene {
             { id: 'alloy', label: 'Legering' },
             { id: 'forge', label: 'Smi' },
         ];
-        // Add Chemistry tab if unlocked (after first zone boss kill)
-        if (this.heroRef.chemLabUnlocked) {
-            tabs.push({ id: 'chem', label: 'Kjemi' });
-        }
-        const tabW = tabs.length <= 4 ? 110 : 90;
+        const tabW = 110;
         const tabY = this.py + 50;
         tabs.forEach((tab, i) => {
             const tx = this.px + 30 + i * (tabW + 10) + tabW / 2;
@@ -118,7 +114,6 @@ class SmelteryScene extends Phaser.Scene {
             case 'smelt': this._drawSmeltTab(); break;
             case 'alloy': this._drawAlloyTab(); break;
             case 'forge': this._drawForgeTab(); break;
-            case 'chem':  this._drawChemTab(); break;
         }
     }
 
