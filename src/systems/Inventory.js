@@ -299,14 +299,23 @@ class Inventory {
             inv.expandBackpack(savedSize - inv.backpack.length);
         }
 
+        /** Look up an item def from any registry */
+        const lookupDef = (id) => {
+            return ITEM_DEFS[id]
+                || (typeof ALLOY_EQUIPMENT !== 'undefined' && ALLOY_EQUIPMENT[id])
+                || null;
+        };
+
         /** Restore an equipment entry (string id or {id, rarity}) */
         const restoreEquip = (raw) => {
             if (!raw) return null;
             if (typeof raw === 'string') {
-                return ITEM_DEFS[raw] ? makeRarityItem(ITEM_DEFS[raw], 'common') : null;
+                const def = lookupDef(raw);
+                return def ? makeRarityItem(def, 'common') : null;
             }
-            if (raw.id && ITEM_DEFS[raw.id]) {
-                return makeRarityItem(ITEM_DEFS[raw.id], raw.rarity || 'common');
+            if (raw.id) {
+                const def = lookupDef(raw.id);
+                if (def) return makeRarityItem(def, raw.rarity || 'common');
             }
             return null;
         };
@@ -329,7 +338,7 @@ class Inventory {
             data.backpack.forEach((entry, i) => {
                 if (!entry) { inv.backpack[i] = null; return; }
                 if (typeof entry === 'string') {
-                    const def = ITEM_DEFS[entry];
+                    const def = lookupDef(entry);
                     if (!def) return;
                     if (def.type === 'consumable' || def.type === 'tool') {
                         inv.backpack[i] = { id: entry, count: 1 };
@@ -344,13 +353,13 @@ class Inventory {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
                     } else if (entry.isMolecule && typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id]) {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
-                    } else if (ITEM_DEFS[entry.id]) {
+                    } else if (lookupDef(entry.id)) {
                         if (entry.count !== undefined) {
                             // Stacked consumable/tool
                             inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
                         } else {
                             // Equipment with optional rarity
-                            inv.backpack[i] = makeRarityItem(ITEM_DEFS[entry.id], entry.rarity || 'common');
+                            inv.backpack[i] = makeRarityItem(lookupDef(entry.id), entry.rarity || 'common');
                         }
                     }
                 }

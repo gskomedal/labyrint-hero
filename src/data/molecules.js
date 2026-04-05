@@ -14,20 +14,20 @@ const MOLECULE_DEFS = {
         desc: 'Livgivende vann. Healer 1 HP.'
     },
     calcium_oxide: {
-        id: 'calcium_oxide', name: 'Brent kalk', type: 'molecule', subtype: 'base',
+        id: 'calcium_oxide', name: 'Brent kalk', type: 'molecule', subtype: 'medicine',
         formula: 'CaO', tier: 1, color: 0xeeddcc, stackSize: 20,
         recipe: [{ symbol: 'Ca', amount: 1 }, { symbol: 'O', amount: 1 }],
         energyCost: 0,
-        effects: null,
-        desc: 'Brent kalkstein. Brukes i medisiner.'
+        effects: { onUse: 'buff', stat: 'defense', amount: 2, durationMs: 45000 },
+        desc: '+2 Forsvar i 45 sek. Herder kroppen som kalk herder betong.'
     },
     potassium_nitrate: {
-        id: 'potassium_nitrate', name: 'Salpeter', type: 'molecule', subtype: 'salt',
+        id: 'potassium_nitrate', name: 'Salpeter', type: 'molecule', subtype: 'explosive',
         formula: 'KNO₃', tier: 2, color: 0xcccccc, stackSize: 20,
         recipe: [{ symbol: 'K', amount: 1 }, { symbol: 'N', amount: 1 }],
         energyCost: 1,
-        effects: null,
-        desc: 'Nøkkelkomponent i krutt og gjødsel.'
+        effects: { onUse: 'bomb', damage: 5, radius: 2 },
+        desc: 'Svakt sprengstoff. 5 skade i radius 2.'
     },
 
     // ── Acids ────────────────────────────────────────────────────────────────

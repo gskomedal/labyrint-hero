@@ -7,7 +7,7 @@
 ### Feilrettinger
 - **Inventar-overlapp (#51):** Nye ryggsekkplasser overlapper ikke lenger med kjæledyrets inventar – panelstørrelsen og kjæledyr-posisjonen beregnes dynamisk
 - **Stabling i kjæledyr (#52):** Mineraler, krystaller, brensel og molekyler stabler nå riktig i kjæledyrets ryggsekk
-- **Salpeter forsvinner (#53):** Kjemisk labb-produkter (inkl. salpeter) vises nå korrekt i inventar og kan brukes via hurtigbruk (Q)
+- **Craftede gjenstander forsvinner (#53):** Kjemisk labb-produkter (inkl. salpeter) vises nå korrekt i inventar og kan brukes via hurtigbruk (Q). Base-forbindelser (brent kalk, salpeter) har nå reelle effekter: forsvarsbuff og sprengstoff. Smidd legeringsutstyr overlever nå lagring/lasting
 - **Krystalleffekter (#54):** Krystaller i ryggsekken gir nå passive bonuser: angrep, forsvar, synsfelt, giftresistans, brannresistans, gullmultiplikator, kritisk sjanse og unnvikelse
 - **Bomber og blendgranater (#55):** Bomber og blendgranater fungerer nå via Q-knappen med synlig visuell tilbakemelding (skjermristing/flash). Kjemiske produkter kan nå tilordnes hurtigbruk
 - **Gift tikker for raskt (#56):** Gift-tick økt fra 0.9s til 2.5s, brann-tick fra 0.8s til 2.0s – gir spilleren tid til å bruke motgift
@@ -19,6 +19,8 @@
 - Inventory._getItemDef() og Pet.getItemDef() slår nå opp i MOLECULE_DEFS i tillegg til ITEM_DEFS, MINERAL_DEFS og FUEL_DEFS
 - Kjemiske gjenstander bevarer sin use()-funksjon gjennom hurtigbruk-systemet via _chemItem-referanse
 - Serialisering/deserialisering støtter nå molekyl-gjenstander i ryggsekk og kjæledyr
+- Serialisering/deserialisering støtter nå legeringsutstyr (ALLOY_EQUIPMENT) i tillegg til ITEM_DEFS
+- Alle craftbare kjemiske produkter har nå brukbare effekter – ingen «døde» gjenstander
 
 ---
 
