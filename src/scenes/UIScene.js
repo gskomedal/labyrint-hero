@@ -257,7 +257,14 @@ class UIScene extends Phaser.Scene {
         this.xpFill.fillRect(xpX, xpY, Math.floor(xpW * frac), 8);
 
         // ── Labels ────────────────────────────────────────────────────────────
-        this.worldText.setText(`Verden ${this.gameScene.worldNum}`);
+        const wn = this.gameScene.worldNum;
+        if (typeof getZone !== 'undefined') {
+            const zone = getZone(wn);
+            const floor = getZoneFloor(wn);
+            this.worldText.setText(`${zone.name} ${floor}/${zone.worlds.length}`);
+        } else {
+            this.worldText.setText(`Verden ${wn}`);
+        }
         this.levelText.setText(`Nivå ${hero.level}  XP ${hero.xp}/${hero.xpToNext}`);
         this.atkText.setText(`ATK ${hero.attack}  DEF ${hero.defense}  Syn ${hero.visionRadius}`);
         this.goldText.setText(`💰 ${hero.gold}g`);

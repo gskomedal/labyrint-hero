@@ -162,6 +162,42 @@ class MazeGenerator {
                 this.specialRooms.push({ type: 'chem_lab', tiles });
             }
         }
+
+        // Ore Chamber: world 5+, 25% chance – concentrated T2-T3 ores
+        if (worldNum >= 5 && deadEnds.length > 0 && Math.random() < 0.25) {
+            const de = deadEnds.shift();
+            const tiles = this._gatherRoomTiles(de.x, de.y, 3 + Math.floor(Math.random() * 3));
+            if (tiles.length >= 2) {
+                this.specialRooms.push({ type: 'ore_chamber', tiles });
+            }
+        }
+
+        // Hydrothermal Vent: world 8+, 30% chance – T4 minerals + poison gas
+        if (worldNum >= 8 && deadEnds.length > 0 && Math.random() < 0.30) {
+            const de = deadEnds.shift();
+            const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 2));
+            if (tiles.length >= 1) {
+                this.specialRooms.push({ type: 'hydrothermal', tiles });
+            }
+        }
+
+        // Gas Pocket: world 10+, 20% chance – fuel source
+        if (worldNum >= 10 && deadEnds.length > 0 && Math.random() < 0.20) {
+            const de = deadEnds.shift();
+            const tiles = this._gatherRoomTiles(de.x, de.y, 2);
+            if (tiles.length >= 1) {
+                this.specialRooms.push({ type: 'gas_pocket', tiles });
+            }
+        }
+
+        // Magma Chamber: world 18+, 25% chance – T5-T6 minerals + fire damage
+        if (worldNum >= 18 && deadEnds.length > 0 && Math.random() < 0.25) {
+            const de = deadEnds.shift();
+            const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 2));
+            if (tiles.length >= 1) {
+                this.specialRooms.push({ type: 'magma_chamber', tiles });
+            }
+        }
     }
 
     /** Gather up to maxSize floor tiles around a starting point (BFS). */

@@ -26,6 +26,16 @@ class Monster {
             this.attack = 3 + worldMul * 2;
         }
 
+        // Zone boss – tougher boss that guards zone transitions
+        if (type === 'zone_boss') {
+            this.maxHp  = 80 + worldMul * 50;
+            this.hp     = this.maxHp;
+            this.attack = 5 + worldMul * 3;
+            this.color  = 0xff22ff;
+            this.xpReward = 300 + worldMul * 50;
+            this.defense = Math.floor(worldMul * 0.5);
+        }
+
         // Boss phase tracking (1 = normal, 2 = enraged at ≤50% HP)
         this.phase   = 1;
         this.enraged = false;

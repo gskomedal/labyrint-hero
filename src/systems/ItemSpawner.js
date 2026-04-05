@@ -435,16 +435,41 @@ class ItemSpawner {
         const gen = scene._gen;
         if (gen && gen.specialRooms) {
             for (const room of gen.specialRooms) {
-                const roomMinerals = room.type === 'quarry' ? 3 + Math.floor(Math.random() * 3) : 2 + Math.floor(Math.random() * 3);
+                // Determine mineral count and type per room
+                let roomMinerals = 0;
+                let mineralFn = () => rollMineralForWorld(wn);
+                if (room.type === 'quarry') {
+                    roomMinerals = 3 + Math.floor(Math.random() * 3);
+                    mineralFn = () => rollMineralForWorld(Math.max(1, wn));
+                } else if (room.type === 'crystal_cave') {
+                    roomMinerals = 2 + Math.floor(Math.random() * 3);
+                    mineralFn = () => this._rollCrystalForWorld(wn);
+                } else if (room.type === 'ore_chamber') {
+                    roomMinerals = 4 + Math.floor(Math.random() * 3);
+                    mineralFn = () => rollMineralForWorld(Math.max(3, wn));
+                } else if (room.type === 'hydrothermal') {
+                    roomMinerals = 3 + Math.floor(Math.random() * 2);
+                    mineralFn = () => rollMineralForWorld(Math.max(5, wn)); // T4+ minerals
+                } else if (room.type === 'magma_chamber') {
+                    roomMinerals = 3 + Math.floor(Math.random() * 3);
+                    mineralFn = () => rollBossMineral(wn); // T5-T6 minerals
+                } else if (room.type === 'gas_pocket') {
+                    // Gas pockets spawn extra fuel instead of minerals
+                    roomMinerals = 0;
+                    for (const tile of room.tiles) {
+                        if (!scene.itemObjects.some(o => o.gridX === tile.x && o.gridY === tile.y)) {
+                            this._spawnFuelAt(tile.x, tile.y, FUEL_DEFS.coal);
+                        }
+                    }
+                } else {
+                    continue; // camp_room and chem_lab don't spawn minerals
+                }
                 for (let i = 0; i < roomMinerals && room.tiles.length > 0; i++) {
                     const tIdx = Math.floor(Math.random() * room.tiles.length);
                     const tile = room.tiles[tIdx];
                     if (scene.itemObjects.some(o => o.gridX === tile.x && o.gridY === tile.y)) continue;
                     if (scene.chests.some(c => c.gridX === tile.x && c.gridY === tile.y)) continue;
-                    const mineralDef = room.type === 'quarry'
-                        ? rollMineralForWorld(Math.max(1, wn))     // ores for quarry
-                        : this._rollCrystalForWorld(wn);            // crystals for crystal cave
-                    this.spawnMineralAt(tile.x, tile.y, mineralDef);
+                    this.spawnMineralAt(tile.x, tile.y, mineralFn());
                 }
             }
         }

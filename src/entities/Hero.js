@@ -77,6 +77,9 @@ class Hero {
         this.chemRadiusBonus = 0;
         this.toxicBladeChance = 0;
 
+        // Zone progression (Phase 4)
+        this.completedZones = []; // ['surface', 'bedrock', ...]
+
         // Camp stash – persistent storage for minerals, fuel, etc.
         // Array of { id, count } entries (like backpack slots but unlimited size)
         this.campStash = [];
@@ -302,6 +305,7 @@ class Hero {
             chemBombBonus:        this.chemBombBonus,
             chemRadiusBonus:      this.chemRadiusBonus,
             toxicBladeChance:     this.toxicBladeChance,
+            completedZones:       [...this.completedZones],
         };
     }
 
@@ -354,6 +358,7 @@ class Hero {
         this.chemBombBonus        = stats.chemBombBonus        || 0;
         this.chemRadiusBonus      = stats.chemRadiusBonus      || 0;
         this.toxicBladeChance     = stats.toxicBladeChance     || 0;
+        this.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus

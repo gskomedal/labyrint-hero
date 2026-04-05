@@ -301,6 +301,16 @@ class GameScene extends Phaser.Scene {
         }
         Audio.playExit();
         this._stopOverlayScenes();
+
+        // Mark zone as completed if this was the last world of the zone
+        if (typeof isZoneBossWorld !== 'undefined' && isZoneBossWorld(this.worldNum)) {
+            const zone = getZone(this.worldNum);
+            if (zone && !this.hero.completedZones.includes(zone.id)) {
+                this.hero.completedZones.push(zone.id);
+                this._floatingText(this.hero.gridX, this.hero.gridY, `Sone fullført: ${zone.name}!`, '#ffcc00');
+            }
+        }
+
         SaveManager.save(this.worldNum + 1, this._getFullStats());
         const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
         this.time.delayedCall(300, () => {

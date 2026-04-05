@@ -464,12 +464,16 @@ Med en dypere verden trenger spilleren bedre kartlegging:
 - [x] Kjemiker-sti i skill tree (Potente potions, Syremestring, Eksplosjonsgenial)
 - [ ] Energi-utvidelse: Olje/Gass (utsatt til Fase 4)
 
-### Fase 4 – Verdensekspansjon (Issue-prioritet: Medium)
-- [ ] Soner: Dyplag og Underverden (etasje 8–18)
-- [ ] Sjef-monstre mellom soner
-- [ ] Hydrotermal-rom og Gasslomme-rom
-- [ ] Hurtigreise mellom soner
-- [ ] Utvidet minikartet med Geolog-skills
+### Fase 4 – Verdensekspansjon ✅ (v0.26)
+- [x] Sonesystem: 5 geologiske soner (Overflatelag, Grunnfjell, Dyplag, Underverden, Jordens kjerne)
+- [x] 25 etasjer totalt fordelt på soner med stigende vanskelighetsgrad
+- [x] 3 nye visuelle temaer: Dyplag (magma), Underverden (lilla), Jordens kjerne (gull)
+- [x] Soneboss: Ekstra tøff boss med forsvar på siste etasje i hver sone
+- [x] 4 nye spesialrom: Malmkammer (5+), Hydrotermalkilde (8+), Gasslomme (10+), Magmakammer (18+)
+- [x] Sone-UI: HUD viser «Sonens navn Etasje/Total»
+- [x] Soneprogresjon: Fullførte soner lagres i hero.completedZones
+- [ ] Hurtigreise mellom fullførte soner (UI-valg ved sonemeny – utsatt)
+- [ ] Utvidet minikart med Geolog-skills (utsatt)
 
 ### Fase 5 – Fysikk og endgame (Issue-prioritet: Lav)
 - [ ] Halvleder-crafting (Si, Ge, GaAs)

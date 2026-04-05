@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.25
+**Versjon:** 0.26
 **Sist oppdatert:** 2026-04-04
 
 ---
@@ -461,8 +461,24 @@ Kjemisk syntese av potions, bomber, medisiner og syrer fra rene grunnstoffer.
 | T2 | Syremestring | +30% kjemisk bombe-skade per stack (maks 2) |
 | T3 | Eksplosjonsgenial | +50% skade, +1 radius på bomber (maks 1) |
 
+### Fase 4: Verdensekspansjon (v0.26)
+
+Spillet utvides fra 7 verdener til 25 etasjer fordelt på 5 geologiske soner.
+
+**Soner:**
+| Sone | Etasjer | Tema | Mineral-tier |
+|------|---------|------|-------------|
+| Overflatelag | 1-3 | Skog/Grotte | T1 |
+| Grunnfjell | 4-7 | Is/Vulkan/Tempel | T2 |
+| Dyplag | 8-12 | Magma (nytt) | T3 |
+| Underverden | 13-18 | Lilla krystaller (nytt) | T4 |
+| Jordens kjerne | 19-25 | Smeltet gull (nytt) | T5 |
+
+**Soneboss:** Ekstra tøff boss (80+50×verden HP, 5+3×verden ATK) på siste etasje i hver sone.
+
+**Nye spesialrom:** Malmkammer (5+), Hydrotermalkilde (8+), Gasslomme (10+), Magmakammer (18+).
+
 ### Fremtidige faser (ikke implementert)
-- Fase 4: Verdensekspansjon (soner, dybde-skalering)
 - Fase 5: Fysikk og endgame (halvledere, fisjon, fusjon)
 
 Se `docs/Elements-mod.md` for fullstendig designdokument.
