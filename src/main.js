@@ -26,7 +26,8 @@ const config = {
         GameOverScene,
         SettingsScene,
         ElementBookScene,
-        SmelteryScene
+        SmelteryScene,
+        ChemLabScene
     ]
 };
 

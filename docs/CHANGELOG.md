@@ -2,6 +2,24 @@
 
 ---
 
+## v0.25 – 2026-04-05
+
+### Nye funksjoner
+- **Elements-mod Fase 3 – Kjemi:**
+  - **Molekyl-dataset:** 15 kjemiske produkter i 5 kategorier: base-forbindelser, syrer, potions, medisiner og eksplosiver
+  - **Kjemisk laboratorium:** Nytt spesialrom fra verden 3+ (30% sjanse) med grønn glød. Trykk C for å åpne
+  - **Syntese:** Kombiner rene grunnstoffer til kjemiske produkter – potions healer mer, bomber gjør mer skade, medisiner kurerer alt
+  - **Kjemiske produkter:**
+    - *Potions:* Kjemisk livselixir (+4 HP), Styrkeelixir (+3 ATK 90s), Forsvarselixir (+2 DEF 90s), Usynlighetsdrikk (30s)
+    - *Bomber:* Krutt (8 dmg radius 3), Røykbombe (stun alle radius 4), Syrebombe (6 dmg + etsende), Dynamitt (15 dmg radius 4)
+    - *Medisiner:* Universell motgift (kurerer alt + 2 HP), Smertestillende (+3 DEF 60s)
+    - *Syrer:* Svovelsyre og Saltsyre som kastbare AoE-våpen
+  - **Kjemiker-skillsti:** Ny 9. spesialiseringsvei (låses opp ved første syntese) med 3 tiers: Potente potions (+50% varighet), Syremestring (+30% bombeskade), Eksplosjonsgenial (+50% skade +1 radius)
+  - **Synergier:** «Giftklinger» (Kjemiker + Krigar) → +2 ATK, 15% gift ved angrep. «Alkymist» (Kjemiker + Metallurg) → +20% potens, -15% energi
+  - **Touch-støtte:** Ny grønn LAB-knapp for touch-enheter
+
+---
+
 ## v0.24 – 2026-04-04
 
 ### Nye funksjoner

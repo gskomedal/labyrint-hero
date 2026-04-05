@@ -252,6 +252,44 @@ const SKILL_TREE_PATHS = [
             },
         ]
     },
+    // ── KJEMIKER (Chemist – Elements mod Phase 3) ──────────────────────────────
+    {
+        id:    'kjemiker',
+        name:  'Kjemiker',
+        desc:  'Potions, bomber og medisin',
+        color: 0x33dd88,
+        icon:  'C',
+        unlockCondition: 'first_synthesis',
+        tiers: [
+            {
+                id:       'potent_potions',
+                name:     'Potente potions',
+                desc:     '+50% varighet\npå potions',
+                category: 'UTIL',
+                maxStack: 3,
+                apply(hero) { hero.potionDurationBonus = (hero.potionDurationBonus || 0) + 0.50; }
+            },
+            {
+                id:       'acid_mastery',
+                name:     'Syremestring',
+                desc:     '+30% kjemisk\nbombe-skade',
+                category: 'ATK',
+                maxStack: 2,
+                apply(hero) { hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.30; }
+            },
+            {
+                id:       'explosive_genius',
+                name:     'Eksplosjonsgenial',
+                desc:     '+50% skade\n+1 radius på bomber',
+                category: 'ATK',
+                maxStack: 1,
+                apply(hero) {
+                    hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.50;
+                    hero.chemRadiusBonus = (hero.chemRadiusBonus || 0) + 0.30;
+                }
+            },
+        ]
+    },
 ];
 
 // ── Flat list for backward compat (save/load, apply) ──────────────────────────
@@ -277,6 +315,7 @@ function isSkillUnlocked(hero, pathIndex, tierIndex) {
     // Check path-level unlock condition
     if (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked) return false;
     if (path.unlockCondition === 'first_smelt' && !hero.metallurgistUnlocked) return false;
+    if (path.unlockCondition === 'first_synthesis' && !hero.chemistUnlocked) return false;
 
     // Already at max stack → not available
     if (_countSkill(hero, skill.id) >= skill.maxStack) return false;
@@ -387,6 +426,24 @@ const SKILL_SYNERGIES = [
         color: 0xbb7733,
         apply(hero) { hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1; hero.smeltingSpeedMul = (hero.smeltingSpeedMul || 1.0) * 0.9; },
         unapply(hero) { hero.mineralVisionRadius = Math.max(0, (hero.mineralVisionRadius || 0) - 1); hero.smeltingSpeedMul = (hero.smeltingSpeedMul || 1.0) / 0.9; },
+    },
+    {
+        id:    'toxic_blades',
+        name:  'Giftklinger',
+        desc:  '+2 ATK, 15% gift ved angrep',
+        paths: ['kjemiker', 'krigar'],
+        color: 0x44cc44,
+        apply(hero) { hero.attack += 2; hero.toxicBladeChance = (hero.toxicBladeChance || 0) + 0.15; },
+        unapply(hero) { hero.attack -= 2; hero.toxicBladeChance = Math.max(0, (hero.toxicBladeChance || 0) - 0.15); },
+    },
+    {
+        id:    'alchemist',
+        name:  'Alkymist',
+        desc:  '+20% potens, -15% energi',
+        paths: ['kjemiker', 'metallurg'],
+        color: 0x88aa44,
+        apply(hero) { hero.potionPotencyBonus = (hero.potionPotencyBonus || 0) + 0.20; hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) * 0.85; },
+        unapply(hero) { hero.potionPotencyBonus = Math.max(0, (hero.potionPotencyBonus || 0) - 0.20); hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) / 0.85; },
     },
 ];
 

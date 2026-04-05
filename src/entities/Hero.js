@@ -69,6 +69,14 @@ class Hero {
         this.oreEfficiencyChance = 0;
         this.alloyInventory = {};  // { 'bronze': 2, 'steel': 1, ... }
 
+        // Chemistry mod (Phase 3)
+        this.chemistUnlocked = false;
+        this.potionDurationBonus = 0;
+        this.potionPotencyBonus = 0;
+        this.chemBombBonus = 0;
+        this.chemRadiusBonus = 0;
+        this.toxicBladeChance = 0;
+
         // Camp stash – persistent storage for minerals, fuel, etc.
         // Array of { id, count } entries (like backpack slots but unlimited size)
         this.campStash = [];
@@ -287,6 +295,13 @@ class Hero {
             oreEfficiencyChance:  this.oreEfficiencyChance,
             alloyInventory:       { ...this.alloyInventory },
             campStash:            this.campStash.map(e => ({ ...e })),
+            // Chemistry mod
+            chemistUnlocked:      this.chemistUnlocked,
+            potionDurationBonus:  this.potionDurationBonus,
+            potionPotencyBonus:   this.potionPotencyBonus,
+            chemBombBonus:        this.chemBombBonus,
+            chemRadiusBonus:      this.chemRadiusBonus,
+            toxicBladeChance:     this.toxicBladeChance,
         };
     }
 
@@ -332,6 +347,13 @@ class Hero {
         this.oreEfficiencyChance  = stats.oreEfficiencyChance  || 0;
         this.alloyInventory       = stats.alloyInventory       ? { ...stats.alloyInventory } : {};
         this.campStash            = (stats.campStash || []).map(e => ({ ...e }));
+        // Chemistry mod
+        this.chemistUnlocked      = stats.chemistUnlocked      || false;
+        this.potionDurationBonus  = stats.potionDurationBonus  || 0;
+        this.potionPotencyBonus   = stats.potionPotencyBonus   || 0;
+        this.chemBombBonus        = stats.chemBombBonus        || 0;
+        this.chemRadiusBonus      = stats.chemRadiusBonus      || 0;
+        this.toxicBladeChance     = stats.toxicBladeChance     || 0;
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus
