@@ -155,7 +155,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene') || this.scene.isActive('ChemLabScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene');
 
         if (!blocked) {
             this.inputHandler.handleInput(delta);
@@ -178,15 +178,8 @@ class GameScene extends Phaser.Scene {
                 this.scene.launch('SmelteryScene', { heroRef: this.hero, gameScene: this });
             }
 
-            const touchChem = this.game.registry.get('touch_chemlab');
-            if (touchChem) this.game.registry.set('touch_chemlab', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.chemLabKey) || touchChem) && !this.scene.isActive('ChemLabScene') && this._isInChemLab()) {
-                this.scene.launch('ChemLabScene', { heroRef: this.hero, gameScene: this });
-            }
-
             // Auto-open prompts for special rooms
             this._checkCampRoom();
-            this._checkChemLab();
 
             this.monsterMgr.tickMonsters(delta);
             this._tickPet(delta);
@@ -212,23 +205,6 @@ class GameScene extends Phaser.Scene {
             this._showMessage('Leirplass! Trykk V for å smelte og smi.', '#ff7722');
         } else if (!this._isInCampRoom()) {
             this._campRoomShown = false;
-        }
-    }
-
-    _isInChemLab() {
-        if (!this._gen || !this._gen.specialRooms) return false;
-        const hx = this.hero.gridX, hy = this.hero.gridY;
-        return this._gen.specialRooms.some(room =>
-            room.type === 'chem_lab' && room.tiles.some(t => t.x === hx && t.y === hy)
-        );
-    }
-
-    _checkChemLab() {
-        if (!this._chemLabShown && this._isInChemLab()) {
-            this._chemLabShown = true;
-            this._showMessage('Kjemisk lab! Trykk C for å lage kjemikalier.', '#33dd88');
-        } else if (!this._isInChemLab()) {
-            this._chemLabShown = false;
         }
     }
 

@@ -154,15 +154,6 @@ class MazeGenerator {
             }
         }
 
-        // Chem Lab: world 3+, 30% chance, max 1
-        if (worldNum >= 3 && deadEnds.length > 0 && Math.random() < 0.30) {
-            const de = deadEnds.shift();
-            const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 2));
-            if (tiles.length >= 1) {
-                this.specialRooms.push({ type: 'chem_lab', tiles });
-            }
-        }
-
         // Ore Chamber: world 5+, 25% chance – concentrated T2-T3 ores
         if (worldNum >= 5 && deadEnds.length > 0 && Math.random() < 0.25) {
             const de = deadEnds.shift();

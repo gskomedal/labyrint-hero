@@ -241,18 +241,18 @@ const Audio = (function () {
         /** Start themed background music for a given world number */
         startMusic(worldNum) {
             if (!ctx) return;
-            // Use zone-based theme index if available, fallback to old formula
+            // Map world number to music theme using same logic as visual themes
             let themeIdx;
             if (worldNum <= 7) {
-                // Early worlds: original per-world theme rotation
-                themeIdx = Math.min(Math.floor((worldNum - 1) / 2), 4);
+                // Match visual theme mapping exactly
+                themeIdx = Math.min(Math.floor((worldNum - 1) / 2), THEMES.length - 1);
             } else if (typeof getZone !== 'undefined') {
                 const zone = getZone(worldNum);
                 themeIdx = Math.min(zone.themeIdx, THEMES.length - 1);
             } else {
-                themeIdx = Math.min(Math.floor((worldNum - 1) / 2), THEMES.length - 1);
+                themeIdx = THEMES.length - 1;
             }
-            if (themeIdx === _seqTheme) return; // already playing
+            // Always restart music on new world (theme may be same but feels fresh)
             this.stopMusic();
             _seqTheme = themeIdx;
             _seqStep  = 0;
