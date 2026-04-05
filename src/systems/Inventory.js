@@ -116,8 +116,11 @@ class Inventory {
 
         // If quick-use already has something, put it back in backpack
         if (this.quickUse) {
-            // Try to stack back
-            const oldDef = ITEM_DEFS[this.quickUse.id];
+            // Try to stack back – check all DEFs, not just ITEM_DEFS
+            const oldDef = this.quickUse._chemItem
+                || ITEM_DEFS[this.quickUse.id]
+                || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[this.quickUse.id])
+                || null;
             if (oldDef) {
                 for (let i = 0; i < this.quickUse.count; i++) {
                     this.addItem(oldDef);
@@ -163,7 +166,10 @@ class Inventory {
     /** Unequip quick-use back into backpack */
     unequipQuickUse() {
         if (!this.quickUse) return false;
-        const itemDef = ITEM_DEFS[this.quickUse.id];
+        const itemDef = this.quickUse._chemItem
+            || ITEM_DEFS[this.quickUse.id]
+            || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[this.quickUse.id])
+            || null;
         if (!itemDef) { this.quickUse = null; return false; }
         for (let i = 0; i < this.quickUse.count; i++) {
             if (!this.addItem(itemDef)) return false; // backpack full
@@ -190,7 +196,10 @@ class Inventory {
     /** Drop from quick-use slot (one item). Returns itemDef or null. */
     dropQuickUse() {
         if (!this.quickUse) return null;
-        const itemDef = ITEM_DEFS[this.quickUse.id];
+        const itemDef = this.quickUse._chemItem
+            || ITEM_DEFS[this.quickUse.id]
+            || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[this.quickUse.id])
+            || null;
         this.quickUse.count--;
         if (this.quickUse.count <= 0) this.quickUse = null;
         return itemDef;

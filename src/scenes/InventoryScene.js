@@ -234,7 +234,11 @@ class InventoryScene extends Phaser.Scene {
     _makeQuickUseSlot(x, y) {
         const size = 64;
         const qu = this.inv.quickUse;
-        const itemDef = qu ? ITEM_DEFS[qu.id] : null;
+        const itemDef = qu
+            ? (qu._chemItem || ITEM_DEFS[qu.id]
+               || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[qu.id])
+               || null)
+            : null;
 
         const bg = this._d(this.add.rectangle(x, y, size, size, 0x0a0918).setStrokeStyle(
             itemDef ? 2 : 1,
