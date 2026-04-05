@@ -61,7 +61,12 @@ class SmelteryScene extends Phaser.Scene {
             { id: 'alloy', label: 'Legering' },
             { id: 'forge', label: 'Smi' },
         ];
-        const tabW = 110, tabY = this.py + 50;
+        // Add Chemistry tab if unlocked (after first zone boss kill)
+        if (this.heroRef.chemLabUnlocked) {
+            tabs.push({ id: 'chem', label: 'Kjemi' });
+        }
+        const tabW = tabs.length <= 4 ? 110 : 90;
+        const tabY = this.py + 50;
         tabs.forEach((tab, i) => {
             const tx = this.px + 30 + i * (tabW + 10) + tabW / 2;
             const active = this._tab === tab.id;
@@ -113,6 +118,7 @@ class SmelteryScene extends Phaser.Scene {
             case 'smelt': this._drawSmeltTab(); break;
             case 'alloy': this._drawAlloyTab(); break;
             case 'forge': this._drawForgeTab(); break;
+            case 'chem':  this._drawChemTab(); break;
         }
     }
 
@@ -550,6 +556,105 @@ class SmelteryScene extends Phaser.Scene {
 
         if (this.gs) {
             this.gs._floatingText(hero.gridX, hero.gridY, `Smidd: ${result.item.name}!`, '#ffaa44');
+        }
+
+        Audio.playPickup();
+        this._refresh();
+    }
+
+    // ── Element inventory display ────────────────────────────────────────────
+
+    // ── CHEM TAB: Elements → Chemical Products (via ChemistrySystem) ────────
+
+    _drawChemTab() {
+        if (typeof ChemistrySystem === 'undefined') return;
+        const hero = this.heroRef;
+        const cx = this.px + this.panelW / 2;
+        let y = this.contentY;
+        const colW = Math.min(340, this.panelW - 40);
+        const startX = this.px + 20;
+
+        if (!this._chem) this._chem = new ChemistrySystem();
+        const fuel = this.smelter.calculateFuelEnergy(hero);
+        const allMols = this._chem.getAvailableMolecules(hero, fuel);
+
+        this._d(this.add.text(cx, y, 'Syntetiser kjemikalier fra grunnstoffer:', {
+            fontSize: '10px', color: '#33dd88', fontFamily: 'monospace'
+        }).setOrigin(0.5));
+        y += 18;
+
+        if (allMols.length === 0) {
+            this._d(this.add.text(cx, y + 30, 'Ingen oppskrifter.', {
+                fontSize: '11px', color: '#334433', fontFamily: 'monospace'
+            }).setOrigin(0.5));
+            return;
+        }
+
+        allMols.forEach((entry, idx) => {
+            const my = y + idx * 50;
+            if (my > this.py + this.panelH - 80) return;
+            const m = entry.mol;
+            const can = entry.canCraft;
+            const col = can ? 0x33dd88 : 0x223322;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+
+            const bg = this._d(this.add.graphics());
+            bg.fillStyle(col, 0.08);
+            bg.fillRoundedRect(startX, my, colW, 44, 4);
+            bg.lineStyle(1, col, 0.3);
+            bg.strokeRoundedRect(startX, my, colW, 44, 4);
+
+            this._d(this.add.text(startX + 6, my + 4, m.name, {
+                fontSize: '10px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+
+            const recipeStr = m.recipe.map(r => {
+                const have = hero.elementTracker.getCount(r.symbol);
+                return `${r.symbol}:${have}/${r.amount}`;
+            }).join(' ');
+            this._d(this.add.text(startX + 6, my + 18, recipeStr, {
+                fontSize: '8px', color: '#556655', fontFamily: 'monospace'
+            }));
+            this._d(this.add.text(startX + 6, my + 30, m.desc.length > 45 ? m.desc.slice(0, 43) + '…' : m.desc, {
+                fontSize: '7px', color: '#445544', fontFamily: 'monospace'
+            }));
+
+            if (can) {
+                const btn = this._d(this.add.text(startX + colW - 50, my + 10, '[ Lag ]', {
+                    fontSize: '10px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setInteractive({ useHandCursor: true }));
+                btn.on('pointerover', () => btn.setColor('#66ffaa'));
+                btn.on('pointerout', () => btn.setColor('#33dd88'));
+                btn.on('pointerdown', () => this._doChemSynth(m.id));
+            }
+        });
+
+        const elemY = y + Math.min(allMols.length, 7) * 50 + 10;
+        this._drawElementInventory(startX + colW + 10, elemY - allMols.length * 50, colW - 60);
+    }
+
+    _doChemSynth(moleculeId) {
+        if (!this._chem) this._chem = new ChemistrySystem();
+        const hero = this.heroRef;
+        const result = this._chem.synthesize(moleculeId, hero);
+        if (!result.success) return;
+
+        if (result.energyCost > 0) {
+            this.smelter.consumeFuel(hero, result.energyCost);
+        }
+
+        const added = hero.inventory.addItem(result.item);
+        if (!added && this.gs) {
+            this.gs.itemSpawner.spawnItemAt(hero.gridX, hero.gridY, result.item);
+        }
+
+        if (!hero.chemistUnlocked && this.gs) {
+            hero.chemistUnlocked = true;
+            this.gs._floatingText(hero.gridX, hero.gridY - 1, 'Kjemiker-stien er ulåst!', '#33dd88');
+        }
+
+        if (this.gs) {
+            this.gs._floatingText(hero.gridX, hero.gridY, `Laget: ${result.item.name}!`, '#33dd88');
         }
 
         Audio.playPickup();

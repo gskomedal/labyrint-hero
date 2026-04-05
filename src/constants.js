@@ -65,8 +65,8 @@ const HERO_BASE_HEARTS  = 5;
 // v0.7 balance: monsters are significantly tougher
 const MONSTER_BASE_HP   = { goblin: 10, orc: 18,  troll: 30,  boss: 35 };
 const MONSTER_ATTACK    = { goblin: 2,  orc: 4,   troll: 6,   boss: 3  };
-const MONSTER_COLOR     = { goblin: COLORS.MONSTER, orc: COLORS.MONSTER_ORC, troll: COLORS.MONSTER_TRL, boss: COLORS.BOSS };
-const MONSTER_XP        = { goblin: 10, orc: 25,  troll: 50,  boss: 150 };
+const MONSTER_COLOR     = { goblin: COLORS.MONSTER, orc: COLORS.MONSTER_ORC, troll: COLORS.MONSTER_TRL, boss: COLORS.BOSS, zone_boss: 0xff22ff };
+const MONSTER_XP        = { goblin: 10, orc: 25,  troll: 50,  boss: 150, zone_boss: 300 };
 
 // v0.7 balance: much slower XP curve → less frequent skill picks
 const XP_BASE           = 100;   // XP needed for level 2
@@ -102,7 +102,7 @@ function isZoneBossWorld(worldNum) {
 const AGGRO_RADIUS      = 12;    // tiles; monster won't chase beyond this
 
 // Gold economy
-const GOLD_DROP         = { goblin: 5, orc: 12, troll: 25, boss: 100 };
+const GOLD_DROP         = { goblin: 5, orc: 12, troll: 25, boss: 100, zone_boss: 200 };
 const GOLD_CHEST_BASE   = 15;   // base gold per chest (+ worldNum scaling)
 const MERCHANT_MARKUP    = 1.0;  // price multiplier for merchant items
 
@@ -246,10 +246,13 @@ const WORLD_THEMES = [
 ];
 
 function getWorldTheme(worldNum) {
-    // Use zone-based theme mapping for Phase 4
+    // Surface and Bedrock zones use the original per-world theme rotation
+    // Deeper zones use their dedicated new themes
+    if (worldNum <= 7) {
+        const idx = Math.floor((worldNum - 1) / 2);
+        return WORLD_THEMES[Math.min(idx, 4)]; // 0-4: forest, cave, ice, volcanic, temple
+    }
     const zone = typeof getZone !== 'undefined' ? getZone(worldNum) : null;
     if (zone) return WORLD_THEMES[Math.min(zone.themeIdx, WORLD_THEMES.length - 1)];
-    // Fallback: old formula
-    const idx = Math.floor((worldNum - 1) / 2);
-    return WORLD_THEMES[Math.min(idx, WORLD_THEMES.length - 1)];
+    return WORLD_THEMES[WORLD_THEMES.length - 1];
 }

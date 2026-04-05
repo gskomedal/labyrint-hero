@@ -71,6 +71,7 @@ class Hero {
 
         // Chemistry mod (Phase 3)
         this.chemistUnlocked = false;
+        this.chemLabUnlocked = false; // unlocked by defeating first zone boss
         this.potionDurationBonus = 0;
         this.potionPotencyBonus = 0;
         this.chemBombBonus = 0;
@@ -300,6 +301,7 @@ class Hero {
             campStash:            this.campStash.map(e => ({ ...e })),
             // Chemistry mod
             chemistUnlocked:      this.chemistUnlocked,
+            chemLabUnlocked:      this.chemLabUnlocked,
             potionDurationBonus:  this.potionDurationBonus,
             potionPotencyBonus:   this.potionPotencyBonus,
             chemBombBonus:        this.chemBombBonus,
@@ -353,6 +355,7 @@ class Hero {
         this.campStash            = (stats.campStash || []).map(e => ({ ...e }));
         // Chemistry mod
         this.chemistUnlocked      = stats.chemistUnlocked      || false;
+        this.chemLabUnlocked      = stats.chemLabUnlocked      || false;
         this.potionDurationBonus  = stats.potionDurationBonus  || 0;
         this.potionPotencyBonus   = stats.potionPotencyBonus   || 0;
         this.chemBombBonus        = stats.chemBombBonus        || 0;
