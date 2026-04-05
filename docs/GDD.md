@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.24
+**Versjon:** 0.25
 **Sist oppdatert:** 2026-04-04
 
 ---
@@ -446,8 +446,22 @@ Smelting, legeringer og smiing av utstyr.
 | T2 | Legeringsmester | +15% legering-stats per stack (maks 2) |
 | T3 | Mestersmie | +25% stats på smidd utstyr (maks 1) |
 
+### Fase 3: Kjemi (v0.25)
+
+Kjemisk syntese av potions, bomber, medisiner og syrer fra rene grunnstoffer.
+
+**Kjemisk laboratorium:** Spesialrom fra verden 3+ med grønn glød. Åpnes med C-tast. Filterbare oppskrifter etter kategori.
+
+**Produkter:** 15 kjemiske produkter i 5 kategorier. Kraftigere enn vanlige consumables – kjemisk livselixir healer 4 HP (vs 2), krutt gjør 8 skade i radius 3 (vs 6 for vanlig bombe), dynamitt 15 skade.
+
+**Kjemiker-skillsti (#9):**
+| Tier | Skill | Effekt |
+|------|-------|--------|
+| T1 | Potente potions | +50% potion-varighet per stack (maks 3) |
+| T2 | Syremestring | +30% kjemisk bombe-skade per stack (maks 2) |
+| T3 | Eksplosjonsgenial | +50% skade, +1 radius på bomber (maks 1) |
+
 ### Fremtidige faser (ikke implementert)
-- Fase 3: Kjemi (molekyler, potions, bomber)
 - Fase 4: Verdensekspansjon (soner, dybde-skalering)
 - Fase 5: Fysikk og endgame (halvledere, fisjon, fusjon)
 

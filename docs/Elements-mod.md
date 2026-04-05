@@ -433,32 +433,36 @@ Med en dypere verden trenger spilleren bedre kartlegging:
 
 ## 12. Teknisk implementasjonsplan
 
-### Fase 1 – Grunnlag: Geologi (Issue-prioritet: Høy)
-- [ ] `src/data/elements.js` – Datasett med alle ~50 relevante grunnstoffer
-- [ ] `src/data/minerals.js` – Datasett med ~20 startmineraler og krystaller
-- [ ] Mineral-items i dungeon-generering (tilfeldige drops og årer per sone)
-- [ ] Spesialrom: Steinbrott og Krystallhule
-- [ ] Elementbok UI (periodisk system-oversikt i inventar)
-- [ ] Geolog-sti i skill tree
+### Fase 1 – Grunnlag: Geologi ✅ (v0.23)
+- [x] `src/data/elements.js` – ~50 grunnstoffer med tier 1-6
+- [x] `src/data/minerals.js` – ~23 malmer + ~10 krystaller (inkl. iskrystall, sylvitt, salpeter)
+- [x] Mineral-items i dungeon-generering (2-5 per etasje, skalert med verden)
+- [x] Spesialrom: Steinbrott (verden 1+) og Krystallhule (verden 3+)
+- [x] Elementbok UI (B-tast, periodisk system med oppdagelser og gruppeprestasjoner)
+- [x] Geolog-sti i skill tree (Malmøye, Effektiv utvinning, Mesterprospektør)
+- [x] Monster mineral-drops (15% vanlig, 100% boss)
+- [x] Mineralsynsradius gjennom tåke
 
-### Fase 2 – Metallurgi (Issue-prioritet: Høy)
-- [ ] `src/data/alloys.js` – Legeringsdatasett
-- [ ] Energisystem (tre/kull som start)
-- [ ] Smelteovn-mekanikk (leirplass-rom fra etasje 5)
-- [ ] Smelteprosess med energikostnad og tids-ticks
-- [ ] Legerings-crafting-system
-- [ ] Metallurgisk oppgradering av eksisterende utstyr
-- [ ] Metallurg-sti i skill tree
+### Fase 2 – Metallurgi ✅ (v0.24)
+- [x] `src/data/alloys.js` – 8 legeringer (Bronse→Pt-Ir) + 3 brenseltyper + 12 smibare utstyr
+- [x] Energisystem (tre=1, kull=3 energi, spawner i labyrinten)
+- [x] Smelteovn-mekanikk (Leirplass/Camp Room, garantert verden 2+)
+- [x] Smelteprosess med energikostnad og skill-modifikatorer
+- [x] Legerings-crafting-system (elementer → legering → utstyr)
+- [x] 12 nye våpen/rustninger fra legeringer
+- [x] Metallurg-sti i skill tree (Rask smelting, Legeringsmester, Mestersmie)
+- [x] Persistent lager (stash) i Camp Room for mineraler og brensel
+- [x] Vokter T2 «Festning» gir +2 ryggsekk-plasser (dynamisk inventar)
 
-### Fase 3 – Kjemi og molekyler (Issue-prioritet: Medium)
-- [ ] `src/data/molecules.js` – Kjemikalier og molekylydatasett
-- [ ] Kjemisk laboratorium-rom i dungeon
-- [ ] Syntese-mekanikk (grunnstoffer → molekyler → kjemikalier)
-- [ ] Potions fra kjemikalier (erstatter enkle potions gradvis)
-- [ ] Kjemiske statuseffekter (etsende, forgiftet, strålt)
-- [ ] Eksplosiver og bomber
-- [ ] Kjemiker-sti i skill tree
-- [ ] Energi-utvidelse: Olje/Gass
+### Fase 3 – Kjemi og molekyler ✅ (v0.25)
+- [x] `src/data/molecules.js` – 15 kjemiske produkter (potions, bomber, medisiner, syrer)
+- [x] Kjemisk laboratorium-rom i dungeon (verden 3+, 30% sjanse)
+- [x] Syntese-mekanikk (grunnstoffer → kjemikalier, forenklede oppskrifter 1-3 elementer)
+- [x] Potions: Livselixir (+4 HP), Styrkeelixir (+3 ATK), Forsvarselixir (+2 DEF), Usynlighet
+- [x] Eksplosiver: Krutt (8 dmg), Røykbombe (stun), Syrebombe (etsende), Dynamitt (15 dmg)
+- [x] Medisiner: Universell motgift, Smertestillende
+- [x] Kjemiker-sti i skill tree (Potente potions, Syremestring, Eksplosjonsgenial)
+- [ ] Energi-utvidelse: Olje/Gass (utsatt til Fase 4)
 
 ### Fase 4 – Verdensekspansjon (Issue-prioritet: Medium)
 - [ ] Soner: Dyplag og Underverden (etasje 8–18)

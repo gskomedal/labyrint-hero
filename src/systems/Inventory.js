@@ -29,7 +29,7 @@ class Inventory {
     // ── Stack helpers ─────────────────────────────────────────────────────────
 
     _isStackable(itemDef) {
-        return itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'mineral' || itemDef.type === 'fuel';
+        return itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'mineral' || itemDef.type === 'fuel' || itemDef.type === 'molecule';
     }
 
     _getItemDef(entry) {

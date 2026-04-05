@@ -63,7 +63,8 @@ class SkillScene extends Phaser.Scene {
 
         // Check if entire path is locked
         const pathLocked = (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked)
-            || (path.unlockCondition === 'first_smelt' && !hero.metallurgistUnlocked);
+            || (path.unlockCondition === 'first_smelt' && !hero.metallurgistUnlocked)
+            || (path.unlockCondition === 'first_synthesis' && !hero.chemistUnlocked);
 
         // Path header
         const hdrBg = this.add.graphics();
@@ -75,7 +76,9 @@ class SkillScene extends Phaser.Scene {
         this.add.text(colCX, areaTop + 6, `── ${path.name.toUpperCase()} ──`, {
             fontSize: '11px', color: pathLocked ? '#333344' : hexCol, fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
-        const lockHint = path.unlockCondition === 'first_smelt' ? 'Smelt et mineral!' : 'Finn et mineral!';
+        const lockHint = path.unlockCondition === 'first_smelt' ? 'Smelt et mineral!'
+            : path.unlockCondition === 'first_synthesis' ? 'Lag en kjemikalie!'
+            : 'Finn et mineral!';
         this.add.text(colCX, areaTop + 18, pathLocked ? lockHint : path.desc, {
             fontSize: '8px', color: pathLocked ? '#333344' : '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
@@ -85,6 +88,8 @@ class SkillScene extends Phaser.Scene {
             this.add.text(colCX, areaTop + 80, '🔒', { fontSize: '24px' }).setOrigin(0.5);
             const lockMsg = path.unlockCondition === 'first_smelt'
                 ? 'Smelt et mineral\ni leirplassen\nfor å låse opp'
+                : path.unlockCondition === 'first_synthesis'
+                ? 'Lag en kjemikalie\ni laboratoriet\nfor å låse opp'
                 : 'Plukk opp et\nmineral for å\nlåse opp';
             this.add.text(colCX, areaTop + 110, lockMsg, {
                 fontSize: '9px', color: '#333344', fontFamily: 'monospace', align: 'center'

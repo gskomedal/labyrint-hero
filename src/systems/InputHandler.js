@@ -23,6 +23,7 @@ class InputHandler {
         scene.useItemKey   = scene.input.keyboard.addKey('Q');
         scene.elementBookKey = scene.input.keyboard.addKey('B');
         scene.smelteryKey    = scene.input.keyboard.addKey('V');
+        scene.chemLabKey     = scene.input.keyboard.addKey('C');
         scene.moveTimer    = 0;
 
         // Mouse wheel zoom
