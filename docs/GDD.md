@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.26
-**Sist oppdatert:** 2026-04-04
+**Versjon:** 0.27
+**Sist oppdatert:** 2026-04-05
 
 ---
 
@@ -175,12 +175,28 @@ Bevegelse inn i monster-rute: helten setter facing uten å angripe (visuell flas
 ### Statuseffekter (v0.14)
 | Effekt | Ikon | Varighet | Skade | Kilde | Kur |
 |--------|------|----------|-------|-------|-----|
-| Gift | ☠ | 4 runder | 1/runde | Orc (20%), Troll (30%) | Motgift |
-| Brann | 🔥 | 3 runder | 2/runde | Vulkandungeon-monstre (20%) | Brannsalve, Motgift |
+| Gift | ☠ | 4 runder | 1/2.5s | Orc (20%), Troll (30%) | Motgift, Krystallresistans |
+| Brann | 🔥 | 3 runder | 2/2.0s | Vulkandungeon-monstre (20%) | Brannsalve, Motgift, Krystallresistans |
 | Frostbitt | ❄ | 4 runder | Ingen (halv fart) | Iskrystall-monstre (25%) | Frostsalve, Motgift |
 | Lammet | ⚡ | 1 runde | Ingen (skip turn) | Boss fase 2 (15%) | Venter ut |
 
 Motgift kurerer alle statuseffekter. Effektene stables ikke – ny påføring forlenger gjenværende varighet.
+
+### Krystall-passive bonuser (v0.27)
+Krystaller (edelstener) i ryggsekken gir passive bonuser uten å bruke dem:
+| Krystall | Bonus |
+|----------|-------|
+| Klar kvarts | +1 Synsfelt |
+| Ametyst | 15% Giftresistans |
+| Citrin | +20% Gullfunn |
+| Smaragd | 30% Giftresistans |
+| Akvamarin | 30% Brannresistans |
+| Rubin | +1 Angrep |
+| Safir | +1 Forsvar |
+| Diamant | +1 Angrep, +1 Forsvar, +1 Maks-hjerte |
+| Rød beryll | +10% Kritisk, +10% Unnvikelse |
+
+Bonuser stabler med antall krystaller i ryggsekken.
 
 ### Bump-mekanikk
 Bevegelse inn i monster-rute: helten setter facing uten å angripe (visuell flash). Trykk SPACE/F for å angripe i facing-retning.

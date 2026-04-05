@@ -4,12 +4,15 @@
 class LeaderboardScene extends Phaser.Scene {
     constructor() { super({ key: 'LeaderboardScene' }); }
 
+    init(data) {
+        this._filterRace = (data && data.filterRace) || null;
+        this._filterDiff = (data && data.filterDiff) || null;
+    }
+
     create() {
         const { width: W, height: H } = this.cameras.main;
         const cx = W / 2, cy = H / 2;
 
-        this._filterRace = null;
-        this._filterDiff = null;
         this._dyn = [];
 
         // Background
@@ -28,7 +31,15 @@ class LeaderboardScene extends Phaser.Scene {
 
         // Scroll area
         this._listY = 110;
+        this._scrollOffset = 0;
         this._refreshList();
+
+        // Mouse wheel scrolling
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            const maxScroll = Math.max(0, (this._totalRows - 12) * 20);
+            this._scrollOffset = Phaser.Math.Clamp(this._scrollOffset + deltaY * 0.5, 0, maxScroll);
+            this._refreshList();
+        });
 
         // Back button
         const back = this.add.text(cx, H - 30, '[ TILBAKE ]', {
@@ -65,7 +76,7 @@ class LeaderboardScene extends Phaser.Scene {
             }).setInteractive({ useHandCursor: true });
             btn.on('pointerdown', () => {
                 this._filterRace = r.id;
-                this.scene.restart();
+                this.scene.restart({ filterRace: this._filterRace, filterDiff: this._filterDiff });
             });
             rx += btn.width + 8;
         }
@@ -79,7 +90,7 @@ class LeaderboardScene extends Phaser.Scene {
             }).setInteractive({ useHandCursor: true });
             btn.on('pointerdown', () => {
                 this._filterDiff = d.id;
-                this.scene.restart();
+                this.scene.restart({ filterRace: this._filterRace, filterDiff: this._filterDiff });
             });
             dx += btn.width + 8;
         }
@@ -111,11 +122,15 @@ class LeaderboardScene extends Phaser.Scene {
 
         const RACE_NAMES = { human: 'Menneske', dwarf: 'Dverg', elf: 'Alv', hobbit: 'Hobbit' };
         const rowH = 20;
-        const maxRows = Math.min(scores.length, 15);
+        this._totalRows = scores.length;
+        const { height: H } = this.cameras.main;
+        const visibleArea = H - y0 - 60;
+        const maxVisible = Math.floor(visibleArea / rowH);
 
-        for (let i = 0; i < maxRows; i++) {
+        for (let i = 0; i < scores.length; i++) {
             const s = scores[i];
-            const ry = y0 + 20 + i * rowH;
+            const ry = y0 + 20 + i * rowH - (this._scrollOffset || 0);
+            if (ry < y0 + 10 || ry > H - 50) continue; // clip rows outside visible area
             const isTop3 = i < 3;
             const col = isTop3 ? ['#f5e642', '#cccccc', '#cc8844'][i] : '#667788';
             const style = { fontSize: '11px', color: col, fontFamily: 'monospace' };

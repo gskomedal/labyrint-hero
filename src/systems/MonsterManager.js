@@ -61,31 +61,41 @@ class MonsterManager {
         const scene = this.scene;
 
         // ── Status effect ticks ────────────────────────
-        // Poison
+        // Poison (tick every 2500ms – was 900ms, #56)
         if (scene.hero.poisonTurns > 0) {
             scene.poisonTickTimer += delta;
-            if (scene.poisonTickTimer >= 900) {
+            if (scene.poisonTickTimer >= 2500) {
                 scene.poisonTickTimer = 0;
                 scene.hero.poisonTurns--;
-                const died = scene.hero.takeDamage(1);
-                scene._floatingText(scene.hero.gridX, scene.hero.gridY, '☠ -1', '#44ee66');
-                scene.hero._drawSprite();
-                if (died) { scene._heroDied(); return; }
+                const cb = scene.hero.getCrystalBonuses();
+                if (cb.poisonResist > 0 && Math.random() < cb.poisonResist) {
+                    scene._floatingText(scene.hero.gridX, scene.hero.gridY, '☠ Motstått!', '#88ff88');
+                } else {
+                    const died = scene.hero.takeDamage(1);
+                    scene._floatingText(scene.hero.gridX, scene.hero.gridY, '☠ -1', '#44ee66');
+                    scene.hero._drawSprite();
+                    if (died) { scene._heroDied(); return; }
+                }
             }
         } else {
             scene.poisonTickTimer = 0;
         }
 
-        // Burn
+        // Burn (tick every 2000ms – was 800ms, #56)
         if (scene.hero.burnTurns > 0) {
             scene.burnTickTimer = (scene.burnTickTimer || 0) + delta;
-            if (scene.burnTickTimer >= 800) {
+            if (scene.burnTickTimer >= 2000) {
                 scene.burnTickTimer = 0;
                 scene.hero.burnTurns--;
-                const died = scene.hero.takeDamage(2);
-                scene._floatingText(scene.hero.gridX, scene.hero.gridY, '🔥 -2', '#ff6600');
-                scene.hero._drawSprite();
-                if (died) { scene._heroDied(); return; }
+                const cb = scene.hero.getCrystalBonuses();
+                if (cb.burnResist > 0 && Math.random() < cb.burnResist) {
+                    scene._floatingText(scene.hero.gridX, scene.hero.gridY, '🔥 Motstått!', '#ffaa66');
+                } else {
+                    const died = scene.hero.takeDamage(2);
+                    scene._floatingText(scene.hero.gridX, scene.hero.gridY, '🔥 -2', '#ff6600');
+                    scene.hero._drawSprite();
+                    if (died) { scene._heroDied(); return; }
+                }
             }
         } else {
             scene.burnTickTimer = 0;

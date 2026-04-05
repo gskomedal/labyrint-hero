@@ -78,6 +78,14 @@ class ChemLabScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-C', () => this.scene.stop());
 
         this.contentY = filterY + 22;
+        this._scrollOffset = 0;
+
+        // Mouse wheel scrolling for recipe list
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            this._scrollOffset = Math.max(0, this._scrollOffset + deltaY * 0.5);
+            this._refresh();
+        });
+
         this._refresh();
     }
 
@@ -122,8 +130,8 @@ class ChemLabScene extends Phaser.Scene {
         }
 
         allMols.forEach((entry, idx) => {
-            const my = y + idx * 58;
-            if (my > this.py + this.panelH - 80) return;
+            const my = y + idx * 58 - (this._scrollOffset || 0);
+            if (my > this.py + this.panelH - 80 || my < y - 20) return;
             const m = entry.mol;
             const can = entry.canCraft;
             const col = can ? 0x33dd88 : 0x223322;

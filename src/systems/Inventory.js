@@ -36,9 +36,11 @@ class Inventory {
         if (!entry) return null;
         // Stacked entry: { id, count }
         if (entry.id && entry.count !== undefined) {
-            return ITEM_DEFS[entry.id]
+            return entry._chemItem
+                || ITEM_DEFS[entry.id]
                 || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
                 || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
+                || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id])
                 || null;
         }
         // Plain item def (equipment)
@@ -67,7 +69,10 @@ class Inventory {
             // No existing stack or all full – create new stack
             const slot = this.backpack.indexOf(null);
             if (slot === -1) return false;
-            this.backpack[slot] = { id: itemDef.id, count: 1 };
+            const stackEntry = { id: itemDef.id, count: 1 };
+            // Preserve dynamic chemistry item (has use() function not in any DEF)
+            if (itemDef._chemType) stackEntry._chemItem = itemDef;
+            this.backpack[slot] = stackEntry;
             return true;
         }
 
@@ -96,7 +101,7 @@ class Inventory {
 
         if (itemDef.type === 'weapon' || itemDef.type === 'armor') {
             this._equip(slotIndex, hero);
-        } else if (itemDef.type === 'consumable' || itemDef.type === 'tool') {
+        } else if (itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'molecule') {
             // Assign to quick-use slot
             this._assignQuickUse(slotIndex);
         }
@@ -107,7 +112,7 @@ class Inventory {
         const entry = this.backpack[slotIndex];
         if (!entry) return;
         const itemDef = this._getItemDef(entry);
-        if (!itemDef || (itemDef.type !== 'consumable' && itemDef.type !== 'tool')) return;
+        if (!itemDef || (itemDef.type !== 'consumable' && itemDef.type !== 'tool' && itemDef.type !== 'molecule')) return;
 
         // If quick-use already has something, put it back in backpack
         if (this.quickUse) {
@@ -122,13 +127,16 @@ class Inventory {
 
         // Move from backpack to quick-use
         this.quickUse = { id: entry.id, count: entry.count || 1 };
+        // Preserve dynamically generated chemistry item for use()
+        if (entry._chemItem) this.quickUse._chemItem = entry._chemItem;
         this.backpack[slotIndex] = null;
     }
 
     /** Use the item in quick-use slot. Returns the itemDef if used, null otherwise. */
     useQuickItem(hero, scene) {
         if (!this.quickUse || this.quickUse.count <= 0) return null;
-        const itemDef = ITEM_DEFS[this.quickUse.id];
+        // Check standard items first, then molecule quick-use items
+        const itemDef = ITEM_DEFS[this.quickUse.id] || this.quickUse._chemItem || null;
         if (!itemDef) return null;
 
         if (itemDef.type === 'tool') return null; // Tools are auto-consumed elsewhere
@@ -262,11 +270,14 @@ class Inventory {
                     // Mark mineral/fuel entries so deserialization looks in correct DEF
                     const def = ITEM_DEFS[entry.id]
                         || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
-                        || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id]);
+                        || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
+                        || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id]);
                     const isMineral = def && def.type === 'mineral';
                     const isFuel = def && def.type === 'fuel';
+                    const isMolecule = def && def.type === 'molecule';
                     if (isMineral) return { id: entry.id, count: entry.count, isMineral: true };
                     if (isFuel) return { id: entry.id, count: entry.count, isFuel: true };
+                    if (isMolecule) return { id: entry.id, count: entry.count, isMolecule: true };
                     return { id: entry.id, count: entry.count };
                 }
                 // Equipment: store rarity if non-common
@@ -330,6 +341,8 @@ class Inventory {
                     if (entry.isMineral && typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id]) {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
                     } else if (entry.isFuel && typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id]) {
+                        inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
+                    } else if (entry.isMolecule && typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id]) {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
                     } else if (ITEM_DEFS[entry.id]) {
                         if (entry.count !== undefined) {

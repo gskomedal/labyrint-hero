@@ -531,7 +531,8 @@ class MapRenderer {
 
     updateFog() {
         const scene = this.scene;
-        const r  = scene.hero.visionRadius;
+        const crystalVision = scene.hero.getCrystalBonuses ? scene.hero.getCrystalBonuses().visionRadius : 0;
+        const r  = scene.hero.visionRadius + crystalVision;
         const hx = scene.hero.gridX, hy = scene.hero.gridY;
         for (let y = 0; y < scene.tileH; y++)
             for (let x = 0; x < scene.tileW; x++)
