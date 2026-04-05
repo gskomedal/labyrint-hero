@@ -54,6 +54,27 @@ const MINERAL_DEFS = {
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Gr\u00f8nt silikatmineral fra dypet.'
     },
+    ice_crystal: {
+        id: 'ice_crystal', name: 'Iskrystall', type: 'mineral', subtype: 'ore',
+        formula: 'H\u2082O', tier: 1, color: 0xaaddff,
+        yields: [{ symbol: 'H', amount: 5, chance: 1.0 }, { symbol: 'O', amount: 3, chance: 1.0 }],
+        energyCost: 0, smeltingTime: 1, stackSize: 10,
+        desc: 'Frosset vann. Rik kilde til hydrogen og oksygen.'
+    },
+    sylvite: {
+        id: 'sylvite', name: 'Sylvitt', type: 'mineral', subtype: 'ore',
+        formula: 'KCl', tier: 1, color: 0xddaa88,
+        yields: [{ symbol: 'K', amount: 4, chance: 1.0 }, { symbol: 'Cl', amount: 3, chance: 0.8 }],
+        energyCost: 1, smeltingTime: 2, stackSize: 10,
+        desc: 'Kaliumklorid. Viktig for krutt og kjemi.'
+    },
+    niter: {
+        id: 'niter', name: 'Salpeter', type: 'mineral', subtype: 'ore',
+        formula: 'KNO\u2083', tier: 2, color: 0xccccbb,
+        yields: [{ symbol: 'K', amount: 3, chance: 1.0 }, { symbol: 'N', amount: 3, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.5 }],
+        energyCost: 1, smeltingTime: 2, stackSize: 10,
+        desc: 'Naturlig salpeter. Gir kalium og nitrogen.'
+    },
 
     // ── Tier 2 – Uncommon ores ───────────────────────────────────────────────
     pyrite: {
@@ -241,8 +262,8 @@ const MINERAL_DEFS = {
 // ── Mineral pools grouped by tier ────────────────────────────────────────────
 
 const MINERAL_POOL = {
-    1: ['quartz', 'hematite', 'magnetite', 'limestone', 'halite', 'bauxite', 'olivine'],
-    2: ['pyrite', 'ilmenite', 'apatite'],
+    1: ['quartz', 'hematite', 'magnetite', 'limestone', 'halite', 'bauxite', 'olivine', 'ice_crystal', 'sylvite'],
+    2: ['pyrite', 'ilmenite', 'apatite', 'niter'],
     3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite'],
     4: ['galena', 'cassiterite', 'cinnabar'],
     5: ['argentite', 'native_gold', 'native_silver'],
