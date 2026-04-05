@@ -36,9 +36,11 @@ class Inventory {
         if (!entry) return null;
         // Stacked entry: { id, count }
         if (entry.id && entry.count !== undefined) {
-            return ITEM_DEFS[entry.id]
+            return entry._chemItem
+                || ITEM_DEFS[entry.id]
                 || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
                 || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
+                || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id])
                 || null;
         }
         // Plain item def (equipment)
@@ -67,7 +69,10 @@ class Inventory {
             // No existing stack or all full – create new stack
             const slot = this.backpack.indexOf(null);
             if (slot === -1) return false;
-            this.backpack[slot] = { id: itemDef.id, count: 1 };
+            const stackEntry = { id: itemDef.id, count: 1 };
+            // Preserve dynamic chemistry item (has use() function not in any DEF)
+            if (itemDef._chemType) stackEntry._chemItem = itemDef;
+            this.backpack[slot] = stackEntry;
             return true;
         }
 
@@ -96,7 +101,7 @@ class Inventory {
 
         if (itemDef.type === 'weapon' || itemDef.type === 'armor') {
             this._equip(slotIndex, hero);
-        } else if (itemDef.type === 'consumable' || itemDef.type === 'tool') {
+        } else if (itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'molecule') {
             // Assign to quick-use slot
             this._assignQuickUse(slotIndex);
         }
@@ -107,12 +112,15 @@ class Inventory {
         const entry = this.backpack[slotIndex];
         if (!entry) return;
         const itemDef = this._getItemDef(entry);
-        if (!itemDef || (itemDef.type !== 'consumable' && itemDef.type !== 'tool')) return;
+        if (!itemDef || (itemDef.type !== 'consumable' && itemDef.type !== 'tool' && itemDef.type !== 'molecule')) return;
 
         // If quick-use already has something, put it back in backpack
         if (this.quickUse) {
-            // Try to stack back
-            const oldDef = ITEM_DEFS[this.quickUse.id];
+            // Try to stack back – check all DEFs, not just ITEM_DEFS
+            const oldDef = this.quickUse._chemItem
+                || ITEM_DEFS[this.quickUse.id]
+                || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[this.quickUse.id])
+                || null;
             if (oldDef) {
                 for (let i = 0; i < this.quickUse.count; i++) {
                     this.addItem(oldDef);
@@ -122,13 +130,16 @@ class Inventory {
 
         // Move from backpack to quick-use
         this.quickUse = { id: entry.id, count: entry.count || 1 };
+        // Preserve dynamically generated chemistry item for use()
+        if (entry._chemItem) this.quickUse._chemItem = entry._chemItem;
         this.backpack[slotIndex] = null;
     }
 
     /** Use the item in quick-use slot. Returns the itemDef if used, null otherwise. */
     useQuickItem(hero, scene) {
         if (!this.quickUse || this.quickUse.count <= 0) return null;
-        const itemDef = ITEM_DEFS[this.quickUse.id];
+        // Check standard items first, then molecule quick-use items
+        const itemDef = ITEM_DEFS[this.quickUse.id] || this.quickUse._chemItem || null;
         if (!itemDef) return null;
 
         if (itemDef.type === 'tool') return null; // Tools are auto-consumed elsewhere
@@ -155,7 +166,10 @@ class Inventory {
     /** Unequip quick-use back into backpack */
     unequipQuickUse() {
         if (!this.quickUse) return false;
-        const itemDef = ITEM_DEFS[this.quickUse.id];
+        const itemDef = this.quickUse._chemItem
+            || ITEM_DEFS[this.quickUse.id]
+            || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[this.quickUse.id])
+            || null;
         if (!itemDef) { this.quickUse = null; return false; }
         for (let i = 0; i < this.quickUse.count; i++) {
             if (!this.addItem(itemDef)) return false; // backpack full
@@ -182,7 +196,10 @@ class Inventory {
     /** Drop from quick-use slot (one item). Returns itemDef or null. */
     dropQuickUse() {
         if (!this.quickUse) return null;
-        const itemDef = ITEM_DEFS[this.quickUse.id];
+        const itemDef = this.quickUse._chemItem
+            || ITEM_DEFS[this.quickUse.id]
+            || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[this.quickUse.id])
+            || null;
         this.quickUse.count--;
         if (this.quickUse.count <= 0) this.quickUse = null;
         return itemDef;
@@ -262,11 +279,14 @@ class Inventory {
                     // Mark mineral/fuel entries so deserialization looks in correct DEF
                     const def = ITEM_DEFS[entry.id]
                         || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
-                        || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id]);
+                        || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
+                        || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id]);
                     const isMineral = def && def.type === 'mineral';
                     const isFuel = def && def.type === 'fuel';
+                    const isMolecule = def && def.type === 'molecule';
                     if (isMineral) return { id: entry.id, count: entry.count, isMineral: true };
                     if (isFuel) return { id: entry.id, count: entry.count, isFuel: true };
+                    if (isMolecule) return { id: entry.id, count: entry.count, isMolecule: true };
                     return { id: entry.id, count: entry.count };
                 }
                 // Equipment: store rarity if non-common
@@ -288,14 +308,23 @@ class Inventory {
             inv.expandBackpack(savedSize - inv.backpack.length);
         }
 
+        /** Look up an item def from any registry */
+        const lookupDef = (id) => {
+            return ITEM_DEFS[id]
+                || (typeof ALLOY_EQUIPMENT !== 'undefined' && ALLOY_EQUIPMENT[id])
+                || null;
+        };
+
         /** Restore an equipment entry (string id or {id, rarity}) */
         const restoreEquip = (raw) => {
             if (!raw) return null;
             if (typeof raw === 'string') {
-                return ITEM_DEFS[raw] ? makeRarityItem(ITEM_DEFS[raw], 'common') : null;
+                const def = lookupDef(raw);
+                return def ? makeRarityItem(def, 'common') : null;
             }
-            if (raw.id && ITEM_DEFS[raw.id]) {
-                return makeRarityItem(ITEM_DEFS[raw.id], raw.rarity || 'common');
+            if (raw.id) {
+                const def = lookupDef(raw.id);
+                if (def) return makeRarityItem(def, raw.rarity || 'common');
             }
             return null;
         };
@@ -318,7 +347,7 @@ class Inventory {
             data.backpack.forEach((entry, i) => {
                 if (!entry) { inv.backpack[i] = null; return; }
                 if (typeof entry === 'string') {
-                    const def = ITEM_DEFS[entry];
+                    const def = lookupDef(entry);
                     if (!def) return;
                     if (def.type === 'consumable' || def.type === 'tool') {
                         inv.backpack[i] = { id: entry, count: 1 };
@@ -331,13 +360,15 @@ class Inventory {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
                     } else if (entry.isFuel && typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id]) {
                         inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
-                    } else if (ITEM_DEFS[entry.id]) {
+                    } else if (entry.isMolecule && typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id]) {
+                        inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
+                    } else if (lookupDef(entry.id)) {
                         if (entry.count !== undefined) {
                             // Stacked consumable/tool
                             inv.backpack[i] = { id: entry.id, count: entry.count || 1 };
                         } else {
                             // Equipment with optional rarity
-                            inv.backpack[i] = makeRarityItem(ITEM_DEFS[entry.id], entry.rarity || 'common');
+                            inv.backpack[i] = makeRarityItem(lookupDef(entry.id), entry.rarity || 'common');
                         }
                     }
                 }

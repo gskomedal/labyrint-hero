@@ -22,7 +22,10 @@ class InventoryScene extends Phaser.Scene {
 
         const panelW = 520;
         const hasPet = this.pet && this.pet.alive;
-        const panelH = hasPet ? 500 : 420;
+        const bpCount = this.inv.backpack.length;
+        const bpRows = Math.ceil(bpCount / 5);
+        const extraBpSpace = Math.max(0, (bpRows - 2) * 60);
+        const panelH = (hasPet ? 500 : 420) + extraBpSpace;
         const panelY = cy;
         this.add.rectangle(cx, panelY, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x334466);
 
@@ -98,7 +101,10 @@ class InventoryScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
         const hasPet = this.pet && this.pet.alive;
         const panelW = 520;
-        const panelH = hasPet ? 500 : 420;
+        const bpCount = this.inv.backpack.length;
+        const bpRows = Math.ceil(bpCount / 5);
+        const extraBpSpace = Math.max(0, (bpRows - 2) * 60);
+        const panelH = (hasPet ? 500 : 420) + extraBpSpace;
         const panelY = cy;
 
         // Update stats line
@@ -124,7 +130,6 @@ class InventoryScene extends Phaser.Scene {
 
         // Backpack slots (dynamic size – base 10 + skill expansions)
         const bpY     = panelY - panelH / 2 + 245;
-        const bpCount = this.inv.backpack.length;
         const cols = 5, gap = 8;
         const slotSize = bpCount > 15 ? 44 : 52;
         const bpTotalW = cols * slotSize + (cols - 1) * gap;
@@ -142,9 +147,11 @@ class InventoryScene extends Phaser.Scene {
             this._makeBackpackSlot(sx, sy, slotSize, i);
         }
 
-        // Pet inventory section
+        // Pet inventory section – position dynamically below backpack rows
         if (hasPet) {
-            this._drawPetInventory(cx, panelY - panelH / 2, panelW);
+            const bpRows = Math.ceil(bpCount / cols);
+            const bpBottom = bpY + bpRows * (slotSize + gap);
+            this._drawPetInventory(cx, panelY - panelH / 2, panelW, bpBottom);
         }
     }
 
@@ -227,7 +234,11 @@ class InventoryScene extends Phaser.Scene {
     _makeQuickUseSlot(x, y) {
         const size = 64;
         const qu = this.inv.quickUse;
-        const itemDef = qu ? ITEM_DEFS[qu.id] : null;
+        const itemDef = qu
+            ? (qu._chemItem || ITEM_DEFS[qu.id]
+               || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[qu.id])
+               || null)
+            : null;
 
         const bg = this._d(this.add.rectangle(x, y, size, size, 0x0a0918).setStrokeStyle(
             itemDef ? 2 : 1,
@@ -368,9 +379,9 @@ class InventoryScene extends Phaser.Scene {
 
     // ── Pet inventory ──────────────────────────────────────────────────────────
 
-    _drawPetInventory(cx, panelTop, panelW) {
+    _drawPetInventory(cx, panelTop, panelW, bpBottom) {
         const pet = this.pet;
-        const baseY = panelTop + 370;
+        const baseY = Math.max(panelTop + 370, bpBottom + 10);
 
         // Separator
         this._d(this.add.rectangle(cx, baseY - 8, panelW - 40, 1, 0x223344));

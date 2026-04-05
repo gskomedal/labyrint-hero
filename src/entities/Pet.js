@@ -372,7 +372,8 @@ class Pet {
 
     /** Add item to pet backpack. Returns true on success. */
     addItem(itemDef) {
-        const isStackable = itemDef.type === 'consumable' || itemDef.type === 'tool';
+        const isStackable = itemDef.type === 'consumable' || itemDef.type === 'tool'
+            || itemDef.type === 'mineral' || itemDef.type === 'fuel' || itemDef.type === 'molecule';
         if (isStackable) {
             for (let i = 0; i < this.backpack.length; i++) {
                 const entry = this.backpack[i];
@@ -398,7 +399,11 @@ class Pet {
         if (!entry) return null;
         let itemDef;
         if (entry.id && entry.count !== undefined) {
-            itemDef = ITEM_DEFS[entry.id];
+            itemDef = ITEM_DEFS[entry.id]
+                || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
+                || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
+                || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id])
+                || null;
             entry.count--;
             if (entry.count <= 0) this.backpack[index] = null;
         } else {
@@ -411,7 +416,13 @@ class Pet {
     /** Get item def for a backpack entry */
     getItemDef(entry) {
         if (!entry) return null;
-        if (entry.id && entry.count !== undefined) return ITEM_DEFS[entry.id];
+        if (entry.id && entry.count !== undefined) {
+            return ITEM_DEFS[entry.id]
+                || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
+                || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
+                || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id])
+                || null;
+        }
         return entry;
     }
 
@@ -454,11 +465,19 @@ class Pet {
             data.backpack.forEach((entry, i) => {
                 if (i >= 4 || !entry) return;
                 if (typeof entry === 'string') {
-                    const def = ITEM_DEFS[entry];
+                    const def = ITEM_DEFS[entry]
+                        || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry])
+                        || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry])
+                        || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry]);
                     if (!def) return;
-                    pet.backpack[i] = (def.type === 'consumable' || def.type === 'tool')
+                    const stackable = def.type === 'consumable' || def.type === 'tool'
+                        || def.type === 'mineral' || def.type === 'fuel' || def.type === 'molecule';
+                    pet.backpack[i] = stackable
                         ? { id: entry, count: 1 } : makeRarityItem(def, 'common');
-                } else if (entry.id && ITEM_DEFS[entry.id]) {
+                } else if (entry.id && (ITEM_DEFS[entry.id]
+                    || (typeof MINERAL_DEFS !== 'undefined' && MINERAL_DEFS[entry.id])
+                    || (typeof FUEL_DEFS !== 'undefined' && FUEL_DEFS[entry.id])
+                    || (typeof MOLECULE_DEFS !== 'undefined' && MOLECULE_DEFS[entry.id]))) {
                     if (entry.count !== undefined) {
                         pet.backpack[i] = { id: entry.id, count: entry.count || 1 };
                     } else {
