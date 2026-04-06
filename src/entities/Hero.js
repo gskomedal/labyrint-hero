@@ -53,37 +53,8 @@ class Hero {
         this.slowTurns   = 0;   // slowed movement
         this.stunTurns   = 0;   // skip turns
 
-        // Elements mod
-        this.elementTracker = new ElementTracker();
-        this.geologistUnlocked = false;
-        this.mineralVisionRadius = 0;
-        this.miningYieldBonus = 0;
-        this.guaranteedRareMineral = false;
-
-        // Metallurgy mod (Phase 2)
-        this.metallurgistUnlocked = false;
-        this.smeltingSpeedMul = 1.0;
-        this.smeltingEfficiency = 1.0;
-        this.alloyMasteryBonus = 0;
-        this.alloyStatBonus = 0;
-        this.oreEfficiencyChance = 0;
-        this.alloyInventory = {};  // { 'bronze': 2, 'steel': 1, ... }
-
-        // Chemistry mod (Phase 3)
-        this.chemistUnlocked = false;
-        this.chemLabUnlocked = false; // unlocked by defeating first zone boss
-        this.potionDurationBonus = 0;
-        this.potionPotencyBonus = 0;
-        this.chemBombBonus = 0;
-        this.chemRadiusBonus = 0;
-        this.toxicBladeChance = 0;
-
-        // Zone progression (Phase 4)
-        this.completedZones = []; // ['surface', 'bedrock', ...]
-
-        // Camp stash – persistent storage for minerals, fuel, etc.
-        // Array of { id, count } entries (like backpack slots but unlimited size)
-        this.campStash = [];
+        // Crafting state (Elements, Metallurgy, Chemistry, Camp Stash)
+        HeroCrafting.init(this);
 
         // Temporary buffs from brews [{stat, amount, msLeft}]
         this.tempBuffs = [];
@@ -305,30 +276,7 @@ class Hero {
             skills:       [...this.skills],
             tempBuffs:    this.tempBuffs.map(b => ({ ...b })),
             inventory:    this.inventory.serialize(),
-            // Elements mod
-            elementTracker:       this.elementTracker.serialize(),
-            geologistUnlocked:    this.geologistUnlocked,
-            mineralVisionRadius:  this.mineralVisionRadius,
-            miningYieldBonus:     this.miningYieldBonus,
-            guaranteedRareMineral: this.guaranteedRareMineral,
-            // Metallurgy mod
-            metallurgistUnlocked: this.metallurgistUnlocked,
-            smeltingSpeedMul:     this.smeltingSpeedMul,
-            smeltingEfficiency:   this.smeltingEfficiency,
-            alloyMasteryBonus:    this.alloyMasteryBonus,
-            alloyStatBonus:       this.alloyStatBonus,
-            oreEfficiencyChance:  this.oreEfficiencyChance,
-            alloyInventory:       { ...this.alloyInventory },
-            campStash:            this.campStash.map(e => ({ ...e })),
-            // Chemistry mod
-            chemistUnlocked:      this.chemistUnlocked,
-            chemLabUnlocked:      this.chemLabUnlocked,
-            potionDurationBonus:  this.potionDurationBonus,
-            potionPotencyBonus:   this.potionPotencyBonus,
-            chemBombBonus:        this.chemBombBonus,
-            chemRadiusBonus:      this.chemRadiusBonus,
-            toxicBladeChance:     this.toxicBladeChance,
-            completedZones:       [...this.completedZones],
+            ...HeroCrafting.serialize(this),
         };
     }
 
@@ -359,30 +307,8 @@ class Hero {
         this.stunTurns    = stats.stunTurns    || 0;
         this.skills       = stats.skills       ? migrateSkills([...stats.skills]) : [];
         this.tempBuffs    = (stats.tempBuffs || []).map(b => ({ ...b }));
-        // Elements mod
-        this.elementTracker       = ElementTracker.deserialize(stats.elementTracker || null);
-        this.geologistUnlocked    = stats.geologistUnlocked    || false;
-        this.mineralVisionRadius  = stats.mineralVisionRadius  || 0;
-        this.miningYieldBonus     = stats.miningYieldBonus     || 0;
-        this.guaranteedRareMineral = stats.guaranteedRareMineral || false;
-        // Metallurgy mod
-        this.metallurgistUnlocked = stats.metallurgistUnlocked || false;
-        this.smeltingSpeedMul     = stats.smeltingSpeedMul     || 1.0;
-        this.smeltingEfficiency   = stats.smeltingEfficiency   || 1.0;
-        this.alloyMasteryBonus    = stats.alloyMasteryBonus    || 0;
-        this.alloyStatBonus       = stats.alloyStatBonus       || 0;
-        this.oreEfficiencyChance  = stats.oreEfficiencyChance  || 0;
-        this.alloyInventory       = stats.alloyInventory       ? { ...stats.alloyInventory } : {};
-        this.campStash            = (stats.campStash || []).map(e => ({ ...e }));
-        // Chemistry mod
-        this.chemistUnlocked      = stats.chemistUnlocked      || false;
-        this.chemLabUnlocked      = stats.chemLabUnlocked      || false;
-        this.potionDurationBonus  = stats.potionDurationBonus  || 0;
-        this.potionPotencyBonus   = stats.potionPotencyBonus   || 0;
-        this.chemBombBonus        = stats.chemBombBonus        || 0;
-        this.chemRadiusBonus      = stats.chemRadiusBonus      || 0;
-        this.toxicBladeChance     = stats.toxicBladeChance     || 0;
-        this.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
+        // Crafting state (Elements, Metallurgy, Chemistry, Camp Stash)
+        HeroCrafting.applyStats(this, stats);
         // Deserialize inventory – _apply() re-adds equipment bonuses on top of base stats
         this.inventory    = Inventory.deserialize(stats.inventory || null, this);
         // Set hearts after equipment is applied so maxHearts includes equipment bonus

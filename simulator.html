@@ -163,6 +163,7 @@ tbody tr:hover td { background: #131128; }
     </div>
     <div class="card">
         <h3>📊 Siste 20 spill (log)</h3>
+        <div id="assertionResults" style="margin: 16px 0; padding: 10px; border: 1px solid #334466; border-radius: 6px;"></div>
         <div id="logBox"></div>
     </div>
 </div>
@@ -997,6 +998,33 @@ function renderDashboard(results, logLines) {
         <div class="stat-row"><span class="stat-label">Vegger brutt/spill</span><span class="stat-val">${(wUsed/N).toFixed(1)}</span></div>
         <div class="stat-row"><span class="stat-label">Nøkkel-bruksrate</span><span class="stat-val">${kPickup > 0 ? pct(kUsed,kPickup) : '–'}%</span></div>
         <div class="stat-row"><span class="stat-label">Hakke-bruksrate</span><span class="stat-val">${pPickup > 0 ? pct(wUsed,pPickup) : '–'}%</span></div>`;
+
+    // ── Balance assertions ─────────────────────────────────────────────────
+    const assertions = [];
+    function check(name, value, min, max) {
+        const pass = value >= min && value <= max;
+        assertions.push({ name, value, min, max, pass });
+    }
+
+    check('Win rate (%)', +winRate, 15, 90);
+    check('Average level', +avgLevel, 2, 20);
+    check('Average world reached', +avgWorld, 1.5, 25);
+    check('Average HP remaining (%)', +avgHp, 10, 80);
+    check('Boss kill rate (%)', +bossKill, 10, 95);
+    check('Average turns', +avgTurns, 30, 2000);
+
+    const assertEl = document.getElementById('assertionResults');
+    if (assertEl) {
+        const allPass = assertions.every(a => a.pass);
+        assertEl.innerHTML = `
+            <h3 style="color:${allPass ? '#44ee88' : '#ff4444'}">${allPass ? '✓ Alle balansesjekker bestått' : '✗ Balanseproblemer oppdaget'}</h3>
+            ${assertions.map(a => `
+                <div style="color:${a.pass ? '#44cc66' : '#ff5555'}; margin: 2px 0 2px 12px; font-size: 12px;">
+                    ${a.pass ? '✓' : '✗'} ${a.name}: ${typeof a.value === 'number' ? a.value.toFixed ? a.value.toFixed(1) : a.value : a.value} (forventet ${a.min}–${a.max})
+                </div>
+            `).join('')}
+        `;
+    }
 
     // ── Log
     document.getElementById('logBox').innerHTML = logLines.join('<br>');

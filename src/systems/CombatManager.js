@@ -88,15 +88,46 @@ class CombatManager {
         }
     }
 
+    // ── Damage calculation (pure logic, testable) ──────────────────────────────
+
+    /**
+     * Calculate hero's melee damage output.
+     * @param {number} heroAttack - Hero base attack stat
+     * @param {object} crystalBonuses - { attack, critChance, ... } from getCrystalBonuses()
+     * @param {number} heroCritChance - Hero base crit chance
+     * @param {number} [roll] - Random roll 0-2 for variance (optional, for testing)
+     * @param {number} [critRoll] - Random 0-1 for crit check (optional, for testing)
+     * @returns {{ damage: number, isCrit: boolean }}
+     */
+    static calculateHeroDamage(heroAttack, crystalBonuses, heroCritChance, roll, critRoll) {
+        if (roll === undefined) roll = Math.floor(Math.random() * 3);
+        if (critRoll === undefined) critRoll = Math.random();
+        let dmg = heroAttack + (crystalBonuses.attack || 0) + roll;
+        const totalCrit = heroCritChance + (crystalBonuses.critChance || 0);
+        const isCrit = totalCrit > 0 && critRoll < totalCrit;
+        if (isCrit) dmg *= 2;
+        return { damage: dmg, isCrit };
+    }
+
+    /**
+     * Calculate monster's damage to hero.
+     * @param {number} monsterAttack - Monster attack stat
+     * @param {number} [bonusRoll] - Random 0-1 for +1 bonus chance (optional, for testing)
+     * @returns {number} damage amount
+     */
+    static calculateMonsterDamage(monsterAttack, bonusRoll) {
+        if (bonusRoll === undefined) bonusRoll = Math.random();
+        return monsterAttack + (bonusRoll < 0.3 ? 1 : 0);
+    }
+
     // ── Hero melee attack ─────────────────────────────────────────────────────
 
     _heroAttack(monster) {
         const scene = this.scene;
         const cb = scene.hero.getCrystalBonuses();
-        let dmg  = scene.hero.attack + cb.attack + Math.floor(Math.random() * 3);
-        const totalCrit = scene.hero.critChance + cb.critChance;
-        const crit = totalCrit > 0 && Math.random() < totalCrit;
-        if (crit) dmg *= 2;
+        const { damage: dmg, isCrit: crit } = CombatManager.calculateHeroDamage(
+            scene.hero.attack, cb, scene.hero.critChance
+        );
 
         const lx = scene.hero.graphics.x + Math.sign(monster.gridX - scene.hero.gridX) * 9;
         const ly = scene.hero.graphics.y + Math.sign(monster.gridY - scene.hero.gridY) * 9;
@@ -236,7 +267,7 @@ class CombatManager {
             }
         }
 
-        const dmg = monster.attack + (Math.random() < 0.3 ? 1 : 0);
+        const dmg = CombatManager.calculateMonsterDamage(monster.attack);
         const died = scene.hero.takeDamage(dmg);
 
         Audio.playHurt();
