@@ -136,6 +136,11 @@ class GameScene extends Phaser.Scene {
         // ── Skill event listener ──────────────────────────────────────────────
         this.game.events.on('skillPicked', this._onSkillPicked, this);
 
+        // ── EventBus listeners (decoupled scene communication) ───────────────
+        EventBus.off(); // clear previous world listeners
+        EventBus.on('floatingText', (d) => this._floatingText(d.gx, d.gy, d.msg, d.color, d.big));
+        EventBus.on('showMessage', (d) => this._showMessage(d.text, d.color));
+
         // ── HUD overlay ───────────────────────────────────────────────────────
         this.scene.launch('UIScene', { gameScene: this });
 

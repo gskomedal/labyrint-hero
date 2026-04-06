@@ -355,71 +355,44 @@ class SmelteryScene extends Phaser.Scene {
     }
 
     _doSmelt(slotIndex, mineralDef) {
-        const hero = this.heroRef;
-        const result = this.smelter.smelt(mineralDef, hero);
-
-        // Consume fuel
-        this.smelter.consumeFuel(hero, result.energyCost);
-
-        // Unlock metallurgist path on first smelt
-        if (!hero.metallurgistUnlocked) {
-            hero.metallurgistUnlocked = true;
-            if (this.gs) {
-                this.gs._floatingText(hero.gridX, hero.gridY - 1, 'Metallurg-stien er ulåst!', '#ff7722');
-            }
-        }
-
-        // Remove one mineral from slot
-        const entry = hero.inventory.backpack[slotIndex];
-        if (entry) {
-            entry.count--;
-            if (entry.count <= 0) hero.inventory.backpack[slotIndex] = null;
-        }
-
-        // Show result
-        const elemStr = result.elements.map(e => `${e.symbol}×${e.amount}`).join(', ');
-        if (this.gs) {
-            this.gs._floatingText(hero.gridX, hero.gridY, `Smeltet: ${elemStr}`, '#ff7722');
-        }
-
-        // Check completions
-        hero.elementTracker.checkCompletions();
-
-        Audio.playPickup();
-        this._refresh();
+        this._doSmeltFrom('backpack', slotIndex, mineralDef);
     }
 
     _doSmeltFromStash(stashIndex, mineralDef) {
+        this._doSmeltFrom('stash', stashIndex, mineralDef);
+    }
+
+    /** Shared smelt logic for both backpack and stash sources. */
+    _doSmeltFrom(source, index, mineralDef) {
         const hero = this.heroRef;
         const result = this.smelter.smelt(mineralDef, hero);
 
-        // Consume fuel
         this.smelter.consumeFuel(hero, result.energyCost);
 
-        // Unlock metallurgist path on first smelt
         if (!hero.metallurgistUnlocked) {
             hero.metallurgistUnlocked = true;
-            if (this.gs) {
-                this.gs._floatingText(hero.gridX, hero.gridY - 1, 'Metallurg-stien er ulåst!', '#ff7722');
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY - 1, msg: 'Metallurg-stien er ulåst!', color: '#ff7722' });
+        }
+
+        // Remove one mineral from source
+        if (source === 'stash') {
+            const stashEntry = hero.campStash[index];
+            if (stashEntry) {
+                stashEntry.count--;
+                if (stashEntry.count <= 0) hero.campStash.splice(index, 1);
+            }
+        } else {
+            const entry = hero.inventory.backpack[index];
+            if (entry) {
+                entry.count--;
+                if (entry.count <= 0) hero.inventory.backpack[index] = null;
             }
         }
 
-        // Remove one mineral from stash
-        const stashEntry = hero.campStash[stashIndex];
-        if (stashEntry) {
-            stashEntry.count--;
-            if (stashEntry.count <= 0) hero.campStash.splice(stashIndex, 1);
-        }
-
-        // Show result
         const elemStr = result.elements.map(e => `${e.symbol}×${e.amount}`).join(', ');
-        if (this.gs) {
-            this.gs._floatingText(hero.gridX, hero.gridY, `Smeltet: ${elemStr}`, '#ff7722');
-        }
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smeltet: ${elemStr}`, color: '#ff7722' });
 
-        // Check completions
         hero.elementTracker.checkCompletions();
-
         Audio.playPickup();
         this._refresh();
     }
@@ -509,9 +482,7 @@ class SmelteryScene extends Phaser.Scene {
         if (!hero.alloyInventory) hero.alloyInventory = {};
         hero.alloyInventory[alloyId] = (hero.alloyInventory[alloyId] || 0) + 1;
 
-        if (this.gs) {
-            this.gs._floatingText(hero.gridX, hero.gridY, `Laget: ${result.alloy.name}!`, '#ff7722');
-        }
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.alloy.name}!`, color: '#ff7722' });
 
         Audio.playPickup();
         this._refresh();
@@ -596,9 +567,7 @@ class SmelteryScene extends Phaser.Scene {
             this.gs.itemSpawner.spawnItemAt(hero.gridX, hero.gridY, result.item);
         }
 
-        if (this.gs) {
-            this.gs._floatingText(hero.gridX, hero.gridY, `Smidd: ${result.item.name}!`, '#ffaa44');
-        }
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smidd: ${result.item.name}!`, color: '#ffaa44' });
 
         Audio.playPickup();
         this._refresh();

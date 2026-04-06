@@ -198,13 +198,11 @@ class ChemLabScene extends Phaser.Scene {
         }
 
         // Unlock chemist path
-        if (!hero.chemistUnlocked && this.gs) {
-            this.gs._floatingText(hero.gridX, hero.gridY - 1, 'Kjemiker-stien er ulåst!', '#33dd88');
+        if (!hero.chemistUnlocked) {
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY - 1, msg: 'Kjemiker-stien er ulåst!', color: '#33dd88' });
         }
 
-        if (this.gs) {
-            this.gs._floatingText(hero.gridX, hero.gridY, `Laget: ${result.item.name}!`, '#33dd88');
-        }
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.item.name}!`, color: '#33dd88' });
 
         Audio.playPickup();
         this._refresh();
