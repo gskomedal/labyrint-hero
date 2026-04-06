@@ -11,7 +11,6 @@ class InventoryScene extends Phaser.Scene {
         const gs  = this.scene.get('GameScene');
         this.hero = gs.hero;
         this.inv  = gs.hero.inventory;
-        this.gs   = gs;
         this.pet  = gs.pet;
 
         this._dyn = [];  // dynamic objects – destroyed on _refresh()
@@ -195,7 +194,7 @@ class InventoryScene extends Phaser.Scene {
             bg.on('pointerdown', (pointer) => {
                 if (pointer.rightButtonDown()) {
                     const dropped = this.inv.dropEquipped(slot, this.hero);
-                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     this._refresh();
                     return;
                 }
@@ -203,7 +202,7 @@ class InventoryScene extends Phaser.Scene {
                 bg._lpTimer = this.time.delayedCall(500, () => {
                     bg._lpTimer = null;
                     const dropped = this.inv.dropEquipped(slot, this.hero);
-                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     this._refresh();
                 });
             });
@@ -258,14 +257,14 @@ class InventoryScene extends Phaser.Scene {
             bg.on('pointerdown', (pointer) => {
                 if (pointer.rightButtonDown()) {
                     const dropped = this.inv.dropQuickUse();
-                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     this._refresh();
                     return;
                 }
                 bg._lpTimer = this.time.delayedCall(500, () => {
                     bg._lpTimer = null;
                     const dropped = this.inv.dropQuickUse();
-                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     this._refresh();
                 });
             });
@@ -346,7 +345,7 @@ class InventoryScene extends Phaser.Scene {
                         this.inv.dropSlot(index);
                     } else {
                         const dropped = this.inv.dropSlot(index);
-                        if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                        if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     }
                     this._refresh();
                     return;
@@ -359,7 +358,7 @@ class InventoryScene extends Phaser.Scene {
                         this.inv.dropSlot(index);
                     } else {
                         const dropped = this.inv.dropSlot(index);
-                        if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                        if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     }
                     this._refresh();
                 });
@@ -368,7 +367,7 @@ class InventoryScene extends Phaser.Scene {
                 if (bg._lpTimer) {
                     bg._lpTimer.remove();
                     bg._lpTimer = null;
-                    this.inv.useSlot(index, this.hero, this.gs);
+                    this.inv.useSlot(index, this.hero);
                     this._refresh();
                 }
             });
@@ -454,14 +453,14 @@ class InventoryScene extends Phaser.Scene {
                 if (pointer.rightButtonDown()) {
                     // Drop from pet backpack to ground
                     const dropped = pet.dropSlot(index);
-                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     this._refresh();
                     return;
                 }
                 bg._lpTimer = this.time.delayedCall(500, () => {
                     bg._lpTimer = null;
                     const dropped = pet.dropSlot(index);
-                    if (dropped) this.gs.itemSpawner.spawnItemAt(this.hero.gridX, this.hero.gridY, dropped);
+                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                     this._refresh();
                 });
             });
