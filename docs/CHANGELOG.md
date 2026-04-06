@@ -6,7 +6,9 @@
 
 ### Tekniske endringer
 - **Kodestruktur refaktorert:** Grafikk-kode ekstrahert fra ItemSpawner.js (→ ItemGraphics.js) og Monster.js (→ MonsterGraphics.js), reduserer filstørrelser med ~500 linjer. Ny UIHelper.js samler felles UI-mønster (dynamisk opprydding, tab-switching, farge-konvertering)
-- **Testinfrastruktur:** Ny browser-basert testrunner (`tests/test-runner.html`) med minimalt rammeverk. Initiale tester for Inventory (serialisering, stacking, slot-operasjoner), MazeGenerator (dimensjoner, nåbarhet, exit-plassering), SmeltingSystem (brensel, smelting, element-sporing) og UIHelper
+- **EventBus:** Ny lettevekts pub/sub-system (`EventBus.js`) for løs kobling mellom scener. SmelteryScene og ChemLabScene bruker nå EventBus for flytende tekst og item-spawning i stedet for direkte GameScene-referanser. `gameScene`-parameteren er fullstendig fjernet fra begge scener
+- **SmelteryScene deduplisert:** `_doSmelt` og `_doSmeltFromStash` slått sammen til felles `_doSmeltFrom()` – fjernet ~30 linjer duplikatkode
+- **Testinfrastruktur:** Ny browser-basert testrunner (`tests/test-runner.html`) med 8 test-suiter: Inventory, MazeGenerator, SmeltingSystem, UIHelper, Hero, EventBus, ChemistrySystem og Monster (stats, skade, fase-overganger)
 - **Kodeevaluering:** Identifisert hovedproblemer (god objects, kodeduplisering, tett scene-kobling) og laget plan for videre forbedringer
 
 ---

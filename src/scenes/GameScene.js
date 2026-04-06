@@ -136,6 +136,12 @@ class GameScene extends Phaser.Scene {
         // ── Skill event listener ──────────────────────────────────────────────
         this.game.events.on('skillPicked', this._onSkillPicked, this);
 
+        // ── EventBus listeners (decoupled scene communication) ───────────────
+        EventBus.off(); // clear previous world listeners
+        EventBus.on('floatingText', (d) => this._floatingText(d.gx, d.gy, d.msg, d.color, d.big));
+        EventBus.on('showMessage', (d) => this._showMessage(d.text, d.color));
+        EventBus.on('spawnItem', (d) => this.itemSpawner.spawnItemAt(d.gx, d.gy, d.item));
+
         // ── HUD overlay ───────────────────────────────────────────────────────
         this.scene.launch('UIScene', { gameScene: this });
 
@@ -175,14 +181,14 @@ class GameScene extends Phaser.Scene {
             const touchSmelt = this.game.registry.get('touch_smeltery');
             if (touchSmelt) this.game.registry.set('touch_smeltery', false);
             if ((Phaser.Input.Keyboard.JustDown(this.smelteryKey) || touchSmelt) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
-                this.scene.launch('SmelteryScene', { heroRef: this.hero, gameScene: this });
+                this.scene.launch('SmelteryScene', { heroRef: this.hero });
             }
 
             const touchChem = this.game.registry.get('touch_chemlab');
             if (touchChem) this.game.registry.set('touch_chemlab', false);
             if ((Phaser.Input.Keyboard.JustDown(this.chemLabKey) || touchChem) && !this.scene.isActive('ChemLabScene') && this._isInChemLab()) {
                 if (this.hero.chemLabUnlocked) {
-                    this.scene.launch('ChemLabScene', { heroRef: this.hero, gameScene: this });
+                    this.scene.launch('ChemLabScene', { heroRef: this.hero });
                 } else {
                     this._showMessage('Beseir en soneboss for å låse opp laboratoriet!', '#33dd88');
                 }

@@ -34,6 +34,8 @@
 <script src="../src/systems/SmeltingSystem.js"></script>
 <script src="../src/systems/ChemistrySystem.js"></script>
 <script src="../src/systems/Inventory.js"></script>
+<script src="../src/systems/ChemistrySystem.js"></script>
+<script src="../src/utils/EventBus.js"></script>
 
 <!-- Minimal stubs for dependencies not needed in tests -->
 <script>
@@ -45,7 +47,20 @@
     if (typeof makeRarityItem === 'undefined') {
         window.makeRarityItem = (def, rarity) => ({ ...def, rarity });
     }
+    // Stub drawCharacterSprite for Hero tests
+    if (typeof drawCharacterSprite === 'undefined') {
+        window.drawCharacterSprite = () => {};
+    }
+    // Stub defaultAppearance for Hero tests
+    if (typeof defaultAppearance === 'undefined') {
+        window.defaultAppearance = (race) => ({ skinColor: 0, hairColor: 0, hairStyle: 0 });
+    }
 </script>
+
+<!-- Entity source (after stubs) -->
+<script src="../src/entities/Hero.js"></script>
+<script src="../src/graphics/MonsterGraphics.js"></script>
+<script src="../src/entities/Monster.js"></script>
 
 <!-- Test framework -->
 <script src="framework.js"></script>
@@ -55,6 +70,10 @@
 <script src="test-maze.js"></script>
 <script src="test-smelting.js"></script>
 <script src="test-uihelper.js"></script>
+<script src="test-hero.js"></script>
+<script src="test-eventbus.js"></script>
+<script src="test-chemistry.js"></script>
+<script src="test-monster.js"></script>
 
 <!-- Run -->
 <script>
