@@ -357,7 +357,7 @@ class Hero {
         this.burnTurns    = stats.burnTurns    || 0;
         this.slowTurns    = stats.slowTurns    || 0;
         this.stunTurns    = stats.stunTurns    || 0;
-        this.skills       = stats.skills       ? [...stats.skills] : [];
+        this.skills       = stats.skills       ? migrateSkills([...stats.skills]) : [];
         this.tempBuffs    = (stats.tempBuffs || []).map(b => ({ ...b }));
         // Elements mod
         this.elementTracker       = ElementTracker.deserialize(stats.elementTracker || null);

@@ -1,184 +1,115 @@
 // ─── Labyrint Hero – Skill Tree ───────────────────────────────────────────────
-// Four specialization paths, each with 3 tiers.
-// Tier 1 is always unlocked. Tier 2 requires ≥1 skill from that path's T1.
-// Tier 3 requires ≥1 skill from that path's T2.
-// Each skill can generally be stacked 2× (maxStack), T3 skills only 1×.
+// Consolidated specialization paths, each with 3 tiers.
+// Tier 1 is always unlocked. Tier 2 requires T1 maxed from same path.
+// Tier 3 requires T2 maxed from same path.
+// Each skill can generally be stacked 2–3× (maxStack), T3 skills only 1×.
+
+// ── Legacy skill migration ───────────────────────────────────────────────────
+// Maps old skill IDs from before consolidation to their new equivalents.
+const LEGACY_SKILL_MAP = {
+    'thick_skin':      'power_strike',      // Vokter T1 → Kriger T1
+    'bulwark':         'battle_hardened',    // Vokter T2 → Kriger T2
+    'iron_health':     'giant_strength',     // Vokter T3 → Kriger T3
+    'xp_boost':        'keen_eye',           // Skurk T1 → Villmarksjeger T1
+    'dodge':           'vital_strike',       // Skurk T2 → Villmarksjeger T2
+    'regen':           'precision',          // Skurk T3 → Villmarksjeger T3
+    'beast_ferocity':  'keen_eye',           // Dyrevokter T1 → Villmarksjeger T1
+    'beast_vitality':  'vital_strike',       // Dyrevokter T2 → Villmarksjeger T2
+    'beast_bond':      'precision',          // Dyrevokter T3 → Villmarksjeger T3
+};
+
+/** Migrate a hero's skill list from legacy IDs to current ones. */
+function migrateSkills(skills) {
+    if (!skills) return skills;
+    return skills.map(id => LEGACY_SKILL_MAP[id] || id);
+}
 
 const SKILL_TREE_PATHS = [
-    // ── KRIGAR (Warrior) ───────────────────────────────────────────────────────
+    // ── KRIGER (Warrior + Guardian merged) ────────────────────────────────────
     {
-        id:    'krigar',
-        name:  'Krigar',
-        desc:  'Kamp og råstyrke',
+        id:    'kriger',
+        name:  'Kriger',
+        desc:  'Kamp, forsvar og utholdenhet',
         color: 0xff4422,
         icon:  'K',
         tiers: [
             {
                 id:       'power_strike',
                 name:     'Kraftig slag',
-                desc:     '+2 Angrep',
+                desc:     '+2 Angrep\n+1 Forsvar',
                 category: 'ATK',
                 maxStack: 3,
-                apply(hero) { hero.attack += 2; }
+                apply(hero) { hero.attack += 2; hero.defense += 1; }
             },
             {
                 id:       'battle_hardened',
                 name:     'Kampherdet',
-                desc:     '+2 Angrep\n+1 Forsvar',
+                desc:     '+2 Angrep\n+1 Forsvar\n+1 Hjerte\n+2 ryggsekk',
                 category: 'ATK',
                 maxStack: 2,
-                apply(hero) { hero.attack += 2; hero.defense += 1; }
+                apply(hero) { hero.attack += 2; hero.defense += 1; hero.maxHearts++; hero.inventory.expandBackpack(2); }
             },
             {
                 id:       'giant_strength',
                 name:     'Jotunstyrke',
-                desc:     '+5 Angrep\n(krever T2)',
+                desc:     '+5 Angrep\n+2 maks hjerter\n(krever T2)',
                 category: 'ATK',
                 maxStack: 1,
-                apply(hero) { hero.attack += 5; }
+                apply(hero) { hero.attack += 5; hero.maxHearts += 2; }
             },
         ]
     },
 
-    // ── VOKTER (Guardian) ──────────────────────────────────────────────────────
+    // ── VILLMARKSJEGER (Hunter + Rogue + Beast Keeper merged) ─────────────────
     {
-        id:    'vokter',
-        name:  'Vokter',
-        desc:  'Forsvar og utholdenhet',
-        color: 0x2266cc,
-        icon:  'V',
-        tiers: [
-            {
-                id:       'thick_skin',
-                name:     'Tykk hud',
-                desc:     '+1 Forsvar',
-                category: 'DEF',
-                maxStack: 3,
-                apply(hero) { hero.defense += 1; }
-            },
-            {
-                id:       'bulwark',
-                name:     'Festning',
-                desc:     '+1 Forsvar\n+1 Hjerte\n+2 ryggsekk',
-                category: 'DEF',
-                maxStack: 2,
-                apply(hero) { hero.defense += 1; hero.maxHearts++; hero.inventory.expandBackpack(2); }
-            },
-            {
-                id:       'iron_health',
-                name:     'Jernhelse',
-                desc:     '+2 maks hjerter\n(krever T2)',
-                category: 'HP',
-                maxStack: 1,
-                apply(hero) { hero.maxHearts += 2; }
-            },
-        ]
-    },
-
-    // ── JEGER (Hunter) ─────────────────────────────────────────────────────────
-    {
-        id:    'jeger',
-        name:  'Jeger',
-        desc:  'Syn, presisjon og kritiske treff',
+        id:    'villmarksjeger',
+        name:  'Villmarksjeger',
+        desc:  'Syn, presisjon, unnvikelse og dyr',
         color: 0x44dd88,
         icon:  'J',
         tiers: [
             {
                 id:       'keen_eye',
                 name:     'Skarpsyn',
-                desc:     '+2 synsradius',
+                desc:     '+2 synsradius\n+20% XP\n+2 kjæledyr-ATK',
                 category: 'VIS',
                 maxStack: 2,
-                apply(hero) { hero.visionRadius += 2; }
+                apply(hero) {
+                    hero.visionRadius += 2;
+                    hero.xpMultiplier += 0.20;
+                    hero.petBonusAtk = (hero.petBonusAtk || 0) + 2;
+                }
             },
             {
                 id:       'vital_strike',
                 name:     'Vitalt anslag',
-                desc:     '+25% kritisk-\nsjanse (×2 skade)',
+                desc:     '+20% kritisk\n+15% unnvikelse\n+3 kjæl.-HP, +1 kjæl.-DEF\nPotion healer kjæledyr',
                 category: 'ATK',
                 maxStack: 2,
-                apply(hero) { hero.critChance = Math.min(0.75, hero.critChance + 0.25); }
+                apply(hero) {
+                    hero.critChance = Math.min(0.75, hero.critChance + 0.20);
+                    hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.15);
+                    hero.petBonusHp = (hero.petBonusHp || 0) + 3;
+                    hero.petBonusDef = (hero.petBonusDef || 0) + 1;
+                    hero.petHealShare = true;
+                }
             },
             {
                 id:       'precision',
                 name:     'Presisjon',
-                desc:     '+3 Angrep\n(krever T2)',
+                desc:     '+3 Angrep\n+3 kjæl.-ATK\n+3 kjæl.-HP\n+2 hjerter nå',
                 category: 'ATK',
                 maxStack: 1,
-                apply(hero) { hero.attack += 3; }
+                apply(hero) {
+                    hero.attack += 3;
+                    hero.petBonusAtk = (hero.petBonusAtk || 0) + 3;
+                    hero.petBonusHp = (hero.petBonusHp || 0) + 3;
+                    hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts);
+                }
             },
         ]
     },
 
-    // ── SKURK (Rogue) ──────────────────────────────────────────────────────────
-    {
-        id:    'skurk',
-        name:  'Skurk',
-        desc:  'Unnvikelse og erfaring',
-        color: 0xaa44ff,
-        icon:  'S',
-        tiers: [
-            {
-                id:       'xp_boost',
-                name:     'Kunnskap',
-                desc:     '+30% XP fra alt',
-                category: 'UTIL',
-                maxStack: 2,
-                apply(hero) { hero.xpMultiplier += 0.30; }
-            },
-            {
-                id:       'dodge',
-                name:     'Unnvikelse',
-                desc:     '+20% sjanse\nfor å unngå',
-                category: 'UTIL',
-                maxStack: 2,
-                apply(hero) { hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.20); }
-            },
-            {
-                id:       'regen',
-                name:     'Blomstersaft',
-                desc:     'Gjenoppretter\n2 hjerter nå',
-                category: 'HP',
-                maxStack: 99,
-                apply(hero) { hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts); }
-            },
-        ]
-    },
-
-    // ── DYREVOKTER (Beast Keeper) ─────────────────────────────────────────────
-    {
-        id:    'dyrevokter',
-        name:  'Dyrevokter',
-        desc:  'Styrk ditt kjæledyr',
-        color: 0xffaa44,
-        icon:  'D',
-        tiers: [
-            {
-                id:       'beast_ferocity',
-                name:     'Villskap',
-                desc:     '+2 kjæledyr-\nangrep',
-                category: 'PET',
-                maxStack: 3,
-                apply(hero) { hero.petBonusAtk = (hero.petBonusAtk || 0) + 2; }
-            },
-            {
-                id:       'beast_vitality',
-                name:     'Dyrisk livskraft',
-                desc:     '+3 kjæledyr-HP\n+1 kjæledyr-forsvar\nPotion healer kjæledyr',
-                category: 'PET',
-                maxStack: 2,
-                apply(hero) { hero.petBonusHp = (hero.petBonusHp || 0) + 3; hero.petBonusDef = (hero.petBonusDef || 0) + 1; hero.petHealShare = true; }
-            },
-            {
-                id:       'beast_bond',
-                name:     'Sjelsbånd',
-                desc:     '+3 kjæledyr-angrep\n+3 kjæledyr-HP\n(krever T2)',
-                category: 'PET',
-                maxStack: 1,
-                apply(hero) { hero.petBonusAtk = (hero.petBonusAtk || 0) + 3; hero.petBonusHp = (hero.petBonusHp || 0) + 3; }
-            },
-        ]
-    },
     // ── GEOLOG (Geologist – Elements mod) ───────────────────────────────────────
     {
         id:    'geolog',
@@ -305,8 +236,8 @@ function _countSkill(hero, id) {
 /**
  * Check whether a skill slot in the tree is available to pick.
  *   tier 0 (T1) – always available (if not maxed)
- *   tier 1 (T2) – need ≥1 T1 skill from same path
- *   tier 2 (T3) – need ≥1 T2 skill from same path
+ *   tier 1 (T2) – need T1 maxed from same path
+ *   tier 2 (T3) – need T2 maxed from same path
  */
 function isSkillUnlocked(hero, pathIndex, tierIndex) {
     const path  = SKILL_TREE_PATHS[pathIndex];
@@ -350,7 +281,7 @@ const SKILL_SYNERGIES = [
         id:    'counter_attack',
         name:  'Motangrep',
         desc:  '20% sjanse for motangrep ved treff',
-        paths: ['krigar', 'jeger'],
+        paths: ['kriger', 'villmarksjeger'],
         color: 0xff8844,
         apply(hero) { hero.counterChance = Math.min(0.4, (hero.counterChance || 0) + 0.20); },
         unapply(hero) { hero.counterChance = Math.max(0, (hero.counterChance || 0) - 0.20); },
@@ -358,53 +289,17 @@ const SKILL_SYNERGIES = [
     {
         id:    'thorns',
         name:  'Tornehud',
-        desc:  'Angripere tar 1 skade',
-        paths: ['vokter', 'skurk'],
+        desc:  'Angripere tar 1 skade, +1 synsfelt',
+        paths: ['kriger', 'villmarksjeger'],
         color: 0x44ddaa,
-        apply(hero) { hero.thornsDamage = (hero.thornsDamage || 0) + 1; },
-        unapply(hero) { hero.thornsDamage = Math.max(0, (hero.thornsDamage || 0) - 1); },
-    },
-    {
-        id:    'unbreakable',
-        name:  'Uovervinnelig',
-        desc:  '+2 Angrep, +1 Forsvar, +1 Hjerte',
-        paths: ['krigar', 'vokter'],
-        color: 0xff6644,
-        apply(hero) { hero.attack += 2; hero.defense += 1; hero.maxHearts += 1; },
-        unapply(hero) { hero.attack -= 2; hero.defense -= 1; hero.maxHearts -= 1; hero.hearts = Math.min(hero.hearts, hero.maxHearts); },
-    },
-    {
-        id:    'shadow_hunter',
-        name:  'Skyggejeger',
-        desc:  '+15% unnvikelse, +1 synsfelt',
-        paths: ['jeger', 'skurk'],
-        color: 0x9966ff,
-        apply(hero) { hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.15); hero.visionRadius += 1; },
-        unapply(hero) { hero.dodgeChance = Math.max(0, hero.dodgeChance - 0.15); hero.visionRadius -= 1; },
-    },
-    {
-        id:    'pack_leader',
-        name:  'Flokkleder',
-        desc:  '+2 Angrep, +2 kjæledyr-angrep',
-        paths: ['krigar', 'dyrevokter'],
-        color: 0xff7733,
-        apply(hero) { hero.attack += 2; hero.petBonusAtk = (hero.petBonusAtk || 0) + 2; },
-        unapply(hero) { hero.attack -= 2; hero.petBonusAtk = Math.max(0, (hero.petBonusAtk || 0) - 2); },
-    },
-    {
-        id:    'natures_ward',
-        name:  'Naturens vern',
-        desc:  '+2 kjæledyr-HP, +1 Forsvar',
-        paths: ['vokter', 'dyrevokter'],
-        color: 0x44aa88,
-        apply(hero) { hero.defense += 1; hero.petBonusHp = (hero.petBonusHp || 0) + 2; },
-        unapply(hero) { hero.defense -= 1; hero.petBonusHp = Math.max(0, (hero.petBonusHp || 0) - 2); },
+        apply(hero) { hero.thornsDamage = (hero.thornsDamage || 0) + 1; hero.visionRadius += 1; },
+        unapply(hero) { hero.thornsDamage = Math.max(0, (hero.thornsDamage || 0) - 1); hero.visionRadius -= 1; },
     },
     {
         id:    'earthen_might',
         name:  'Jordens kraft',
         desc:  '+1 Forsvar, +1 mineralsynsradius',
-        paths: ['geolog', 'vokter'],
+        paths: ['geolog', 'kriger'],
         color: 0x886644,
         apply(hero) { hero.defense += 1; hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1; },
         unapply(hero) { hero.defense -= 1; hero.mineralVisionRadius = Math.max(0, (hero.mineralVisionRadius || 0) - 1); },
@@ -413,7 +308,7 @@ const SKILL_SYNERGIES = [
         id:    'forge_master',
         name:  'Smiekunst',
         desc:  '+3 Angrep, +20% malmeffekt',
-        paths: ['metallurg', 'krigar'],
+        paths: ['metallurg', 'kriger'],
         color: 0xff6622,
         apply(hero) { hero.attack += 3; hero.oreEfficiencyChance = (hero.oreEfficiencyChance || 0) + 0.20; },
         unapply(hero) { hero.attack -= 3; hero.oreEfficiencyChance = Math.max(0, (hero.oreEfficiencyChance || 0) - 0.20); },
@@ -431,7 +326,7 @@ const SKILL_SYNERGIES = [
         id:    'toxic_blades',
         name:  'Giftklinger',
         desc:  '+2 ATK, 15% gift ved angrep',
-        paths: ['kjemiker', 'krigar'],
+        paths: ['kjemiker', 'kriger'],
         color: 0x44cc44,
         apply(hero) { hero.attack += 2; hero.toxicBladeChance = (hero.toxicBladeChance || 0) + 0.15; },
         unapply(hero) { hero.attack -= 2; hero.toxicBladeChance = Math.max(0, (hero.toxicBladeChance || 0) - 0.15); },
@@ -444,6 +339,24 @@ const SKILL_SYNERGIES = [
         color: 0x88aa44,
         apply(hero) { hero.potionPotencyBonus = (hero.potionPotencyBonus || 0) + 0.20; hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) * 0.85; },
         unapply(hero) { hero.potionPotencyBonus = Math.max(0, (hero.potionPotencyBonus || 0) - 0.20); hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) / 0.85; },
+    },
+    {
+        id:    'wild_geologist',
+        name:  'Naturkjenner',
+        desc:  '+1 mineral-syn, +2 kjæledyr-HP',
+        paths: ['geolog', 'villmarksjeger'],
+        color: 0x77aa55,
+        apply(hero) { hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1; hero.petBonusHp = (hero.petBonusHp || 0) + 2; },
+        unapply(hero) { hero.mineralVisionRadius = Math.max(0, (hero.mineralVisionRadius || 0) - 1); hero.petBonusHp = Math.max(0, (hero.petBonusHp || 0) - 2); },
+    },
+    {
+        id:    'chem_hunter',
+        name:  'Giftjeger',
+        desc:  '+20% kjemibombe, +10% crit',
+        paths: ['kjemiker', 'villmarksjeger'],
+        color: 0x66cc88,
+        apply(hero) { hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.20; hero.critChance = Math.min(0.75, hero.critChance + 0.10); },
+        unapply(hero) { hero.chemBombBonus = Math.max(0, (hero.chemBombBonus || 0) - 0.20); hero.critChance = Math.max(0, hero.critChance - 0.10); },
     },
 ];
 

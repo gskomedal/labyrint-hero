@@ -7,7 +7,8 @@ class SkillScene extends Phaser.Scene {
     constructor() { super({ key: 'SkillScene' }); }
 
     init(data) {
-        this.heroRef = data.heroRef || null;
+        this.heroRef  = data.heroRef || null;
+        this.viewOnly = data.viewOnly || false;
     }
 
     create() {
@@ -19,7 +20,7 @@ class SkillScene extends Phaser.Scene {
 
         // ── Panel ─────────────────────────────────────────────────────────────
         const panelW = Math.min(W - 10, 940);
-        const panelH = Math.min(H - 10, 380);
+        const panelH = Math.min(H - 10, 520);
         const px = cx - panelW / 2;
         const py = cy - panelH / 2;
 
@@ -30,10 +31,21 @@ class SkillScene extends Phaser.Scene {
         panel.strokeRoundedRect(px, py, panelW, panelH, 8);
 
         // Title
-        this.add.text(cx, py + 18, 'NIVÅ OPP  –  Velg én evne fra spesialiseringsgrenen', {
-            fontSize: '15px', color: '#f5e642', fontFamily: 'monospace',
-            fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 2
+        const titleText = this.viewOnly
+            ? 'FERDIGHETSTREET  –  Trykk T eller ESC for å lukke'
+            : 'NIVÅ OPP  –  Velg én evne fra spesialiseringsgrenen';
+        const titleColor = this.viewOnly ? '#88aacc' : '#f5e642';
+        const titleStroke = this.viewOnly ? '#334466' : '#7a6a00';
+        this.add.text(cx, py + 18, titleText, {
+            fontSize: '15px', color: titleColor, fontFamily: 'monospace',
+            fontStyle: 'bold', stroke: titleStroke, strokeThickness: 2
         }).setOrigin(0.5);
+
+        // Close on T or ESC in view-only mode
+        if (this.viewOnly) {
+            this.input.keyboard.on('keydown-T', () => this.scene.stop());
+            this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
+        }
 
         this.add.rectangle(cx, py + 38, panelW - 30, 1, 0x2a2060);
 
@@ -50,7 +62,10 @@ class SkillScene extends Phaser.Scene {
 
         // ── Footer ────────────────────────────────────────────────────────────
         this.add.rectangle(cx, py + panelH - 24, panelW - 30, 1, 0x1a1840);
-        this.add.text(cx, py + panelH - 14, 'Grønne rammer = tilgjengelig · Grå = låst · Klikk for å velge', {
+        const footerText = this.viewOnly
+            ? 'Grønne rammer = tilgjengelig ved neste nivå opp · Grå = låst'
+            : 'Grønne rammer = tilgjengelig · Grå = låst · Klikk for å velge';
+        this.add.text(cx, py + panelH - 14, footerText, {
             fontSize: '10px', color: '#33335a', fontFamily: 'monospace'
         }).setOrigin(0.5);
     }
@@ -97,8 +112,8 @@ class SkillScene extends Phaser.Scene {
             return;
         }
 
-        const tierH    = 72;
-        const cardW    = Math.min(148, this._colW - 12), cardH = 62;
+        const tierH    = 100;
+        const cardW    = Math.min(160, this._colW - 12), cardH = 84;
         const tierGapY = areaTop + 28;
 
         path.tiers.forEach((skill, tierIndex) => {
@@ -171,8 +186,8 @@ class SkillScene extends Phaser.Scene {
         }
 
         // Skill name
-        this.add.text(cx, y + 16, skill.name, {
-            fontSize: '11px',
+        this.add.text(cx, y + 18, skill.name, {
+            fontSize: '12px',
             color: maxed ? '#445566' : (locked ? '#333355' : '#e8e8ff'),
             fontFamily: 'monospace', fontStyle: 'bold',
             align: 'center', wordWrap: { width: w - 12 }
@@ -181,8 +196,8 @@ class SkillScene extends Phaser.Scene {
         // Category badge + description combined
         const catHex = locked ? '#222233' : '#' + colColor.toString(16).padStart(6, '0');
         const descLine = skill.desc.replace(/\n/g, ', ');
-        this.add.text(cx, y + 30, `[${skill.category}] ${descLine}`, {
-            fontSize: '8px',
+        this.add.text(cx, y + 36, `[${skill.category}] ${descLine}`, {
+            fontSize: '10px',
             color: locked ? '#1e1e30' : (maxed ? '#334455' : '#8899bb'),
             fontFamily: 'monospace', align: 'center',
             wordWrap: { width: w - 10 }
@@ -196,7 +211,7 @@ class SkillScene extends Phaser.Scene {
         }
 
         // Clickable hit area
-        if (available) {
+        if (available && !this.viewOnly) {
             const hitZone = this.add.rectangle(cx, y + h / 2, w, h)
                 .setInteractive({ useHandCursor: true });
             hitZone.on('pointerover', () => {

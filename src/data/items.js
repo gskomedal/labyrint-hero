@@ -171,18 +171,20 @@ const ITEM_DEFS = {
     antidote: {
         id: 'antidote', name: 'Motgift', type: 'consumable',
         color: 0x88ee44, desc: 'Kurerer alle statuseffekter og gjenoppretter 1 hjerte', tier: 1,
-        use(hero) {
+        use(hero, scene) {
             hero.clearAllEffects();
             hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            if (hero.petHealShare && scene && scene.pet && scene.pet.alive) scene.pet.heal(1);
             return true;
         }
     },
     frost_salve: {
         id: 'frost_salve', name: 'Frostsalve', type: 'consumable',
         color: 0x88ddff, desc: 'Kurerer frostbitt og gir motstand mot kulde', tier: 2,
-        use(hero) {
+        use(hero, scene) {
             hero.slowTurns = 0;
             hero.hearts = Math.min(hero.hearts + 1, hero.maxHearts);
+            if (hero.petHealShare && scene && scene.pet && scene.pet.alive) scene.pet.heal(1);
             hero._drawSprite();
             return true;
         }
@@ -190,9 +192,10 @@ const ITEM_DEFS = {
     burn_salve: {
         id: 'burn_salve', name: 'Brannsalve', type: 'consumable',
         color: 0xff8844, desc: 'Kurerer brannsår og gjenoppretter 2 hjerter', tier: 2,
-        use(hero) {
+        use(hero, scene) {
             hero.burnTurns = 0;
             hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts);
+            if (hero.petHealShare && scene && scene.pet && scene.pet.alive) scene.pet.heal(2);
             hero._drawSprite();
             return true;
         }

@@ -25,85 +25,93 @@ const Audio = (function () {
     // Notes encoded as semitone offsets from root (root = 110 Hz / A2)
     const ROOT = 110;
     const THEMES = [
-        // 0 – Forest: bright Dorian scale, light arpeggios
+        // 0 – Forest: Grieg's Morning Mood–inspired, ascending pentatonic melody
         {
             name:   'Skog',
-            bpm:    76,
-            bass:   [0, 0, 5, 0,  7, 0, 3, 0],
-            melody: [12, -1, 15, 12, 17, 15, 19, -1,  12, -1, 14, -1, 12, 10, 12, -1],
-            chord:  [[0,7,12], [0,7,12], [5,9,14], [7,12,17]],
-            bassWave: 'triangle', melWave: 'triangle',
-            melVol: 0.10, bassVol: 0.16, chordVol: 0.05,
+            bpm:    72,
+            bass:   [0, -1, 0, 5,  7, -1, 5, 0],
+            melody: [12, 14, 16, 19, 21, 19, 16, 14,  12, -1, 16, 19, 21, 24, 21, -1],
+            counter:[24, -1, -1, -1, 28, -1, -1, -1,  26, -1, -1, -1, 24, -1, -1, -1],
+            chord:  [[0,4,7], [5,9,12], [7,11,14], [0,4,7]],
+            bassWave: 'triangle', melWave: 'triangle', counterWave: 'sine',
+            melVol: 0.11, bassVol: 0.14, chordVol: 0.05, counterVol: 0.06,
         },
-        // 1 – Cave: dark Aeolian, slow pulse
+        // 1 – Cave: Mountain King–inspired, creeping Dorian with building tension
         {
             name:   'Grotte',
-            bpm:    58,
-            bass:   [0, 0, -2, 0,  3, 0, -2, 0],
-            melody: [12, -1, -1, 11, 12, -1, -1, 9,  7, -1, -1, 8, 7, -1, 5, -1],
-            chord:  [[0,3,7], [0,3,7], [5,8,12], [2,5,9]],
-            bassWave: 'sawtooth', melWave: 'sine',
-            melVol: 0.08, bassVol: 0.18, chordVol: 0.04,
+            bpm:    62,
+            bass:   [0, 0, 3, 0,  5, 3, 0, -2],
+            melody: [12, -1, 14, 15, 17, -1, 15, 14,  12, -1, 10, 9, 10, 12, 14, -1],
+            counter:[-1, 19, -1, -1, -1, 17, -1, -1,  -1, 15, -1, -1, -1, 14, -1, -1],
+            chord:  [[0,3,7], [3,7,10], [5,8,12], [0,3,7]],
+            bassWave: 'sawtooth', melWave: 'triangle', counterWave: 'sine',
+            melVol: 0.09, bassVol: 0.16, chordVol: 0.04, counterVol: 0.05,
         },
-        // 2 – Ice: sparse high register, crystalline
+        // 2 – Ice: Solveig's Song–inspired, sparse and melancholic Aeolian
         {
             name:   'Is',
-            bpm:    52,
-            bass:   [0, -1, 0, -1,  5, -1, 0, -1],
-            melody: [24, -1, -1, -1, 27, -1, 24, -1,  29, -1, -1, -1, 24, -1, -1, -1],
-            chord:  [[0,7,12], [-1,-1,-1], [5,9,14], [-1,-1,-1]],
-            bassWave: 'sine', melWave: 'triangle',
-            melVol: 0.09, bassVol: 0.12, chordVol: 0.04,
+            bpm:    54,
+            bass:   [0, -1, 7, -1,  5, -1, 3, -1],
+            melody: [24, -1, 22, 19, 17, -1, 19, -1,  22, 24, 26, -1, 24, -1, 22, -1],
+            counter:[-1, -1, -1, -1, 29, -1, -1, -1,  -1, -1, -1, -1, 31, -1, -1, -1],
+            chord:  [[0,3,7], [-1,-1,-1], [5,8,12], [3,7,10]],
+            bassWave: 'sine', melWave: 'triangle', counterWave: 'sine',
+            melVol: 0.10, bassVol: 0.11, chordVol: 0.04, counterVol: 0.05,
         },
-        // 3 – Volcanic: pounding Phrygian, intense rhythm
+        // 3 – Volcanic: Grieg's Phrygian storm, driving rhythm with chromatic tension
         {
             name:   'Vulkan',
-            bpm:    95,
-            bass:   [0, 0, -1, 0,  0, 0, -1, 2],
-            melody: [12, 11, 12, -1, 11, 9, -1, 7,  8, 7, -1, 5, 7, -1, 5, 3],
-            chord:  [[0,3,7], [0,3,7], [-1,-1,-1], [5,8,12]],
-            bassWave: 'sawtooth', melWave: 'square',
-            melVol: 0.07, bassVol: 0.20, chordVol: 0.05,
+            bpm:    92,
+            bass:   [0, 0, -1, 0,  5, 3, 0, -1],
+            melody: [12, 11, 12, 15, 17, 15, 12, 11,  8, -1, 11, 12, 15, 17, 15, -1],
+            counter:[-1, -1, 24, -1, -1, -1, 23, -1,  -1, -1, 20, -1, -1, -1, 24, -1],
+            chord:  [[0,3,7], [0,1,5], [-1,-1,-1], [5,8,12]],
+            bassWave: 'sawtooth', melWave: 'square', counterWave: 'triangle',
+            melVol: 0.07, bassVol: 0.19, chordVol: 0.05, counterVol: 0.04,
         },
-        // 4 – Temple: pentatonic, mysterious, slow
+        // 4 – Temple: Holberg Suite–inspired, stately Baroque pentatonic
         {
             name:   'Tempel',
-            bpm:    60,
-            bass:   [0, -1, 5, -1,  7, -1, 0, -1],
-            melody: [-1, 12, -1, 17, -1, 15, -1, 12,  -1, 19, -1, 17, -1, 15, -1, -1],
-            chord:  [[0,7,12], [-1,-1,-1], [5,9,14], [7,12,17]],
-            bassWave: 'triangle', melWave: 'sine',
-            melVol: 0.09, bassVol: 0.14, chordVol: 0.045,
+            bpm:    63,
+            bass:   [0, -1, 7, 5,  3, -1, 5, 0],
+            melody: [19, 17, 15, 12, 15, 17, 19, -1,  21, 19, 17, 15, 17, 19, 21, -1],
+            counter:[12, -1, -1, 7,  -1, -1, 12, -1,  14, -1, -1, 10, -1, -1, 14, -1],
+            chord:  [[0,4,7], [7,11,14], [5,9,12], [0,4,7]],
+            bassWave: 'triangle', melWave: 'sine', counterWave: 'triangle',
+            melVol: 0.10, bassVol: 0.13, chordVol: 0.045, counterVol: 0.06,
         },
-        // 5 – Deep Magma: heavy low-end, relentless Locrian
+        // 5 – Deep Magma: Hall of the Mountain King–inspired, relentless and dark
         {
             name:   'Dyplag',
-            bpm:    80,
-            bass:   [0, 0, -1, 0,  -3, 0, -1, -5],
-            melody: [12, -1, 11, -1, 8, -1, 7, -1,  5, -1, 3, -1, 5, 7, -1, -1],
-            chord:  [[0,3,6], [0,3,6], [-1,-1,-1], [5,8,11]],
-            bassWave: 'sawtooth', melWave: 'square',
-            melVol: 0.06, bassVol: 0.22, chordVol: 0.04,
+            bpm:    78,
+            bass:   [0, 0, -1, 0,  -3, 0, -5, 0],
+            melody: [12, 14, 15, 17, 18, 17, 15, 14,  12, 10, 8, 7, 8, 10, 12, -1],
+            counter:[-1, -1, -1, -1, 24, -1, -1, -1,  -1, -1, -1, -1, 20, -1, -1, -1],
+            chord:  [[0,3,6], [0,3,7], [-1,-1,-1], [5,8,11]],
+            bassWave: 'sawtooth', melWave: 'square', counterWave: 'sawtooth',
+            melVol: 0.07, bassVol: 0.21, chordVol: 0.04, counterVol: 0.04,
         },
-        // 6 – Underworld: eerie whole-tone, ethereal pads
+        // 6 – Underworld: Grieg's late Romantic mode, whole-tone pads with mournful melody
         {
             name:   'Underverden',
-            bpm:    50,
-            bass:   [0, -1, -1, 2,  -1, -1, 4, -1],
-            melody: [24, -1, 26, -1, -1, 22, -1, -1,  20, -1, -1, 18, -1, -1, 16, -1],
-            chord:  [[0,4,8], [-1,-1,-1], [2,6,10], [-1,-1,-1]],
-            bassWave: 'sine', melWave: 'sine',
-            melVol: 0.08, bassVol: 0.16, chordVol: 0.06,
+            bpm:    48,
+            bass:   [0, -1, 2, -1,  4, -1, 6, -1],
+            melody: [24, 22, -1, 20, 18, -1, 16, 18,  20, -1, 22, 24, -1, 26, 24, -1],
+            counter:[-1, -1, 12, -1, -1, -1, 10, -1,  -1, -1, 14, -1, -1, -1, 12, -1],
+            chord:  [[0,4,8], [-1,-1,-1], [2,6,10], [4,8,12]],
+            bassWave: 'sine', melWave: 'sine', counterWave: 'triangle',
+            melVol: 0.09, bassVol: 0.14, chordVol: 0.055, counterVol: 0.05,
         },
-        // 7 – Earth's Core: triumphant Lydian, epic climax
+        // 7 – Earth's Core: Grieg's Triumphal March–inspired, Lydian fanfare
         {
             name:   'Kjerne',
-            bpm:    70,
-            bass:   [0, 0, 7, 0,  5, 0, 7, 9],
-            melody: [12, 14, 16, 18, 19, -1, 16, -1,  14, -1, 12, -1, 14, 16, 18, -1],
+            bpm:    72,
+            bass:   [0, 0, 7, 5,  4, 5, 7, 0],
+            melody: [12, -1, 16, 18, 19, 21, 23, 24,  23, 21, 19, 18, 16, -1, 19, -1],
+            counter:[24, -1, -1, -1, 31, -1, 28, -1,  26, -1, -1, -1, 28, -1, -1, -1],
             chord:  [[0,4,7], [0,4,7], [5,9,12], [7,11,14]],
-            bassWave: 'sawtooth', melWave: 'triangle',
-            melVol: 0.10, bassVol: 0.18, chordVol: 0.06,
+            bassWave: 'sawtooth', melWave: 'triangle', counterWave: 'triangle',
+            melVol: 0.11, bassVol: 0.17, chordVol: 0.06, counterVol: 0.06,
         },
     ];
 
@@ -187,6 +195,18 @@ const Audio = (function () {
         if (melSem >= 0) {
             const dest = reverbNode ? reverbNode : musicGain;
             _note(_freq(melSem), 0.22, dest, theme.melWave, theme.melVol);
+        }
+
+        // Counter-melody (runs at 1/16 speed, provides harmonic depth)
+        if (theme.counter) {
+            const ctrIdx = step % theme.counter.length;
+            const ctrSem = theme.counter[ctrIdx];
+            if (ctrSem >= 0) {
+                const dest = reverbNode ? reverbNode : musicGain;
+                const wave = theme.counterWave || 'sine';
+                const vol  = theme.counterVol  || 0.05;
+                _note(_freq(ctrSem), 0.30, dest, wave, vol);
+            }
         }
 
         // Chord stabs on beat 1 & 3 of each bar

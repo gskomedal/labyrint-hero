@@ -2,6 +2,26 @@
 
 ---
 
+## v0.28 – 2026-04-06
+
+### Nye funksjoner
+- **Ferdighetstreet konsolidert (#62):** Krigar + Vokter slått sammen til «Kriger» (kamp, forsvar og utholdenhet). Jeger + Skurk + Dyrevokter slått sammen til «Villmarksjeger» (syn, presisjon, unnvikelse og kjæledyr). Redusert fra 8 til 5 stier med tydeligere identitet. Bakoverkompatibel med gamle lagringsfiler via automatisk ferdighetsmigrasjon
+- **Ferdighetstre-hurtigtast (#61):** Trykk T for å åpne ferdighetstreet når som helst (kun visning). Panelet er nå større (520px høyde) med bedre lesbarhet. Lukkes med T eller ESC
+- **Smelting fra lager (#60):** Smelt-fanen viser nå mineraler fra både ryggsekk og leirplasslager. Brensel i lageret telles også med i tilgjengelig energi
+- **Kjæledyr-healing utvidet (#65):** Alle helende gjenstander (motgift, frostsalve, brannsalve, kjemiske eliksirer) healer nå også kjæledyret når Villmarksjeger T2 er aktiv – ikke bare livspotion
+- **Soneboss nytt utseende (#67):** Sonebossen har nå et unikt, skremmende design med horn, spektralvinger, multiple øyne, glødende runer og en helt annen silhuett enn vanlige bosser. Støtter nå også fase 2 raseri-overgang
+- **Grieg-inspirert musikk (#66):** Alle 8 musikktemaer omskrevet med rikere melodier inspirert av Edvard Grieg (Morgenstemning, I Dovregubbens hall, Solveigs sang, Holbergsuite). Ny kontramellodi-linje gir harmonisk dybde
+- **Økt oppløsning (#63):** Spillvindu økt fra 960×640 til 1280×800 for mer skjermplass. Responsiv nedskalering bevart via Phaser FIT-modus
+
+### Tekniske endringer
+- Ny `migrateSkills()` funksjon for bakoverkompatibel overgang fra gamle ferdighets-IDer til nye
+- Synergier oppdatert til nye sti-IDer med to nye synergier: «Naturkjenner» og «Giftjeger»
+- TouchControls bruker nå dynamiske dimensjoner fra kamera i stedet for hardkodede verdier
+- Musikksekvenser støtter nå valgfri `counter`-array og `counterWave`/`counterVol`-parametre
+- SmeltingSystem.calculateFuelEnergy() og consumeFuel() søker nå også i campStash
+
+---
+
 ## v0.27 – 2026-04-05
 
 ### Feilrettinger
