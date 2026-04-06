@@ -90,14 +90,9 @@ class ChemLabScene extends Phaser.Scene {
     }
 
     _refresh() {
-        for (const o of this._dyn) { if (o && o.destroy) o.destroy(); }
-        this._dyn = [];
+        UIHelper.clearDynamic(this._dyn);
 
-        const filters = ['all', 'potion', 'explosive', 'medicine', 'acid'];
-        this._filterBtns.forEach((btn, i) => {
-            btn.setColor(this._filter === filters[i] ? '#33dd88' : '#335533');
-            btn.setFontStyle(this._filter === filters[i] ? 'bold' : 'normal');
-        });
+        UIHelper.updateTabButtons(this._filterBtns, ['all', 'potion', 'explosive', 'medicine', 'acid'], this._filter, '#33dd88', '#335533');
 
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
         this._fuelText.setText(`Energi: ${fuel}`);

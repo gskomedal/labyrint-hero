@@ -2,6 +2,15 @@
 
 ---
 
+## v0.29 – 2026-04-06
+
+### Tekniske endringer
+- **Kodestruktur refaktorert:** Grafikk-kode ekstrahert fra ItemSpawner.js (→ ItemGraphics.js) og Monster.js (→ MonsterGraphics.js), reduserer filstørrelser med ~500 linjer. Ny UIHelper.js samler felles UI-mønster (dynamisk opprydding, tab-switching, farge-konvertering)
+- **Testinfrastruktur:** Ny browser-basert testrunner (`tests/test-runner.html`) med minimalt rammeverk. Initiale tester for Inventory (serialisering, stacking, slot-operasjoner), MazeGenerator (dimensjoner, nåbarhet, exit-plassering), SmeltingSystem (brensel, smelting, element-sporing) og UIHelper
+- **Kodeevaluering:** Identifisert hovedproblemer (god objects, kodeduplisering, tett scene-kobling) og laget plan for videre forbedringer
+
+---
+
 ## v0.28 – 2026-04-06
 
 ### Nye funksjoner
