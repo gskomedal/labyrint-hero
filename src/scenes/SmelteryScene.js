@@ -91,15 +91,10 @@ class SmelteryScene extends Phaser.Scene {
     }
 
     _refresh() {
-        for (const o of this._dyn) { if (o && o.destroy) o.destroy(); }
-        this._dyn = [];
+        UIHelper.clearDynamic(this._dyn);
 
         // Update tab button colors
-        const tabs = ['stash', 'smelt', 'alloy', 'forge'];
-        this._tabBtns.forEach((btn, i) => {
-            btn.setColor(this._tab === tabs[i] ? '#ff7722' : '#554433');
-            btn.setFontStyle(this._tab === tabs[i] ? 'bold' : 'normal');
-        });
+        UIHelper.updateTabButtons(this._tabBtns, ['stash', 'smelt', 'alloy', 'forge'], this._tab, '#ff7722', '#554433');
 
         // Update fuel text
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);

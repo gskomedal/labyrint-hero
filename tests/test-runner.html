@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Labyrint Hero – Test Runner</title>
+    <style>
+        body { background: #0a0a12; color: #ccddff; font-family: monospace; padding: 20px; }
+        h1 { color: #88aaff; font-size: 18px; }
+        .suite { margin: 16px 0; padding: 10px; border: 1px solid #223344; border-radius: 4px; }
+        .suite-name { color: #6688aa; font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+        .pass { color: #44cc66; }
+        .fail { color: #ff4444; }
+        .test { margin: 2px 0 2px 16px; font-size: 12px; }
+        .summary { margin-top: 20px; font-size: 14px; padding: 10px; border-top: 1px solid #334466; }
+        .error-detail { color: #ff6666; margin-left: 32px; font-size: 11px; }
+    </style>
+</head>
+<body>
+<h1>Labyrint Hero – Test Runner</h1>
+<div id="output"></div>
+
+<!-- Load game source files (order matches index.html) -->
+<script src="../src/constants.js"></script>
+<script src="../src/maze.js"></script>
+<script src="../src/utils/SaveManager.js"></script>
+<script src="../src/utils/UIHelper.js"></script>
+<script src="../src/data/skills.js"></script>
+<script src="../src/data/elements.js"></script>
+<script src="../src/data/minerals.js"></script>
+<script src="../src/data/alloys.js"></script>
+<script src="../src/data/molecules.js"></script>
+<script src="../src/data/items.js"></script>
+<script src="../src/systems/ElementTracker.js"></script>
+<script src="../src/systems/SmeltingSystem.js"></script>
+<script src="../src/systems/ChemistrySystem.js"></script>
+<script src="../src/systems/Inventory.js"></script>
+
+<!-- Minimal stubs for dependencies not needed in tests -->
+<script>
+    // Stub Audio for tests
+    if (typeof Audio === 'undefined') {
+        window.Audio = { playPickup: () => {}, playHit: () => {}, playBreak: () => {} };
+    }
+    // Stub makeRarityItem if needed
+    if (typeof makeRarityItem === 'undefined') {
+        window.makeRarityItem = (def, rarity) => ({ ...def, rarity });
+    }
+</script>
+
+<!-- Test framework -->
+<script src="framework.js"></script>
+
+<!-- Test suites -->
+<script src="test-inventory.js"></script>
+<script src="test-maze.js"></script>
+<script src="test-smelting.js"></script>
+<script src="test-uihelper.js"></script>
+
+<!-- Run -->
+<script>
+    TestRunner.run();
+</script>
+</body>
+</html>
