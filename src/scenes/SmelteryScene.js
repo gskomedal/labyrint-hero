@@ -8,7 +8,6 @@ class SmelteryScene extends Phaser.Scene {
 
     init(data) {
         this.heroRef = data.heroRef || null;
-        this.gs = data.gameScene || null;
     }
 
     create() {
@@ -563,8 +562,8 @@ class SmelteryScene extends Phaser.Scene {
 
         // Add forged item to inventory
         const added = hero.inventory.addItem(result.item);
-        if (!added && this.gs) {
-            this.gs.itemSpawner.spawnItemAt(hero.gridX, hero.gridY, result.item);
+        if (!added) {
+            EventBus.emit('spawnItem', { gx: hero.gridX, gy: hero.gridY, item: result.item });
         }
 
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smidd: ${result.item.name}!`, color: '#ffaa44' });

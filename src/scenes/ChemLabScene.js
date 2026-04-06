@@ -7,7 +7,6 @@ class ChemLabScene extends Phaser.Scene {
 
     init(data) {
         this.heroRef = data.heroRef || null;
-        this.gs = data.gameScene || null;
     }
 
     create() {
@@ -193,8 +192,8 @@ class ChemLabScene extends Phaser.Scene {
 
         // Add product to inventory
         const added = hero.inventory.addItem(result.item);
-        if (!added && this.gs) {
-            this.gs.itemSpawner.spawnItemAt(hero.gridX, hero.gridY, result.item);
+        if (!added) {
+            EventBus.emit('spawnItem', { gx: hero.gridX, gy: hero.gridY, item: result.item });
         }
 
         // Unlock chemist path
