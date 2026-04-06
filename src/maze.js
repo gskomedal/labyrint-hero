@@ -154,8 +154,9 @@ class MazeGenerator {
             }
         }
 
-        // Chem Lab: world 4+, 35% chance – gated by zone boss at interaction time
-        if (worldNum >= 4 && deadEnds.length > 0 && Math.random() < 0.35) {
+        // Chem Lab: guaranteed world 4, 60% world 5+, gated by zone boss at interaction time
+        const chemChance = worldNum === 4 ? 1.0 : 0.60;
+        if (worldNum >= 4 && deadEnds.length > 0 && Math.random() < chemChance) {
             const de = deadEnds.shift();
             const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 2));
             if (tiles.length >= 1) {
