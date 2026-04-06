@@ -187,6 +187,16 @@ class SmeltingSystem {
                 total += def.energyValue * (entry.count || 1);
             }
         }
+        // Also count fuel in camp stash
+        if (hero.campStash) {
+            for (const entry of hero.campStash) {
+                if (!entry) continue;
+                const def = this._getFuelDef(entry);
+                if (def) {
+                    total += def.energyValue * (entry.count || 1);
+                }
+            }
+        }
         return total;
     }
 
@@ -198,6 +208,7 @@ class SmeltingSystem {
      */
     consumeFuel(hero, energyNeeded) {
         let remaining = energyNeeded;
+        // Consume from backpack first
         for (let i = 0; i < hero.inventory.backpack.length && remaining > 0; i++) {
             const entry = hero.inventory.backpack[i];
             if (!entry) continue;
@@ -209,6 +220,21 @@ class SmeltingSystem {
                 remaining -= def.energyValue;
             }
             if (entry.count <= 0) hero.inventory.backpack[i] = null;
+        }
+        // Then consume from camp stash
+        if (remaining > 0 && hero.campStash) {
+            for (let i = hero.campStash.length - 1; i >= 0 && remaining > 0; i--) {
+                const entry = hero.campStash[i];
+                if (!entry) continue;
+                const def = this._getFuelDef(entry);
+                if (!def) continue;
+
+                while (entry.count > 0 && remaining > 0) {
+                    entry.count--;
+                    remaining -= def.energyValue;
+                }
+                if (entry.count <= 0) hero.campStash.splice(i, 1);
+            }
         }
         return remaining <= 0;
     }

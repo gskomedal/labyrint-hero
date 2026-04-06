@@ -188,6 +188,10 @@ class GameScene extends Phaser.Scene {
                 }
             }
 
+            if (Phaser.Input.Keyboard.JustDown(this.skillTreeKey) && !this.scene.isActive('SkillScene')) {
+                this.scene.launch('SkillScene', { heroRef: this.hero, viewOnly: true });
+            }
+
             // Auto-open prompts for special rooms
             this._checkCampRoom();
             this._checkChemLab();

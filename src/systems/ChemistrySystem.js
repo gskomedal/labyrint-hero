@@ -116,8 +116,9 @@ class ChemistrySystem {
         if (eff.onUse === 'heal') {
             const hp = Math.round(eff.healHP * potencyMul);
             item.desc = `+${hp} HP`;
-            item.use = (hero) => {
+            item.use = (hero, scene) => {
                 hero.hearts = Math.min(hero.hearts + hp, hero.maxHearts);
+                if (hero.petHealShare && scene && scene.pet && scene.pet.alive) scene.pet.heal(hp);
                 return true;
             };
         } else if (eff.onUse === 'buff') {
@@ -130,9 +131,10 @@ class ChemistrySystem {
             };
         } else if (eff.onUse === 'cure_all') {
             const hp = Math.round((eff.healHP || 0) * potencyMul);
-            item.use = (hero) => {
+            item.use = (hero, scene) => {
                 hero.clearAllEffects();
                 if (hp > 0) hero.hearts = Math.min(hero.hearts + hp, hero.maxHearts);
+                if (hp > 0 && hero.petHealShare && scene && scene.pet && scene.pet.alive) scene.pet.heal(hp);
                 return true;
             };
         } else if (eff.onUse === 'bomb') {

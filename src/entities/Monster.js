@@ -58,14 +58,15 @@ class Monster {
         g.clear();
 
         switch (this.type) {
-            case 'boss':  this._drawBoss(g, s);   break;
-            case 'orc':   this._drawOrc(g, s);    break;
-            case 'troll': this._drawTroll(g, s);  break;
-            default:      this._drawGoblin(g, s); break;
+            case 'zone_boss': this._drawZoneBoss(g, s); break;
+            case 'boss':      this._drawBoss(g, s);     break;
+            case 'orc':       this._drawOrc(g, s);      break;
+            case 'troll':     this._drawTroll(g, s);    break;
+            default:          this._drawGoblin(g, s);   break;
         }
 
         // Phase 2 boss: angry red aura border
-        if (this.type === 'boss' && this.phase === 2) {
+        if ((this.type === 'boss' || this.type === 'zone_boss') && this.phase === 2) {
             g.lineStyle(2, 0xff0000, 0.9);
             g.strokeRect(1, 1, s - 2, s - 2);
             g.lineStyle(1, 0xff6600, 0.5);
@@ -92,8 +93,8 @@ class Monster {
         this.hpBar.fillStyle(0x220000);
         this.hpBar.fillRect(3, 0, barW, 4);
         // Phase 2 boss bar turns orange
-        const barCol = this.type === 'boss'
-            ? (this.phase === 2 ? 0xff6600 : 0xff1166)
+        const barCol = (this.type === 'boss' || this.type === 'zone_boss')
+            ? (this.phase === 2 ? 0xff6600 : (this.type === 'zone_boss' ? 0xff22ff : 0xff1166))
             : 0xff4444;
         this.hpBar.fillStyle(barCol);
         this.hpBar.fillRect(3, 0, filled, 4);
@@ -451,6 +452,123 @@ class Monster {
         g.fillRect(cx + 4, 12, 2, 2);
     }
 
+    // ── Zone Boss ──────────────────────────────────────────────────────────────
+    // Massive demonic figure with horns, multiple eyes, spectral wings, and
+    // a pulsing magical aura – clearly distinct from regular bosses
+
+    _drawZoneBoss(g, s) {
+        const cx  = s >> 1;
+        const p2  = this.phase === 2;
+
+        // Outer aura (large spectral glow)
+        g.fillStyle(p2 ? 0x440022 : 0x220033, 0.7);
+        g.fillRoundedRect(0, 0, s, s, 6);
+        // Inner aura ring
+        g.fillStyle(p2 ? 0xff2200 : 0xaa22ff, p2 ? 0.25 : 0.15);
+        g.fillRoundedRect(2, 2, s - 4, s - 4, 5);
+
+        // Shadow (very large)
+        g.fillStyle(0x000000, 0.6);
+        g.fillEllipse(cx, 30, s - 4, 8);
+
+        // Spectral wings (behind body)
+        const wingCol = p2 ? 0x880022 : 0x6622aa;
+        g.fillStyle(wingCol, 0.6);
+        g.fillTriangle(cx - 4, 12, -4, 2, cx - 10, 24);
+        g.fillTriangle(cx + 4, 12, s + 4, 2, cx + 10, 24);
+        // Wing inner membrane
+        g.fillStyle(p2 ? 0xff4444 : 0x9944dd, 0.3);
+        g.fillTriangle(cx - 6, 14, 0, 6, cx - 8, 22);
+        g.fillTriangle(cx + 6, 14, s, 6, cx + 8, 22);
+
+        // Massive legs
+        g.fillStyle(p2 ? 0x660011 : 0x441166);
+        g.fillRect(cx - 9, 22, 8, 9);
+        g.fillRect(cx + 1, 22, 8, 9);
+        // Clawed feet
+        g.fillStyle(p2 ? 0xff4422 : 0x8833cc);
+        g.fillTriangle(cx - 11, 28, cx - 13, 31, cx - 7, 31);
+        g.fillTriangle(cx - 5, 28, cx - 3, 31, cx - 9, 31);
+        g.fillTriangle(cx + 11, 28, cx + 13, 31, cx + 7, 31);
+        g.fillTriangle(cx + 5, 28, cx + 3, 31, cx + 9, 31);
+
+        // Massive body (fills most of the tile)
+        g.fillStyle(p2 ? 0xbb0022 : 0x6622bb);
+        g.fillRoundedRect(cx - 13, 10, 26, 15, 3);
+        // Chest runes / glowing marks
+        g.fillStyle(p2 ? 0xff6600 : 0xcc44ff, 0.7);
+        g.fillRect(cx - 2, 12, 4, 12);   // center rune
+        g.fillRect(cx - 8, 16, 6, 2);    // left rune bar
+        g.fillRect(cx + 2, 16, 6, 2);    // right rune bar
+        // Armor plates
+        g.fillStyle(p2 ? 0x880011 : 0x441188);
+        g.fillRect(cx - 11, 10, 22, 3);
+
+        // Massive arms
+        g.fillStyle(p2 ? 0x990022 : 0x5511aa);
+        g.fillRoundedRect(cx - 18, 10, 7, 14, 2);
+        g.fillRoundedRect(cx + 11, 10, 7, 14, 2);
+        // Clawed hands
+        g.fillStyle(p2 ? 0xff4422 : 0x8833cc);
+        g.fillTriangle(cx - 18, 23, cx - 21, 29, cx - 15, 25);
+        g.fillTriangle(cx - 15, 23, cx - 13, 29, cx - 12, 25);
+        g.fillTriangle(cx + 18, 23, cx + 21, 29, cx + 15, 25);
+        g.fillTriangle(cx + 15, 23, cx + 13, 29, cx + 12, 25);
+
+        // Head (large, angular)
+        g.fillStyle(p2 ? 0xcc0033 : 0x7722cc);
+        g.fillRoundedRect(cx - 11, 2, 22, 12, 3);
+
+        // Massive curved horns
+        g.fillStyle(p2 ? 0xcc6600 : 0xaa8844);
+        // Left horn
+        g.fillTriangle(cx - 10, 5, cx - 18, -4, cx - 6, 3);
+        g.fillTriangle(cx - 18, -4, cx - 20, -2, cx - 14, 2);
+        // Right horn
+        g.fillTriangle(cx + 10, 5, cx + 18, -4, cx + 6, 3);
+        g.fillTriangle(cx + 18, -4, cx + 20, -2, cx + 14, 2);
+        // Horn tips glow
+        g.fillStyle(p2 ? 0xff8800 : 0xffcc44);
+        g.fillCircle(cx - 19, -3, 2);
+        g.fillCircle(cx + 19, -3, 2);
+
+        // Multiple eyes (3 pairs - demonic)
+        const eyeCol = p2 ? 0xff4400 : 0xff22ff;
+        const pupilCol = p2 ? 0xffcc00 : 0xffffff;
+        // Main eyes (large)
+        g.fillStyle(eyeCol);
+        g.fillRect(cx - 9, 5, 6, 5);
+        g.fillRect(cx + 3, 5, 6, 5);
+        g.fillStyle(pupilCol);
+        g.fillRect(cx - 7, 6, 3, 3);
+        g.fillRect(cx + 4, 6, 3, 3);
+        g.fillStyle(0x000000);
+        g.fillRect(cx - 6, 7, 1, 2);
+        g.fillRect(cx + 5, 7, 1, 2);
+        // Small secondary eyes (above main, narrower)
+        g.fillStyle(eyeCol, 0.7);
+        g.fillRect(cx - 7, 3, 4, 2);
+        g.fillRect(cx + 3, 3, 4, 2);
+        // Third eye (center forehead)
+        g.fillStyle(p2 ? 0xff8800 : 0xff44ff);
+        g.fillCircle(cx, 4, 2);
+        g.fillStyle(0x000000);
+        g.fillCircle(cx, 4, 1);
+
+        // Jagged maw with many fangs
+        g.fillStyle(0x110000);
+        g.fillRect(cx - 8, 11, 16, 3);
+        g.fillStyle(0xffffff);
+        // Upper fangs
+        g.fillTriangle(cx - 7, 11, cx - 8, 16, cx - 5, 11);
+        g.fillTriangle(cx - 3, 11, cx - 4, 15, cx - 1, 11);
+        g.fillTriangle(cx + 1, 11, cx + 2, 15, cx + 3, 11);
+        g.fillTriangle(cx + 5, 11, cx + 6, 16, cx + 7, 11);
+        // Lower fangs
+        g.fillTriangle(cx - 5, 14, cx - 6, 10, cx - 3, 14);
+        g.fillTriangle(cx + 3, 14, cx + 4, 10, cx + 5, 14);
+    }
+
     // ── Combat ────────────────────────────────────────────────────────────────
 
     /** Returns true if monster died. Returns 'enraged' string on boss phase transition. */
@@ -468,7 +586,7 @@ class Monster {
 
         // Boss phase 2 transition
         let justEnraged = false;
-        if (this.type === 'boss' && this.phase === 1 && this.hp <= this.maxHp * 0.5) {
+        if ((this.type === 'boss' || this.type === 'zone_boss') && this.phase === 1 && this.hp <= this.maxHp * 0.5) {
             this.phase   = 2;
             this.enraged = true;
             this.attack  = Math.round(this.attack * 1.4);
@@ -499,13 +617,14 @@ class Monster {
         // Shift origin to center so rotation looks natural
         g.x += TILE_SIZE / 2;
         g.y += TILE_SIZE / 2;
+        const isBoss = this.type === 'boss' || this.type === 'zone_boss';
         this.scene.tweens.add({
             targets:  g,
-            angle:    this.type === 'boss' ? 540 : 180,
+            angle:    isBoss ? 540 : 180,
             scaleX:   0,
             scaleY:   0,
             alpha:    0,
-            duration: this.type === 'boss' ? 550 : 300,
+            duration: isBoss ? 550 : 300,
             ease:     'Back.easeIn',
             onComplete: () => { if (g.scene) g.destroy(); }
         });

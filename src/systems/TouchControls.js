@@ -31,7 +31,8 @@ class TouchControls {
         const sz   = 58;
         const gap  = 6;
         const baseX = 24 + sz + gap;
-        const baseY = 640 - 24 - sz - gap;
+        const H = this.scene.cameras.main.height;
+        const baseY = H - 24 - sz - gap;
 
         const directions = [
             { label: '\u25B2', dx:  0, dy: -1, ox: 0,           oy: -(sz + gap) },
@@ -88,8 +89,10 @@ class TouchControls {
     _createActionButtons() {
         const sz   = 56;
         const gap  = 10;
-        const baseX = 960 - 24 - sz / 2;
-        const baseY = 640 - 24 - sz / 2;
+        const W = this.scene.cameras.main.width;
+        const H = this.scene.cameras.main.height;
+        const baseX = W - 24 - sz / 2;
+        const baseY = H - 24 - sz / 2;
 
         const buttons = [
             { label: 'ATK', key: 'touch_attack',    color: 0xaa3333, ox: 0,           oy: 0           },

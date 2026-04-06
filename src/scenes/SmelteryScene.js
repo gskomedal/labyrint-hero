@@ -270,7 +270,7 @@ class SmelteryScene extends Phaser.Scene {
         const cx = this.px + this.panelW / 2;
         let y = this.contentY;
 
-        this._d(this.add.text(cx, y, 'Velg et mineral fra ryggsekken å smelte:', {
+        this._d(this.add.text(cx, y, 'Velg et mineral å smelte (ryggsekk + lager):', {
             fontSize: '10px', color: '#887766', fontFamily: 'monospace'
         }).setOrigin(0.5));
         y += 18;
@@ -282,12 +282,22 @@ class SmelteryScene extends Phaser.Scene {
             if (!entry) continue;
             const def = hero.inventory._getItemDef(entry);
             if (def && def.type === 'mineral' && def.subtype === 'ore' && def.yields) {
-                minerals.push({ slot: i, def, count: entry.count || 1 });
+                minerals.push({ source: 'backpack', slot: i, def, count: entry.count || 1 });
+            }
+        }
+
+        // List minerals in camp stash
+        for (let i = 0; i < hero.campStash.length; i++) {
+            const stashEntry = hero.campStash[i];
+            if (!stashEntry || stashEntry.count <= 0) continue;
+            const def = this._getStashItemDef(stashEntry.id);
+            if (def && def.type === 'mineral' && def.subtype === 'ore' && def.yields) {
+                minerals.push({ source: 'stash', slot: i, def, count: stashEntry.count });
             }
         }
 
         if (minerals.length === 0) {
-            this._d(this.add.text(cx, y + 30, 'Ingen mineraler i ryggsekken.', {
+            this._d(this.add.text(cx, y + 30, 'Ingen mineraler i ryggsekk eller lager.', {
                 fontSize: '11px', color: '#444433', fontFamily: 'monospace'
             }).setOrigin(0.5));
             return;
@@ -311,8 +321,11 @@ class SmelteryScene extends Phaser.Scene {
             bg.lineStyle(1, col, 0.3);
             bg.strokeRoundedRect(startX, my, colW, 46, 4);
 
+            // Source label
+            const srcLabel = m.source === 'stash' ? ' [lager]' : '';
+
             // Mineral name + count
-            this._d(this.add.text(startX + 8, my + 6, `${m.def.name} (×${m.count})`, {
+            this._d(this.add.text(startX + 8, my + 6, `${m.def.name} (×${m.count})${srcLabel}`, {
                 fontSize: '11px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
             }));
 
@@ -329,7 +342,11 @@ class SmelteryScene extends Phaser.Scene {
                 }).setInteractive({ useHandCursor: true }));
                 btn.on('pointerover', () => btn.setColor('#ffaa44'));
                 btn.on('pointerout', () => btn.setColor('#ff7722'));
-                btn.on('pointerdown', () => this._doSmelt(m.slot, m.def));
+                if (m.source === 'stash') {
+                    btn.on('pointerdown', () => this._doSmeltFromStash(m.slot, m.def));
+                } else {
+                    btn.on('pointerdown', () => this._doSmelt(m.slot, m.def));
+                }
             } else {
                 this._d(this.add.text(startX + colW - 70, my + 12, 'Lite brensel', {
                     fontSize: '9px', color: '#443322', fontFamily: 'monospace'
@@ -362,6 +379,41 @@ class SmelteryScene extends Phaser.Scene {
         if (entry) {
             entry.count--;
             if (entry.count <= 0) hero.inventory.backpack[slotIndex] = null;
+        }
+
+        // Show result
+        const elemStr = result.elements.map(e => `${e.symbol}×${e.amount}`).join(', ');
+        if (this.gs) {
+            this.gs._floatingText(hero.gridX, hero.gridY, `Smeltet: ${elemStr}`, '#ff7722');
+        }
+
+        // Check completions
+        hero.elementTracker.checkCompletions();
+
+        Audio.playPickup();
+        this._refresh();
+    }
+
+    _doSmeltFromStash(stashIndex, mineralDef) {
+        const hero = this.heroRef;
+        const result = this.smelter.smelt(mineralDef, hero);
+
+        // Consume fuel
+        this.smelter.consumeFuel(hero, result.energyCost);
+
+        // Unlock metallurgist path on first smelt
+        if (!hero.metallurgistUnlocked) {
+            hero.metallurgistUnlocked = true;
+            if (this.gs) {
+                this.gs._floatingText(hero.gridX, hero.gridY - 1, 'Metallurg-stien er ulåst!', '#ff7722');
+            }
+        }
+
+        // Remove one mineral from stash
+        const stashEntry = hero.campStash[stashIndex];
+        if (stashEntry) {
+            stashEntry.count--;
+            if (stashEntry.count <= 0) hero.campStash.splice(stashIndex, 1);
         }
 
         // Show result

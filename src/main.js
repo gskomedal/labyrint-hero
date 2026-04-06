@@ -5,8 +5,8 @@ const config = {
     scale: {
         mode:       Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width:      960,
-        height:     640,
+        width:      1280,
+        height:     800,
     },
     backgroundColor: '#08060f',
     pixelArt:        true,
