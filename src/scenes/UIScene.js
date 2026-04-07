@@ -14,9 +14,9 @@ class UIScene extends Phaser.Scene {
         this.input.keyboard.once('keydown', () => { Audio.init(); });
 
         const hud = this.add.graphics();
-        hud.fillStyle(COLORS.HUD_BG, 0.85);
+        hud.fillStyle(COLORS.HUD_BG, 0.88);
         hud.fillRect(0, 0, W, 54);
-        hud.fillStyle(0x1a1535, 0.5);
+        hud.fillStyle(0x5a4a30, 0.5);
         hud.fillRect(0, 54, W, 2);
 
         this.heartGfx  = this.add.graphics();
@@ -24,7 +24,7 @@ class UIScene extends Phaser.Scene {
         this.xpFill    = this.add.graphics();
         this.eqGfx     = this.add.graphics();
 
-        const ts = { fontSize: '11px', color: '#8899bb', fontFamily: 'monospace' };
+        const ts = { fontSize: '11px', color: '#c0a880', fontFamily: 'monospace' };
         const DIFF_COL  = { easy: '#44bb44', normal: '#4488ff', hard: '#ff5555' };
         const DIFF_LBL  = { easy: 'LETT', normal: 'NORMAL', hard: 'VANSKELIG' };
         const diff      = this.gameScene.difficulty || 'normal';
@@ -32,12 +32,12 @@ class UIScene extends Phaser.Scene {
             fontSize: '9px', color: DIFF_COL[diff] || '#4488ff', fontFamily: 'monospace'
         }).setOrigin(1, 0);
 
-        this.worldText  = this.add.text(W - 50, 8,  '', { ...ts, color: '#aaaacc' }).setOrigin(1, 0);
+        this.worldText  = this.add.text(W - 50, 8,  '', { ...ts, color: '#e0d0b0' }).setOrigin(1, 0);
         this.levelText  = this.add.text(W - 50, 22, '', ts).setOrigin(1, 0);
         this.atkText    = this.add.text(W - 50, 36, '', ts).setOrigin(1, 0);
         this.goldText   = this.add.text(10, 30, '', { fontSize: '11px', color: '#ffcc00', fontFamily: 'monospace' });
-        this.eqText     = this.add.text(10, 56, '', { fontSize: '10px', color: '#556677', fontFamily: 'monospace' });
-        this.eHint      = this.add.text(W - 50, 56, '[SPACE/F] Angrep  [R] Pil  [Q] Bruk  [E] Inventar  [+/-] Zoom', { fontSize: '10px', color: '#334455', fontFamily: 'monospace' }).setOrigin(1, 0);
+        this.eqText     = this.add.text(10, 56, '', { fontSize: '10px', color: '#8a7a5a', fontFamily: 'monospace' });
+        this.eHint      = this.add.text(W - 50, 56, '[SPACE/F] Angrep  [R] Pil  [Q] Bruk  [E] Inventar  [+/-] Zoom', { fontSize: '10px', color: '#6a5a40', fontFamily: 'monospace' }).setOrigin(1, 0);
 
         // Status effect indicators
         this.statusText = this.add.text(10, 70, '', {
@@ -52,11 +52,11 @@ class UIScene extends Phaser.Scene {
         this.petHpGfx = this.add.graphics();
 
         // Settings gear button
-        const gearBtn = this.add.text(W - 14, 10, '⚙', { fontSize: '18px', color: '#445566', fontFamily: 'monospace' })
+        const gearBtn = this.add.text(W - 14, 10, '⚙', { fontSize: '18px', color: '#8a7a5a', fontFamily: 'monospace' })
             .setOrigin(1, 0)
             .setInteractive({ useHandCursor: true });
-        gearBtn.on('pointerover',  () => gearBtn.setColor('#88bbff'));
-        gearBtn.on('pointerout',   () => gearBtn.setColor('#445566'));
+        gearBtn.on('pointerover',  () => gearBtn.setColor('#d4a843'));
+        gearBtn.on('pointerout',   () => gearBtn.setColor('#8a7a5a'));
         gearBtn.on('pointerdown',  () => {
             Audio.init();
             if (!this.scene.isActive('SettingsScene')) {
@@ -122,7 +122,7 @@ class UIScene extends Phaser.Scene {
         g.clear();
 
         // Background panel
-        g.fillStyle(0x000000, 0.65);
+        g.fillStyle(0x1a1208, 0.65);
         g.fillRect(mx - 2, my - 2, mW + 4, mH + 4);
 
         // Tiles
@@ -138,13 +138,13 @@ class UIScene extends Phaser.Scene {
 
                 let col;
                 switch (t) {
-                    case TILE.WALL:         col = dim ? 0x222233 : 0x3a3555; break;
-                    case TILE.SECRET:       col = dim ? 0x222233 : 0x3a3555; break;
-                    case TILE.CRACKED_WALL: col = dim ? 0x2a2240 : 0x554488; break;
-                    case TILE.DOOR:         col = dim ? 0x332200 : 0x886622; break;
-                    case TILE.EXIT:         col = dim ? 0x004422 : 0x00cc66; break;
-                    case TILE.TRAP:         col = dim ? 0x221100 : 0x663300; break;
-                    default:                col = dim ? 0x111122 : 0x1e1e3a; break;  // FLOOR
+                    case TILE.WALL:         col = dim ? 0x3a3025 : 0x5a4a30; break;
+                    case TILE.SECRET:       col = dim ? 0x3a3025 : 0x5a4a30; break;
+                    case TILE.CRACKED_WALL: col = dim ? 0x3a3020 : 0x6a5a38; break;
+                    case TILE.DOOR:         col = dim ? 0x3a2a10 : 0x886622; break;
+                    case TILE.EXIT:         col = dim ? 0x1a3a1a : 0x44aa44; break;
+                    case TILE.TRAP:         col = dim ? 0x2a1a08 : 0x663300; break;
+                    default:                col = dim ? 0x201a10 : 0x3a3020; break;  // FLOOR
                 }
 
                 g.fillStyle(col);
@@ -198,7 +198,7 @@ class UIScene extends Phaser.Scene {
         // Border
         const b = this.minimapBorder;
         b.clear();
-        b.lineStyle(1, 0x334466, 0.8);
+        b.lineStyle(1, 0x6a5a3a, 0.8);
         b.strokeRect(mx - 2, my - 2, mW + 4, mH + 4);
     }
 

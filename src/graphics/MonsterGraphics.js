@@ -7,8 +7,8 @@ const MonsterGraphics = {
     drawGoblin(g, s) {
         const cx = s >> 1;
 
-        g.fillStyle(0x000000, 0.25);
-        g.fillEllipse(cx, 31, 18, 5);
+        g.fillStyle(0x000000, 0.32);
+        g.fillEllipse(cx + 1, 31, 20, 6);
 
         g.fillStyle(0x2a6615);
         g.fillRect(cx - 6, 22, 4, 8);
@@ -65,8 +65,8 @@ const MonsterGraphics = {
     drawOrc(g, s) {
         const cx = s >> 1;
 
-        g.fillStyle(0x000000, 0.35);
-        g.fillEllipse(cx, 31, 22, 6);
+        g.fillStyle(0x000000, 0.38);
+        g.fillEllipse(cx + 1, 31, 24, 7);
 
         g.fillStyle(0x556633);
         g.fillRect(cx - 8, 20, 7, 10);
@@ -128,8 +128,8 @@ const MonsterGraphics = {
     drawTroll(g, s) {
         const cx = s >> 1;
 
-        g.fillStyle(0x000000, 0.40);
-        g.fillEllipse(cx, 31, 26, 7);
+        g.fillStyle(0x000000, 0.42);
+        g.fillEllipse(cx + 1, 31, 28, 8);
 
         g.fillStyle(0x665544);
         g.fillRect(cx - 7, 24, 6, 7);
@@ -199,8 +199,8 @@ const MonsterGraphics = {
         g.fillStyle(p2 ? 0x330800 : 0x330011, 0.6);
         g.fillRoundedRect(1, 1, s - 2, s - 2, 5);
 
-        g.fillStyle(0x000000, 0.5);
-        g.fillEllipse(cx, 31, 28, 7);
+        g.fillStyle(0x000000, 0.50);
+        g.fillEllipse(cx + 1, 31, 30, 8);
 
         g.fillStyle(p2 ? 0x882200 : 0x990033);
         g.fillRect(cx - 8, 22, 7, 9);
@@ -278,8 +278,8 @@ const MonsterGraphics = {
         g.fillStyle(p2 ? 0xff2200 : 0xaa22ff, p2 ? 0.25 : 0.15);
         g.fillRoundedRect(2, 2, s - 4, s - 4, 5);
 
-        g.fillStyle(0x000000, 0.6);
-        g.fillEllipse(cx, 30, s - 4, 8);
+        g.fillStyle(0x000000, 0.60);
+        g.fillEllipse(cx + 1, 30, s - 2, 9);
 
         const wingCol = p2 ? 0x880022 : 0x6622aa;
         g.fillStyle(wingCol, 0.6);

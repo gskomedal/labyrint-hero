@@ -8,7 +8,7 @@ const config = {
         width:      1280,
         height:     800,
     },
-    backgroundColor: '#08060f',
+    backgroundColor: '#2a1e14',
     pixelArt:        true,
     roundPixels:     true,
     input: {

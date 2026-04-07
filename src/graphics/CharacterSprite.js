@@ -90,12 +90,12 @@ function drawCharacterSprite(g, ox, oy, size, appearance, race) {
     const legX_L  = isFemale ? 10 : 9;
     const legX_R  = isFemale ? 18 : 18;
 
-    // ── Shadow ────────────────────────────────────────────────────────────────
-    g.fillStyle(0x000000, 0.22);
+    // ── Shadow (directional — offset for 3D depth) ─────────────────────────
+    g.fillStyle(0x000000, 0.30);
     g.fillEllipse(
-        Math.round(ox + 16 * sc),
+        Math.round(ox + 17 * sc),
         Math.round(oy + 31 * sc),
-        Math.round(20 * sc), Math.round(5 * sc)
+        Math.round(22 * sc), Math.round(6 * sc)
     );
 
     // ── Long hair / hood (drawn behind head) ──────────────────────────────────

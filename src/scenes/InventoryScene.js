@@ -17,7 +17,7 @@ class InventoryScene extends Phaser.Scene {
 
         // ── Static background & title ──────────────────────────────────────────
         const cx = W / 2, cy = H / 2;
-        this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
+        this.add.rectangle(cx, cy, W, H, 0x1a1008, 0.78);
 
         const panelW = 520;
         const hasPet = this.pet && this.pet.alive;
@@ -26,25 +26,25 @@ class InventoryScene extends Phaser.Scene {
         const extraBpSpace = Math.max(0, (bpRows - 2) * 60);
         const panelH = (hasPet ? 500 : 420) + extraBpSpace;
         const panelY = cy;
-        this.add.rectangle(cx, panelY, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x334466);
+        this.add.rectangle(cx, panelY, panelW, panelH, 0x2a1e14).setStrokeStyle(2, 0x8b6b3a);
 
         this.add.text(cx, panelY - panelH / 2 + 18, 'INVENTAR', {
-            fontSize: '20px', color: '#ccddff', fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '20px', color: '#f0e0c0', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.rectangle(cx, panelY - panelH / 2 + 54, panelW - 40, 1, 0x223344);
+        this.add.rectangle(cx, panelY - panelH / 2 + 54, panelW - 40, 1, 0x5a4a30);
 
         // Stats line – dynamic so it refreshes
         this._statsText = this.add.text(cx, panelY - panelH / 2 + 40, '', {
-            fontSize: '11px', color: '#667788', fontFamily: 'monospace'
+            fontSize: '11px', color: '#c0a880', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Section labels (static)
         this.add.text(cx - panelW / 2 + 20, panelY - panelH / 2 + 62, 'UTSTYR', {
-            fontSize: '11px', color: '#445566', fontFamily: 'monospace'
+            fontSize: '11px', color: '#7a6a50', fontFamily: 'monospace'
         });
         this.add.text(cx, panelY - panelH / 2 + 168, 'EVNER', {
-            fontSize: '11px', color: '#445566', fontFamily: 'monospace'
+            fontSize: '11px', color: '#7a6a50', fontFamily: 'monospace'
         }).setOrigin(0.5);
         // RYGGSEKK label is drawn dynamically in _refresh() to show slot count
 
@@ -52,7 +52,7 @@ class InventoryScene extends Phaser.Scene {
             ? '[Trykk] Bruk/utstyr  ·  [Hold] → Kjæledyr/Slipp  ·  [E/ESC] Lukk'
             : '[Trykk] Bruk/utstyr  ·  [Hold] Slipp  ·  [E/ESC] Lukk';
         this.add.text(cx, panelY + panelH / 2 - 14, helpText, {
-            fontSize: '11px', color: '#334455', fontFamily: 'monospace'
+            fontSize: '11px', color: '#6a5a40', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Element Book button
@@ -70,10 +70,10 @@ class InventoryScene extends Phaser.Scene {
 
         // Close button (touch-friendly)
         const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
-            fontSize: '20px', color: '#667788', fontFamily: 'monospace'
+            fontSize: '20px', color: '#8a7a5a', fontFamily: 'monospace'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
+        closeBtn.on('pointerout',  () => closeBtn.setColor('#8a7a5a'));
         closeBtn.on('pointerdown', () => this._tryClose());
 
         // ── Build dynamic slot UI ──────────────────────────────────────────────

@@ -11,6 +11,28 @@
 
 ---
 
+## v0.30 – 2026-04-07
+
+### Nye funksjoner
+- **Stardew Valley-inspirert visuell stil:** Komplett visuell overhaling med varmere, mer innbydende fargepalett inspirert av Stardew Valley
+- **3D vegg-rendering:** Vegger har nå synlig toppflate (6px), venstre-kant highlight og høyre-kant skygge som gir en opphøyet 3D-blokk-følelse
+- **Gulvflis-bevels:** Alle gulvfliser har nå subtile lyse kanter øverst-venstre og mørke kanter nederst-høyre for dybdefølelse
+- **Forbedrede skygger:** Karakterer og monstre har nå retningsbestemte skygger (offset ned-høyre) med sterkere opacity for bedre 3D-dybde
+- **Rikere skog-dekorasjoner:** Mer grasstuster, blomstervarianter (5 farger), sopp og moseflekker i skogtemaet
+- **3D dør-rendering:** Dører har nå synlig trerammebevel med lys/skygge-kanter
+- **Varm tåke:** Fog of war bruker nå varm brun-svart tone i stedet for kald svart
+- **Koselig UI:** Alle menypaneler har nå varm treaktig bakgrunn med gull-brune rammer, pergament-fargede tekster
+- **Økt standard zoom:** Standard zoom økt fra 1.25 til 1.6 for mer synlige detaljer. Maks zoom økt til 3.0
+
+### Tekniske endringer
+- `COLORS`-objektet omskrevet med varme brune/beige toner i stedet for mørke lilla
+- Alle 8 `WORLD_THEMES` oppdatert med varmere, mer mettet fargepalett
+- MapRenderer utvidet med 3D vegg-rendering (lightenHex/darkenHex for retningsbelysning)
+- Alle 14 scener oppdatert med konsistent varm UI-stil
+- MonsterGraphics og CharacterSprite med forbedrede retningsskygger
+
+---
+
 ## v0.29 – 2026-04-06
 
 ### Tekniske endringer

@@ -16,7 +16,7 @@ class GameOverScene extends Phaser.Scene {
         const { width: W, height: H } = this.cameras.main;
         const cx = W / 2, cy = H / 2;
 
-        this.add.rectangle(cx, cy, W, H, 0x08060f);
+        this.add.rectangle(cx, cy, W, H, 0x2a1e14);
 
         // Record to leaderboard only on world completion, not death (#58)
         if (this.type !== 'death') {
@@ -45,7 +45,7 @@ class GameOverScene extends Phaser.Scene {
     _deathScreen(cx, cy, W, H) {
         // Red vignette
         const g = this.add.graphics();
-        g.fillStyle(0x330000, 0.4);
+        g.fillStyle(0x3a1000, 0.4);
         g.fillRect(0, 0, W, H);
 
         this.add.text(cx, cy - 110, 'DU FALT', {
@@ -54,11 +54,11 @@ class GameOverScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.add.text(cx, cy - 48, `Verden ${this.worldNum}  ·  Nivå ${this.heroStats.level}`, {
-            fontSize: '18px', color: '#ccaaaa', fontFamily: 'monospace'
+            fontSize: '18px', color: '#e0c0a0', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         this.add.text(cx, cy - 18, 'Du beholder nivå og stats. Verden genereres på nytt.', {
-            fontSize: '12px', color: '#664444', fontFamily: 'monospace'
+            fontSize: '12px', color: '#8a6a50', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         this._statsPanel(cx, cy + 18);
@@ -72,7 +72,7 @@ class GameOverScene extends Phaser.Scene {
             });
         });
 
-        const menu = this._button(cx, cy + 140, '[ HOVED MENY ]', '#666688', 14);
+        const menu = this._button(cx, cy + 140, '[ HOVED MENY ]', '#8a7a5a', 14);
         menu.on('pointerdown', () => this.scene.start('MenuScene'));
 
         this.tweens.add({ targets: retry, alpha: 0.5, duration: 650, yoyo: true, repeat: -1 });
@@ -83,7 +83,7 @@ class GameOverScene extends Phaser.Scene {
     _victoryScreen(cx, cy, W, H) {
         // Gold shimmer
         const g = this.add.graphics();
-        g.fillStyle(0x221a00, 0.5);
+        g.fillStyle(0x2a1e08, 0.5);
         g.fillRect(0, 0, W, H);
 
         this.add.text(cx, cy - 110, '✦ VERDEN KLAR ✦', {
@@ -113,7 +113,7 @@ class GameOverScene extends Phaser.Scene {
             });
         });
 
-        const menu = this._button(cx, cy + 136, '[ HOVED MENY ]', '#666688', 14);
+        const menu = this._button(cx, cy + 136, '[ HOVED MENY ]', '#8a7a5a', 14);
         menu.on('pointerdown', () => this.scene.start('MenuScene'));
 
         this.tweens.add({ targets: next, alpha: 0.5, duration: 600, yoyo: true, repeat: -1 });
@@ -137,7 +137,7 @@ class GameOverScene extends Phaser.Scene {
         ];
         lines.forEach((line, i) => {
             this.add.text(cx, cy + i * 18, line, {
-                fontSize: '13px', color: '#8899bb', fontFamily: 'monospace'
+                fontSize: '13px', color: '#c0a880', fontFamily: 'monospace'
             }).setOrigin(0.5);
         });
     }
