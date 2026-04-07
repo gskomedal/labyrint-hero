@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.31
+**Versjon:** 0.32
 **Sist oppdatert:** 2026-04-07
 
 ---
@@ -20,7 +20,7 @@ Et top-down 2D labyrint-RPG i nettleser. Spilleren navigerer en prosedyre-genere
 
 - **Motor:** Phaser 3 (v3.60.0) via CDN
 - **Labyrint:** Recursive Backtracker (DFS) + ekstra ganger fordelt på 4 tile-typer
-- **Rendering:** Phaser Graphics API – prosedyretegnet, ingen bildefiler
+- **Rendering:** Phaser Graphics API – prosedyretegnet med 3D veggflater (to-pass rendering), ingen bildefiler
 - **Lyd:** Web Audio API – prosedyremusikk og SFX, ingen lydfiler
 - **Lagring:** localStorage via SaveManager
 - **Multi-scene pattern:** GameScene + UIScene parallelt; SkillScene, InventoryScene og SettingsScene som overlays

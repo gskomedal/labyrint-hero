@@ -8,6 +8,16 @@ class MapRenderer {
 
     // ── Map drawing (themed per world) ───────────────────────────────────────
 
+    /** True if tile type is wall-like (solid, opaque, raised) */
+    _isWallLike(t) {
+        return t === TILE.WALL || t === TILE.SECRET || t === TILE.CRACKED_WALL;
+    }
+
+    /** True if tile type is floor-like (walkable, lower than walls) */
+    _isFloorLike(t) {
+        return t === TILE.FLOOR || t === TILE.EXIT || t === TILE.DOOR || t === TILE.TRAP;
+    }
+
     drawMap() {
         const scene = this.scene;
         if (!scene.mapGfx) {
@@ -16,18 +26,21 @@ class MapRenderer {
         }
         const g  = scene.mapGfx;
         const th = scene._theme;
+        const FH = typeof WALL_FACE_H !== 'undefined' ? WALL_FACE_H : 12;
         g.clear();
 
+        // ── Pass 1: Draw all tiles (wall tops, floors, doors, etc.) ──────────
         for (let y = 0; y < scene.tileH; y++) {
             for (let x = 0; x < scene.tileW; x++) {
                 const t  = scene.maze[y][x];
                 const px = x * TILE_SIZE, py = y * TILE_SIZE;
                 const S  = TILE_SIZE;
 
-                // ── WALL ──────────────────────────────────────────────────
+                // ── WALL (top-down view = the wall's top surface) ────────
                 if (t === TILE.WALL) {
                     g.fillStyle(th.WALL);
                     g.fillRect(px, py, S, S);
+                    // Brick pattern
                     g.lineStyle(1, th.WALL_MID, 0.3);
                     g.lineBetween(px, py + S / 3, px + S, py + S / 3);
                     g.lineBetween(px, py + 2 * S / 3, px + S, py + 2 * S / 3);
@@ -35,10 +48,12 @@ class MapRenderer {
                     g.lineBetween(px + (S / 4 + vOff) % S, py, px + (S / 4 + vOff) % S, py + S / 3);
                     g.lineBetween(px + (3 * S / 4 + vOff) % S, py + S / 3, px + (3 * S / 4 + vOff) % S, py + 2 * S / 3);
                     g.lineBetween(px + (S / 4 + vOff) % S, py + 2 * S / 3, px + (S / 4 + vOff) % S, py + S);
+                    // Top highlight
                     g.fillStyle(th.WALL_TOP);
                     g.fillRect(px, py, S, 3);
                     g.fillStyle(th.WALL_MID, 0.5);
                     g.fillRect(px, py + 3, S, 2);
+                    // Subtle texture variation
                     const wseed = (x * 31 + y * 17) & 0xFF;
                     if (wseed < 80) {
                         g.fillStyle(th.WALL_TOP, 0.12);
@@ -115,14 +130,6 @@ class MapRenderer {
                     const col = (x + y) % 2 === 0 ? th.FLOOR_A : th.FLOOR_B;
                     g.fillStyle(col);
                     g.fillRect(px, py, S, S);
-                    if (y > 0 && scene.maze[y - 1][x] === TILE.WALL) {
-                        g.fillStyle(0x000000, 0.18);
-                        g.fillRect(px, py, S, 4);
-                    }
-                    if (x > 0 && scene.maze[y][x - 1] === TILE.WALL) {
-                        g.fillStyle(0x000000, 0.12);
-                        g.fillRect(px, py, 3, S);
-                    }
                     this._drawFloorDeco(g, th, px, py, S, x, y);
 
                 // ── EXIT ──────────────────────────────────────────────────
@@ -147,6 +154,73 @@ class MapRenderer {
                         px + S - 13,  py + S - 10,
                         px + 13,      py + S - 10
                     );
+                }
+            }
+        }
+
+        // ── Pass 2: Draw 3D wall faces on floor tiles adjacent to walls ──────
+        // When a wall is directly above a floor-like tile, draw the wall's
+        // visible south face extending down into the floor tile. This creates
+        // the illusion that walls are raised 3D blocks.
+        const wallFace = th.WALL_FACE || th.WALL_MID;
+        for (let y = 0; y < scene.tileH; y++) {
+            for (let x = 0; x < scene.tileW; x++) {
+                const t  = scene.maze[y][x];
+                if (!this._isFloorLike(t)) continue;
+
+                const px = x * TILE_SIZE, py = y * TILE_SIZE;
+                const S  = TILE_SIZE;
+
+                // ── South face: wall directly ABOVE this floor ────────────
+                if (y > 0 && this._isWallLike(scene.maze[y - 1][x])) {
+                    // Main wall face (dark front surface)
+                    g.fillStyle(wallFace);
+                    g.fillRect(px, py, S, FH);
+                    // Horizontal mortar lines on face (brick texture)
+                    g.lineStyle(1, th.WALL_MID, 0.35);
+                    g.lineBetween(px, py + Math.floor(FH * 0.4), px + S, py + Math.floor(FH * 0.4));
+                    g.lineBetween(px, py + Math.floor(FH * 0.8), px + S, py + Math.floor(FH * 0.8));
+                    // Vertical mortar (offset per row)
+                    const vOff2 = (y % 2 === 0) ? S / 2 : 0;
+                    g.lineBetween(px + (S / 3 + vOff2) % S, py, px + (S / 3 + vOff2) % S, py + Math.floor(FH * 0.4));
+                    g.lineBetween(px + (2 * S / 3 + vOff2) % S, py + Math.floor(FH * 0.4), px + (2 * S / 3 + vOff2) % S, py + Math.floor(FH * 0.8));
+                    // Top edge highlight (where wall top meets face)
+                    g.fillStyle(th.WALL_TOP, 0.7);
+                    g.fillRect(px, py, S, 2);
+                    // Bottom edge – soft shadow where face meets floor
+                    g.fillStyle(0x000000, 0.25);
+                    g.fillRect(px, py + FH, S, 3);
+                    g.fillStyle(0x000000, 0.10);
+                    g.fillRect(px, py + FH + 3, S, 2);
+                    // Left edge lighter (light from top-left)
+                    g.fillStyle(th.WALL_TOP, 0.20);
+                    g.fillRect(px, py, 2, FH);
+                    // Right edge darker
+                    g.fillStyle(0x000000, 0.15);
+                    g.fillRect(px + S - 2, py, 2, FH);
+                }
+
+                // ── East face: wall directly to the LEFT of this floor ────
+                if (x > 0 && this._isWallLike(scene.maze[y][x - 1])) {
+                    const faceW = Math.floor(FH * 0.5);  // narrower side face
+                    g.fillStyle(wallFace, 0.7);
+                    g.fillRect(px, py, faceW, S);
+                    // Horizontal line texture
+                    g.lineStyle(1, th.WALL_MID, 0.25);
+                    g.lineBetween(px, py + S / 3, px + faceW, py + S / 3);
+                    g.lineBetween(px, py + 2 * S / 3, px + faceW, py + 2 * S / 3);
+                    // Right shadow edge
+                    g.fillStyle(0x000000, 0.15);
+                    g.fillRect(px + faceW, py, 2, S);
+                }
+
+                // ── Corner shadow: wall above AND to the left ─────────────
+                if (y > 0 && x > 0 &&
+                    this._isWallLike(scene.maze[y - 1][x]) &&
+                    this._isWallLike(scene.maze[y][x - 1])) {
+                    // Dark corner where two wall faces meet
+                    g.fillStyle(0x000000, 0.20);
+                    g.fillRect(px, py, Math.floor(FH * 0.5), FH);
                 }
             }
         }

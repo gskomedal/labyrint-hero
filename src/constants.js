@@ -110,7 +110,10 @@ const MERCHANT_MARKUP    = 1.0;  // price multiplier for merchant items
 const ZOOM_MIN     = 0.5;
 const ZOOM_MAX     = 2.5;
 const ZOOM_STEP    = 0.25;
-const ZOOM_DEFAULT = 1.25;
+const ZOOM_DEFAULT = 1.6;
+
+// Wall face height in pixels (3D south-face of walls visible from top-down view)
+const WALL_FACE_H = 12;
 
 // ─── World visual themes ──────────────────────────────────────────────────────
 // One theme per two worlds (index = Math.floor((worldNum-1)/2))
@@ -120,6 +123,7 @@ const WORLD_THEMES = [
         WALL:         0x0d3a0d,   // dark green hedge
         WALL_TOP:     0x1a6622,   // bright green top
         WALL_MID:     0x0a2a0a,
+        WALL_FACE:    0x082808,   // darker south face
         FLOOR_A:      0x1c3d10,   // grass dark
         FLOOR_B:      0x17330d,   // grass light
         CRACKED_WALL: 0x2a1a08,
@@ -136,6 +140,7 @@ const WORLD_THEMES = [
         WALL:         0x1c1c24,
         WALL_TOP:     0x2e2e3c,
         WALL_MID:     0x141418,
+        WALL_FACE:    0x101016,
         FLOOR_A:      0x16161e,
         FLOOR_B:      0x121218,
         CRACKED_WALL: 0x24243a,
@@ -152,6 +157,7 @@ const WORLD_THEMES = [
         WALL:         0x142240,
         WALL_TOP:     0x1e3860,
         WALL_MID:     0x0e1830,
+        WALL_FACE:    0x0a162e,
         FLOOR_A:      0x101c30,
         FLOOR_B:      0x0c1828,
         CRACKED_WALL: 0x1c2e50,
@@ -168,6 +174,7 @@ const WORLD_THEMES = [
         WALL:         0x1a0600,
         WALL_TOP:     0x2a0c02,
         WALL_MID:     0x120400,
+        WALL_FACE:    0x100400,
         FLOOR_A:      0x0e0400,
         FLOOR_B:      0x0a0200,
         CRACKED_WALL: 0x221004,
@@ -184,6 +191,7 @@ const WORLD_THEMES = [
         WALL:         0x281e0e,
         WALL_TOP:     0x3a2c14,
         WALL_MID:     0x1e1608,
+        WALL_FACE:    0x181208,
         FLOOR_A:      0x1c1808,
         FLOOR_B:      0x181406,
         CRACKED_WALL: 0x24200e,
@@ -200,6 +208,7 @@ const WORLD_THEMES = [
         WALL:         0x1a0800,
         WALL_TOP:     0x2a1204,
         WALL_MID:     0x140600,
+        WALL_FACE:    0x100500,
         FLOOR_A:      0x120500,
         FLOOR_B:      0x0e0300,
         CRACKED_WALL: 0x2a0e04,
@@ -216,6 +225,7 @@ const WORLD_THEMES = [
         WALL:         0x0a0418,
         WALL_TOP:     0x140828,
         WALL_MID:     0x080310,
+        WALL_FACE:    0x060210,
         FLOOR_A:      0x0a0414,
         FLOOR_B:      0x080310,
         CRACKED_WALL: 0x120620,
@@ -232,6 +242,7 @@ const WORLD_THEMES = [
         WALL:         0x1a1400,
         WALL_TOP:     0x2a2200,
         WALL_MID:     0x141000,
+        WALL_FACE:    0x100c00,
         FLOOR_A:      0x161200,
         FLOOR_B:      0x120e00,
         CRACKED_WALL: 0x221a00,

@@ -2,6 +2,22 @@
 
 ---
 
+## v0.32 – 2026-04-07
+
+### Nye funksjoner
+- **3D vegg-rendering:** To-pass rendering system – vegger har nå synlig frontflate (12px) som overlapper gulvfliser under, med murtekstur, retningsbelysning og bunnkantskygge. Gir inntrykk av at vegger er opphøyde 3D-blokker
+- **Sideflate på vegger:** Vegger til venstre for gulv viser nå en synlig sideflate med skyggekant
+- **Hjørneskygge:** Der to veggflater møtes (over + venstre) tegnes en mørkere hjørneskygge for ekstra dybde
+- **Økt standard zoom:** Standard zoom økt fra 1.25 til 1.6 for bedre synlighet av detaljer. Maks zoom økt til 3.0
+
+### Tekniske endringer
+- `MapRenderer.drawMap()` refaktorert til to-pass rendering (først gulv/vegger, deretter 3D veggflater)
+- Nye hjelpemetoder `_isWallLike()` og `_isFloorLike()` for veggflate-logikk
+- Ny `WALL_FACE` farge i alle 8 `WORLD_THEMES` (mørkere vegg-nyanse for frontflaten)
+- Ny `WALL_FACE_H` konstant (12px) for konfigurerbar veggflatehøyde
+
+---
+
 ## v0.31 – 2026-04-07
 
 ### Nye funksjoner
