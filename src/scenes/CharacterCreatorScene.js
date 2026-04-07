@@ -33,7 +33,7 @@ class CharacterCreatorScene extends Phaser.Scene {
         this._customOverrides   = {};
 
         // ── Background ────────────────────────────────────────────────────────
-        this.add.rectangle(cx, H / 2, W, H, 0x2a1e14);
+        this.add.rectangle(cx, H / 2, W, H, 0x0a0814);
 
         // ── Title ─────────────────────────────────────────────────────────────
         this.add.text(cx, 18, 'VELG DIN HELT', {

@@ -20,7 +20,7 @@ Et top-down 2D labyrint-RPG i nettleser. Spilleren navigerer en prosedyre-genere
 
 - **Motor:** Phaser 3 (v3.60.0) via CDN
 - **Labyrint:** Recursive Backtracker (DFS) + ekstra ganger fordelt på 4 tile-typer
-- **Rendering:** Phaser Graphics API – prosedyretegnet med 3D-dybdeeffekter (vegg-toppflater, gulvbevels, retningsskygger), Stardew Valley-inspirert varm fargepalett, ingen bildefiler
+- **Rendering:** Phaser Graphics API – prosedyretegnet, ingen bildefiler
 - **Lyd:** Web Audio API – prosedyremusikk og SFX, ingen lydfiler
 - **Lagring:** localStorage via SaveManager
 - **Multi-scene pattern:** GameScene + UIScene parallelt; SkillScene, InventoryScene og SettingsScene som overlays

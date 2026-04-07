@@ -26,39 +26,26 @@ class MapRenderer {
 
                 // ── WALL ──────────────────────────────────────────────────
                 if (t === TILE.WALL) {
-                    // Base wall fill
                     g.fillStyle(th.WALL);
                     g.fillRect(px, py, S, S);
-                    // Brick pattern lines
-                    g.lineStyle(1, th.WALL_MID, 0.25);
+                    g.lineStyle(1, th.WALL_MID, 0.3);
                     g.lineBetween(px, py + S / 3, px + S, py + S / 3);
                     g.lineBetween(px, py + 2 * S / 3, px + S, py + 2 * S / 3);
                     const vOff = (y % 2 === 0) ? S / 2 : 0;
                     g.lineBetween(px + (S / 4 + vOff) % S, py, px + (S / 4 + vOff) % S, py + S / 3);
                     g.lineBetween(px + (3 * S / 4 + vOff) % S, py + S / 3, px + (3 * S / 4 + vOff) % S, py + 2 * S / 3);
                     g.lineBetween(px + (S / 4 + vOff) % S, py + 2 * S / 3, px + (S / 4 + vOff) % S, py + S);
-                    // 3D top face — raised block look
                     g.fillStyle(th.WALL_TOP);
-                    g.fillRect(px, py, S, 6);
-                    g.fillStyle(lightenHex(th.WALL_TOP, 1.3), 0.55);
-                    g.fillRect(px, py, S, 2);
-                    // Left edge highlight (light from top-left)
-                    g.fillStyle(lightenHex(th.WALL, 1.2), 0.20);
-                    g.fillRect(px, py, 3, S);
-                    // Right edge shadow
-                    g.fillStyle(darkenHex(th.WALL, 0.6), 0.25);
-                    g.fillRect(px + S - 3, py, 3, S);
-                    // Bottom edge shadow
-                    g.fillStyle(darkenHex(th.WALL, 0.5), 0.20);
-                    g.fillRect(px, py + S - 2, S, 2);
-                    // Random brick variation
+                    g.fillRect(px, py, S, 3);
+                    g.fillStyle(th.WALL_MID, 0.5);
+                    g.fillRect(px, py + 3, S, 2);
                     const wseed = (x * 31 + y * 17) & 0xFF;
                     if (wseed < 80) {
-                        g.fillStyle(th.WALL_TOP, 0.10);
-                        g.fillRect(px + 4, py + 7, S / 2 - 2, S / 3 - 2);
+                        g.fillStyle(th.WALL_TOP, 0.12);
+                        g.fillRect(px + 2, py + 2, S / 2 - 2, S / 3 - 2);
                     } else if (wseed > 200) {
-                        g.fillStyle(th.WALL_MID, 0.15);
-                        g.fillRect(px + S / 2, py + S / 3 + 2, S / 2 - 4, S / 3 - 2);
+                        g.fillStyle(th.WALL_MID, 0.18);
+                        g.fillRect(px + S / 2, py + S / 3 + 1, S / 2 - 2, S / 3 - 2);
                     }
                     this._drawWallDeco(g, th, px, py, S, x, y);
 
@@ -66,20 +53,11 @@ class MapRenderer {
                 } else if (t === TILE.SECRET) {
                     g.fillStyle(th.WALL);
                     g.fillRect(px, py, S, S);
-                    // 3D top face
                     g.fillStyle(th.WALL_TOP);
-                    g.fillRect(px, py, S, 6);
-                    g.fillStyle(lightenHex(th.WALL_TOP, 1.3), 0.55);
-                    g.fillRect(px, py, S, 2);
-                    // Left/right/bottom 3D edges
-                    g.fillStyle(lightenHex(th.WALL, 1.2), 0.20);
-                    g.fillRect(px, py, 3, S);
-                    g.fillStyle(darkenHex(th.WALL, 0.6), 0.25);
-                    g.fillRect(px + S - 3, py, 3, S);
-                    g.fillStyle(darkenHex(th.WALL, 0.5), 0.20);
-                    g.fillRect(px, py + S - 2, S, 2);
-                    // Subtle crack hints
-                    g.lineStyle(1, th.SECRET_COLOR, 0.75);
+                    g.fillRect(px, py, S, 3);
+                    g.fillStyle(th.WALL_MID, 0.5);
+                    g.fillRect(px, py + 3, S, 2);
+                    g.lineStyle(1, th.SECRET_COLOR, 0.85);
                     g.lineBetween(px + 8,  py + 7,  px + 10, py + 20);
                     g.lineBetween(px + 20, py + 9,  px + 22, py + 24);
                     g.lineBetween(px + 14, py + 4,  px + 15, py + 16);
@@ -88,18 +66,8 @@ class MapRenderer {
                 } else if (t === TILE.CRACKED_WALL) {
                     g.fillStyle(th.CRACKED_WALL);
                     g.fillRect(px, py, S, S);
-                    // 3D top face
                     g.fillStyle(th.WALL_TOP);
-                    g.fillRect(px, py, S, 6);
-                    g.fillStyle(lightenHex(th.WALL_TOP, 1.3), 0.55);
-                    g.fillRect(px, py, S, 2);
-                    // Left/right/bottom 3D edges
-                    g.fillStyle(lightenHex(th.CRACKED_WALL, 1.2), 0.20);
-                    g.fillRect(px, py, 3, S);
-                    g.fillStyle(darkenHex(th.CRACKED_WALL, 0.6), 0.25);
-                    g.fillRect(px + S - 3, py, 3, S);
-                    g.fillStyle(darkenHex(th.CRACKED_WALL, 0.5), 0.20);
-                    g.fillRect(px, py + S - 2, S, 2);
+                    g.fillRect(px, py, S, 3);
                     g.lineStyle(2, th.CRACKED_LINE, 1.0);
                     g.lineBetween(px + 5,  py + 5,  px + 9,  py + 22);
                     g.lineBetween(px + 9,  py + 14, px + 16, py + 19);
@@ -116,34 +84,21 @@ class MapRenderer {
                     const floorCol = (x + y) % 2 === 0 ? th.FLOOR_A : th.FLOOR_B;
                     g.fillStyle(floorCol);
                     g.fillRect(px, py, S, S);
-                    // Floor bevel under door
-                    g.fillStyle(0xffffff, 0.05);
-                    g.fillRect(px, py, S, 2);
-                    g.fillRect(px, py, 2, S);
-                    // Door frame with 3D bevel
                     g.fillStyle(th.DOOR_FRAME, 0.9);
                     g.fillRect(px + 3, py + 2, S - 6, S - 4);
-                    g.fillStyle(lightenHex(th.DOOR_FRAME, 1.2), 0.4);
-                    g.fillRect(px + 3, py + 2, S - 6, 2);
-                    g.fillRect(px + 3, py + 2, 2, S - 4);
-                    g.fillStyle(darkenHex(th.DOOR_FRAME, 0.6), 0.35);
-                    g.fillRect(px + 3, py + S - 4, S - 6, 2);
-                    g.fillRect(px + S - 5, py + 2, 2, S - 4);
-                    // Door panel
                     g.fillStyle(th.DOOR, 0.95);
                     g.fillRect(px + 5, py + 4, S - 10, S - 8);
-                    // Wood grain panels
-                    g.fillStyle(darkenHex(th.DOOR, 0.7), 0.35);
+                    const dp = Phaser.Display.Color.IntegerToColor(th.DOOR);
+                    g.fillStyle(th.WALL_MID, 0.45);
                     g.fillRect(px + 7,  py + 6,  8, 9);
                     g.fillRect(px + 17, py + 6,  8, 9);
                     g.fillRect(px + 7,  py + 17, 8, 9);
                     g.fillRect(px + 17, py + 17, 8, 9);
-                    // Lock and handle
                     g.fillStyle(th.DOOR_FRAME);
                     g.fillCircle(px + S / 2, py + S / 2, 3);
                     g.fillStyle(0x110800);
                     g.fillCircle(px + S / 2, py + S / 2, 1);
-                    g.fillStyle(lightenHex(th.DOOR_FRAME, 1.1), 0.6);
+                    g.fillStyle(th.DOOR_FRAME, 0.65);
                     g.fillRect(px + 25, py + 4, 5, 2);
                     g.fillCircle(px + 28, py + 5, 2);
 
@@ -152,13 +107,6 @@ class MapRenderer {
                     const col = (x + y) % 2 === 0 ? th.FLOOR_A : th.FLOOR_B;
                     g.fillStyle(col);
                     g.fillRect(px, py, S, S);
-                    // Tile bevel (same as floor for concealment)
-                    g.fillStyle(0xffffff, 0.05);
-                    g.fillRect(px, py, S, 2);
-                    g.fillRect(px, py, 2, S);
-                    g.fillStyle(0x000000, 0.06);
-                    g.fillRect(px, py + S - 2, S, 2);
-                    g.fillRect(px + S - 2, py, 2, S);
                     g.fillStyle(0x8a3300, 0.08);
                     g.fillRect(px + 4, py + 4, S - 8, S - 8);
 
@@ -167,21 +115,13 @@ class MapRenderer {
                     const col = (x + y) % 2 === 0 ? th.FLOOR_A : th.FLOOR_B;
                     g.fillStyle(col);
                     g.fillRect(px, py, S, S);
-                    // Tile bevel — top-left light, bottom-right shadow
-                    g.fillStyle(0xffffff, 0.05);
-                    g.fillRect(px, py, S, 2);
-                    g.fillRect(px, py, 2, S);
-                    g.fillStyle(0x000000, 0.06);
-                    g.fillRect(px, py + S - 2, S, 2);
-                    g.fillRect(px + S - 2, py, 2, S);
-                    // Warm wall-adjacent shadows
                     if (y > 0 && scene.maze[y - 1][x] === TILE.WALL) {
-                        g.fillStyle(0x1a0e05, 0.22);
-                        g.fillRect(px, py, S, 5);
+                        g.fillStyle(0x000000, 0.18);
+                        g.fillRect(px, py, S, 4);
                     }
                     if (x > 0 && scene.maze[y][x - 1] === TILE.WALL) {
-                        g.fillStyle(0x1a0e05, 0.15);
-                        g.fillRect(px, py, 4, S);
+                        g.fillStyle(0x000000, 0.12);
+                        g.fillRect(px, py, 3, S);
                     }
                     this._drawFloorDeco(g, th, px, py, S, x, y);
 
@@ -330,51 +270,28 @@ class MapRenderer {
         const seed2 = (gx * 59 + gy * 43) & 0xFF;
         switch (th.DECO) {
             case 'forest': {
-                // Grass tufts — more frequent and varied
-                if (seed < 80) {
-                    g.lineStyle(1, lightenHex(th.WALL_TOP, 1.1), 0.5);
+                if (seed < 60) {
+                    g.lineStyle(1, th.WALL_TOP, 0.45);
                     g.lineBetween(px + 6,  py + S - 2, px + 4,  py + S - 8);
                     g.lineBetween(px + 10, py + S - 2, px + 12, py + S - 7);
-                    if (seed < 40) {
+                    if (seed < 30) {
                         g.lineBetween(px + 22, py + S - 2, px + 20, py + S - 6);
-                        g.lineBetween(px + 26, py + S - 2, px + 24, py + S - 5);
                     }
                 }
-                // Additional grass at tile edges
-                if (seed2 < 50) {
-                    g.lineStyle(1, th.WALL_TOP, 0.35);
-                    g.lineBetween(px + 16, py + S - 2, px + 14, py + S - 6);
-                    g.lineBetween(px + 28, py + S - 2, px + 27, py + S - 5);
+                if (seed > 230) {
+                    const flowerCol = seed2 < 128 ? 0xffff44 : 0xff88cc;
+                    g.fillStyle(flowerCol, 0.6);
+                    g.fillCircle(px + (seed & 15) + 4, py + (seed >> 4 & 9) + 6, 2);
+                    g.lineStyle(1, th.WALL_TOP, 0.3);
+                    g.lineBetween(px + (seed & 15) + 4, py + (seed >> 4 & 9) + 8, px + (seed & 15) + 4, py + (seed >> 4 & 9) + 13);
                 }
-                // Flowers — more variety (yellow, pink, white, blue)
-                if (seed > 215) {
-                    const flowerCols = [0xffff44, 0xff88cc, 0xffffff, 0x88bbff, 0xff6644];
-                    const flowerCol = flowerCols[(seed + seed2) % flowerCols.length];
-                    const fx = px + (seed & 15) + 4, fy = py + (seed >> 4 & 9) + 6;
-                    g.fillStyle(flowerCol, 0.65);
-                    g.fillCircle(fx, fy, 2);
-                    g.fillStyle(flowerCol, 0.35);
-                    g.fillCircle(fx - 1, fy - 1, 1);
-                    g.fillCircle(fx + 1, fy - 1, 1);
-                    g.lineStyle(1, darkenHex(th.WALL_TOP, 0.8), 0.4);
-                    g.lineBetween(fx, fy + 2, fx, fy + 7);
-                }
-                // Small pebbles / mushrooms
-                if (seed > 180 && seed <= 215) {
-                    g.fillStyle(th.WALL_MID, 0.45);
+                if (seed > 200 && seed <= 230) {
+                    g.fillStyle(th.WALL_MID, 0.5);
                     g.fillCircle(px + (seed & 13) + 6, py + (seed >> 3 & 11) + 5, 2);
-                    if (seed < 195) {
-                        // Tiny mushroom
-                        g.fillStyle(0xddaa77, 0.5);
-                        g.fillRect(px + (seed2 & 11) + 8, py + (seed2 >> 3 & 7) + 12, 2, 3);
-                        g.fillStyle(0xcc6644, 0.5);
-                        g.fillCircle(px + (seed2 & 11) + 9, py + (seed2 >> 3 & 7) + 12, 2);
-                    }
                 }
-                // Moss patches
-                if (seed2 > 220) {
-                    g.fillStyle(darkenHex(th.FLOOR_A, 0.85), 0.2);
-                    g.fillCircle(px + S/2, py + S/2, 5);
+                if (seed2 > 230) {
+                    g.fillStyle(th.WALL_MID, 0.15);
+                    g.fillCircle(px + S/2, py + S/2, 4);
                 }
                 break;
             }
@@ -667,10 +584,10 @@ class MapRenderer {
             for (let x = 0; x < scene.tileW; x++) {
                 const f = scene.fog[y][x];
                 if (f === FOG.DARK) {
-                    g.fillStyle(0x080400, 0.97);
+                    g.fillStyle(0x000000, 1);
                     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 } else if (f === FOG.DIM) {
-                    g.fillStyle(0x0a0500, 0.50);
+                    g.fillStyle(0x000000, 0.52);
                     g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 }
             }

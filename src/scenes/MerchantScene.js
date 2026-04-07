@@ -18,15 +18,15 @@ class MerchantScene extends Phaser.Scene {
         const panelW = 440, panelH = 380;
 
         // Background
-        this.add.rectangle(cx, cy, W, H, 0x1a1008, 0.78);
-        this.add.rectangle(cx, cy, panelW, panelH, 0x2a1e14).setStrokeStyle(2, 0x7a6030);
+        this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
+        this.add.rectangle(cx, cy, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x2244aa);
 
         // Title
         this.add.text(cx, cy - panelH / 2 + 18, 'HANDELSMANN', {
-            fontSize: '20px', color: '#d4a843', fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '20px', color: '#4488ff', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.rectangle(cx, cy - panelH / 2 + 38, panelW - 40, 1, 0x5a4a30);
+        this.add.rectangle(cx, cy - panelH / 2 + 38, panelW - 40, 1, 0x223344);
 
         // Gold display
         this._goldText = this.add.text(cx, cy - panelH / 2 + 50, '', {
@@ -35,20 +35,20 @@ class MerchantScene extends Phaser.Scene {
 
         // Message area
         this._msgText = this.add.text(cx, cy + panelH / 2 - 40, '', {
-            fontSize: '11px', color: '#c0a880', fontFamily: 'monospace'
+            fontSize: '11px', color: '#88bbff', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Close hint
         this.add.text(cx, cy + panelH / 2 - 14, '[ESC/E] Lukk', {
-            fontSize: '11px', color: '#6a5a40', fontFamily: 'monospace'
+            fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Close button
         const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
-            fontSize: '20px', color: '#8a7a5a', fontFamily: 'monospace'
+            fontSize: '20px', color: '#667788', fontFamily: 'monospace'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#8a7a5a'));
+        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
         closeBtn.on('pointerdown', () => this._close());
 
         this._buildShop(cx, cy, panelW, panelH);

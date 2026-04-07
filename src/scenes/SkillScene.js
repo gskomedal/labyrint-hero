@@ -16,7 +16,7 @@ class SkillScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
 
         // ── Dim overlay ───────────────────────────────────────────────────────
-        this.add.rectangle(cx, cy, W, H, 0x1a1008, 0.78);
+        this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
 
         // ── Panel ─────────────────────────────────────────────────────────────
         const panelW = Math.min(W - 10, 940);
@@ -25,17 +25,17 @@ class SkillScene extends Phaser.Scene {
         const py = cy - panelH / 2;
 
         const panel = this.add.graphics();
-        panel.fillStyle(0x221a10, 0.97);
+        panel.fillStyle(0x080618, 0.97);
         panel.fillRoundedRect(px, py, panelW, panelH, 8);
-        panel.lineStyle(2, 0x8b6b3a);
+        panel.lineStyle(2, 0x4444aa);
         panel.strokeRoundedRect(px, py, panelW, panelH, 8);
 
         // Title
         const titleText = this.viewOnly
             ? 'FERDIGHETSTREET  –  Trykk T eller ESC for å lukke'
             : 'NIVÅ OPP  –  Velg én evne fra spesialiseringsgrenen';
-        const titleColor = this.viewOnly ? '#c0a880' : '#f5e642';
-        const titleStroke = this.viewOnly ? '#4a3a20' : '#7a6a00';
+        const titleColor = this.viewOnly ? '#88aacc' : '#f5e642';
+        const titleStroke = this.viewOnly ? '#334466' : '#7a6a00';
         this.add.text(cx, py + 18, titleText, {
             fontSize: '15px', color: titleColor, fontFamily: 'monospace',
             fontStyle: 'bold', stroke: titleStroke, strokeThickness: 2
@@ -47,7 +47,7 @@ class SkillScene extends Phaser.Scene {
             this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
         }
 
-        this.add.rectangle(cx, py + 38, panelW - 30, 1, 0x5a4a30);
+        this.add.rectangle(cx, py + 38, panelW - 30, 1, 0x2a2060);
 
         // ── Draw the 5-path tree ───────────────────────────────────────────────
         const colW = panelW / SKILL_TREE_PATHS.length;

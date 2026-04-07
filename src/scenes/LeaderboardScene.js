@@ -16,7 +16,7 @@ class LeaderboardScene extends Phaser.Scene {
         this._dyn = [];
 
         // Background
-        this.add.rectangle(cx, cy, W, H, 0x2a1e14);
+        this.add.rectangle(cx, cy, W, H, 0x08060f);
 
         // Title
         this.add.text(cx, 30, 'LEDERTAVLE', {
@@ -24,7 +24,7 @@ class LeaderboardScene extends Phaser.Scene {
             fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 3
         }).setOrigin(0.5);
 
-        this.add.rectangle(cx, 52, 400, 1, 0x5a4a30);
+        this.add.rectangle(cx, 52, 400, 1, 0x333355);
 
         // Filter buttons
         this._buildFilters(cx, 70);
@@ -43,7 +43,7 @@ class LeaderboardScene extends Phaser.Scene {
 
         // Back button
         const back = this.add.text(cx, H - 30, '[ TILBAKE ]', {
-            fontSize: '18px', color: '#8a7a5a', fontFamily: 'monospace'
+            fontSize: '18px', color: '#666688', fontFamily: 'monospace'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         back.on('pointerover', () => back.setAlpha(0.7));
         back.on('pointerout',  () => back.setAlpha(1));

@@ -10,7 +10,7 @@ class SettingsScene extends Phaser.Scene {
 
         // ── Dim background ───────────────────────────────────────────────────
         const dim = this.add.graphics();
-        dim.fillStyle(0x1a1008, 0.72);
+        dim.fillStyle(0x000000, 0.72);
         dim.fillRect(0, 0, W, H);
 
         // ── Panel ────────────────────────────────────────────────────────────
@@ -18,14 +18,14 @@ class SettingsScene extends Phaser.Scene {
         const PX = (W - PW) / 2, PY = (H - PH) / 2;
 
         const panel = this.add.graphics();
-        panel.fillStyle(0x2a1e14, 0.97);
+        panel.fillStyle(0x0d0b1e, 0.97);
         panel.fillRoundedRect(PX, PY, PW, PH, 8);
-        panel.lineStyle(2, 0x8b6b3a, 1);
+        panel.lineStyle(2, 0x334466, 1);
         panel.strokeRoundedRect(PX, PY, PW, PH, 8);
 
-        const ts = (sz, col = '#c0a880') => ({ fontSize: sz + 'px', color: col, fontFamily: 'monospace' });
+        const ts = (sz, col = '#aabbdd') => ({ fontSize: sz + 'px', color: col, fontFamily: 'monospace' });
 
-        this.add.text(PX + PW / 2, PY + 18, '⚙  Innstillinger', ts(15, '#d4a843')).setOrigin(0.5, 0);
+        this.add.text(PX + PW / 2, PY + 18, '⚙  Innstillinger', ts(15, '#88bbff')).setOrigin(0.5, 0);
 
         // ── Rows ─────────────────────────────────────────────────────────────
         const rowY = [PY + 52, PY + 104, PY + 148, PY + 192];

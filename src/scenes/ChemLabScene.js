@@ -18,7 +18,7 @@ class ChemLabScene extends Phaser.Scene {
         this._filter = 'all'; // 'all' | 'potion' | 'explosive' | 'medicine'
 
         // ── Dim overlay ───────────────────────────────────────────────────────
-        this.add.rectangle(cx, cy, W, H, 0x1a1008, 0.82);
+        this.add.rectangle(cx, cy, W, H, 0x000000, 0.82);
 
         // ── Panel ─────────────────────────────────────────────────────────────
         this.panelW = Math.min(W - 10, 700);
@@ -27,7 +27,7 @@ class ChemLabScene extends Phaser.Scene {
         this.py = cy - this.panelH / 2;
 
         const panel = this.add.graphics();
-        panel.fillStyle(0x142010, 0.97);
+        panel.fillStyle(0x081808, 0.97);
         panel.fillRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
         panel.lineStyle(2, 0x33dd88);
         panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);

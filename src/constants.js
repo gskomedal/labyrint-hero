@@ -23,34 +23,34 @@ const FOG = {
 };
 
 const COLORS = {
-    WALL:          0x5c3a1e,   // warm brown
-    WALL_TOP:      0x7a5233,   // lighter brown highlight
-    CRACKED_WALL:  0x6b4428,   // visible crack hint
-    CRACKED_LINE:  0x8b6b3a,   // crack mark color
-    SECRET_CRACK:  0x6a4a2e,
-    DOOR:          0x6b3a18,   // dark wood door
-    DOOR_FRAME:    0xd4a843,   // warm gold frame/handle
-    FLOOR_A:       0x8b7355,   // warm tan
-    FLOOR_B:       0x7d6648,   // darker tan
-    EXIT:          0x55cc55,   // softer green
-    EXIT_GLOW:     0x66dd66,
+    WALL:          0x1a1028,
+    WALL_TOP:      0x2e1f44,
+    CRACKED_WALL:  0x251435,   // Slightly lighter – visible crack hint
+    CRACKED_LINE:  0x4a2a6a,   // Crack mark color
+    SECRET_CRACK:  0x2e1f44,
+    DOOR:          0x7a4422,   // Brown door
+    DOOR_FRAME:    0xcc9933,   // Golden door frame/handle
+    FLOOR_A:       0x3d3255,
+    FLOOR_B:       0x352c4a,
+    EXIT:          0x00e87a,
+    EXIT_GLOW:     0x00ff88,
     HERO:          0xf5e642,
-    HERO_EYE:      0x2a1808,
+    HERO_EYE:      0x1a1028,
     MONSTER:       0x44cc44,
     MONSTER_ORC:   0x7a9944,
     MONSTER_TRL:   0x997755,
     BOSS:          0xff1166,
     BOSS_CROWN:    0xffcc00,
-    HEART_FULL:    0xe83838,   // warm red
-    HEART_EMPTY:   0x5a3a2a,   // warm brown empty
-    XP_BAR:        0x55bb55,   // green XP
-    XP_BG:         0x3a3025,   // brown bg
-    HUD_BG:        0x3a2818,   // dark wood
+    HEART_FULL:    0xff2244,
+    HEART_EMPTY:   0x442233,
+    XP_BAR:        0x44aaff,
+    XP_BG:         0x1a2a3a,
+    HUD_BG:        0x0a0a14,
     ARROW:         0xffff88,
     WHITE:         0xffffff,
     GREY:          0x888888,
-    POISON:        0x66cc44,   // poison status colour (green)
-    TRAP_SPIKE:    0x886644    // spike trap floor colour
+    POISON:        0x44ee66,   // Poison status colour (green)
+    TRAP_SPIKE:    0x886644    // Spike trap floor colour
 };
 
 // Gameplay tuning
@@ -108,139 +108,139 @@ const MERCHANT_MARKUP    = 1.0;  // price multiplier for merchant items
 
 // Camera zoom limits
 const ZOOM_MIN     = 0.5;
-const ZOOM_MAX     = 3.0;
+const ZOOM_MAX     = 2.5;
 const ZOOM_STEP    = 0.25;
-const ZOOM_DEFAULT = 1.6;
+const ZOOM_DEFAULT = 1.25;
 
 // ─── World visual themes ──────────────────────────────────────────────────────
 // One theme per two worlds (index = Math.floor((worldNum-1)/2))
 const WORLD_THEMES = [
-    {   // 0 – Worlds 1-2: Forest Garden (lush Stardew spring)
+    {   // 0 – Worlds 1-2: Forest Garden
         name:         'Skogslabyrint',
-        WALL:         0x2a5a1a,   // rich green hedge
-        WALL_TOP:     0x3a7a2a,   // bright green top
-        WALL_MID:     0x1e4a14,
-        FLOOR_A:      0x5a8a3a,   // lush grass
-        FLOOR_B:      0x4d7a30,   // darker grass
-        CRACKED_WALL: 0x4a3a18,
-        CRACKED_LINE: 0x7a6a30,
-        DOOR:         0x6a4020,
-        DOOR_FRAME:   0xbb8833,
-        SECRET_COLOR: 0x2a5820,
-        FOG_TINT:     0x0a1a04,
-        ACCENT:       0x66ff66,
+        WALL:         0x0d3a0d,   // dark green hedge
+        WALL_TOP:     0x1a6622,   // bright green top
+        WALL_MID:     0x0a2a0a,
+        FLOOR_A:      0x1c3d10,   // grass dark
+        FLOOR_B:      0x17330d,   // grass light
+        CRACKED_WALL: 0x2a1a08,
+        CRACKED_LINE: 0x664422,
+        DOOR:         0x5a3412,
+        DOOR_FRAME:   0xaa7722,
+        SECRET_COLOR: 0x0e3210,
+        FOG_TINT:     0x001100,
+        ACCENT:       0x44ee66,
         DECO:         'forest',
     },
-    {   // 1 – Worlds 3-4: Stone Cave (warm grey-brown)
+    {   // 1 – Worlds 3-4: Stone Cave
         name:         'Steingrotte',
-        WALL:         0x3a3530,   // warm grey stone
-        WALL_TOP:     0x504a42,   // lighter stone top
-        WALL_MID:     0x2e2a25,
-        FLOOR_A:      0x504840,   // warm stone floor
-        FLOOR_B:      0x443c35,
-        CRACKED_WALL: 0x484038,
-        CRACKED_LINE: 0x6a7090,
-        DOOR:         0x5a4a28,
-        DOOR_FRAME:   0x998844,
-        SECRET_COLOR: 0x383228,
-        FOG_TINT:     0x080604,
-        ACCENT:       0x8899cc,
+        WALL:         0x1c1c24,
+        WALL_TOP:     0x2e2e3c,
+        WALL_MID:     0x141418,
+        FLOOR_A:      0x16161e,
+        FLOOR_B:      0x121218,
+        CRACKED_WALL: 0x24243a,
+        CRACKED_LINE: 0x4a5080,
+        DOOR:         0x4a3a18,
+        DOOR_FRAME:   0x887733,
+        SECRET_COLOR: 0x1a1a28,
+        FOG_TINT:     0x000008,
+        ACCENT:       0x6688ff,
         DECO:         'cave',
     },
-    {   // 2 – World 5: Ice Crystal (brighter blue-white)
+    {   // 2 – World 5: Ice Crystal
         name:         'Iskrystall',
-        WALL:         0x2a4a6a,   // slate blue
-        WALL_TOP:     0x3a6080,   // lighter blue top
-        WALL_MID:     0x1e3a55,
-        FLOOR_A:      0x3a5a7a,   // steel blue floor
-        FLOOR_B:      0x304e6a,
-        CRACKED_WALL: 0x3a5070,
-        CRACKED_LINE: 0x8ac0ee,
-        DOOR:         0x2a4868,
-        DOOR_FRAME:   0x77ddff,
-        SECRET_COLOR: 0x283e58,
-        FOG_TINT:     0x040810,
-        ACCENT:       0x99eeff,
+        WALL:         0x142240,
+        WALL_TOP:     0x1e3860,
+        WALL_MID:     0x0e1830,
+        FLOOR_A:      0x101c30,
+        FLOOR_B:      0x0c1828,
+        CRACKED_WALL: 0x1c2e50,
+        CRACKED_LINE: 0x7ab0ee,
+        DOOR:         0x1c3858,
+        DOOR_FRAME:   0x66ccff,
+        SECRET_COLOR: 0x101e38,
+        FOG_TINT:     0x000410,
+        ACCENT:       0x88ddff,
         DECO:         'ice',
     },
-    {   // 3 – World 6: Volcanic Abyss (deep red earth)
+    {   // 3 – World 6: Volcanic Abyss
         name:         'Vulkandungeon',
-        WALL:         0x3a1810,   // dark red-brown
-        WALL_TOP:     0x502818,   // brighter red top
-        WALL_MID:     0x2a1008,
-        FLOOR_A:      0x2a1a12,   // dark warm earth
-        FLOOR_B:      0x22140e,
-        CRACKED_WALL: 0x3a2010,
-        CRACKED_LINE: 0xff5500,
-        DOOR:         0x4a2210,
-        DOOR_FRAME:   0xff7722,
-        SECRET_COLOR: 0x301810,
-        FOG_TINT:     0x0a0400,
-        ACCENT:       0xff6622,
+        WALL:         0x1a0600,
+        WALL_TOP:     0x2a0c02,
+        WALL_MID:     0x120400,
+        FLOOR_A:      0x0e0400,
+        FLOOR_B:      0x0a0200,
+        CRACKED_WALL: 0x221004,
+        CRACKED_LINE: 0xff4400,
+        DOOR:         0x3a1408,
+        DOOR_FRAME:   0xff6600,
+        SECRET_COLOR: 0x180500,
+        FOG_TINT:     0x0a0000,
+        ACCENT:       0xff5500,
         DECO:         'volcanic',
     },
-    {   // 4 – World 7: Ancient Temple (warm sandstone)
+    {   // 4 – Worlds 7: Ancient Temple
         name:         'Oldtidstempel',
-        WALL:         0x5a4a28,   // sandstone
-        WALL_TOP:     0x706030,   // lighter sandstone top
-        WALL_MID:     0x443a1e,
-        FLOOR_A:      0x4a3c20,   // warm sand floor
-        FLOOR_B:      0x3e321a,
-        CRACKED_WALL: 0x504420,
-        CRACKED_LINE: 0xddaa33,
-        DOOR:         0x5a4418,
-        DOOR_FRAME:   0xffdd33,
-        SECRET_COLOR: 0x4a3c1e,
-        FOG_TINT:     0x0a0804,
-        ACCENT:       0xffdd55,
+        WALL:         0x281e0e,
+        WALL_TOP:     0x3a2c14,
+        WALL_MID:     0x1e1608,
+        FLOOR_A:      0x1c1808,
+        FLOOR_B:      0x181406,
+        CRACKED_WALL: 0x24200e,
+        CRACKED_LINE: 0xcc9922,
+        DOOR:         0x4a3810,
+        DOOR_FRAME:   0xffcc22,
+        SECRET_COLOR: 0x201a08,
+        FOG_TINT:     0x080500,
+        ACCENT:       0xffcc44,
         DECO:         'temple',
     },
-    {   // 5 – Worlds 8-12: Deep Magma (earth with ember)
+    {   // 5 – Worlds 8-12: Deep Magma (Dyplag)
         name:         'Dyplag',
-        WALL:         0x3a1a08,   // deep earth brown
-        WALL_TOP:     0x502a10,   // brighter earth top
-        WALL_MID:     0x2a1204,
-        FLOOR_A:      0x2a1208,   // dark earth
-        FLOOR_B:      0x220e06,
-        CRACKED_WALL: 0x3a1808,
-        CRACKED_LINE: 0xff7733,
-        DOOR:         0x4a2410,
-        DOOR_FRAME:   0xff9955,
-        SECRET_COLOR: 0x301408,
-        FOG_TINT:     0x0a0400,
-        ACCENT:       0xff7733,
+        WALL:         0x1a0800,
+        WALL_TOP:     0x2a1204,
+        WALL_MID:     0x140600,
+        FLOOR_A:      0x120500,
+        FLOOR_B:      0x0e0300,
+        CRACKED_WALL: 0x2a0e04,
+        CRACKED_LINE: 0xff6622,
+        DOOR:         0x3a1a08,
+        DOOR_FRAME:   0xff8844,
+        SECRET_COLOR: 0x1a0800,
+        FOG_TINT:     0x0a0200,
+        ACCENT:       0xff6622,
         DECO:         'deep',
     },
-    {   // 6 – Worlds 13-18: Underworld (warmer purple)
+    {   // 6 – Worlds 13-18: Underworld (Underverden)
         name:         'Underverden',
-        WALL:         0x2a1840,   // warm purple
-        WALL_TOP:     0x3a2855,   // lighter purple top
-        WALL_MID:     0x1e1030,
-        FLOOR_A:      0x1e1230,   // muted purple floor
-        FLOOR_B:      0x180e28,
-        CRACKED_WALL: 0x281440,
-        CRACKED_LINE: 0x9955dd,
-        DOOR:         0x2a1848,
-        DOOR_FRAME:   0xbb77ff,
-        SECRET_COLOR: 0x201438,
-        FOG_TINT:     0x060210,
-        ACCENT:       0xbb77ff,
+        WALL:         0x0a0418,
+        WALL_TOP:     0x140828,
+        WALL_MID:     0x080310,
+        FLOOR_A:      0x0a0414,
+        FLOOR_B:      0x080310,
+        CRACKED_WALL: 0x120620,
+        CRACKED_LINE: 0x8844cc,
+        DOOR:         0x201040,
+        DOOR_FRAME:   0xaa66ff,
+        SECRET_COLOR: 0x0a0418,
+        FOG_TINT:     0x020008,
+        ACCENT:       0xaa66ff,
         DECO:         'underworld',
     },
-    {   // 7 – Worlds 19-25: Earth's Core (golden amber)
+    {   // 7 – Worlds 19-25: Earth's Core (Jordens kjerne)
         name:         'Jordens kjerne',
-        WALL:         0x4a3a08,   // dark gold
-        WALL_TOP:     0x605010,   // amber top
-        WALL_MID:     0x382c04,
-        FLOOR_A:      0x3a2c06,   // amber floor
-        FLOOR_B:      0x302404,
-        CRACKED_WALL: 0x443208,
-        CRACKED_LINE: 0xffbb22,
-        DOOR:         0x4a3608,
-        DOOR_FRAME:   0xffee55,
-        SECRET_COLOR: 0x382c08,
-        FOG_TINT:     0x0a0804,
-        ACCENT:       0xffdd22,
+        WALL:         0x1a1400,
+        WALL_TOP:     0x2a2200,
+        WALL_MID:     0x141000,
+        FLOOR_A:      0x161200,
+        FLOOR_B:      0x120e00,
+        CRACKED_WALL: 0x221a00,
+        CRACKED_LINE: 0xffaa00,
+        DOOR:         0x3a2a00,
+        DOOR_FRAME:   0xffdd44,
+        SECRET_COLOR: 0x1a1400,
+        FOG_TINT:     0x080600,
+        ACCENT:       0xffcc00,
         DECO:         'core',
     },
 ];
