@@ -2,6 +2,15 @@
 
 ---
 
+## v0.31 – 2026-04-07
+
+### Nye funksjoner
+- **Forbedret musikk-kvalitet:** Alle 8 musikktemaer utvidet fra 16 til 64 noter per melodi (4 fraser: A–B–A'–C), basslinjer fra 8 til 32 noter, kontramelodier fra 16 til 64 noter, og akkordprogresjoner fra 4 til 8. Full loop er nå ~27 sekunder i stedet for ~7 sekunder
+- **Perkusjon:** Nytt rytme-lag med noise-basert perkusjon tilpasset hvert tema (sparsomt for Is, drivende for Vulkan, marsj-aktig for Kjerne)
+- **Velocity-variasjon:** Subtil tilfeldig volumvariasjon (±15%) på melodi og kontramellodi for mer levende, humanisert lyd
+
+---
+
 ## v0.29 – 2026-04-06
 
 ### Tekniske endringer
