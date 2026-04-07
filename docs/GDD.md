@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.30
-**Sist oppdatert:** 2026-04-06
+**Versjon:** 0.31
+**Sist oppdatert:** 2026-04-07
 
 ---
 
@@ -35,7 +35,7 @@ src/
   data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy) + sjeldenhetsystem
   graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser, 2 kjønn, 10 frisyrer, 4 klesstiler)
   systems/Inventory.js      – 2 utstyrsplasser + 10-spors ryggsekk
-  systems/AudioManager.js   – prosedyremusikk (5 temaer) + SFX-motoren
+  systems/AudioManager.js   – prosedyremusikk (8 temaer, 64-noters melodier) + SFX-motoren
   systems/MapRenderer.js    – kartrendering, tåke, portal-animasjon
   systems/ItemSpawner.js    – kister, verktøy, gjenstander, kjøpmann
   systems/MonsterManager.js – monsterplassering, AI, statuseffekter
@@ -311,7 +311,7 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 
 ## 8. Lyd
 
-- **Bakgrunnsmusikk:** 8 prosedyre-temaer (Web Audio API) inspirert av Edvard Grieg, med melodi, bass, akkorder og kontramellodi. Skifter med verden/sone
+- **Bakgrunnsmusikk:** 8 prosedyre-temaer (Web Audio API) inspirert av Edvard Grieg. Hver melodi er 64 noter lang (4 fraser: A–B–A'–C) med 32-noters basslinje, 64-noters kontramellodi, 8 akkordprogresjoner og perkusjonsrytme. Subtil velocity-variasjon for humanisering. Full loop ~27 sekunder. Skifter med verden/sone
 - **SFX:** angrep, pilskudd, skade, plukk opp, nivå-opp, død, døroppning, veggskjøting, exit-portal
 - **Innstillinger:** ⚙-knapp i HUD åpner SettingsScene med volum-slidere og on/off-toggle
 
@@ -373,7 +373,7 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 | Minimap (M-tast) | ✅ Ferdig | Fog-bevisst, hjørne-kart |
 | Statuseffekter (4 typer) | ✅ Ferdig | Gift, Brann, Frostbitt, Lammet |
 | Feller/traps | ✅ Ferdig | Usynlige spikefeller, 1-gangs-trigger |
-| Bakgrunnsmusikk (8 temaer) | ✅ Ferdig | Web Audio API, Grieg-inspirert med kontramellodi |
+| Bakgrunnsmusikk (8 temaer) | ✅ Ferdig | Web Audio API, Grieg-inspirert. 64-noters melodier, perkusjon, velocity-variasjon |
 | SFX (9 typer) | ✅ Ferdig | |
 | Lydinnstillinger | ✅ Ferdig | SettingsScene |
 | SaveManager (localStorage) | ✅ Ferdig | |
