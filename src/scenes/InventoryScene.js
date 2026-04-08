@@ -19,7 +19,7 @@ class InventoryScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
 
-        const panelW = 520;
+        const panelW = 740;
         const hasPet = this.pet && this.pet.alive;
         const bpCount = this.inv.backpack.length;
         const bpRows = Math.ceil(bpCount / 5);
@@ -28,22 +28,24 @@ class InventoryScene extends Phaser.Scene {
         const panelY = cy;
         this.add.rectangle(cx, panelY, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x334466);
 
-        this.add.text(cx, panelY - panelH / 2 + 18, 'INVENTAR', {
+        // Title shifted right to make room for portrait
+        const contentCX = cx + 100;
+        this.add.text(contentCX, panelY - panelH / 2 + 18, 'INVENTAR', {
             fontSize: '20px', color: '#ccddff', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.rectangle(cx, panelY - panelH / 2 + 54, panelW - 40, 1, 0x223344);
+        this.add.rectangle(contentCX, panelY - panelH / 2 + 54, panelW - 250, 1, 0x223344);
 
         // Stats line – dynamic so it refreshes
-        this._statsText = this.add.text(cx, panelY - panelH / 2 + 40, '', {
+        this._statsText = this.add.text(contentCX, panelY - panelH / 2 + 40, '', {
             fontSize: '11px', color: '#667788', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        // Section labels (static)
-        this.add.text(cx - panelW / 2 + 20, panelY - panelH / 2 + 62, 'UTSTYR', {
+        // Section labels (static) - shifted right
+        this.add.text(contentCX - 220, panelY - panelH / 2 + 62, 'UTSTYR', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         });
-        this.add.text(cx, panelY - panelH / 2 + 168, 'EVNER', {
+        this.add.text(contentCX, panelY - panelH / 2 + 168, 'EVNER', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
         // RYGGSEKK label is drawn dynamically in _refresh() to show slot count
@@ -97,7 +99,8 @@ class InventoryScene extends Phaser.Scene {
         const { width: W, height: H } = this.cameras.main;
         const cx = W / 2, cy = H / 2;
         const hasPet = this.pet && this.pet.alive;
-        const panelW = 520;
+        const panelW = 740;
+        const contentCX = cx + 100;
         const bpCount = this.inv.backpack.length;
         const bpRows = Math.ceil(bpCount / 5);
         const extraBpSpace = Math.max(0, (bpRows - 2) * 60);
@@ -111,14 +114,14 @@ class InventoryScene extends Phaser.Scene {
         );
 
         // ── Character portrait (left of equipment) ────────────────────────────
-        const portraitSize = 96;
-        const portraitX = cx - panelW / 2 + 22;
-        const portraitY = panelY - panelH / 2 + 68;
+        const portraitSize = 192;
+        const portraitX = cx - panelW / 2 + 16;
+        const portraitY = panelY - panelH / 2 + 60;
         const pGfx = this._d(this.add.graphics());
-        pGfx.fillStyle(0x000000, 0.3);
-        pGfx.fillRoundedRect(portraitX - 3, portraitY - 3, portraitSize + 6, portraitSize + 6, 4);
-        pGfx.lineStyle(1, 0x334466, 0.5);
-        pGfx.strokeRoundedRect(portraitX - 3, portraitY - 3, portraitSize + 6, portraitSize + 6, 4);
+        pGfx.fillStyle(0x0a0918, 0.9);
+        pGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 6);
+        pGfx.lineStyle(2, 0x334466, 0.6);
+        pGfx.strokeRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 6);
         const eq = this.inv.equipped || {};
         if (typeof drawDetailedCharacterSprite === 'function') {
             drawDetailedCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race, eq);
@@ -126,17 +129,17 @@ class InventoryScene extends Phaser.Scene {
             drawCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race);
         }
 
-        // Equipment slots
+        // Equipment slots (shifted right to leave room for portrait)
         const eqY = panelY - panelH / 2 + 110;
-        this._makeEquipSlot(cx - 120, eqY, 'weapon', 'Våpen');
-        this._makeEquipSlot(cx,       eqY, 'armor',  'Rustning');
-        this._makeQuickUseSlot(cx + 120, eqY);
+        this._makeEquipSlot(contentCX - 120, eqY, 'weapon', 'Våpen');
+        this._makeEquipSlot(contentCX,       eqY, 'armor',  'Rustning');
+        this._makeQuickUseSlot(contentCX + 120, eqY);
 
         // Skills
-        this._drawSkills(cx, panelY - panelH / 2 + 185);
+        this._drawSkills(contentCX, panelY - panelH / 2 + 185);
 
         // Backpack label with count
-        this._d(this.add.text(cx + 80, panelY - panelH / 2 + 220,
+        this._d(this.add.text(contentCX + 80, panelY - panelH / 2 + 220,
             `(${this.inv.itemCount}/10)`, {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }));
@@ -146,10 +149,10 @@ class InventoryScene extends Phaser.Scene {
         const cols = 5, gap = 8;
         const slotSize = bpCount > 15 ? 44 : 52;
         const bpTotalW = cols * slotSize + (cols - 1) * gap;
-        const bpStartX = cx - bpTotalW / 2;
+        const bpStartX = contentCX - bpTotalW / 2;
 
         const bpLabel = `RYGGSEKK (${this.inv.itemCount}/${bpCount})`;
-        this._d(this.add.text(cx - panelW / 2 + 20, bpY - 22, bpLabel, {
+        this._d(this.add.text(contentCX - 220, bpY - 22, bpLabel, {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }));
 
@@ -164,7 +167,7 @@ class InventoryScene extends Phaser.Scene {
         if (hasPet) {
             const bpRows = Math.ceil(bpCount / cols);
             const bpBottom = bpY + bpRows * (slotSize + gap);
-            this._drawPetInventory(cx, panelY - panelH / 2, panelW, bpBottom);
+            this._drawPetInventory(contentCX, panelY - panelH / 2, panelW - 220, bpBottom);
         }
     }
 

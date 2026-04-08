@@ -31,20 +31,26 @@ class SmelteryScene extends Phaser.Scene {
         panel.fillRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
 
         // ── Camp background art ───────────────────────────────────────────────
-        const bgGfx = this.add.graphics();
-        SceneBackgrounds.drawCampBackground(bgGfx, this.px, this.py, this.panelW, this.panelH);
+        if (SceneBackgrounds.addCampBackground) {
+            SceneBackgrounds.addCampBackground(this, this.px, this.py, this.panelW, this.panelH);
+        } else {
+            const bgGfx = this.add.graphics();
+            SceneBackgrounds.drawCampBackground(bgGfx, this.px, this.py, this.panelW, this.panelH);
+        }
 
         // Panel border (on top of background)
         panel.lineStyle(2, 0xff7722);
         panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
 
         // ── Character portrait (lower-right corner) ───────────────────────────
-        const portraitSize = 88;
-        const portraitX = this.px + this.panelW - portraitSize - 12;
-        const portraitY = this.py + this.panelH - portraitSize - 30;
+        const portraitSize = 128;
+        const portraitX = this.px + this.panelW - portraitSize - 10;
+        const portraitY = this.py + this.panelH - portraitSize - 24;
         const portraitGfx = this.add.graphics();
-        portraitGfx.fillStyle(0x000000, 0.3);
-        portraitGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 4);
+        portraitGfx.fillStyle(0x0a0918, 0.7);
+        portraitGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
+        portraitGfx.lineStyle(1, 0xff7722, 0.3);
+        portraitGfx.strokeRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
         if (this.heroRef) {
             const eq = this.heroRef.inventory ? this.heroRef.inventory.equipped : {};
             if (typeof drawDetailedCharacterSprite === 'function') {

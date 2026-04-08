@@ -59,12 +59,14 @@ class SkillScene extends Phaser.Scene {
 
         // ── Character portrait (lower-left corner) ──────────────────────────
         if (this.heroRef) {
-            const portraitSize = 80;
-            const portraitX = px + 8;
-            const portraitY = py + panelH - portraitSize - 50;
+            const portraitSize = 128;
+            const portraitX = px + 6;
+            const portraitY = py + panelH - portraitSize - 46;
             const portraitGfx = this.add.graphics();
-            portraitGfx.fillStyle(0x000000, 0.3);
-            portraitGfx.fillRoundedRect(portraitX - 3, portraitY - 3, portraitSize + 6, portraitSize + 6, 4);
+            portraitGfx.fillStyle(0x0a0918, 0.7);
+            portraitGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
+            portraitGfx.lineStyle(1, 0x4444aa, 0.3);
+            portraitGfx.strokeRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
             const eq = this.heroRef.inventory ? this.heroRef.inventory.equipped : {};
             if (typeof drawDetailedCharacterSprite === 'function') {
                 drawDetailedCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race, eq);
@@ -72,8 +74,8 @@ class SkillScene extends Phaser.Scene {
                 drawCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race);
             }
             // Hero name below portrait
-            this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 6, this.heroRef.name || '', {
-                fontSize: '8px', color: '#667788', fontFamily: 'monospace'
+            this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 8, this.heroRef.heroName || '', {
+                fontSize: '9px', color: '#667788', fontFamily: 'monospace'
             }).setOrigin(0.5);
         }
 
