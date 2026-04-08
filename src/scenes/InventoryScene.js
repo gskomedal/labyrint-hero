@@ -131,17 +131,7 @@ class InventoryScene extends Phaser.Scene {
         } else {
             drawCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race);
         }
-        // Pet companion next to hero in portrait
-        if (hasPet) {
-            const petSize = 64;
-            const petDrawX = portraitX + portraitSize - petSize + 4;
-            const petDrawY = portraitY + portraitSize - petSize - 2;
-            this._drawPetPortrait(pGfx, petDrawX, petDrawY, petSize, this.pet);
-            // Pet name
-            this._d(this.add.text(petDrawX + petSize / 2, petDrawY + petSize + 2, this.pet.petName, {
-                fontSize: '8px', color: '#ffaadd', fontFamily: 'monospace'
-            }).setOrigin(0.5));
-        }
+        // Pet portrait is drawn inline with pet inventory section (see _drawPetInventory)
         // Hero name under portrait
         this._d(this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 10, h.heroName || 'Helten', {
             fontSize: '11px', color: '#8899bb', fontFamily: 'monospace'
@@ -420,9 +410,21 @@ class InventoryScene extends Phaser.Scene {
         // Separator
         this._d(this.add.rectangle(cx, baseY - 8, panelW - 40, 1, 0x223344));
 
-        // Pet label with name and HP
+        // Pet portrait (left side, aligned with slots)
+        const petPortSize = 64;
+        const petPortX = cx - panelW / 2 + 14;
+        const petPortY = baseY + 6;
+        const petGfx = this._d(this.add.graphics());
+        petGfx.fillStyle(0x120a18, 0.8);
+        petGfx.fillRoundedRect(petPortX - 3, petPortY - 3, petPortSize + 6, petPortSize + 6, 4);
+        petGfx.lineStyle(1, 0x442244, 0.4);
+        petGfx.strokeRoundedRect(petPortX - 3, petPortY - 3, petPortSize + 6, petPortSize + 6, 4);
+        this._drawPetPortrait(petGfx, petPortX, petPortY, petPortSize, pet);
+
+        // Pet label with name and HP (to the right of portrait)
+        const labelX = petPortX + petPortSize + 12;
         const hpText = `${pet.petName}  HP: ${pet.hp}/${pet.effectiveMaxHp}  ATK: ${pet.effectiveAttack}`;
-        this._d(this.add.text(cx - panelW / 2 + 20, baseY, `KJÆLEDYR  ·  ${hpText}`, {
+        this._d(this.add.text(labelX, baseY, `KJÆLEDYR  ·  ${hpText}`, {
             fontSize: '11px', color: '#ffaadd', fontFamily: 'monospace'
         }));
         this._d(this.add.text(cx + panelW / 2 - 20, baseY,
@@ -430,10 +432,10 @@ class InventoryScene extends Phaser.Scene {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(1, 0));
 
-        // Pet backpack slots (4 slots in a row)
+        // Pet backpack slots (4 slots in a row, to the right of portrait)
         const slotSize = 52, gap = 8;
         const totalW = 4 * slotSize + 3 * gap;
-        const startX = cx - totalW / 2;
+        const startX = labelX;
         const slotsY = baseY + 20;
 
         for (let i = 0; i < 4; i++) {
