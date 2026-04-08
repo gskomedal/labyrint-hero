@@ -27,10 +27,32 @@ class ChemLabScene extends Phaser.Scene {
         this.py = cy - this.panelH / 2;
 
         const panel = this.add.graphics();
-        panel.fillStyle(0x081808, 0.97);
+        panel.fillStyle(0x081810, 0.88);
         panel.fillRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
+
+        // ── Chemistry lab background art ──────────────────────────────────────
+        const bgGfx = this.add.graphics();
+        SceneBackgrounds.drawChemLabBackground(bgGfx, this.px, this.py, this.panelW, this.panelH);
+
+        // Panel border (on top of background)
         panel.lineStyle(2, 0x33dd88);
         panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
+
+        // ── Character portrait (lower-right corner) ───────────────────────────
+        const portraitSize = 88;
+        const portraitX = this.px + this.panelW - portraitSize - 12;
+        const portraitY = this.py + this.panelH - portraitSize - 30;
+        const portraitGfx = this.add.graphics();
+        portraitGfx.fillStyle(0x000000, 0.3);
+        portraitGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 4);
+        if (this.heroRef) {
+            const eq = this.heroRef.inventory ? this.heroRef.inventory.equipped : {};
+            if (typeof drawDetailedCharacterSprite === 'function') {
+                drawDetailedCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race, eq);
+            } else {
+                drawCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race);
+            }
+        }
 
         // Title
         this.add.text(cx, this.py + 18, 'KJEMISK LABORATORIUM', {

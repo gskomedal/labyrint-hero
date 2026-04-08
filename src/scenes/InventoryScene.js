@@ -110,6 +110,22 @@ class InventoryScene extends Phaser.Scene {
             `${h.heroName || 'Helten'}  ·  Nivå ${h.level}  ·  ATK ${h.attack}  ·  DEF ${h.defense}  ·  💰 ${h.gold}g`
         );
 
+        // ── Character portrait (left of equipment) ────────────────────────────
+        const portraitSize = 96;
+        const portraitX = cx - panelW / 2 + 22;
+        const portraitY = panelY - panelH / 2 + 68;
+        const pGfx = this._d(this.add.graphics());
+        pGfx.fillStyle(0x000000, 0.3);
+        pGfx.fillRoundedRect(portraitX - 3, portraitY - 3, portraitSize + 6, portraitSize + 6, 4);
+        pGfx.lineStyle(1, 0x334466, 0.5);
+        pGfx.strokeRoundedRect(portraitX - 3, portraitY - 3, portraitSize + 6, portraitSize + 6, 4);
+        const eq = this.inv.equipped || {};
+        if (typeof drawDetailedCharacterSprite === 'function') {
+            drawDetailedCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race, eq);
+        } else {
+            drawCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race);
+        }
+
         // Equipment slots
         const eqY = panelY - panelH / 2 + 110;
         this._makeEquipSlot(cx - 120, eqY, 'weapon', 'Våpen');
