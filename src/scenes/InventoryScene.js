@@ -122,12 +122,30 @@ class InventoryScene extends Phaser.Scene {
         pGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 6);
         pGfx.lineStyle(2, 0x334466, 0.6);
         pGfx.strokeRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 6);
+        // Floor hint in portrait
+        pGfx.fillStyle(0x1e1a30);
+        pGfx.fillRect(portraitX - 3, portraitY + portraitSize - 16, portraitSize + 6, 19);
         const eq = this.inv.equipped || {};
         if (typeof drawDetailedCharacterSprite === 'function') {
             drawDetailedCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race, eq);
         } else {
             drawCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race);
         }
+        // Pet companion next to hero in portrait
+        if (hasPet) {
+            const petSize = 64;
+            const petDrawX = portraitX + portraitSize - petSize + 4;
+            const petDrawY = portraitY + portraitSize - petSize - 2;
+            this._drawPetPortrait(pGfx, petDrawX, petDrawY, petSize, this.pet);
+            // Pet name
+            this._d(this.add.text(petDrawX + petSize / 2, petDrawY + petSize + 2, this.pet.petName, {
+                fontSize: '8px', color: '#ffaadd', fontFamily: 'monospace'
+            }).setOrigin(0.5));
+        }
+        // Hero name under portrait
+        this._d(this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 10, h.heroName || 'Helten', {
+            fontSize: '11px', color: '#8899bb', fontFamily: 'monospace'
+        }).setOrigin(0.5));
 
         // Equipment slots (shifted right to leave room for portrait)
         const eqY = panelY - panelH / 2 + 110;
@@ -530,6 +548,116 @@ class InventoryScene extends Phaser.Scene {
                 { fontSize: '10px', fontFamily: 'monospace', color: col }
             ));
         });
+    }
+
+    // ── Pet portrait in character frame ──────────────────────────────────────
+
+    _drawPetPortrait(g, px, py, size, pet) {
+        const sc = size / 32;
+        const cx = px + size / 2;
+        const cy = py + size / 2;
+
+        const b = (x, y, w, h, color, alpha) => {
+            if (alpha !== undefined) g.fillStyle(color, alpha);
+            else g.fillStyle(color);
+            g.fillRect(
+                Math.round(px + x * sc), Math.round(py + y * sc),
+                Math.max(1, Math.round(w * sc)), Math.max(1, Math.round(h * sc))
+            );
+        };
+
+        // Shadow
+        g.fillStyle(0x000000, 0.2);
+        g.fillEllipse(cx, py + 28 * sc, 12 * sc, 4 * sc);
+
+        const typeId = pet.typeId || 'fox';
+        const col = pet.color || 0xff8833;
+        const colDk = darkenHex(col, 0.75);
+        const colHi = lightenHex(col, 1.2);
+
+        if (typeId === 'fox') {
+            // Body
+            b(10, 16, 12, 10, col);
+            // Tail
+            g.fillStyle(darkenHex(col, 0.85));
+            g.fillEllipse(px + 24 * sc, py + 20 * sc, 5 * sc, 3 * sc);
+            g.fillStyle(0xffffff);
+            g.fillEllipse(px + 27 * sc, py + 20 * sc, 3 * sc, 2 * sc);
+            // Legs
+            b(11, 24, 3, 5, colDk); b(18, 24, 3, 5, colDk);
+            b(11, 27, 3, 2, 0x331100); b(18, 27, 3, 2, 0x331100);
+            // Head
+            b(10, 8, 12, 10, colHi);
+            // Ears
+            g.fillStyle(darkenHex(col, 0.9));
+            g.fillTriangle(px + 10 * sc, py + 10 * sc, px + 13 * sc, py + 10 * sc, px + 11 * sc, py + 3 * sc);
+            g.fillTriangle(px + 22 * sc, py + 10 * sc, px + 19 * sc, py + 10 * sc, px + 21 * sc, py + 3 * sc);
+            // Snout
+            b(13, 13, 6, 4, 0xffffff);
+            g.fillStyle(0x111111); g.fillCircle(cx, py + 14 * sc, 2 * sc);
+            // Eyes
+            g.fillStyle(0x221100); g.fillCircle(px + 13 * sc, py + 11 * sc, 2 * sc); g.fillCircle(px + 19 * sc, py + 11 * sc, 2 * sc);
+            g.fillStyle(0xffffff); g.fillCircle(px + 12 * sc, py + 10 * sc, 1 * sc); g.fillCircle(px + 18 * sc, py + 10 * sc, 1 * sc);
+        } else if (typeId === 'cat') {
+            b(11, 16, 10, 10, col);
+            // Tail curving up
+            b(20, 14, 3, 8, colDk); b(22, 12, 3, 4, colDk);
+            b(12, 24, 3, 5, colDk); b(17, 24, 3, 5, colDk);
+            b(12, 27, 3, 2, 0x664422); b(17, 27, 3, 2, 0x664422);
+            b(10, 7, 12, 11, colHi);
+            // Ears
+            g.fillStyle(col);
+            g.fillTriangle(px + 10 * sc, py + 9 * sc, px + 13 * sc, py + 9 * sc, px + 11 * sc, py + 2 * sc);
+            g.fillTriangle(px + 22 * sc, py + 9 * sc, px + 19 * sc, py + 9 * sc, px + 21 * sc, py + 2 * sc);
+            // Eyes (green slit)
+            b(12, 10, 3, 3, 0x44cc44); b(17, 10, 3, 3, 0x44cc44);
+            b(13, 10, 1, 3, 0x111111); b(18, 10, 1, 3, 0x111111);
+            // Nose
+            g.fillStyle(0xff8899); g.fillCircle(cx, py + 14 * sc, 1 * sc);
+        } else if (typeId === 'dragon') {
+            b(10, 14, 12, 12, col);
+            b(12, 17, 8, 7, 0xffaa66); // belly
+            // Wings
+            g.fillStyle(colDk);
+            g.fillTriangle(px + 10 * sc, py + 16 * sc, px + 2 * sc, py + 8 * sc, px + 12 * sc, py + 12 * sc);
+            g.fillTriangle(px + 22 * sc, py + 16 * sc, px + 30 * sc, py + 8 * sc, px + 20 * sc, py + 12 * sc);
+            b(11, 24, 3, 5, colDk); b(18, 24, 3, 5, colDk);
+            b(10, 27, 4, 2, darkenHex(col, 0.6)); b(18, 27, 4, 2, darkenHex(col, 0.6));
+            // Head
+            b(10, 5, 12, 10, colHi);
+            // Horns
+            b(10, 4, 2, 4, 0xddaa44); b(20, 4, 2, 4, 0xddaa44);
+            // Eyes
+            g.fillStyle(0xffee00); g.fillCircle(px + 13 * sc, py + 9 * sc, 2 * sc); g.fillCircle(px + 19 * sc, py + 9 * sc, 2 * sc);
+            g.fillStyle(0x111111); g.fillCircle(px + 13 * sc, py + 9 * sc, 1 * sc); g.fillCircle(px + 19 * sc, py + 9 * sc, 1 * sc);
+            // Snout
+            b(14, 12, 4, 3, colHi);
+            g.fillStyle(0x111111); g.fillCircle(px + 14 * sc, py + 13 * sc, 0.5 * sc); g.fillCircle(px + 18 * sc, py + 13 * sc, 0.5 * sc);
+        } else if (typeId === 'owl') {
+            b(10, 14, 12, 10, col);
+            b(11, 24, 3, 4, colDk); b(18, 24, 3, 4, colDk);
+            // Wings folded
+            b(8, 16, 3, 8, colDk); b(21, 16, 3, 8, colDk);
+            // Head (large round)
+            b(9, 5, 14, 12, colHi);
+            // Ear tufts
+            b(9, 4, 3, 4, col); b(20, 4, 3, 4, col);
+            // Face disc
+            b(11, 7, 10, 8, lightenHex(col, 1.15));
+            // Eyes (large)
+            g.fillStyle(0xffee44); g.fillCircle(px + 14 * sc, py + 10 * sc, 3 * sc); g.fillCircle(px + 18 * sc, py + 10 * sc, 3 * sc);
+            g.fillStyle(0x111111); g.fillCircle(px + 14 * sc, py + 10 * sc, 1.5 * sc); g.fillCircle(px + 18 * sc, py + 10 * sc, 1.5 * sc);
+            // Beak
+            g.fillStyle(0xddaa44);
+            g.fillTriangle(px + 15 * sc, py + 13 * sc, px + 17 * sc, py + 13 * sc, px + 16 * sc, py + 16 * sc);
+        }
+
+        // Pet name label
+        const nameStr = pet.petName || '';
+        if (nameStr) {
+            g.fillStyle(0x000000, 0.5);
+            g.fillRoundedRect(px, py + 30 * sc, size, Math.round(10 * sc), 2);
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

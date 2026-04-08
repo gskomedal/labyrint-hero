@@ -26,31 +26,19 @@ class ChemLabScene extends Phaser.Scene {
         this.px = cx - this.panelW / 2;
         this.py = cy - this.panelH / 2;
 
+        // ── Lab background art (behind everything) ──────────────────────────
         const panel = this.add.graphics();
-        panel.fillStyle(0x081810, 0.88);
+        panel.fillStyle(0x080a10, 0.97);
         panel.fillRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
-
-        // ── Chemistry lab background art ──────────────────────────────────────
         if (SceneBackgrounds.addLabBackground) {
             SceneBackgrounds.addLabBackground(this, this.px, this.py, this.panelW, this.panelH);
-        } else {
-            const bgGfx = this.add.graphics();
-            SceneBackgrounds.drawChemLabBackground(bgGfx, this.px, this.py, this.panelW, this.panelH);
         }
 
-        // Panel border (on top of background)
-        panel.lineStyle(2, 0x33dd88);
-        panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
-
-        // ── Character portrait (lower-right corner) ───────────────────────────
-        const portraitSize = 128;
-        const portraitX = this.px + this.panelW - portraitSize - 10;
-        const portraitY = this.py + this.panelH - portraitSize - 24;
+        // ── Character portrait (sits in the scene, lower-right of bg) ─────────
+        const portraitSize = 120;
+        const portraitX = this.px + this.panelW - portraitSize - 6;
+        const portraitY = this.py + this.panelH - portraitSize - 6;
         const portraitGfx = this.add.graphics();
-        portraitGfx.fillStyle(0x0a0918, 0.7);
-        portraitGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
-        portraitGfx.lineStyle(1, 0x33dd88, 0.3);
-        portraitGfx.strokeRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
         if (this.heroRef) {
             const eq = this.heroRef.inventory ? this.heroRef.inventory.equipped : {};
             if (typeof drawDetailedCharacterSprite === 'function') {
@@ -59,6 +47,19 @@ class ChemLabScene extends Phaser.Scene {
                 drawCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race);
             }
         }
+
+        // ── Dark content area (high contrast zone for UI) ─────────────────────
+        const contentLeft = this.px + 6;
+        const contentTop = this.py + 6;
+        const contentW = this.panelW - 12;
+        const contentH = 60;
+        const uiGfx = this.add.graphics();
+        uiGfx.fillStyle(0x080a10, 0.82);
+        uiGfx.fillRoundedRect(contentLeft, contentTop, contentW, contentH, 6);
+
+        // Panel border
+        panel.lineStyle(2, 0x33dd88);
+        panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
 
         // Title
         this.add.text(cx, this.py + 18, 'KJEMISK LABORATORIUM', {
@@ -118,6 +119,11 @@ class ChemLabScene extends Phaser.Scene {
 
     _refresh() {
         UIHelper.clearDynamic(this._dyn);
+
+        // Dark backing behind content for readability
+        const cbg = this._d(this.add.graphics());
+        cbg.fillStyle(0x080a10, 0.78);
+        cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 150, this.panelH - (this.contentY - this.py) - 10, 4);
 
         UIHelper.updateTabButtons(this._filterBtns, ['all', 'potion', 'explosive', 'medicine', 'acid'], this._filter, '#33dd88', '#335533');
 
