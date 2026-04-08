@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.31
-**Sist oppdatert:** 2026-04-07
+**Versjon:** 0.32
+**Sist oppdatert:** 2026-04-08
 
 ---
 
@@ -34,6 +34,8 @@ src/
   data/skills.js            – 12 passive evner
   data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy) + sjeldenhetsystem
   graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser, 2 kjønn, 10 frisyrer, 4 klesstiler)
+  graphics/DetailedCharacterSprite.js – høyoppløselig karakterportrett (64-grid) med utstyrsvisning for menyskjermer
+  graphics/SceneBackgrounds.js – tematiske bakgrunner for leirplass og kjemilab
   systems/Inventory.js      – 2 utstyrsplasser + 10-spors ryggsekk
   systems/AudioManager.js   – prosedyremusikk (8 temaer, 64-noters melodier) + SFX-motoren
   systems/MapRenderer.js    – kartrendering, tåke, portal-animasjon
@@ -468,7 +470,7 @@ Synergi: **Jordens kraft** (Geolog + Vokter) → +1 forsvar, +1 mineralsynsradiu
 
 Smelting, legeringer og smiing av utstyr.
 
-**Leirplass (Camp Room):** Garantert fra verden 2+, 50% sjanse i verden 1. Trygg sone med smelteovn og **persistent lager (stash)** der spilleren kan lagre mineraler, brensel og andre ressurser mellom besøk. Frigjør ryggsekken for kamp. Åpnes med V-tast.
+**Leirplass (Camp Room):** Garantert fra verden 2+, 50% sjanse i verden 1. Trygg sone med smelteovn og **persistent lager (stash)** der spilleren kan lagre mineraler, brensel og andre ressurser mellom besøk. Frigjør ryggsekken for kamp. Åpnes med V-tast. Visuelt tema med bål, telt, trær, stjernehimmel og røyk. Karakterportrett i nedre høyre hjørne.
 
 **Smelting:** Mineraler + brensel → rene grunnstoffer. Brensel (tre=1, kull=3 energi) spawner i labyrinten.
 
@@ -487,7 +489,7 @@ Smelting, legeringer og smiing av utstyr.
 
 Kjemisk syntese av potions, bomber, medisiner og syrer fra rene grunnstoffer.
 
-**Kjemisk laboratorium:** Spesialrom fra verden 3+ med grønn glød. Åpnes med C-tast. Filterbare oppskrifter etter kategori.
+**Kjemisk laboratorium:** Spesialrom fra verden 3+ med grønn glød. Åpnes med C-tast. Filterbare oppskrifter etter kategori. Visuelt tema med labbenk, hyller med flasker, erlenmeyerkolber, reagensrør, periodisk tabell-hint og bobler. Karakterportrett i nedre høyre hjørne.
 
 **Produkter:** 15 kjemiske produkter i 5 kategorier. Kraftigere enn vanlige consumables – kjemisk livselixir healer 4 HP (vs 2), krutt gjør 8 skade i radius 3 (vs 6 for vanlig bombe), dynamitt 15 skade.
 

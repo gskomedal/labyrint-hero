@@ -350,23 +350,34 @@ class CharacterCreatorScene extends Phaser.Scene {
         const g = this._previewGfx;
         g.clear();
 
-        const previewSize = 128;
-        const px = W - 100;
-        const py = H - 250;
+        const previewSize = 256;
+        const px = W - 160;
+        const py = H - 420;
 
-        // Preview box
-        g.lineStyle(1, 0x2a2050);
-        g.strokeRect(px - previewSize / 2 - 6, py - 6, previewSize + 12, previewSize + 12);
-        g.lineStyle(1, 0x334466, 0.5);
-        g.strokeRect(px - previewSize / 2 - 4, py - 4, previewSize + 8, previewSize + 8);
-        g.fillStyle(0x0d0b1e);
-        g.fillRect(px - previewSize / 2 - 3, py - 3, previewSize + 6, previewSize + 6);
+        // Preview box background
+        g.fillStyle(0x0d0b1e, 0.95);
+        g.fillRoundedRect(px - previewSize / 2 - 8, py - 8, previewSize + 16, previewSize + 16, 6);
+        // Double border
+        g.lineStyle(2, 0x4444aa, 0.6);
+        g.strokeRoundedRect(px - previewSize / 2 - 8, py - 8, previewSize + 16, previewSize + 16, 6);
+        g.lineStyle(1, 0x2a2050, 0.4);
+        g.strokeRoundedRect(px - previewSize / 2 - 4, py - 4, previewSize + 8, previewSize + 8, 4);
 
         // Floor tile hint
         g.fillStyle(0x1e1a30);
-        g.fillRect(px - previewSize / 2 - 3, py + previewSize - 10, previewSize + 6, 13);
+        g.fillRect(px - previewSize / 2 - 3, py + previewSize - 20, previewSize + 6, 23);
 
-        drawCharacterSprite(g, px - previewSize / 2, py, previewSize, this.appearance, this.selectedRace);
+        // Draw the detailed character sprite
+        if (typeof drawDetailedCharacterSprite === 'function') {
+            drawDetailedCharacterSprite(g, px - previewSize / 2, py, previewSize, this.appearance, this.selectedRace);
+        } else {
+            drawCharacterSprite(g, px - previewSize / 2, py, previewSize, this.appearance, this.selectedRace);
+        }
+
+        // Label below preview
+        g.fillStyle(0x000000, 0);
+        const raceName = RACE_DEFS[this.selectedRace]?.name || '';
+        // Race label is handled by text objects in stats panel
     }
 
     // ── Starting bonus panel ──────────────────────────────────────────────────

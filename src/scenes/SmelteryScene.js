@@ -26,9 +26,38 @@ class SmelteryScene extends Phaser.Scene {
         this.px = cx - this.panelW / 2;
         this.py = cy - this.panelH / 2;
 
+        // ── Camp background art (behind everything) ──────────────────────────
         const panel = this.add.graphics();
-        panel.fillStyle(0x0a0818, 0.97);
+        panel.fillStyle(0x0a0608, 0.97);
         panel.fillRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
+        if (SceneBackgrounds.addCampBackground) {
+            SceneBackgrounds.addCampBackground(this, this.px, this.py, this.panelW, this.panelH);
+        }
+
+        // ── Character portrait (sits in the scene, lower-right of bg) ─────────
+        const portraitSize = 120;
+        const portraitX = this.px + this.panelW - portraitSize - 6;
+        const portraitY = this.py + this.panelH - portraitSize - 6;
+        const portraitGfx = this.add.graphics();
+        if (this.heroRef) {
+            const eq = this.heroRef.inventory ? this.heroRef.inventory.equipped : {};
+            if (typeof drawDetailedCharacterSprite === 'function') {
+                drawDetailedCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race, eq);
+            } else {
+                drawCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race);
+            }
+        }
+
+        // ── Dark content area (high contrast zone for UI) ─────────────────────
+        const contentLeft = this.px + 6;
+        const contentTop = this.py + 6;
+        const contentW = this.panelW - 12;
+        const contentH = 60;
+        const uiGfx = this.add.graphics();
+        uiGfx.fillStyle(0x0a0608, 0.82);
+        uiGfx.fillRoundedRect(contentLeft, contentTop, contentW, contentH, 6);
+
+        // Panel border
         panel.lineStyle(2, 0xff7722);
         panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
 
@@ -91,6 +120,11 @@ class SmelteryScene extends Phaser.Scene {
 
     _refresh() {
         UIHelper.clearDynamic(this._dyn);
+
+        // Dark backing behind content for readability
+        const cbg = this._d(this.add.graphics());
+        cbg.fillStyle(0x0a0608, 0.78);
+        cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 150, this.panelH - (this.contentY - this.py) - 10, 4);
 
         // Update tab button colors
         UIHelper.updateTabButtons(this._tabBtns, ['stash', 'smelt', 'alloy', 'forge'], this._tab, '#ff7722', '#554433');

@@ -2,6 +2,22 @@
 
 ---
 
+## v0.32 – 2026-04-08
+
+### Nye funksjoner
+- **Detaljert karakterportrett:** Ny høyoppløselig karaktertegning (64-grid) med iris/pupill i øynene, nesebor, detaljerte lepper, synlige fingre, hår-highlights, klærfolder og sømmer. Viser også utstyrt våpen og rustning på figuren
+- **Karakterportrett i menyer:** Detaljert karakterportrett vises nå i Inventar, Ferdighetstreet, Leirplass og Kjemisk laboratorium
+- **Leirplass visuelt tema:** Smelteovn-skjermen har nå tematisk bakgrunn med bål, telt, trær, stjernehimmel, røyk og stein – ser ut som en ekte leirplass
+- **Kjemilab visuelt tema:** Laboratorium-skjermen har nå tematisk bakgrunn med labbenk, hyller med fargerike flasker, erlenmeyerkolber, reagensrør, periodisk tabell-hint, bobler og damp
+
+### Tekniske endringer
+- Ny `DetailedCharacterSprite.js` med `drawDetailedCharacterSprite()` funksjon (64-enhets grid, dobbel oppløsning)
+- Ny `SceneBackgrounds.js` med `drawCampBackground()` og `drawChemLabBackground()` funksjoner
+- SmelteryScene, ChemLabScene, SkillScene og InventoryScene oppdatert med karakterportretter
+- SmelteryScene og ChemLabScene bruker semi-transparente paneler for å vise tematiske bakgrunner
+
+---
+
 ## v0.31 – 2026-04-07
 
 ### Nye funksjoner

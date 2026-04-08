@@ -19,7 +19,7 @@ class InventoryScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
 
-        const panelW = 520;
+        const panelW = 740;
         const hasPet = this.pet && this.pet.alive;
         const bpCount = this.inv.backpack.length;
         const bpRows = Math.ceil(bpCount / 5);
@@ -28,22 +28,24 @@ class InventoryScene extends Phaser.Scene {
         const panelY = cy;
         this.add.rectangle(cx, panelY, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x334466);
 
-        this.add.text(cx, panelY - panelH / 2 + 18, 'INVENTAR', {
+        // Title shifted right to make room for portrait
+        const contentCX = cx + 100;
+        this.add.text(contentCX, panelY - panelH / 2 + 18, 'INVENTAR', {
             fontSize: '20px', color: '#ccddff', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
 
-        this.add.rectangle(cx, panelY - panelH / 2 + 54, panelW - 40, 1, 0x223344);
+        this.add.rectangle(contentCX, panelY - panelH / 2 + 54, panelW - 250, 1, 0x223344);
 
         // Stats line – dynamic so it refreshes
-        this._statsText = this.add.text(cx, panelY - panelH / 2 + 40, '', {
+        this._statsText = this.add.text(contentCX, panelY - panelH / 2 + 40, '', {
             fontSize: '11px', color: '#667788', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        // Section labels (static)
-        this.add.text(cx - panelW / 2 + 20, panelY - panelH / 2 + 62, 'UTSTYR', {
+        // Section labels (static) - shifted right
+        this.add.text(contentCX - 220, panelY - panelH / 2 + 62, 'UTSTYR', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         });
-        this.add.text(cx, panelY - panelH / 2 + 168, 'EVNER', {
+        this.add.text(contentCX, panelY - panelH / 2 + 168, 'EVNER', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
         // RYGGSEKK label is drawn dynamically in _refresh() to show slot count
@@ -97,7 +99,8 @@ class InventoryScene extends Phaser.Scene {
         const { width: W, height: H } = this.cameras.main;
         const cx = W / 2, cy = H / 2;
         const hasPet = this.pet && this.pet.alive;
-        const panelW = 520;
+        const panelW = 740;
+        const contentCX = cx + 100;
         const bpCount = this.inv.backpack.length;
         const bpRows = Math.ceil(bpCount / 5);
         const extraBpSpace = Math.max(0, (bpRows - 2) * 60);
@@ -110,17 +113,41 @@ class InventoryScene extends Phaser.Scene {
             `${h.heroName || 'Helten'}  ·  Nivå ${h.level}  ·  ATK ${h.attack}  ·  DEF ${h.defense}  ·  💰 ${h.gold}g`
         );
 
-        // Equipment slots
+        // ── Character portrait (left of equipment) ────────────────────────────
+        const portraitSize = 192;
+        const portraitX = cx - panelW / 2 + 16;
+        const portraitY = panelY - panelH / 2 + 60;
+        const pGfx = this._d(this.add.graphics());
+        pGfx.fillStyle(0x0a0918, 0.9);
+        pGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 6);
+        pGfx.lineStyle(2, 0x334466, 0.6);
+        pGfx.strokeRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 6);
+        // Floor hint in portrait
+        pGfx.fillStyle(0x1e1a30);
+        pGfx.fillRect(portraitX - 3, portraitY + portraitSize - 16, portraitSize + 6, 19);
+        const eq = this.inv.equipped || {};
+        if (typeof drawDetailedCharacterSprite === 'function') {
+            drawDetailedCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race, eq);
+        } else {
+            drawCharacterSprite(pGfx, portraitX, portraitY, portraitSize, h.appearance, h.race);
+        }
+        // Pet portrait is drawn inline with pet inventory section (see _drawPetInventory)
+        // Hero name under portrait
+        this._d(this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 10, h.heroName || 'Helten', {
+            fontSize: '11px', color: '#8899bb', fontFamily: 'monospace'
+        }).setOrigin(0.5));
+
+        // Equipment slots (shifted right to leave room for portrait)
         const eqY = panelY - panelH / 2 + 110;
-        this._makeEquipSlot(cx - 120, eqY, 'weapon', 'Våpen');
-        this._makeEquipSlot(cx,       eqY, 'armor',  'Rustning');
-        this._makeQuickUseSlot(cx + 120, eqY);
+        this._makeEquipSlot(contentCX - 120, eqY, 'weapon', 'Våpen');
+        this._makeEquipSlot(contentCX,       eqY, 'armor',  'Rustning');
+        this._makeQuickUseSlot(contentCX + 120, eqY);
 
         // Skills
-        this._drawSkills(cx, panelY - panelH / 2 + 185);
+        this._drawSkills(contentCX, panelY - panelH / 2 + 185);
 
         // Backpack label with count
-        this._d(this.add.text(cx + 80, panelY - panelH / 2 + 220,
+        this._d(this.add.text(contentCX + 80, panelY - panelH / 2 + 220,
             `(${this.inv.itemCount}/10)`, {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }));
@@ -130,10 +157,10 @@ class InventoryScene extends Phaser.Scene {
         const cols = 5, gap = 8;
         const slotSize = bpCount > 15 ? 44 : 52;
         const bpTotalW = cols * slotSize + (cols - 1) * gap;
-        const bpStartX = cx - bpTotalW / 2;
+        const bpStartX = contentCX - bpTotalW / 2;
 
         const bpLabel = `RYGGSEKK (${this.inv.itemCount}/${bpCount})`;
-        this._d(this.add.text(cx - panelW / 2 + 20, bpY - 22, bpLabel, {
+        this._d(this.add.text(contentCX - 220, bpY - 22, bpLabel, {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }));
 
@@ -148,7 +175,7 @@ class InventoryScene extends Phaser.Scene {
         if (hasPet) {
             const bpRows = Math.ceil(bpCount / cols);
             const bpBottom = bpY + bpRows * (slotSize + gap);
-            this._drawPetInventory(cx, panelY - panelH / 2, panelW, bpBottom);
+            this._drawPetInventory(contentCX, panelY - panelH / 2, panelW - 220, bpBottom);
         }
     }
 
@@ -383,9 +410,21 @@ class InventoryScene extends Phaser.Scene {
         // Separator
         this._d(this.add.rectangle(cx, baseY - 8, panelW - 40, 1, 0x223344));
 
-        // Pet label with name and HP
+        // Pet portrait (left side, aligned with slots)
+        const petPortSize = 64;
+        const petPortX = cx - panelW / 2 + 14;
+        const petPortY = baseY + 6;
+        const petGfx = this._d(this.add.graphics());
+        petGfx.fillStyle(0x120a18, 0.8);
+        petGfx.fillRoundedRect(petPortX - 3, petPortY - 3, petPortSize + 6, petPortSize + 6, 4);
+        petGfx.lineStyle(1, 0x442244, 0.4);
+        petGfx.strokeRoundedRect(petPortX - 3, petPortY - 3, petPortSize + 6, petPortSize + 6, 4);
+        this._drawPetPortrait(petGfx, petPortX, petPortY, petPortSize, pet);
+
+        // Pet label with name and HP (to the right of portrait)
+        const labelX = petPortX + petPortSize + 12;
         const hpText = `${pet.petName}  HP: ${pet.hp}/${pet.effectiveMaxHp}  ATK: ${pet.effectiveAttack}`;
-        this._d(this.add.text(cx - panelW / 2 + 20, baseY, `KJÆLEDYR  ·  ${hpText}`, {
+        this._d(this.add.text(labelX, baseY, `KJÆLEDYR  ·  ${hpText}`, {
             fontSize: '11px', color: '#ffaadd', fontFamily: 'monospace'
         }));
         this._d(this.add.text(cx + panelW / 2 - 20, baseY,
@@ -393,10 +432,10 @@ class InventoryScene extends Phaser.Scene {
             fontSize: '11px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(1, 0));
 
-        // Pet backpack slots (4 slots in a row)
+        // Pet backpack slots (4 slots in a row, to the right of portrait)
         const slotSize = 52, gap = 8;
         const totalW = 4 * slotSize + 3 * gap;
-        const startX = cx - totalW / 2;
+        const startX = labelX;
         const slotsY = baseY + 20;
 
         for (let i = 0; i < 4; i++) {
@@ -511,6 +550,116 @@ class InventoryScene extends Phaser.Scene {
                 { fontSize: '10px', fontFamily: 'monospace', color: col }
             ));
         });
+    }
+
+    // ── Pet portrait in character frame ──────────────────────────────────────
+
+    _drawPetPortrait(g, px, py, size, pet) {
+        const sc = size / 32;
+        const cx = px + size / 2;
+        const cy = py + size / 2;
+
+        const b = (x, y, w, h, color, alpha) => {
+            if (alpha !== undefined) g.fillStyle(color, alpha);
+            else g.fillStyle(color);
+            g.fillRect(
+                Math.round(px + x * sc), Math.round(py + y * sc),
+                Math.max(1, Math.round(w * sc)), Math.max(1, Math.round(h * sc))
+            );
+        };
+
+        // Shadow
+        g.fillStyle(0x000000, 0.2);
+        g.fillEllipse(cx, py + 28 * sc, 12 * sc, 4 * sc);
+
+        const typeId = pet.typeId || 'fox';
+        const col = pet.color || 0xff8833;
+        const colDk = darkenHex(col, 0.75);
+        const colHi = lightenHex(col, 1.2);
+
+        if (typeId === 'fox') {
+            // Body
+            b(10, 16, 12, 10, col);
+            // Tail
+            g.fillStyle(darkenHex(col, 0.85));
+            g.fillEllipse(px + 24 * sc, py + 20 * sc, 5 * sc, 3 * sc);
+            g.fillStyle(0xffffff);
+            g.fillEllipse(px + 27 * sc, py + 20 * sc, 3 * sc, 2 * sc);
+            // Legs
+            b(11, 24, 3, 5, colDk); b(18, 24, 3, 5, colDk);
+            b(11, 27, 3, 2, 0x331100); b(18, 27, 3, 2, 0x331100);
+            // Head
+            b(10, 8, 12, 10, colHi);
+            // Ears
+            g.fillStyle(darkenHex(col, 0.9));
+            g.fillTriangle(px + 10 * sc, py + 10 * sc, px + 13 * sc, py + 10 * sc, px + 11 * sc, py + 3 * sc);
+            g.fillTriangle(px + 22 * sc, py + 10 * sc, px + 19 * sc, py + 10 * sc, px + 21 * sc, py + 3 * sc);
+            // Snout
+            b(13, 13, 6, 4, 0xffffff);
+            g.fillStyle(0x111111); g.fillCircle(cx, py + 14 * sc, 2 * sc);
+            // Eyes
+            g.fillStyle(0x221100); g.fillCircle(px + 13 * sc, py + 11 * sc, 2 * sc); g.fillCircle(px + 19 * sc, py + 11 * sc, 2 * sc);
+            g.fillStyle(0xffffff); g.fillCircle(px + 12 * sc, py + 10 * sc, 1 * sc); g.fillCircle(px + 18 * sc, py + 10 * sc, 1 * sc);
+        } else if (typeId === 'cat') {
+            b(11, 16, 10, 10, col);
+            // Tail curving up
+            b(20, 14, 3, 8, colDk); b(22, 12, 3, 4, colDk);
+            b(12, 24, 3, 5, colDk); b(17, 24, 3, 5, colDk);
+            b(12, 27, 3, 2, 0x664422); b(17, 27, 3, 2, 0x664422);
+            b(10, 7, 12, 11, colHi);
+            // Ears
+            g.fillStyle(col);
+            g.fillTriangle(px + 10 * sc, py + 9 * sc, px + 13 * sc, py + 9 * sc, px + 11 * sc, py + 2 * sc);
+            g.fillTriangle(px + 22 * sc, py + 9 * sc, px + 19 * sc, py + 9 * sc, px + 21 * sc, py + 2 * sc);
+            // Eyes (green slit)
+            b(12, 10, 3, 3, 0x44cc44); b(17, 10, 3, 3, 0x44cc44);
+            b(13, 10, 1, 3, 0x111111); b(18, 10, 1, 3, 0x111111);
+            // Nose
+            g.fillStyle(0xff8899); g.fillCircle(cx, py + 14 * sc, 1 * sc);
+        } else if (typeId === 'dragon') {
+            b(10, 14, 12, 12, col);
+            b(12, 17, 8, 7, 0xffaa66); // belly
+            // Wings
+            g.fillStyle(colDk);
+            g.fillTriangle(px + 10 * sc, py + 16 * sc, px + 2 * sc, py + 8 * sc, px + 12 * sc, py + 12 * sc);
+            g.fillTriangle(px + 22 * sc, py + 16 * sc, px + 30 * sc, py + 8 * sc, px + 20 * sc, py + 12 * sc);
+            b(11, 24, 3, 5, colDk); b(18, 24, 3, 5, colDk);
+            b(10, 27, 4, 2, darkenHex(col, 0.6)); b(18, 27, 4, 2, darkenHex(col, 0.6));
+            // Head
+            b(10, 5, 12, 10, colHi);
+            // Horns
+            b(10, 4, 2, 4, 0xddaa44); b(20, 4, 2, 4, 0xddaa44);
+            // Eyes
+            g.fillStyle(0xffee00); g.fillCircle(px + 13 * sc, py + 9 * sc, 2 * sc); g.fillCircle(px + 19 * sc, py + 9 * sc, 2 * sc);
+            g.fillStyle(0x111111); g.fillCircle(px + 13 * sc, py + 9 * sc, 1 * sc); g.fillCircle(px + 19 * sc, py + 9 * sc, 1 * sc);
+            // Snout
+            b(14, 12, 4, 3, colHi);
+            g.fillStyle(0x111111); g.fillCircle(px + 14 * sc, py + 13 * sc, 0.5 * sc); g.fillCircle(px + 18 * sc, py + 13 * sc, 0.5 * sc);
+        } else if (typeId === 'owl') {
+            b(10, 14, 12, 10, col);
+            b(11, 24, 3, 4, colDk); b(18, 24, 3, 4, colDk);
+            // Wings folded
+            b(8, 16, 3, 8, colDk); b(21, 16, 3, 8, colDk);
+            // Head (large round)
+            b(9, 5, 14, 12, colHi);
+            // Ear tufts
+            b(9, 4, 3, 4, col); b(20, 4, 3, 4, col);
+            // Face disc
+            b(11, 7, 10, 8, lightenHex(col, 1.15));
+            // Eyes (large)
+            g.fillStyle(0xffee44); g.fillCircle(px + 14 * sc, py + 10 * sc, 3 * sc); g.fillCircle(px + 18 * sc, py + 10 * sc, 3 * sc);
+            g.fillStyle(0x111111); g.fillCircle(px + 14 * sc, py + 10 * sc, 1.5 * sc); g.fillCircle(px + 18 * sc, py + 10 * sc, 1.5 * sc);
+            // Beak
+            g.fillStyle(0xddaa44);
+            g.fillTriangle(px + 15 * sc, py + 13 * sc, px + 17 * sc, py + 13 * sc, px + 16 * sc, py + 16 * sc);
+        }
+
+        // Pet name label
+        const nameStr = pet.petName || '';
+        if (nameStr) {
+            g.fillStyle(0x000000, 0.5);
+            g.fillRoundedRect(px, py + 30 * sc, size, Math.round(10 * sc), 2);
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
