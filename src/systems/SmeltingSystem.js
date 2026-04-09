@@ -44,6 +44,12 @@ class SmeltingSystem {
                 if (oreEfficiency > 0 && Math.random() < oreEfficiency) {
                     amount += 1;
                 }
+                // Geologist smeltBonusElement: extra element per smelt
+                amount += (hero.smeltBonusElement || 0);
+                // Metallurgist smeltExtraYieldChance: chance for double yield
+                if ((hero.smeltExtraYieldChance || 0) > 0 && Math.random() < hero.smeltExtraYieldChance) {
+                    amount = Math.ceil(amount * 1.5);
+                }
                 elements.push({ symbol: y.symbol, amount });
 
                 // Add to tracker
@@ -104,7 +110,10 @@ class SmeltingSystem {
         }
 
         const energyCost = this._adjustedEnergyCost(alloy.energyCost, hero);
-        return { success: true, alloy, energyCost };
+        // Double alloy chance from Metallurgist Legeringsmester
+        const doubleChance = hero.doubleAlloyChance || 0;
+        const doubled = doubleChance > 0 && Math.random() < doubleChance;
+        return { success: true, alloy, energyCost, doubled };
     }
 
     /**
@@ -158,7 +167,14 @@ class SmeltingSystem {
             if (item.atk) item.atk = Math.round(item.atk * (1 + bonus));
             if (item.def) item.def = Math.round(item.def * (1 + bonus));
             if (item.hearts) item.hearts = Math.round(item.hearts * (1 + bonus));
-            item.desc = item.desc + ' [Mestersmie]';
+            // Master Smith special properties
+            if (item.type === 'weapon') {
+                item.critBonus = 0.10;
+                item.desc = item.desc + ' [Mestersmie: +10% krit]';
+            } else if (item.type === 'armor') {
+                item.thornsDmg = 1;
+                item.desc = item.desc + ' [Mestersmie: +1 torneskade]';
+            }
         }
 
         // Alloy mastery bonus from skills

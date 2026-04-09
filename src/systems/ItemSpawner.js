@@ -459,15 +459,21 @@ class ItemSpawner {
                             scene.hero.geologistUnlocked = true;
                             scene._floatingText(hx, hy - 1, 'Geolog-stien er ulåst!', '#997755');
                         }
-                        for (const y of obj.item.yields) {
-                            const isNew = scene.hero.elementTracker.discover(y.symbol);
-                            if (isNew && typeof ELEMENTS !== 'undefined') {
-                                const elem = ELEMENTS[y.symbol];
-                                if (elem) {
-                                    const hexCol = '#' + elem.color.toString(16).padStart(6, '0');
-                                    scene._floatingText(hx, hy, `${elem.symbol} (${elem.name}) oppdaget!`, hexCol);
+                        // Only discover/identify elements if hero has Geologist skill
+                        const canIdentify = (scene.hero.mineralIdentifyLevel || 0) > 0;
+                        if (canIdentify) {
+                            for (const y of obj.item.yields) {
+                                const isNew = scene.hero.elementTracker.discover(y.symbol);
+                                if (isNew && typeof ELEMENTS !== 'undefined') {
+                                    const elem = ELEMENTS[y.symbol];
+                                    if (elem) {
+                                        const hexCol = '#' + elem.color.toString(16).padStart(6, '0');
+                                        scene._floatingText(hx, hy, `${elem.symbol} (${elem.name}) oppdaget!`, hexCol);
+                                    }
                                 }
                             }
+                        } else {
+                            scene._floatingText(hx, hy, 'Ukjent mineral – lær Geolog!', '#776655');
                         }
                         // Check for completion bonuses
                         const newBonuses = scene.hero.elementTracker.checkCompletions();
