@@ -23,7 +23,7 @@ class SettingsScene extends Phaser.Scene {
         panel.lineStyle(2, 0x334466, 1);
         panel.strokeRoundedRect(PX, PY, PW, PH, 8);
 
-        const ts = (sz, col = '#aabbdd') => ({ fontSize: sz + 'px', color: col, fontFamily: 'monospace' });
+        const ts = (sz, col = '#aabbdd') => ({ fontSize: Math.max(sz, 12) + 'px', color: col, fontFamily: 'monospace' });
 
         this.add.text(PX + PW / 2, PY + 18, '⚙  Innstillinger', ts(15, '#88bbff')).setOrigin(0.5, 0);
 
@@ -73,7 +73,7 @@ class SettingsScene extends Phaser.Scene {
         let state = initial;
 
         const btn = this.add.graphics();
-        const label = this.add.text(x + 44, y, '', { fontSize: '11px', color: '#aabbdd', fontFamily: 'monospace' })
+        const label = this.add.text(x + 44, y, '', { fontSize: '13px', color: '#aabbdd', fontFamily: 'monospace' })
             .setOrigin(0, 0.5);
 
         const draw = () => {
@@ -103,7 +103,7 @@ class SettingsScene extends Phaser.Scene {
 
         const track = this.add.graphics();
         const knob  = this.add.graphics();
-        const vText = this.add.text(x + width + 8, y + 6, '', { fontSize: '10px', color: '#667799', fontFamily: 'monospace' })
+        const vText = this.add.text(x + width + 8, y + 6, '', { fontSize: '12px', color: '#667799', fontFamily: 'monospace' })
             .setOrigin(0, 0.5);
 
         const draw = () => {

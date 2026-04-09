@@ -36,8 +36,8 @@ class CharacterCreatorScene extends Phaser.Scene {
         this.add.rectangle(cx, H / 2, W, H, 0x0a0814);
 
         // ── Title ─────────────────────────────────────────────────────────────
-        this.add.text(cx, 18, 'VELG DIN HELT', {
-            fontSize: '24px', color: '#f5e642', fontFamily: 'monospace',
+        this.add.text(cx, 22, 'VELG DIN HELT', {
+            fontSize: '28px', color: '#f5e642', fontFamily: 'monospace',
             fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 3
         }).setOrigin(0.5, 0);
 
@@ -63,9 +63,9 @@ class CharacterCreatorScene extends Phaser.Scene {
     // ── Difficulty row ────────────────────────────────────────────────────────
 
     _buildDifficultyRow(cx, W) {
-        this.add.rectangle(cx, 45, W - 20, 1, 0x1a1535);
-        this.add.text(18, 52, 'VANSKELIGHETSGRAD:', {
-            fontSize: '10px', color: '#445566', fontFamily: 'monospace'
+        this.add.rectangle(cx, 52, W - 40, 1, 0x1a1535);
+        this.add.text(30, 64, 'VANSKELIGHETSGRAD:', {
+            fontSize: '13px', color: '#445566', fontFamily: 'monospace'
         });
 
         const DIFFS = [
@@ -75,11 +75,11 @@ class CharacterCreatorScene extends Phaser.Scene {
         ];
         this._diffBtns = {};
         DIFFS.forEach(({ id, label, col }, i) => {
-            const bx  = 170 + i * 100;
-            const bg  = this.add.rectangle(bx, 57, 88, 18, 0x111122)
+            const bx  = 220 + i * 120;
+            const bg  = this.add.rectangle(bx, 66, 105, 24, 0x111122)
                 .setStrokeStyle(1, 0x334466).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx, 57, label, {
-                fontSize: '11px', color: '#889aaa', fontFamily: 'monospace'
+            const txt = this.add.text(bx, 66, label, {
+                fontSize: '14px', color: '#889aaa', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => this._selectDifficulty(id));
             this._diffBtns[id] = { bg, txt, col };
@@ -100,26 +100,26 @@ class CharacterCreatorScene extends Phaser.Scene {
     // ── Left panel: race selection + stats ────────────────────────────────────
 
     _buildRacePanel(W, H) {
-        const panelX = 18;
+        const panelX = 30;
         const races  = Object.keys(RACE_DEFS);
-        const btnW   = 100, btnH = 32;
+        const btnW   = 120, btnH = 38;
 
         this._raceBtns = {};
-        this.add.rectangle(panelX + races.length * (btnW + 6) / 2, 75, W / 2, 1, 0x1a1535);
+        this.add.rectangle(panelX + races.length * (btnW + 8) / 2, 90, W / 2, 1, 0x1a1535);
         races.forEach((id, i) => {
-            const bx  = panelX + i * (btnW + 6) + btnW / 2;
-            const btn = this._raceTab(bx, 88, btnW, btnH, RACE_DEFS[id].name, id);
+            const bx  = panelX + i * (btnW + 8) + btnW / 2;
+            const btn = this._raceTab(bx, 108, btnW, btnH, RACE_DEFS[id].name, id);
             this._raceBtns[id] = btn;
         });
 
-        this._statsY    = 116;
+        this._statsY    = 140;
         this._statsObjs = [];
         this._rebuildStats();
     }
 
     _raceTab(x, y, w, h, label, raceId) {
         const bg  = this.add.rectangle(x, y, w, h, 0x1a1535).setStrokeStyle(1, 0x4444aa).setInteractive({ useHandCursor: true });
-        const txt = this.add.text(x, y, label, { fontSize: '13px', color: '#cccccc', fontFamily: 'monospace' }).setOrigin(0.5);
+        const txt = this.add.text(x, y, label, { fontSize: '15px', color: '#cccccc', fontFamily: 'monospace' }).setOrigin(0.5);
         bg.on('pointerdown', () => this._selectRace(raceId));
         bg.on('pointerover', () => bg.setAlpha(0.8));
         bg.on('pointerout',  () => bg.setAlpha(1));
@@ -147,10 +147,10 @@ class CharacterCreatorScene extends Phaser.Scene {
         const def = RACE_DEFS[this.selectedRace];
         const add = o => { this._statsObjs.push(o); return o; };
         const y0  = this._statsY;
-        const lx  = 22;
+        const lx  = 34;
 
-        add(this.add.text(lx, y0, def.desc, { fontSize: '10px', color: '#8899bb', fontFamily: 'monospace', wordWrap: { width: 420 } }));
-        add(this.add.text(lx, y0 + 14, `Spesial: ${def.special}`, { fontSize: '10px', color: '#f5e642', fontFamily: 'monospace' }));
+        add(this.add.text(lx, y0, def.desc, { fontSize: '13px', color: '#8899bb', fontFamily: 'monospace', wordWrap: { width: 480 } }));
+        add(this.add.text(lx, y0 + 20, `Spesial: ${def.special}`, { fontSize: '13px', color: '#f5e642', fontFamily: 'monospace' }));
 
         const stats = [
             { label: 'Hjerter',  val: def.hearts,       max: 8,  col: 0xff2244 },
@@ -159,18 +159,18 @@ class CharacterCreatorScene extends Phaser.Scene {
             { label: 'Syn',      val: def.visionRadius,  max: 8,  col: 0xffee00 },
             { label: 'XP-mult',  val: def.xpMultiplier,  max: 2,  col: 0xaa44ff }
         ];
-        const barX = lx, bw = 190, bh = 8, gap = 17;
+        const barX = lx, bw = 220, bh = 12, gap = 24;
         stats.forEach(({ label, val, max, col }, i) => {
-            const y = y0 + 30 + i * gap;
-            add(this.add.text(barX, y, label, { fontSize: '10px', color: '#556677', fontFamily: 'monospace' }));
+            const y = y0 + 46 + i * gap;
+            add(this.add.text(barX, y, label, { fontSize: '13px', color: '#556677', fontFamily: 'monospace' }));
             const bg = add(this.add.graphics());
             bg.fillStyle(0x1a1535);
-            bg.fillRect(barX + 62, y, bw, bh);
+            bg.fillRect(barX + 80, y + 2, bw, bh);
             const fill = add(this.add.graphics());
             fill.fillStyle(col);
-            fill.fillRect(barX + 62, y, Math.floor(bw * (val / max)), bh);
+            fill.fillRect(barX + 80, y + 2, Math.floor(bw * (val / max)), bh);
             const valStr = label === 'XP-mult' ? `×${val.toFixed(2)}` : String(val);
-            add(this.add.text(barX + 62 + bw + 5, y, valStr, { fontSize: '10px', color: '#aabbcc', fontFamily: 'monospace' }));
+            add(this.add.text(barX + 80 + bw + 8, y, valStr, { fontSize: '13px', color: '#aabbcc', fontFamily: 'monospace' }));
         });
     }
 
@@ -187,26 +187,25 @@ class CharacterCreatorScene extends Phaser.Scene {
         this._appearObjs = [];
 
         const { width: W } = this.cameras.main;
-        const px = W - 380, py = 112;
+        const px = W - 420, py = 140;
         const add = o => { this._appearObjs.push(o); return o; };
 
-        add(this.add.text(px, py, 'UTSEENDE', { fontSize: '10px', color: '#445566', fontFamily: 'monospace' }));
+        add(this.add.text(px, py, 'UTSEENDE', { fontSize: '13px', color: '#445566', fontFamily: 'monospace' }));
 
         // ── Gender row ────────────────────────────────────────────────────────
-        let rowY = py + 18;
-        add(this.add.text(px, rowY, 'Kjønn:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        let rowY = py + 24;
+        add(this.add.text(px, rowY, 'Kjønn:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
         GENDERS.forEach((gid, i) => {
-            const bx  = px + 56 + i * 70;
+            const bx  = px + 70 + i * 80;
             const sel = this.appearance.gender === gid;
-            const bg  = this.add.rectangle(bx + 24, rowY + 7, 60, 18, sel ? 0x2a2060 : 0x111122)
+            const bg  = this.add.rectangle(bx + 28, rowY + 8, 70, 22, sel ? 0x2a2060 : 0x111122)
                 .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx + 24, rowY + 7, GENDER_LABELS[gid], {
-                fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+            const txt = this.add.text(bx + 28, rowY + 8, GENDER_LABELS[gid], {
+                fontSize: '12px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => {
                 this._customOverrides.gender = gid;
                 this.appearance.gender = gid;
-                // Reset beard for female
                 if (gid === 'female' && this.appearance.beardStyle !== 'none') {
                     this._customOverrides.beardStyle = 'none';
                     this.appearance.beardStyle = 'none';
@@ -219,51 +218,51 @@ class CharacterCreatorScene extends Phaser.Scene {
         });
 
         // ── Skin tone row ─────────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Hud:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        rowY += 32;
+        add(this.add.text(px, rowY, 'Hud:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
         SKIN_TONES.forEach((col, i) => {
-            const btn = this._colorDot(px + 44 + i * 26, rowY + 5, col, this.appearance.skinColor === col);
+            const btn = this._colorDot(px + 52 + i * 30, rowY + 7, col, this.appearance.skinColor === col);
             btn.on('pointerdown', () => { this._customOverrides.skinColor = col; this.appearance.skinColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
         // ── Hair color row ────────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Hår:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        rowY += 32;
+        add(this.add.text(px, rowY, 'Hår:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
         HAIR_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 44 + i * 24, rowY + 5, col, this.appearance.hairColor === col);
+            const btn = this._colorDot(px + 52 + i * 28, rowY + 7, col, this.appearance.hairColor === col);
             btn.on('pointerdown', () => { this._customOverrides.hairColor = col; this.appearance.hairColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
         // ── Eye color row ─────────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Øyne:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        rowY += 32;
+        add(this.add.text(px, rowY, 'Øyne:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
         EYE_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 52 + i * 26, rowY + 5, col, this.appearance.eyeColor === col);
+            const btn = this._colorDot(px + 60 + i * 30, rowY + 7, col, this.appearance.eyeColor === col);
             btn.on('pointerdown', () => { this._customOverrides.eyeColor = col; this.appearance.eyeColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
         // ── Cloth color row ───────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Farge:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        rowY += 32;
+        add(this.add.text(px, rowY, 'Farge:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
         CLOTH_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 52 + i * 22, rowY + 5, col, this.appearance.clothColor === col);
+            const btn = this._colorDot(px + 60 + i * 26, rowY + 7, col, this.appearance.clothColor === col);
             btn.on('pointerdown', () => { this._customOverrides.clothColor = col; this.appearance.clothColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
         // ── Clothing style row ────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Drakt:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        rowY += 32;
+        add(this.add.text(px, rowY, 'Drakt:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
         CLOTH_STYLES.forEach((style, i) => {
-            const bx  = px + 52 + i * 58;
+            const bx  = px + 60 + i * 68;
             const sel = this.appearance.clothStyle === style;
-            const bg  = this.add.rectangle(bx + 22, rowY + 7, 52, 18, sel ? 0x2a2060 : 0x111122)
+            const bg  = this.add.rectangle(bx + 26, rowY + 8, 60, 22, sel ? 0x2a2060 : 0x111122)
                 .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx + 22, rowY + 7, CLOTH_STYLE_LABELS[style], {
-                fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+            const txt = this.add.text(bx + 26, rowY + 8, CLOTH_STYLE_LABELS[style], {
+                fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => {
                 this._customOverrides.clothStyle = style;
@@ -277,20 +276,19 @@ class CharacterCreatorScene extends Phaser.Scene {
 
         // ── Hair style row (not for dwarf) ────────────────────────────────────
         if (this.selectedRace !== 'dwarf') {
-            rowY += 26;
-            add(this.add.text(px, rowY, 'Frisyre:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
-            // Show 5 styles per row to fit
+            rowY += 32;
+            add(this.add.text(px, rowY, 'Frisyre:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
             const stylesPerRow = 5;
             HAIR_STYLES.forEach((style, i) => {
                 const row = Math.floor(i / stylesPerRow);
                 const col = i % stylesPerRow;
-                const bx  = px + 60 + col * 56;
-                const by  = rowY + 7 + row * 22;
+                const bx  = px + 70 + col * 62;
+                const by  = rowY + 8 + row * 28;
                 const sel = this.appearance.hairStyle === style;
-                const bg  = this.add.rectangle(bx + 22, by, 50, 18, sel ? 0x2a2060 : 0x111122)
+                const bg  = this.add.rectangle(bx + 24, by, 56, 22, sel ? 0x2a2060 : 0x111122)
                     .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 22, by, HAIR_STYLE_LABELS[style], {
-                    fontSize: '8px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+                const txt = this.add.text(bx + 24, by, HAIR_STYLE_LABELS[style], {
+                    fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
                 }).setOrigin(0.5);
                 bg.on('pointerdown', () => {
                     this._customOverrides.hairStyle = style;
@@ -301,22 +299,22 @@ class CharacterCreatorScene extends Phaser.Scene {
                 add(bg);
                 add(txt);
             });
-            rowY += Math.ceil(HAIR_STYLES.length / stylesPerRow) * 22;
+            rowY += Math.ceil(HAIR_STYLES.length / stylesPerRow) * 28;
         }
 
         // ── Beard style row (male human / dwarf only) ─────────────────────────
         const showBeard = (this.selectedRace === 'human' || this.selectedRace === 'dwarf') &&
                           this.appearance.gender !== 'female';
         if (showBeard) {
-            rowY += 4;
-            add(this.add.text(px, rowY, 'Skjegg:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+            rowY += 6;
+            add(this.add.text(px, rowY, 'Skjegg:', { fontSize: '13px', color: '#667788', fontFamily: 'monospace' }));
             BEARD_STYLES.forEach((style, i) => {
-                const bx  = px + 56 + i * 60;
+                const bx  = px + 70 + i * 70;
                 const sel = this.appearance.beardStyle === style;
-                const bg  = this.add.rectangle(bx + 20, rowY + 7, 54, 18, sel ? 0x2a2060 : 0x111122)
+                const bg  = this.add.rectangle(bx + 24, rowY + 8, 62, 22, sel ? 0x2a2060 : 0x111122)
                     .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 20, rowY + 7, BEARD_STYLE_LABELS[style], {
-                    fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+                const txt = this.add.text(bx + 24, rowY + 8, BEARD_STYLE_LABELS[style], {
+                    fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
                 }).setOrigin(0.5);
                 bg.on('pointerdown', () => {
                     this._customOverrides.beardStyle = style;
@@ -333,7 +331,7 @@ class CharacterCreatorScene extends Phaser.Scene {
     }
 
     _colorDot(x, y, color, selected) {
-        const r = 9;
+        const r = 10;
         const g = this.add.graphics();
         g.fillStyle(color);
         g.fillCircle(x, y, r);
@@ -352,12 +350,11 @@ class CharacterCreatorScene extends Phaser.Scene {
 
         const previewSize = 256;
         const px = W - 160;
-        const py = H - 420;
+        const py = H - 380;
 
         // Preview box background
         g.fillStyle(0x0d0b1e, 0.95);
         g.fillRoundedRect(px - previewSize / 2 - 8, py - 8, previewSize + 16, previewSize + 16, 6);
-        // Double border
         g.lineStyle(2, 0x4444aa, 0.6);
         g.strokeRoundedRect(px - previewSize / 2 - 8, py - 8, previewSize + 16, previewSize + 16, 6);
         g.lineStyle(1, 0x2a2050, 0.4);
@@ -373,33 +370,28 @@ class CharacterCreatorScene extends Phaser.Scene {
         } else {
             drawCharacterSprite(g, px - previewSize / 2, py, previewSize, this.appearance, this.selectedRace);
         }
-
-        // Label below preview
-        g.fillStyle(0x000000, 0);
-        const raceName = RACE_DEFS[this.selectedRace]?.name || '';
-        // Race label is handled by text objects in stats panel
     }
 
     // ── Starting bonus panel ──────────────────────────────────────────────────
 
     _buildBonusPanel(W, H) {
-        const lx = 22, by = this._statsY + 120;
+        const lx = 34, by = this._statsY + 180;
 
-        this.add.rectangle(W / 4, by - 6, W / 2 - 10, 1, 0x1a1535);
+        this.add.rectangle(W / 4, by - 8, W / 2 - 20, 1, 0x1a1535);
         this.add.text(lx, by, 'STARTBONUS  (velg én)', {
-            fontSize: '10px', color: '#445566', fontFamily: 'monospace'
+            fontSize: '13px', color: '#445566', fontFamily: 'monospace'
         });
 
         this._bonusBtns = {};
         START_BONUSES.forEach(({ id, label, desc, col }, i) => {
-            const bx  = lx + i * 150 + 60;
-            const bg  = this.add.rectangle(bx, by + 26, 138, 32, 0x111122)
+            const bx  = lx + i * 170 + 72;
+            const bg  = this.add.rectangle(bx, by + 32, 155, 40, 0x111122)
                 .setStrokeStyle(1, 0x334466).setInteractive({ useHandCursor: true });
-            const lbl = this.add.text(bx, by + 20, label, {
-                fontSize: '12px', color: '#aabbcc', fontFamily: 'monospace', fontStyle: 'bold'
+            const lbl = this.add.text(bx, by + 25, label, {
+                fontSize: '14px', color: '#aabbcc', fontFamily: 'monospace', fontStyle: 'bold'
             }).setOrigin(0.5);
-            const dsc = this.add.text(bx, by + 32, desc, {
-                fontSize: '9px', color: '#556677', fontFamily: 'monospace'
+            const dsc = this.add.text(bx, by + 40, desc, {
+                fontSize: '11px', color: '#556677', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => this._selectBonus(id));
             bg.on('pointerover',  () => { if (this.selectedBonus !== id) bg.setFillStyle(0x1a1a33); });
@@ -423,12 +415,12 @@ class CharacterCreatorScene extends Phaser.Scene {
     // ── Name input ────────────────────────────────────────────────────────────
 
     _buildNameAndStart(cx, W, H) {
-        const nameY = H - 80;
-        this.add.rectangle(cx, nameY, W - 20, 1, 0x1a1535);
-        this.add.text(22, nameY + 12, 'Navn:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }).setOrigin(0, 0.5);
+        const nameY = H - 100;
+        this.add.rectangle(cx, nameY, W - 40, 1, 0x1a1535);
+        this.add.text(34, nameY + 18, 'Navn:', { fontSize: '15px', color: '#667788', fontFamily: 'monospace' }).setOrigin(0, 0.5);
 
-        this._nameBg  = this.add.rectangle(cx + 40, nameY + 12, 240, 28, 0x1a1830).setStrokeStyle(1, 0x4444aa);
-        this._nameTxt = this.add.text(cx + 40, nameY + 12, '|', { fontSize: '15px', color: '#ffffff', fontFamily: 'monospace' }).setOrigin(0.5);
+        this._nameBg  = this.add.rectangle(cx + 40, nameY + 18, 280, 34, 0x1a1830).setStrokeStyle(1, 0x4444aa);
+        this._nameTxt = this.add.text(cx + 40, nameY + 18, '|', { fontSize: '18px', color: '#ffffff', fontFamily: 'monospace' }).setOrigin(0.5);
 
         this._nameBg.setInteractive({ useHandCursor: true });
         this._nameBg.on('pointerdown', () => this._openMobileNameInput());
@@ -439,8 +431,8 @@ class CharacterCreatorScene extends Phaser.Scene {
             this._nameTxt.setText((this.heroName || '') + (this._cursor ? '|' : ' '));
         }});
 
-        const startBtn = this.add.text(cx, H - 36, '[ START EVENTYR ]', {
-            fontSize: '22px', color: '#00e87a', fontFamily: 'monospace'
+        const startBtn = this.add.text(cx, H - 40, '[ START EVENTYR ]', {
+            fontSize: '26px', color: '#00e87a', fontFamily: 'monospace'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         startBtn.on('pointerover', () => startBtn.setAlpha(0.7));
         startBtn.on('pointerout',  () => startBtn.setAlpha(1));
@@ -468,7 +460,7 @@ class CharacterCreatorScene extends Phaser.Scene {
             inp.maxLength = 14;
             inp.autocomplete = 'off';
             inp.style.cssText = 'position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);' +
-                'font-size:18px;font-family:monospace;padding:8px 12px;width:240px;' +
+                'font-size:20px;font-family:monospace;padding:10px 16px;width:280px;' +
                 'background:#1a1830;color:#ffffff;border:2px solid #4444aa;border-radius:6px;' +
                 'text-align:center;z-index:9999;outline:none;';
             document.body.appendChild(inp);
