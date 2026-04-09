@@ -11,8 +11,14 @@
 - **Geolog-skillz styrket (#81):** Malmøye gir nå også mineral-identifisering – uten Geolog-skill vises mineraler som «Ukjent mineral» og elementer oppdages ikke automatisk. Effektiv utvinning gir nå +1 ekstra element per smelting
 - **Metallurg-skillz styrket (#81):** Rask smelting gir nå også +15% sjanse for ekstra utbytte. Legeringsmester gir 20% sjanse for dobbel legering-output. Mestersmie økt til +30% stats og gir spesialegenskaper (våpen: +10% krit, rustning: +1 torneskade)
 
+### Forbedringer
+- **SkillScene utvidet (#79):** Panelet fyller nå hele skjermen (1260×780 i stedet for 940×520). Skill-kort økt til 220×108px med mer plass til tekst og beskrivelser
+- **CharacterCreatorScene fullstendig redesignet (#80):** Ny tre-kolonne layout som fyller hele 1280×800-lerret. Venstre: 2×2 rase-rutenett + egenskaper. Senter: Stort forhåndsvisningsfelt (280px) + heltenavn. Høyre: Utseende-tilpasning. Bunnfelt: Startbonus + startknapp. Visuelt sammenhengende med seksjonspaneler
+
 ### Tekniske endringer
 - Fontstørrelser justert i alle 11 scene-filer
+- SkillScene: panelW/panelH bruker nå W-20/H-20, cardW opptil 220px, cardH 108px, tierH 140px
+- CharacterCreatorScene: Fullstendig omskrevet med tre-kolonne panelstruktur og seksjonspaneler
 - TouchControls utvidet med zoom/fullskjerm-knapper og Fullscreen API-integrasjon
 - InputHandler støtter nå touch_zoom_in/touch_zoom_out registry-flagg
 - Nye hero-egenskaper: mineralIdentifyLevel, smeltBonusElement, smeltExtraYieldChance, doubleAlloyChance

@@ -19,8 +19,8 @@ class SkillScene extends Phaser.Scene {
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
 
         // ── Panel ─────────────────────────────────────────────────────────────
-        const panelW = Math.min(W - 10, 940);
-        const panelH = Math.min(H - 10, 520);
+        const panelW = W - 20;
+        const panelH = H - 20;
         const px = cx - panelW / 2;
         const py = cy - panelH / 2;
 
@@ -96,7 +96,7 @@ class SkillScene extends Phaser.Scene {
         const hero    = this.heroRef;
         const colColor = path.color;
         const hexCol  = '#' + colColor.toString(16).padStart(6, '0');
-        const hdrW = Math.min(160, this._colW - 8);
+        const hdrW = Math.min(220, this._colW - 12);
 
         // Check if entire path is locked
         const pathLocked = (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked)
@@ -134,8 +134,8 @@ class SkillScene extends Phaser.Scene {
             return;
         }
 
-        const tierH    = 100;
-        const cardW    = Math.min(160, this._colW - 12), cardH = 84;
+        const tierH    = 140;
+        const cardW    = Math.min(220, this._colW - 16), cardH = 108;
         const tierGapY = areaTop + 28;
 
         path.tiers.forEach((skill, tierIndex) => {
@@ -208,7 +208,7 @@ class SkillScene extends Phaser.Scene {
         }
 
         // Skill name
-        this.add.text(cx, y + 18, skill.name, {
+        this.add.text(cx, y + 20, skill.name, {
             fontSize: '14px',
             color: maxed ? '#445566' : (locked ? '#333355' : '#e8e8ff'),
             fontFamily: 'monospace', fontStyle: 'bold',
@@ -218,7 +218,7 @@ class SkillScene extends Phaser.Scene {
         // Category badge + description combined
         const catHex = locked ? '#222233' : '#' + colColor.toString(16).padStart(6, '0');
         const descLine = skill.desc.replace(/\n/g, ', ');
-        this.add.text(cx, y + 36, `[${skill.category}] ${descLine}`, {
+        this.add.text(cx, y + 42, `[${skill.category}] ${descLine}`, {
             fontSize: '12px',
             color: locked ? '#1e1e30' : (maxed ? '#334455' : '#8899bb'),
             fontFamily: 'monospace', align: 'center',

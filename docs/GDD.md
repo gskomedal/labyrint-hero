@@ -114,7 +114,7 @@ Kun ekstra passasje-vegger kan være SECRET/CRACKED/DOOR – DFS-stien er alltid
 - **Forsvar:** Reduserer innkommende skade
 - **Synsfelt:** Tåkeradius (påvirkes av `keen_eye`-evnen)
 - **XP-kurve:** `XP_BASE = 100`, vokser med `XP_GROWTH = 1.55` per nivå → merkbart slakere progresjon
-- **Nivå opp:** Åpner SkillScene (velg én av tre tilfeldige evner). **Ingen automatisk stats-boost** – all styrke kommer fra evner og utstyr.
+- **Nivå opp:** Åpner SkillScene (fullskjerm-panel med 5 kolonner × 3 tier, kort 220×108px). **Ingen automatisk stats-boost** – all styrke kommer fra evner og utstyr.
 - **Facing-retning:** Siste bevegelsesretning brukes av SPACE/F og pilskyting
 
 ### Kjæledyr-følgesvenn
@@ -353,7 +353,7 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 | Tile-typer (6 typer inkl. TRAP) | ✅ Ferdig | SECRET, CRACKED_WALL, DOOR, TRAP |
 | Fog of War | ✅ Ferdig | 3 nivåer |
 | Visuelle verdenstemaer | ✅ Ferdig | 5 temaer med detaljerte per-tile dekorasjoner, murverk, vegg-skygger |
-| Karakterskaper (4 raser) | ✅ Ferdig | Alv, Dverg, Menneske, Hobbit; kjønnsvalg |
+| Karakterskaper (4 raser) | ✅ Ferdig | Tre-kolonne layout: 2×2 rase-rutenett + stats | preview + navn | utseende. Fyller hele skjermen |
 | Prosedyrekaraktergrafikk | ✅ Ferdig | 2 kjønn, 10 frisyrer, 4 klesstiler, øynefarge, skjegg, tilbehør per rase |
 | Vanskelighetsgrad (MenuScene) | ✅ Ferdig | LETT/NORMAL/VANSKELIG – prominent i startmenyen |
 | Startbonus-valg | ✅ Ferdig | +Hjerte / +Angrep / +Syn |
