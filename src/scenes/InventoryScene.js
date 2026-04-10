@@ -671,6 +671,7 @@ class InventoryScene extends Phaser.Scene {
 
     _showTooltip(x, y, item) {
         this._hideTooltip();
+        const { width: W, height: H } = this.cameras.main;
         const rarDef = item.rarity ? RARITY_BY_ID[item.rarity] : null;
         const rarTag = (rarDef && item.rarity !== 'common') ? `[${rarDef.label}]  ` : '';
         const lines = [rarTag + item.name, item.desc || ''];
@@ -678,8 +679,15 @@ class InventoryScene extends Phaser.Scene {
         this._tooltip = this.add.text(x, y, lines.join('\n'), {
             fontSize: '12px', color: txtCol, fontFamily: 'monospace',
             backgroundColor: '#0a0918', padding: { x: 6, y: 4 },
-            stroke: '#334466', strokeThickness: 1
+            stroke: '#334466', strokeThickness: 1,
+            wordWrap: { width: 300 }
         }).setOrigin(0.5, 1).setDepth(30);
+
+        // Clamp tooltip within viewport
+        const b = this._tooltip.getBounds();
+        if (b.left < 4) this._tooltip.setX(x + (4 - b.left));
+        if (b.right > W - 4) this._tooltip.setX(x - (b.right - W + 4));
+        if (b.top < 4) this._tooltip.setOrigin(0.5, 0).setY(y + 8);
     }
 
     _hideTooltip() {

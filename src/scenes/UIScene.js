@@ -274,8 +274,9 @@ class UIScene extends Phaser.Scene {
         const wpn = inv.equipped.weapon;
         const arm = inv.equipped.armor;
         const parts = [];
-        if (wpn) parts.push(`[${wpn.name}]`);
-        if (arm) parts.push(`[${arm.name}]`);
+        const _trunc = (n, mx) => n.length > mx ? n.slice(0, mx - 1) + '…' : n;
+        if (wpn) parts.push(`[${_trunc(wpn.name, 18)}]`);
+        if (arm) parts.push(`[${_trunc(arm.name, 18)}]`);
         this.eqText.setText(parts.length ? parts.join('  ') : '');
         // Color equipped text by highest rarity
         const bestRarity = [wpn, arm].reduce((best, it) => {
