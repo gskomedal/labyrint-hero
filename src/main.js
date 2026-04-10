@@ -31,12 +31,17 @@ const config = {
     ]
 };
 
-// Patch text factory to render at 2× resolution for sharper text
-// (pixelArt:true uses NEAREST filtering which blurs scaled text)
+// Patch text factory for sharper text:
+// 1) Render at 2× resolution so the source canvas has more detail
+// 2) Switch texture to LINEAR filtering (pixelArt:true forces NEAREST,
+//    which is great for sprites but makes text look blocky/blurry)
 const _origText = Phaser.GameObjects.GameObjectFactory.prototype.text;
 Phaser.GameObjects.GameObjectFactory.prototype.text = function (x, y, text, style) {
     const t = _origText.call(this, x, y, text, style);
     t.setResolution(2);
+    if (t.texture && t.texture.setFilter) {
+        t.texture.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    }
     return t;
 };
 
