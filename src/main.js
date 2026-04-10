@@ -9,7 +9,6 @@ const config = {
         height:     800,
     },
     backgroundColor: '#08060f',
-    pixelArt:        true,
     roundPixels:     true,
     input: {
         activePointers: 3,
@@ -29,6 +28,14 @@ const config = {
         SmelteryScene,
         ChemLabScene
     ]
+};
+
+// Patch text factory to render at 2× resolution for sharper text
+const _origText = Phaser.GameObjects.GameObjectFactory.prototype.text;
+Phaser.GameObjects.GameObjectFactory.prototype.text = function (x, y, text, style) {
+    const t = _origText.call(this, x, y, text, style);
+    t.setResolution(2);
+    return t;
 };
 
 const game = new Phaser.Game(config);

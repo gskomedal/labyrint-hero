@@ -109,16 +109,18 @@ class MerchantScene extends Phaser.Scene {
             iconG.fillCircle(ix - 3, iy - 3, 3);
         }
 
-        // Item name (with rarity color)
+        // Item name (with rarity color) – truncate to fit slot
         const rarDef = item.rarity ? RARITY_BY_ID[item.rarity] : null;
         const nameCol = (rarDef && item.rarity !== 'common') ? rarDef.textColor : '#ccddff';
-        this._d(this.add.text(cx - w / 2 + 50, y + 6, item.name, {
+        const dispName = item.name.length > 30 ? item.name.slice(0, 29) + '…' : item.name;
+        this._d(this.add.text(cx - w / 2 + 50, y + 6, dispName, {
             fontSize: '12px', color: nameCol, fontFamily: 'monospace'
         }));
 
-        // Description
+        // Description – smaller font + wordWrap to stay inside slot
         this._d(this.add.text(cx - w / 2 + 50, y + 22, item.desc || '', {
-            fontSize: '13px', color: '#667788', fontFamily: 'monospace'
+            fontSize: '11px', color: '#667788', fontFamily: 'monospace',
+            wordWrap: { width: w - 100 }
         }));
 
         // Price

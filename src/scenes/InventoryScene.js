@@ -213,8 +213,8 @@ class InventoryScene extends Phaser.Scene {
 
         if (item) {
             this._drawItemIcon(x, y, item, size - 12);
-            this._d(this.add.text(x, y - size / 2 - 10, item.name, {
-                fontSize: '12px', color: this._rarityTextColor(item), fontFamily: 'monospace'
+            this._d(this.add.text(x, y - size / 2 - 10, this._shortName(item.name), {
+                fontSize: '11px', color: this._rarityTextColor(item), fontFamily: 'monospace'
             }).setOrigin(0.5));
 
             bg.setInteractive({ useHandCursor: true });
@@ -275,9 +275,10 @@ class InventoryScene extends Phaser.Scene {
 
         if (itemDef) {
             this._drawItemIcon(x, y, itemDef, size - 12);
-            const label = qu.count > 1 ? `${itemDef.name} ×${qu.count}` : itemDef.name;
+            const sn = this._shortName(itemDef.name);
+            const label = qu.count > 1 ? `${sn} ×${qu.count}` : sn;
             this._d(this.add.text(x, y - size / 2 - 10, label, {
-                fontSize: '12px', color: '#ccddff', fontFamily: 'monospace'
+                fontSize: '11px', color: '#ccddff', fontFamily: 'monospace'
             }).setOrigin(0.5));
 
             bg.setInteractive({ useHandCursor: true });
@@ -343,7 +344,7 @@ class InventoryScene extends Phaser.Scene {
                 ? '#' + (MINERAL_TIER_COLORS[itemDef.tier] || 0x997755).toString(16).padStart(6, '0')
                 : this._rarityTextColor(itemDef);
             this._d(this.add.text(x, y + size / 2 - 2, this._shortName(itemDef.name), {
-                fontSize: '12px', color: nameCol, fontFamily: 'monospace'
+                fontSize: '11px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5, 1));
 
             // Stack count badge
@@ -468,7 +469,7 @@ class InventoryScene extends Phaser.Scene {
             this._drawItemIcon(x, y, itemDef, size - 10);
             const nameCol = this._rarityTextColor(itemDef);
             this._d(this.add.text(x, y + size / 2 - 2, this._shortName(itemDef.name), {
-                fontSize: '12px', color: nameCol, fontFamily: 'monospace'
+                fontSize: '11px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5, 1));
 
             if (count > 1) {
@@ -671,6 +672,7 @@ class InventoryScene extends Phaser.Scene {
 
     _showTooltip(x, y, item) {
         this._hideTooltip();
+        const { width: W, height: H } = this.cameras.main;
         const rarDef = item.rarity ? RARITY_BY_ID[item.rarity] : null;
         const rarTag = (rarDef && item.rarity !== 'common') ? `[${rarDef.label}]  ` : '';
         const lines = [rarTag + item.name, item.desc || ''];
@@ -678,8 +680,15 @@ class InventoryScene extends Phaser.Scene {
         this._tooltip = this.add.text(x, y, lines.join('\n'), {
             fontSize: '12px', color: txtCol, fontFamily: 'monospace',
             backgroundColor: '#0a0918', padding: { x: 6, y: 4 },
-            stroke: '#334466', strokeThickness: 1
+            stroke: '#334466', strokeThickness: 1,
+            wordWrap: { width: 300 }
         }).setOrigin(0.5, 1).setDepth(30);
+
+        // Clamp tooltip within viewport
+        const b = this._tooltip.getBounds();
+        if (b.left < 4) this._tooltip.setX(x + (4 - b.left));
+        if (b.right > W - 4) this._tooltip.setX(x - (b.right - W + 4));
+        if (b.top < 4) this._tooltip.setOrigin(0.5, 0).setY(y + 8);
     }
 
     _hideTooltip() {

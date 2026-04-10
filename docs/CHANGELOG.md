@@ -17,6 +17,12 @@
 - UIScene utvidet med 3 interaktive snarveiknapper
 - Skill unlock conditions endret: metallurg='camp_room_found', kjemiker='chem_lab_found'
 - Fjernet auto-unlock av metallurgist/chemist fra SmelteryScene og ChemistrySystem
+### Forbedringer
+- **Skarpere tekst:** `pixelArt:true` fjernet fra Phaser-config (tvang NEAREST-filtrering på tekst). All tekst rendres i 2× oppløsning. CSS `image-rendering: pixelated` fjernet fra canvas
+- **Tekst-overflow fikset:** Varenavn i handelsmann, tooltips i inventar, mineralnavn i smelteverket, molekylnavn i kjemilabben og utstyrsnavn i HUD forkortes/brytes nå slik at de holder seg innenfor panelgrensene
+- **Inventar-tekst:** Utstyrsnavn, hurtigbruk og ryggsekk-etiketter krympet til 11px med trunkering for å holde seg innenfor rammene
+- **Elementbok:** Tabellen er høyere (cellehøyde 28→36px, panel 580→700px). Symboler vist i 14px med atomnummer i 10px for bedre lesbarhet
+- **Ferdighetstreet:** Karakter-portrettet fjernet for å unngå overlapp. Synergier flyttet opp rett under skill-kortene med flerradslayout (5 per rad)
 
 ---
 

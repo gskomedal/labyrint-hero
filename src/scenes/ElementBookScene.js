@@ -20,7 +20,7 @@ class ElementBookScene extends Phaser.Scene {
 
         // ── Panel ─────────────────────────────────────────────────────────────
         const panelW = Math.min(W - 10, 920);
-        const panelH = Math.min(H - 10, 580);
+        const panelH = Math.min(H - 10, 700);
         const px = cx - panelW / 2;
         const py = cy - panelH / 2;
 
@@ -45,7 +45,7 @@ class ElementBookScene extends Phaser.Scene {
         this.add.rectangle(cx, py + 48, panelW - 30, 1, 0x2a2060);
 
         // ── Draw periodic table grid ──────────────────────────────────────────
-        const cellW = 46, cellH = 28;
+        const cellW = 46, cellH = 36;
         const cols = 18, rows = 10; // 7 main rows + gap + 2 lanthanide/actinide rows
         const tableW = cols * cellW;
         const tableH = rows * cellH;
@@ -98,12 +98,12 @@ class ElementBookScene extends Phaser.Scene {
                 // Atomic number
                 const numHex = '#' + (catCol).toString(16).padStart(6, '0');
                 this.add.text(cellX + 3, cellY + 2, `${elem.atomicNumber}`, {
-                    fontSize: '13px', color: numHex, fontFamily: 'monospace'
+                    fontSize: '10px', color: numHex, fontFamily: 'monospace'
                 });
 
                 // Symbol
-                this.add.text(cellX + cellW / 2 - 1, cellY + cellH / 2, elem.symbol, {
-                    fontSize: '12px', color: '#e8e8ff', fontFamily: 'monospace', fontStyle: 'bold'
+                this.add.text(cellX + cellW / 2 - 1, cellY + cellH / 2 + 2, elem.symbol, {
+                    fontSize: '14px', color: '#e8e8ff', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setOrigin(0.5);
 
                 // Tier dot
