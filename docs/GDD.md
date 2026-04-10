@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.32
-**Sist oppdatert:** 2026-04-08
+**Versjon:** 0.9
+**Sist oppdatert:** 2026-04-09
 
 ---
 
@@ -114,7 +114,7 @@ Kun ekstra passasje-vegger kan være SECRET/CRACKED/DOOR – DFS-stien er alltid
 - **Forsvar:** Reduserer innkommende skade
 - **Synsfelt:** Tåkeradius (påvirkes av `keen_eye`-evnen)
 - **XP-kurve:** `XP_BASE = 100`, vokser med `XP_GROWTH = 1.55` per nivå → merkbart slakere progresjon
-- **Nivå opp:** Åpner SkillScene (velg én av tre tilfeldige evner). **Ingen automatisk stats-boost** – all styrke kommer fra evner og utstyr.
+- **Nivå opp:** Åpner SkillScene (fullskjerm-panel med 5 kolonner × 3 tier, kort 220×108px). **Ingen automatisk stats-boost** – all styrke kommer fra evner og utstyr.
 - **Facing-retning:** Siste bevegelsesretning brukes av SPACE/F og pilskyting
 
 ### Kjæledyr-følgesvenn
@@ -291,8 +291,8 @@ Livspotte, Stor livspotte, Styrkebrygg (midlertidig +2 ATK i 60 sek), Forsvarsbr
 | T3 | precision | +3 ATK, +3 kjæl.-ATK, +3 kjæl.-HP, +2 hjerter nå | ×1 |
 
 ### Håndverksstier (låses opp)
-- **Geolog** (lås: finn mineral) – mineralsynsradius, utbytte, garantert sjeldent mineral
-- **Metallurg** (lås: smelt mineral) – smeltetid, legeringsstats, mestersmie
+- **Geolog** (lås: finn mineral) – mineralidentifisering, mineralsynsradius, utbytte, bonuselementer, garantert sjeldent mineral
+- **Metallurg** (lås: smelt mineral) – smeltetid/energi, ekstra utbytte, legeringsstats, dobbellegering, mestersmie med spesialegenskaper
 - **Kjemiker** (lås: lag kjemikalie) – potion-varighet, bombeskade, eksplosjonsradius
 
 ### Synergier
@@ -353,7 +353,7 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 | Tile-typer (6 typer inkl. TRAP) | ✅ Ferdig | SECRET, CRACKED_WALL, DOOR, TRAP |
 | Fog of War | ✅ Ferdig | 3 nivåer |
 | Visuelle verdenstemaer | ✅ Ferdig | 5 temaer med detaljerte per-tile dekorasjoner, murverk, vegg-skygger |
-| Karakterskaper (4 raser) | ✅ Ferdig | Alv, Dverg, Menneske, Hobbit; kjønnsvalg |
+| Karakterskaper (4 raser) | ✅ Ferdig | Tre-kolonne layout: 2×2 rase-rutenett + stats | preview + navn | utseende. Fyller hele skjermen |
 | Prosedyrekaraktergrafikk | ✅ Ferdig | 2 kjønn, 10 frisyrer, 4 klesstiler, øynefarge, skjegg, tilbehør per rase |
 | Vanskelighetsgrad (MenuScene) | ✅ Ferdig | LETT/NORMAL/VANSKELIG – prominent i startmenyen |
 | Startbonus-valg | ✅ Ferdig | +Hjerte / +Angrep / +Syn |
@@ -370,7 +370,8 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 | Skilltre (5 stier + synergier) | ✅ Ferdig | Kriger / Villmarksjeger + Geolog / Metallurg / Kjemiker + 9 synergier. T-tast for visning |
 | Unike gjenstandsikoner | ✅ Ferdig | 20+ distinkte prosedyregrafikker |
 | Bevegelsesanimasjon (glide) | ✅ Ferdig | 90ms hero, 126ms monster |
-| Zoom (kamera) | ✅ Ferdig | Muskjul og +/− |
+| Zoom (kamera) | ✅ Ferdig | Mushjul, +/−, touch-knapper |
+| Fullskjerm (touch) | ✅ Ferdig | Fullscreen API via touch-knapp |
 | HUD + UIScene | ✅ Ferdig | |
 | Minimap (M-tast) | ✅ Ferdig | Fog-bevisst, hjørne-kart |
 | Statuseffekter (4 typer) | ✅ Ferdig | Gift, Brann, Frostbitt, Lammet |
@@ -457,12 +458,14 @@ Elements-modifikasjonen fletter det periodiske system, geologi, metallurgi og kj
 Periodisk system-overlay med 18×9 rutenett. Oppdagede grunnstoffer vises med symbol og kategori-farge. Gruppeprestasjoner (f.eks. Jernmetaller → +2 HP) vises nederst.
 
 ### Geolog-skillsti (#6)
-Låses opp ved første mineral-funn. 3 tiers:
+Låses opp ved første mineral-funn. Kreves for mineral-identifisering. 3 tiers:
 | Tier | Skill | Effekt |
 |------|-------|--------|
-| T1 | Malmøye | +1 mineral-synsradius per stack (maks 3) |
-| T2 | Effektiv utvinning | +25% mineralutbytte per stack (maks 3) |
+| T1 | Malmøye | +1 mineral-synsradius, mineral-identifisering per stack (maks 3) |
+| T2 | Effektiv utvinning | +25% mineralutbytte, +1 ekstra element ved smelting per stack (maks 3) |
 | T3 | Mesterprospektør | Garantert T4+ mineral per etasje (maks 1) |
+
+**Mineral-identifisering:** Uten Geolog-skill vises mineraler som «Ukjent mineral» og grunnstoffer oppdages ikke automatisk ved oppsamling. Malmøye-skillen gir mineralidentifisering.
 
 Synergi: **Jordens kraft** (Geolog + Vokter) → +1 forsvar, +1 mineralsynsradius.
 
@@ -481,9 +484,9 @@ Smelting, legeringer og smiing av utstyr.
 **Metallurg-skillsti (#8):**
 | Tier | Skill | Effekt |
 |------|-------|--------|
-| T1 | Rask smelting | -25% energi og smeltetid per stack (maks 3) |
-| T2 | Legeringsmester | +15% legering-stats per stack (maks 2) |
-| T3 | Mestersmie | +25% stats på smidd utstyr (maks 1) |
+| T1 | Rask smelting | -25% energi/smeltetid, +15% sjanse ekstra utbytte per stack (maks 3) |
+| T2 | Legeringsmester | +15% legering-stats, 20% sjanse for dobbel legering per stack (maks 2) |
+| T3 | Mestersmie | +30% stats på smidd utstyr, spesialegenskaper (våpen: +10% krit, rustning: +1 torneskade) (maks 1) |
 
 ### Fase 3: Kjemi (v0.25)
 

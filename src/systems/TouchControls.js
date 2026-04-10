@@ -109,6 +109,81 @@ class TouchControls {
             const y = baseY + btn.oy;
             this._makeActionButton(x, y, sz, btn.label, btn.key, btn.color);
         }
+
+        // ── Zoom & fullscreen buttons (top-right corner) ─────────────────────
+        this._createZoomButtons();
+    }
+
+    // ── Zoom & fullscreen (top-right) ────────────────────────────────────────
+
+    _createZoomButtons() {
+        const scene = this.scene;
+        const reg   = this.game.registry;
+        const sz    = 44;
+        const gap   = 8;
+        const W     = scene.cameras.main.width;
+        const startX = W - 20 - sz / 2;
+        const startY = 64 + sz / 2;
+
+        // Zoom in (+)
+        this._makeSimpleButton(startX, startY, sz, '+', 0x336699, () => {
+            reg.set('touch_zoom_in', true);
+        });
+
+        // Zoom out (-)
+        this._makeSimpleButton(startX - (sz + gap), startY, sz, '−', 0x336699, () => {
+            reg.set('touch_zoom_out', true);
+        });
+
+        // Fullscreen toggle
+        this._makeSimpleButton(startX - (sz + gap) * 2, startY, sz, '⛶', 0x446688, () => {
+            this._toggleFullscreen();
+        });
+    }
+
+    _makeSimpleButton(x, y, sz, label, color, callback) {
+        const scene = this.scene;
+        const alpha = 0.4;
+        const pressAlpha = 0.75;
+
+        const bg = scene.add.graphics();
+        this._drawRoundedBtn(bg, x, y, sz, color, alpha);
+        bg.setDepth(100);
+
+        const txt = scene.add.text(x, y, label, {
+            fontSize: '22px', color: '#eeeeff', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101).setAlpha(0.7);
+
+        const zone = scene.add.zone(x, y, sz, sz).setInteractive().setDepth(102);
+
+        zone.on('pointerdown', () => {
+            callback();
+            this._drawRoundedBtn(bg, x, y, sz, color, pressAlpha);
+            txt.setAlpha(1);
+        });
+
+        const release = () => {
+            this._drawRoundedBtn(bg, x, y, sz, color, alpha);
+            txt.setAlpha(0.7);
+        };
+
+        zone.on('pointerup', release);
+        zone.on('pointerout', release);
+
+        this.widgets.push(bg, txt, zone);
+    }
+
+    _toggleFullscreen() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+        } else {
+            const el = this.game.canvas.parentElement || this.game.canvas;
+            if (el.requestFullscreen) {
+                el.requestFullscreen().catch(() => {});
+            } else if (el.webkitRequestFullscreen) {
+                el.webkitRequestFullscreen();
+            }
+        }
     }
 
     _makeActionButton(x, y, sz, label, regKey, color) {

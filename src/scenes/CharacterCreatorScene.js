@@ -1,4 +1,5 @@
 // ─── Labyrint Hero – CharacterCreatorScene ────────────────────────────────────
+// Full-page three-column layout: Race+Stats | Preview+Name | Appearance
 
 const RACE_DEFS = {
     human:  { name: 'Menneske', hearts: 5, attack: 2, defense: 0, visionRadius: 5, xpMultiplier: 1.25, special: 'XP-bonus +25%',       desc: 'Allsidig og tilpasningsdyktig. Lærer raskere enn andre.' },
@@ -23,7 +24,6 @@ class CharacterCreatorScene extends Phaser.Scene {
 
     create() {
         const { width: W, height: H } = this.cameras.main;
-        const cx = W / 2;
 
         this.selectedRace       = 'human';
         this.selectedDifficulty = this._initDifficulty;
@@ -32,59 +32,91 @@ class CharacterCreatorScene extends Phaser.Scene {
         this.appearance         = defaultAppearance('human');
         this._customOverrides   = {};
 
-        // ── Background ────────────────────────────────────────────────────────
-        this.add.rectangle(cx, H / 2, W, H, 0x0a0814);
+        // ── Full background ──────────────────────────────────────────────────
+        this.add.rectangle(W / 2, H / 2, W, H, 0x080612);
 
-        // ── Title ─────────────────────────────────────────────────────────────
-        this.add.text(cx, 18, 'VELG DIN HELT', {
-            fontSize: '24px', color: '#f5e642', fontFamily: 'monospace',
-            fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 3
-        }).setOrigin(0.5, 0);
+        // ── Layout constants ─────────────────────────────────────────────────
+        const pad = 15;
+        const mainY = 58, mainBot = H - 145;
+        const mainH = mainBot - mainY;
 
-        // ── Difficulty display ────────────────────────────────────────────────
-        this._buildDifficultyRow(cx, W);
+        const leftX = pad, leftW = 370;
+        const centerX = leftX + leftW + pad, centerW = 400;
+        const rightX = centerX + centerW + pad, rightW = W - rightX - pad;
 
-        // ── Race tabs ─────────────────────────────────────────────────────────
-        this._buildRacePanel(W, H);
+        this._leftPanel   = { x: leftX, y: mainY, w: leftW, h: mainH };
+        this._centerPanel = { x: centerX, y: mainY, w: centerW, h: mainH };
+        this._rightPanel  = { x: rightX, y: mainY, w: rightW, h: mainH };
 
-        // ── Appearance / Preview (right panel) ────────────────────────────────
-        this._buildAppearancePanel(W, H);
+        // ── Top bar ──────────────────────────────────────────────────────────
+        this._buildTopBar(W);
 
-        // ── Starting bonus (left panel, below stats) ──────────────────────────
-        this._buildBonusPanel(W, H);
+        // ── Section panels (backgrounds) ─────────────────────────────────────
+        this._drawSectionPanel(leftX, mainY, leftW, mainH);
+        this._drawSectionPanel(centerX, mainY, centerW, mainH);
+        this._drawSectionPanel(rightX, mainY, rightW, mainH);
 
-        // ── Name + start ──────────────────────────────────────────────────────
-        this._buildNameAndStart(cx, W, H);
+        // ── Left panel: Race grid + Stats ────────────────────────────────────
+        this._statsObjs = [];
+        this._buildRaceGrid();
 
+        // ── Center panel: Preview + Name ─────────────────────────────────────
+        this._previewGfx = this.add.graphics();
+        this._descObjs   = [];
+        this._buildNameInput();
+
+        // ── Right panel: Appearance ──────────────────────────────────────────
+        this._appearObjs = [];
+
+        // ── Bottom bar: Bonus + Start ────────────────────────────────────────
+        this._buildBottomBar(W, H, mainBot + pad);
+
+        // ── Apply defaults ───────────────────────────────────────────────────
         this._selectRace('human');
+        this._selectDifficulty(this.selectedDifficulty);
+        this._selectBonus('heart');
         this.input.keyboard.on('keydown', this._onKey, this);
     }
 
-    // ── Difficulty row ────────────────────────────────────────────────────────
+    _drawSectionPanel(x, y, w, h) {
+        const g = this.add.graphics();
+        g.fillStyle(0x0c0a1a, 0.85);
+        g.fillRoundedRect(x, y, w, h, 6);
+        g.lineStyle(1, 0x2a2060, 0.5);
+        g.strokeRoundedRect(x, y, w, h, 6);
+    }
 
-    _buildDifficultyRow(cx, W) {
-        this.add.rectangle(cx, 45, W - 20, 1, 0x1a1535);
-        this.add.text(18, 52, 'VANSKELIGHETSGRAD:', {
-            fontSize: '10px', color: '#445566', fontFamily: 'monospace'
+    // ── Top bar: Title + Difficulty ──────────────────────────────────────────
+
+    _buildTopBar(W) {
+        const cx = W / 2;
+        this.add.text(cx, 8, 'VELG DIN HELT', {
+            fontSize: '26px', color: '#f5e642', fontFamily: 'monospace',
+            fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 3
+        }).setOrigin(0.5, 0);
+
+        this.add.text(W - 390, 18, 'VANSKELIGHETSGRAD:', {
+            fontSize: '12px', color: '#445566', fontFamily: 'monospace'
         });
 
         const DIFFS = [
-            { id: 'easy',   label: 'LETT',     col: 0x44bb44 },
-            { id: 'normal', label: 'NORMAL',   col: 0x4488ff },
-            { id: 'hard',   label: 'VANSK.',   col: 0xff4444 },
+            { id: 'easy',   label: 'LETT',   col: 0x44bb44 },
+            { id: 'normal', label: 'NORMAL', col: 0x4488ff },
+            { id: 'hard',   label: 'VANSK.', col: 0xff4444 },
         ];
         this._diffBtns = {};
         DIFFS.forEach(({ id, label, col }, i) => {
-            const bx  = 170 + i * 100;
-            const bg  = this.add.rectangle(bx, 57, 88, 18, 0x111122)
+            const bx = W - 230 + i * 80;
+            const bg = this.add.rectangle(bx, 17, 70, 22, 0x111122)
                 .setStrokeStyle(1, 0x334466).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx, 57, label, {
-                fontSize: '11px', color: '#889aaa', fontFamily: 'monospace'
+            const txt = this.add.text(bx, 17, label, {
+                fontSize: '12px', color: '#889aaa', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => this._selectDifficulty(id));
             this._diffBtns[id] = { bg, txt, col };
         });
-        this._selectDifficulty(this.selectedDifficulty);
+
+        this.add.rectangle(cx, 46, W - 24, 1, 0x1a1535);
     }
 
     _selectDifficulty(id) {
@@ -97,44 +129,77 @@ class CharacterCreatorScene extends Phaser.Scene {
         }
     }
 
-    // ── Left panel: race selection + stats ────────────────────────────────────
+    // ── Left panel: Race grid (2x2) + Stats ──────────────────────────────────
 
-    _buildRacePanel(W, H) {
-        const panelX = 18;
-        const races  = Object.keys(RACE_DEFS);
-        const btnW   = 100, btnH = 32;
+    _buildRaceGrid() {
+        const { x: px, y: py, w: pw } = this._leftPanel;
+        const innerPad = 15;
+
+        this.add.text(px + pw / 2, py + 10, 'RASE', {
+            fontSize: '13px', color: '#556677', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5, 0);
+
+        const races = Object.keys(RACE_DEFS);
+        const cardW = (pw - innerPad * 2 - 10) / 2;
+        const cardH = 80;
+        const gap = 8;
+        const gridX = px + innerPad;
+        const gridY = py + 30;
 
         this._raceBtns = {};
-        this.add.rectangle(panelX + races.length * (btnW + 6) / 2, 75, W / 2, 1, 0x1a1535);
         races.forEach((id, i) => {
-            const bx  = panelX + i * (btnW + 6) + btnW / 2;
-            const btn = this._raceTab(bx, 88, btnW, btnH, RACE_DEFS[id].name, id);
-            this._raceBtns[id] = btn;
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            const cx = gridX + col * (cardW + gap) + cardW / 2;
+            const cy = gridY + row * (cardH + gap) + cardH / 2;
+
+            const def = RACE_DEFS[id];
+            const bg = this.add.graphics();
+            bg.fillStyle(0x111128, 0.9);
+            bg.fillRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 5);
+            bg.lineStyle(1, 0x334466);
+            bg.strokeRoundedRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH, 5);
+
+            const hitZone = this.add.rectangle(cx, cy, cardW, cardH)
+                .setInteractive({ useHandCursor: true }).setAlpha(0.001);
+
+            const name = this.add.text(cx, cy - 20, def.name, {
+                fontSize: '15px', color: '#cccccc', fontFamily: 'monospace', fontStyle: 'bold'
+            }).setOrigin(0.5);
+            const spec = this.add.text(cx, cy + 2, def.special, {
+                fontSize: '11px', color: '#667788', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            const statLine = `\u2665${def.hearts} \u2694${def.attack} \u25C6${def.defense} \u25CE${def.visionRadius}`;
+            const stats = this.add.text(cx, cy + 20, statLine, {
+                fontSize: '10px', color: '#556677', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+
+            hitZone.on('pointerdown', () => this._selectRace(id));
+            hitZone.on('pointerover', () => { if (this.selectedRace !== id) bg.setAlpha(0.8); });
+            hitZone.on('pointerout',  () => bg.setAlpha(1));
+
+            this._raceBtns[id] = { bg, name, spec, stats, hitZone, cardW, cardH, cx, cy };
         });
 
-        this._statsY    = 116;
-        this._statsObjs = [];
-        this._rebuildStats();
-    }
-
-    _raceTab(x, y, w, h, label, raceId) {
-        const bg  = this.add.rectangle(x, y, w, h, 0x1a1535).setStrokeStyle(1, 0x4444aa).setInteractive({ useHandCursor: true });
-        const txt = this.add.text(x, y, label, { fontSize: '13px', color: '#cccccc', fontFamily: 'monospace' }).setOrigin(0.5);
-        bg.on('pointerdown', () => this._selectRace(raceId));
-        bg.on('pointerover', () => bg.setAlpha(0.8));
-        bg.on('pointerout',  () => bg.setAlpha(1));
-        return { bg, txt };
+        // Stats area starts below the grid
+        this._statsAreaY = gridY + 2 * (cardH + gap) + 12;
     }
 
     _selectRace(id) {
         this.selectedRace = id;
-        this.appearance   = { ...defaultAppearance(id), ...this._customOverrides };
-        for (const [rid, { bg, txt }] of Object.entries(this._raceBtns)) {
+        this.appearance = { ...defaultAppearance(id), ...this._customOverrides };
+
+        for (const [rid, btn] of Object.entries(this._raceBtns)) {
             const sel = rid === id;
-            bg.setFillStyle(sel ? 0x2a2060 : 0x1a1535);
-            bg.setStrokeStyle(sel ? 2 : 1, sel ? 0xf5e642 : 0x4444aa);
-            txt.setColor(sel ? '#f5e642' : '#cccccc');
+            btn.bg.clear();
+            btn.bg.fillStyle(sel ? 0x1a1540 : 0x111128, 0.9);
+            btn.bg.fillRoundedRect(btn.cx - btn.cardW / 2, btn.cy - btn.cardH / 2, btn.cardW, btn.cardH, 5);
+            btn.bg.lineStyle(sel ? 2 : 1, sel ? 0xf5e642 : 0x334466);
+            btn.bg.strokeRoundedRect(btn.cx - btn.cardW / 2, btn.cy - btn.cardH / 2, btn.cardW, btn.cardH, 5);
+            btn.name.setColor(sel ? '#f5e642' : '#cccccc');
+            btn.spec.setColor(sel ? '#aabb88' : '#667788');
         }
+
         this._rebuildStats();
         this._rebuildPreview();
         this._rebuildAppearancePickers();
@@ -144,69 +209,157 @@ class CharacterCreatorScene extends Phaser.Scene {
         this._statsObjs.forEach(o => o.destroy());
         this._statsObjs = [];
 
+        const { x: px, w: pw } = this._leftPanel;
+        const innerPad = 15;
+        const lx = px + innerPad;
+        const sy = this._statsAreaY;
         const def = RACE_DEFS[this.selectedRace];
         const add = o => { this._statsObjs.push(o); return o; };
-        const y0  = this._statsY;
-        const lx  = 22;
 
-        add(this.add.text(lx, y0, def.desc, { fontSize: '10px', color: '#8899bb', fontFamily: 'monospace', wordWrap: { width: 420 } }));
-        add(this.add.text(lx, y0 + 14, `Spesial: ${def.special}`, { fontSize: '10px', color: '#f5e642', fontFamily: 'monospace' }));
+        // Race description
+        add(this.add.text(lx, sy, def.desc, {
+            fontSize: '12px', color: '#8899bb', fontFamily: 'monospace',
+            wordWrap: { width: pw - innerPad * 2 }
+        }));
+        add(this.add.text(lx, sy + 28, `\u2605 ${def.special}`, {
+            fontSize: '12px', color: '#f5e642', fontFamily: 'monospace'
+        }));
+
+        // Separator
+        const sepG = add(this.add.graphics());
+        sepG.lineStyle(1, 0x1a1535);
+        sepG.lineBetween(px + 10, sy + 50, px + pw - 10, sy + 50);
+
+        // Section header
+        add(this.add.text(px + pw / 2, sy + 58, 'EGENSKAPER', {
+            fontSize: '12px', color: '#556677', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5, 0));
 
         const stats = [
-            { label: 'Hjerter',  val: def.hearts,       max: 8,  col: 0xff2244 },
-            { label: 'Angrep',   val: def.attack,        max: 6,  col: 0xff8800 },
-            { label: 'Forsvar',  val: def.defense,       max: 4,  col: 0x4488ff },
-            { label: 'Syn',      val: def.visionRadius,  max: 8,  col: 0xffee00 },
-            { label: 'XP-mult',  val: def.xpMultiplier,  max: 2,  col: 0xaa44ff }
+            { label: 'Hjerter', val: def.hearts,      max: 8, col: 0xff2244 },
+            { label: 'Angrep',  val: def.attack,       max: 6, col: 0xff8800 },
+            { label: 'Forsvar', val: def.defense,      max: 4, col: 0x4488ff },
+            { label: 'Syn',     val: def.visionRadius, max: 8, col: 0xffee00 },
+            { label: 'XP-mult', val: def.xpMultiplier, max: 2, col: 0xaa44ff }
         ];
-        const barX = lx, bw = 190, bh = 8, gap = 17;
+
+        const bw = pw - innerPad * 2 - 100;
+        const bh = 12;
+        const gap = 26;
+
         stats.forEach(({ label, val, max, col }, i) => {
-            const y = y0 + 30 + i * gap;
-            add(this.add.text(barX, y, label, { fontSize: '10px', color: '#556677', fontFamily: 'monospace' }));
-            const bg = add(this.add.graphics());
-            bg.fillStyle(0x1a1535);
-            bg.fillRect(barX + 62, y, bw, bh);
+            const y = sy + 80 + i * gap;
+            add(this.add.text(lx, y, label, {
+                fontSize: '12px', color: '#556677', fontFamily: 'monospace'
+            }));
+            const bgBar = add(this.add.graphics());
+            bgBar.fillStyle(0x1a1535);
+            bgBar.fillRect(lx + 72, y + 2, bw, bh);
             const fill = add(this.add.graphics());
             fill.fillStyle(col);
-            fill.fillRect(barX + 62, y, Math.floor(bw * (val / max)), bh);
-            const valStr = label === 'XP-mult' ? `×${val.toFixed(2)}` : String(val);
-            add(this.add.text(barX + 62 + bw + 5, y, valStr, { fontSize: '10px', color: '#aabbcc', fontFamily: 'monospace' }));
+            fill.fillRect(lx + 72, y + 2, Math.floor(bw * (val / max)), bh);
+            const valStr = label === 'XP-mult' ? `\u00d7${val.toFixed(2)}` : String(val);
+            add(this.add.text(lx + 72 + bw + 6, y, valStr, {
+                fontSize: '12px', color: '#aabbcc', fontFamily: 'monospace'
+            }));
         });
     }
 
-    // ── Right panel: sprite preview + appearance pickers ──────────────────────
+    // ── Center panel: Preview + Description + Name ───────────────────────────
 
-    _buildAppearancePanel(W, H) {
-        this._previewGfx  = this.add.graphics();
-        this._appearObjs  = [];
-        this._rebuildAppearancePickers();
+    _rebuildPreview() {
+        this._descObjs.forEach(o => o.destroy());
+        this._descObjs = [];
+
+        const { x: px, y: py, w: pw, h: ph } = this._centerPanel;
+        const g = this._previewGfx;
+        g.clear();
+
+        const previewSize = Math.min(280, pw - 40);
+        const prevCX = px + pw / 2;
+        const prevY = py + 20;
+
+        // Preview box background
+        g.fillStyle(0x0d0b1e, 0.95);
+        g.fillRoundedRect(prevCX - previewSize / 2 - 8, prevY, previewSize + 16, previewSize + 16, 6);
+        g.lineStyle(2, 0x3a3070, 0.6);
+        g.strokeRoundedRect(prevCX - previewSize / 2 - 8, prevY, previewSize + 16, previewSize + 16, 6);
+
+        // Floor hint
+        g.fillStyle(0x1e1a30);
+        g.fillRect(prevCX - previewSize / 2 - 3, prevY + previewSize - 12, previewSize + 6, 23);
+
+        // Character sprite
+        if (typeof drawDetailedCharacterSprite === 'function') {
+            drawDetailedCharacterSprite(g, prevCX - previewSize / 2, prevY + 8, previewSize, this.appearance, this.selectedRace);
+        } else {
+            drawCharacterSprite(g, prevCX - previewSize / 2, prevY + 8, previewSize, this.appearance, this.selectedRace);
+        }
+
+        // Race name below preview
+        const add = o => { this._descObjs.push(o); return o; };
+        const def = RACE_DEFS[this.selectedRace];
+        add(this.add.text(prevCX, prevY + previewSize + 28, def.name.toUpperCase(), {
+            fontSize: '18px', color: '#f5e642', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5, 0));
     }
+
+    _buildNameInput() {
+        const { x: px, y: py, w: pw, h: ph } = this._centerPanel;
+        const cx = px + pw / 2;
+        const y = py + ph - 55;
+
+        this.add.text(cx - 110, y, 'Heltenavn:', {
+            fontSize: '13px', color: '#667788', fontFamily: 'monospace'
+        }).setOrigin(0, 0.5);
+
+        this._nameBg  = this.add.rectangle(cx + 30, y, 200, 28, 0x1a1830)
+            .setStrokeStyle(1, 0x4444aa);
+        this._nameTxt = this.add.text(cx + 30, y, '|', {
+            fontSize: '16px', color: '#ffffff', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        this._nameBg.setInteractive({ useHandCursor: true });
+        this._nameBg.on('pointerdown', () => this._openMobileNameInput());
+
+        this._cursor = true;
+        this.time.addEvent({ delay: 500, loop: true, callback: () => {
+            this._cursor = !this._cursor;
+            this._nameTxt.setText((this.heroName || '') + (this._cursor ? '|' : ' '));
+        }});
+    }
+
+    // ── Right panel: Appearance ──────────────────────────────────────────────
 
     _rebuildAppearancePickers() {
         this._appearObjs.forEach(o => o.destroy());
         this._appearObjs = [];
 
-        const { width: W } = this.cameras.main;
-        const px = W - 380, py = 112;
+        const { x: px, y: py, w: pw } = this._rightPanel;
+        const innerPad = 15;
+        const lx = px + innerPad;
         const add = o => { this._appearObjs.push(o); return o; };
 
-        add(this.add.text(px, py, 'UTSEENDE', { fontSize: '10px', color: '#445566', fontFamily: 'monospace' }));
+        add(this.add.text(px + pw / 2, py + 10, 'UTSEENDE', {
+            fontSize: '13px', color: '#556677', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5, 0));
 
-        // ── Gender row ────────────────────────────────────────────────────────
-        let rowY = py + 18;
-        add(this.add.text(px, rowY, 'Kjønn:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        let rowY = py + 36;
+        const rowGap = 36;
+
+        // ── Gender ───────────────────────────────────────────────────────────
+        add(this.add.text(lx, rowY, 'Kj\u00f8nn:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
         GENDERS.forEach((gid, i) => {
-            const bx  = px + 56 + i * 70;
+            const bx = lx + 70 + i * 80;
             const sel = this.appearance.gender === gid;
-            const bg  = this.add.rectangle(bx + 24, rowY + 7, 60, 18, sel ? 0x2a2060 : 0x111122)
+            const bg = this.add.rectangle(bx + 28, rowY + 6, 68, 22, sel ? 0x2a2060 : 0x111122)
                 .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx + 24, rowY + 7, GENDER_LABELS[gid], {
-                fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+            const txt = this.add.text(bx + 28, rowY + 6, GENDER_LABELS[gid], {
+                fontSize: '12px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => {
                 this._customOverrides.gender = gid;
                 this.appearance.gender = gid;
-                // Reset beard for female
                 if (gid === 'female' && this.appearance.beardStyle !== 'none') {
                     this._customOverrides.beardStyle = 'none';
                     this.appearance.beardStyle = 'none';
@@ -214,56 +367,55 @@ class CharacterCreatorScene extends Phaser.Scene {
                 this._rebuildPreview();
                 this._rebuildAppearancePickers();
             });
-            add(bg);
-            add(txt);
+            add(bg); add(txt);
         });
 
-        // ── Skin tone row ─────────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Hud:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        // ── Skin tone ────────────────────────────────────────────────────────
+        rowY += rowGap;
+        add(this.add.text(lx, rowY, 'Hud:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
         SKIN_TONES.forEach((col, i) => {
-            const btn = this._colorDot(px + 44 + i * 26, rowY + 5, col, this.appearance.skinColor === col);
+            const btn = this._colorDot(lx + 52 + i * 30, rowY + 7, col, this.appearance.skinColor === col);
             btn.on('pointerdown', () => { this._customOverrides.skinColor = col; this.appearance.skinColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
-        // ── Hair color row ────────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Hår:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        // ── Hair color ───────────────────────────────────────────────────────
+        rowY += rowGap;
+        add(this.add.text(lx, rowY, 'H\u00e5r:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
         HAIR_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 44 + i * 24, rowY + 5, col, this.appearance.hairColor === col);
+            const btn = this._colorDot(lx + 52 + i * 28, rowY + 7, col, this.appearance.hairColor === col);
             btn.on('pointerdown', () => { this._customOverrides.hairColor = col; this.appearance.hairColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
-        // ── Eye color row ─────────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Øyne:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        // ── Eye color ────────────────────────────────────────────────────────
+        rowY += rowGap;
+        add(this.add.text(lx, rowY, '\u00d8yne:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
         EYE_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 52 + i * 26, rowY + 5, col, this.appearance.eyeColor === col);
+            const btn = this._colorDot(lx + 60 + i * 30, rowY + 7, col, this.appearance.eyeColor === col);
             btn.on('pointerdown', () => { this._customOverrides.eyeColor = col; this.appearance.eyeColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
-        // ── Cloth color row ───────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Farge:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        // ── Cloth color ──────────────────────────────────────────────────────
+        rowY += rowGap;
+        add(this.add.text(lx, rowY, 'Farge:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
         CLOTH_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(px + 52 + i * 22, rowY + 5, col, this.appearance.clothColor === col);
+            const btn = this._colorDot(lx + 60 + i * 26, rowY + 7, col, this.appearance.clothColor === col);
             btn.on('pointerdown', () => { this._customOverrides.clothColor = col; this.appearance.clothColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
             add(btn);
         });
 
-        // ── Clothing style row ────────────────────────────────────────────────
-        rowY += 24;
-        add(this.add.text(px, rowY, 'Drakt:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+        // ── Clothing style ───────────────────────────────────────────────────
+        rowY += rowGap;
+        add(this.add.text(lx, rowY, 'Drakt:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
         CLOTH_STYLES.forEach((style, i) => {
-            const bx  = px + 52 + i * 58;
+            const bx = lx + 60 + i * 68;
             const sel = this.appearance.clothStyle === style;
-            const bg  = this.add.rectangle(bx + 22, rowY + 7, 52, 18, sel ? 0x2a2060 : 0x111122)
+            const bg = this.add.rectangle(bx + 26, rowY + 6, 60, 22, sel ? 0x2a2060 : 0x111122)
                 .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx + 22, rowY + 7, CLOTH_STYLE_LABELS[style], {
-                fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+            const txt = this.add.text(bx + 26, rowY + 6, CLOTH_STYLE_LABELS[style], {
+                fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => {
                 this._customOverrides.clothStyle = style;
@@ -271,26 +423,24 @@ class CharacterCreatorScene extends Phaser.Scene {
                 this._rebuildPreview();
                 this._rebuildAppearancePickers();
             });
-            add(bg);
-            add(txt);
+            add(bg); add(txt);
         });
 
-        // ── Hair style row (not for dwarf) ────────────────────────────────────
+        // ── Hair style (not for dwarf) ───────────────────────────────────────
         if (this.selectedRace !== 'dwarf') {
-            rowY += 26;
-            add(this.add.text(px, rowY, 'Frisyre:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
-            // Show 5 styles per row to fit
+            rowY += rowGap;
+            add(this.add.text(lx, rowY, 'Frisyre:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
             const stylesPerRow = 5;
             HAIR_STYLES.forEach((style, i) => {
                 const row = Math.floor(i / stylesPerRow);
                 const col = i % stylesPerRow;
-                const bx  = px + 60 + col * 56;
-                const by  = rowY + 7 + row * 22;
+                const bx = lx + 70 + col * 62;
+                const by = rowY + 6 + row * 28;
                 const sel = this.appearance.hairStyle === style;
-                const bg  = this.add.rectangle(bx + 22, by, 50, 18, sel ? 0x2a2060 : 0x111122)
+                const bg = this.add.rectangle(bx + 24, by, 56, 22, sel ? 0x2a2060 : 0x111122)
                     .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 22, by, HAIR_STYLE_LABELS[style], {
-                    fontSize: '8px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+                const txt = this.add.text(bx + 24, by, HAIR_STYLE_LABELS[style], {
+                    fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
                 }).setOrigin(0.5);
                 bg.on('pointerdown', () => {
                     this._customOverrides.hairStyle = style;
@@ -298,25 +448,24 @@ class CharacterCreatorScene extends Phaser.Scene {
                     this._rebuildPreview();
                     this._rebuildAppearancePickers();
                 });
-                add(bg);
-                add(txt);
+                add(bg); add(txt);
             });
-            rowY += Math.ceil(HAIR_STYLES.length / stylesPerRow) * 22;
+            rowY += Math.ceil(HAIR_STYLES.length / stylesPerRow) * 28;
         }
 
-        // ── Beard style row (male human / dwarf only) ─────────────────────────
+        // ── Beard style (male human / dwarf only) ────────────────────────────
         const showBeard = (this.selectedRace === 'human' || this.selectedRace === 'dwarf') &&
                           this.appearance.gender !== 'female';
         if (showBeard) {
-            rowY += 4;
-            add(this.add.text(px, rowY, 'Skjegg:', { fontSize: '10px', color: '#667788', fontFamily: 'monospace' }));
+            rowY += 6;
+            add(this.add.text(lx, rowY, 'Skjegg:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
             BEARD_STYLES.forEach((style, i) => {
-                const bx  = px + 56 + i * 60;
+                const bx = lx + 70 + i * 70;
                 const sel = this.appearance.beardStyle === style;
-                const bg  = this.add.rectangle(bx + 20, rowY + 7, 54, 18, sel ? 0x2a2060 : 0x111122)
+                const bg = this.add.rectangle(bx + 24, rowY + 6, 62, 22, sel ? 0x2a2060 : 0x111122)
                     .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 20, rowY + 7, BEARD_STYLE_LABELS[style], {
-                    fontSize: '9px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+                const txt = this.add.text(bx + 24, rowY + 6, BEARD_STYLE_LABELS[style], {
+                    fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
                 }).setOrigin(0.5);
                 bg.on('pointerdown', () => {
                     this._customOverrides.beardStyle = style;
@@ -324,16 +473,13 @@ class CharacterCreatorScene extends Phaser.Scene {
                     this._rebuildPreview();
                     this._rebuildAppearancePickers();
                 });
-                add(bg);
-                add(txt);
+                add(bg); add(txt);
             });
         }
-
-        this._rebuildPreview();
     }
 
     _colorDot(x, y, color, selected) {
-        const r = 9;
+        const r = 10;
         const g = this.add.graphics();
         g.fillStyle(color);
         g.fillCircle(x, y, r);
@@ -345,69 +491,47 @@ class CharacterCreatorScene extends Phaser.Scene {
         return g;
     }
 
-    _rebuildPreview() {
-        const { width: W, height: H } = this.cameras.main;
-        const g = this._previewGfx;
-        g.clear();
+    // ── Bottom bar: Bonus + Start ────────────────────────────────────────────
 
-        const previewSize = 256;
-        const px = W - 160;
-        const py = H - 420;
+    _buildBottomBar(W, H, botY) {
+        const barH = H - botY - 8;
+        const barG = this.add.graphics();
+        barG.fillStyle(0x0c0a1a, 0.9);
+        barG.fillRoundedRect(15, botY, W - 30, barH, 6);
+        barG.lineStyle(1, 0x2a2060, 0.5);
+        barG.strokeRoundedRect(15, botY, W - 30, barH, 6);
 
-        // Preview box background
-        g.fillStyle(0x0d0b1e, 0.95);
-        g.fillRoundedRect(px - previewSize / 2 - 8, py - 8, previewSize + 16, previewSize + 16, 6);
-        // Double border
-        g.lineStyle(2, 0x4444aa, 0.6);
-        g.strokeRoundedRect(px - previewSize / 2 - 8, py - 8, previewSize + 16, previewSize + 16, 6);
-        g.lineStyle(1, 0x2a2050, 0.4);
-        g.strokeRoundedRect(px - previewSize / 2 - 4, py - 4, previewSize + 8, previewSize + 8, 4);
-
-        // Floor tile hint
-        g.fillStyle(0x1e1a30);
-        g.fillRect(px - previewSize / 2 - 3, py + previewSize - 20, previewSize + 6, 23);
-
-        // Draw the detailed character sprite
-        if (typeof drawDetailedCharacterSprite === 'function') {
-            drawDetailedCharacterSprite(g, px - previewSize / 2, py, previewSize, this.appearance, this.selectedRace);
-        } else {
-            drawCharacterSprite(g, px - previewSize / 2, py, previewSize, this.appearance, this.selectedRace);
-        }
-
-        // Label below preview
-        g.fillStyle(0x000000, 0);
-        const raceName = RACE_DEFS[this.selectedRace]?.name || '';
-        // Race label is handled by text objects in stats panel
-    }
-
-    // ── Starting bonus panel ──────────────────────────────────────────────────
-
-    _buildBonusPanel(W, H) {
-        const lx = 22, by = this._statsY + 120;
-
-        this.add.rectangle(W / 4, by - 6, W / 2 - 10, 1, 0x1a1535);
-        this.add.text(lx, by, 'STARTBONUS  (velg én)', {
-            fontSize: '10px', color: '#445566', fontFamily: 'monospace'
+        // Starting bonus label
+        this.add.text(35, botY + 14, 'STARTBONUS', {
+            fontSize: '13px', color: '#556677', fontFamily: 'monospace', fontStyle: 'bold'
         });
 
         this._bonusBtns = {};
         START_BONUSES.forEach(({ id, label, desc, col }, i) => {
-            const bx  = lx + i * 150 + 60;
-            const bg  = this.add.rectangle(bx, by + 26, 138, 32, 0x111122)
+            const bx = 130 + i * 185;
+            const by = botY + 48;
+            const bg = this.add.rectangle(bx, by, 168, 42, 0x111122)
                 .setStrokeStyle(1, 0x334466).setInteractive({ useHandCursor: true });
-            const lbl = this.add.text(bx, by + 20, label, {
-                fontSize: '12px', color: '#aabbcc', fontFamily: 'monospace', fontStyle: 'bold'
+            const lbl = this.add.text(bx, by - 8, label, {
+                fontSize: '14px', color: '#aabbcc', fontFamily: 'monospace', fontStyle: 'bold'
             }).setOrigin(0.5);
-            const dsc = this.add.text(bx, by + 32, desc, {
-                fontSize: '9px', color: '#556677', fontFamily: 'monospace'
+            const dsc = this.add.text(bx, by + 10, desc, {
+                fontSize: '11px', color: '#556677', fontFamily: 'monospace'
             }).setOrigin(0.5);
             bg.on('pointerdown', () => this._selectBonus(id));
-            bg.on('pointerover',  () => { if (this.selectedBonus !== id) bg.setFillStyle(0x1a1a33); });
-            bg.on('pointerout',   () => { if (this.selectedBonus !== id) bg.setFillStyle(0x111122); });
+            bg.on('pointerover', () => { if (this.selectedBonus !== id) bg.setFillStyle(0x1a1a33); });
+            bg.on('pointerout',  () => { if (this.selectedBonus !== id) bg.setFillStyle(0x111122); });
             this._bonusBtns[id] = { bg, lbl, dsc, col };
         });
 
-        this._selectBonus('heart');
+        // Start button
+        const startBtn = this.add.text(W - 210, botY + barH / 2, '[ START EVENTYR ]', {
+            fontSize: '24px', color: '#00e87a', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        startBtn.on('pointerover', () => startBtn.setAlpha(0.7));
+        startBtn.on('pointerout',  () => startBtn.setAlpha(1));
+        startBtn.on('pointerdown', () => this._startGame());
+        this.tweens.add({ targets: startBtn, alpha: 0.5, duration: 700, yoyo: true, repeat: -1 });
     }
 
     _selectBonus(id) {
@@ -420,33 +544,7 @@ class CharacterCreatorScene extends Phaser.Scene {
         }
     }
 
-    // ── Name input ────────────────────────────────────────────────────────────
-
-    _buildNameAndStart(cx, W, H) {
-        const nameY = H - 80;
-        this.add.rectangle(cx, nameY, W - 20, 1, 0x1a1535);
-        this.add.text(22, nameY + 12, 'Navn:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }).setOrigin(0, 0.5);
-
-        this._nameBg  = this.add.rectangle(cx + 40, nameY + 12, 240, 28, 0x1a1830).setStrokeStyle(1, 0x4444aa);
-        this._nameTxt = this.add.text(cx + 40, nameY + 12, '|', { fontSize: '15px', color: '#ffffff', fontFamily: 'monospace' }).setOrigin(0.5);
-
-        this._nameBg.setInteractive({ useHandCursor: true });
-        this._nameBg.on('pointerdown', () => this._openMobileNameInput());
-
-        this._cursor = true;
-        this.time.addEvent({ delay: 500, loop: true, callback: () => {
-            this._cursor = !this._cursor;
-            this._nameTxt.setText((this.heroName || '') + (this._cursor ? '|' : ' '));
-        }});
-
-        const startBtn = this.add.text(cx, H - 36, '[ START EVENTYR ]', {
-            fontSize: '22px', color: '#00e87a', fontFamily: 'monospace'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        startBtn.on('pointerover', () => startBtn.setAlpha(0.7));
-        startBtn.on('pointerout',  () => startBtn.setAlpha(1));
-        startBtn.on('pointerdown', () => this._startGame());
-        this.tweens.add({ targets: startBtn, alpha: 0.5, duration: 700, yoyo: true, repeat: -1 });
-    }
+    // ── Keyboard + Mobile name input ─────────────────────────────────────────
 
     _onKey(event) {
         if (event.key === 'Backspace') {
@@ -468,7 +566,7 @@ class CharacterCreatorScene extends Phaser.Scene {
             inp.maxLength = 14;
             inp.autocomplete = 'off';
             inp.style.cssText = 'position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);' +
-                'font-size:18px;font-family:monospace;padding:8px 12px;width:240px;' +
+                'font-size:20px;font-family:monospace;padding:10px 16px;width:280px;' +
                 'background:#1a1830;color:#ffffff;border:2px solid #4444aa;border-radius:6px;' +
                 'text-align:center;z-index:9999;outline:none;';
             document.body.appendChild(inp);
@@ -488,6 +586,8 @@ class CharacterCreatorScene extends Phaser.Scene {
         inp.value = this.heroName;
         inp.focus();
     }
+
+    // ── Start game ───────────────────────────────────────────────────────────
 
     _startGame() {
         const inp = document.getElementById('_heroNameInput');

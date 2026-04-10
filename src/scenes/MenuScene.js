@@ -51,7 +51,7 @@ class MenuScene extends Phaser.Scene {
             const race = (saved.heroStats?.race)    || 'human';
             const lvl  = saved.heroStats?.level || 1;
             this.add.text(cx, cy + 28, `${name}  ·  Verden ${saved.worldNum}  ·  Nivå ${lvl}`, {
-                fontSize: '13px', color: '#667788', fontFamily: 'monospace'
+                fontSize: '15px', color: '#667788', fontFamily: 'monospace'
             }).setOrigin(0.5);
 
             const cont = this._btn(cx, cy + 58, '[ FORTSETT ]', '#00e87a', 22);
@@ -82,12 +82,12 @@ class MenuScene extends Phaser.Scene {
         lbBtn.on('pointerdown', () => this.scene.start('LeaderboardScene'));
 
         // ── Footer tips ───────────────────────────────────────────────────────
-        const ts = { fontSize: '11px', color: '#445566', fontFamily: 'monospace' };
+        const ts = { fontSize: '13px', color: '#445566', fontFamily: 'monospace' };
         this.add.text(cx, H - 50, 'WASD/Piltaster: Beveg  ·  SPACE/F: Angrep  ·  R: Pil  ·  E: Inventar  ·  M: Kart', ts).setOrigin(0.5);
         this.add.text(cx, H - 30, 'Beseir bossen for å gå videre til neste verden', ts).setOrigin(0.5);
 
         // Version
-        this.add.text(8, H - 16, 'v0.8', { fontSize: '10px', color: '#222244', fontFamily: 'monospace' });
+        this.add.text(8, H - 16, 'v0.9', { fontSize: '12px', color: '#222244', fontFamily: 'monospace' });
     }
 
     // ── Difficulty panel ──────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ class MenuScene extends Phaser.Scene {
     _buildDifficultyPanel(cx, cy) {
         // Label
         this.add.text(cx, cy - 54, 'VANSKELIGHETSGRAD', {
-            fontSize: '11px', color: '#445566', fontFamily: 'monospace'
+            fontSize: '13px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         const DIFFS = [
@@ -127,7 +127,7 @@ class MenuScene extends Phaser.Scene {
         });
 
         this._diffHintText = this.add.text(cx, cy - 5, '', {
-            fontSize: '10px', color: '#556677', fontFamily: 'monospace'
+            fontSize: '12px', color: '#556677', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         this._selectDifficulty('normal');

@@ -65,13 +65,13 @@ class LeaderboardScene extends Phaser.Scene {
             { id: 'hard', label: 'Vanskelig' },
         ];
 
-        const ts = { fontSize: '10px', color: '#556677', fontFamily: 'monospace' };
+        const ts = { fontSize: '12px', color: '#556677', fontFamily: 'monospace' };
         this.add.text(cx - 200, y, 'Rase:', ts);
 
         let rx = cx - 165;
         for (const r of RACES) {
             const btn = this.add.text(rx, y, `[${r.label}]`, {
-                fontSize: '10px', color: this._filterRace === r.id ? '#f5e642' : '#667788',
+                fontSize: '12px', color: this._filterRace === r.id ? '#f5e642' : '#667788',
                 fontFamily: 'monospace'
             }).setInteractive({ useHandCursor: true });
             btn.on('pointerdown', () => {
@@ -85,7 +85,7 @@ class LeaderboardScene extends Phaser.Scene {
         let dx = cx + 75;
         for (const d of DIFFS) {
             const btn = this.add.text(dx, y, `[${d.label}]`, {
-                fontSize: '10px', color: this._filterDiff === d.id ? '#f5e642' : '#667788',
+                fontSize: '12px', color: this._filterDiff === d.id ? '#f5e642' : '#667788',
                 fontFamily: 'monospace'
             }).setInteractive({ useHandCursor: true });
             btn.on('pointerdown', () => {
@@ -113,7 +113,7 @@ class LeaderboardScene extends Phaser.Scene {
         }
 
         // Header
-        const hdrStyle = { fontSize: '10px', color: '#556677', fontFamily: 'monospace' };
+        const hdrStyle = { fontSize: '12px', color: '#556677', fontFamily: 'monospace' };
         const cols = [cx - 215, cx - 150, cx - 85, cx - 30, cx + 15, cx + 60, cx + 110, cx + 160];
         ['#', 'Navn', 'Rase', 'Verden', 'Niv\u00e5', 'Drap', 'Gull', 'Tid'].forEach((h, i) => {
             this._dyn.push(this.add.text(cols[i], y0, h, hdrStyle));
@@ -133,12 +133,12 @@ class LeaderboardScene extends Phaser.Scene {
             if (ry < y0 + 10 || ry > H - 50) continue; // clip rows outside visible area
             const isTop3 = i < 3;
             const col = isTop3 ? ['#f5e642', '#cccccc', '#cc8844'][i] : '#667788';
-            const style = { fontSize: '11px', color: col, fontFamily: 'monospace' };
+            const style = { fontSize: '13px', color: col, fontFamily: 'monospace' };
 
             const medal = i === 0 ? '1.' : i === 1 ? '2.' : i === 2 ? '3.' : `${i + 1}.`;
             this._dyn.push(this.add.text(cols[0], ry, medal, style));
             this._dyn.push(this.add.text(cols[1], ry, s.heroName || 'Helt', style));
-            this._dyn.push(this.add.text(cols[2], ry, RACE_NAMES[s.race] || s.race, { ...style, fontSize: '9px' }));
+            this._dyn.push(this.add.text(cols[2], ry, RACE_NAMES[s.race] || s.race, { ...style, fontSize: '13px' }));
             this._dyn.push(this.add.text(cols[3], ry, `${s.worldsCleared}`, style));
             this._dyn.push(this.add.text(cols[4], ry, `${s.level}`, style));
             this._dyn.push(this.add.text(cols[5], ry, `${s.monstersKilled}`, style));

@@ -69,7 +69,7 @@ class ChemLabScene extends Phaser.Scene {
         // Fuel indicator
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
         this._fuelText = this.add.text(this.px + this.panelW - 20, this.py + 18, `Energi: ${fuel}`, {
-            fontSize: '10px', color: '#448844', fontFamily: 'monospace'
+            fontSize: '12px', color: '#448844', fontFamily: 'monospace'
         }).setOrigin(1, 0.5);
 
         this.add.rectangle(cx, this.py + 34, this.panelW - 20, 1, 0x113322);
@@ -88,7 +88,7 @@ class ChemLabScene extends Phaser.Scene {
             const fx = this.px + 30 + i * 100 + 45;
             const active = this._filter === f.id;
             const btn = this.add.text(fx, filterY, f.label, {
-                fontSize: '10px', color: active ? '#33dd88' : '#335533',
+                fontSize: '12px', color: active ? '#33dd88' : '#335533',
                 fontFamily: 'monospace', fontStyle: active ? 'bold' : 'normal'
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
             btn.on('pointerdown', () => { this._filter = f.id; this._refresh(); });
@@ -153,7 +153,7 @@ class ChemLabScene extends Phaser.Scene {
 
         if (allMols.length === 0) {
             this._d(this.add.text(cx, y + 40, 'Ingen oppskrifter tilgjengelig.', {
-                fontSize: '11px', color: '#334433', fontFamily: 'monospace'
+                fontSize: '13px', color: '#334433', fontFamily: 'monospace'
             }).setOrigin(0.5));
         }
 
@@ -178,10 +178,10 @@ class ChemLabScene extends Phaser.Scene {
 
             // Name + formula
             this._d(this.add.text(leftX + 24, my + 5, `${m.name}`, {
-                fontSize: '11px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+                fontSize: '13px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
             }));
             this._d(this.add.text(leftX + 24, my + 19, `${m.formula}  [T${m.tier}]`, {
-                fontSize: '8px', color: '#556655', fontFamily: 'monospace'
+                fontSize: '12px', color: '#556655', fontFamily: 'monospace'
             }));
 
             // Recipe elements
@@ -191,17 +191,17 @@ class ChemLabScene extends Phaser.Scene {
                 return `${r.symbol}:${have}/${r.amount}${ok ? '' : '!'}`;
             }).join('  ');
             this._d(this.add.text(leftX + 6, my + 33, recipeStr, {
-                fontSize: '8px', color: '#556655', fontFamily: 'monospace'
+                fontSize: '12px', color: '#556655', fontFamily: 'monospace'
             }));
 
             // Effect preview
             this._d(this.add.text(leftX + colW - 8, my + 36, m.desc.length > 35 ? m.desc.slice(0, 33) + '…' : m.desc, {
-                fontSize: '7px', color: '#445544', fontFamily: 'monospace'
+                fontSize: '12px', color: '#445544', fontFamily: 'monospace'
             }).setOrigin(1, 0));
 
             if (can) {
                 const btn = this._d(this.add.text(leftX + colW - 50, my + 10, '[ Lag ]', {
-                    fontSize: '11px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
+                    fontSize: '13px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
                 btn.on('pointerover', () => btn.setColor('#66ffaa'));
                 btn.on('pointerout', () => btn.setColor('#33dd88'));
@@ -243,14 +243,14 @@ class ChemLabScene extends Phaser.Scene {
 
     _drawElementCounts(x, y, w) {
         this._d(this.add.text(x, y, 'GRUNNSTOFFER:', {
-            fontSize: '9px', color: '#556655', fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '13px', color: '#556655', fontFamily: 'monospace', fontStyle: 'bold'
         }));
 
         const collected = this.heroRef.elementTracker.collected;
         const entries = Object.entries(collected).filter(([, v]) => v > 0);
         if (entries.length === 0) {
             this._d(this.add.text(x, y + 14, 'Ingen lagret.', {
-                fontSize: '9px', color: '#334433', fontFamily: 'monospace'
+                fontSize: '13px', color: '#334433', fontFamily: 'monospace'
             }));
             return;
         }
@@ -261,7 +261,7 @@ class ChemLabScene extends Phaser.Scene {
             const col = elem ? elem.color : 0xaaaaaa;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
             const badge = this._d(this.add.text(bx, by, `${symbol}:${count}`, {
-                fontSize: '9px', color: hexCol, fontFamily: 'monospace',
+                fontSize: '13px', color: hexCol, fontFamily: 'monospace',
                 backgroundColor: '#081808', padding: { x: 3, y: 1 }
             }));
             bx += badge.width + 6;

@@ -10,16 +10,20 @@ const HeroCrafting = {
         hero.elementTracker = new ElementTracker();
         hero.geologistUnlocked = false;
         hero.mineralVisionRadius = 0;
+        hero.mineralIdentifyLevel = 0;
         hero.miningYieldBonus = 0;
+        hero.smeltBonusElement = 0;
         hero.guaranteedRareMineral = false;
 
         // Metallurgy mod (Phase 2)
         hero.metallurgistUnlocked = false;
         hero.smeltingSpeedMul = 1.0;
         hero.smeltingEfficiency = 1.0;
+        hero.smeltExtraYieldChance = 0;
         hero.alloyMasteryBonus = 0;
         hero.alloyStatBonus = 0;
         hero.oreEfficiencyChance = 0;
+        hero.doubleAlloyChance = 0;
         hero.alloyInventory = {};
 
         // Chemistry mod (Phase 3)
@@ -44,14 +48,18 @@ const HeroCrafting = {
             elementTracker:       hero.elementTracker.serialize(),
             geologistUnlocked:    hero.geologistUnlocked,
             mineralVisionRadius:  hero.mineralVisionRadius,
+            mineralIdentifyLevel: hero.mineralIdentifyLevel,
             miningYieldBonus:     hero.miningYieldBonus,
+            smeltBonusElement:    hero.smeltBonusElement,
             guaranteedRareMineral: hero.guaranteedRareMineral,
             metallurgistUnlocked: hero.metallurgistUnlocked,
             smeltingSpeedMul:     hero.smeltingSpeedMul,
             smeltingEfficiency:   hero.smeltingEfficiency,
+            smeltExtraYieldChance: hero.smeltExtraYieldChance,
             alloyMasteryBonus:    hero.alloyMasteryBonus,
             alloyStatBonus:       hero.alloyStatBonus,
             oreEfficiencyChance:  hero.oreEfficiencyChance,
+            doubleAlloyChance:    hero.doubleAlloyChance,
             alloyInventory:       { ...hero.alloyInventory },
             campStash:            hero.campStash.map(e => ({ ...e })),
             chemistUnlocked:      hero.chemistUnlocked,
@@ -70,14 +78,18 @@ const HeroCrafting = {
         hero.elementTracker       = ElementTracker.deserialize(stats.elementTracker || null);
         hero.geologistUnlocked    = stats.geologistUnlocked    || false;
         hero.mineralVisionRadius  = stats.mineralVisionRadius  || 0;
+        hero.mineralIdentifyLevel = stats.mineralIdentifyLevel || 0;
         hero.miningYieldBonus     = stats.miningYieldBonus     || 0;
+        hero.smeltBonusElement    = stats.smeltBonusElement    || 0;
         hero.guaranteedRareMineral = stats.guaranteedRareMineral || false;
         hero.metallurgistUnlocked = stats.metallurgistUnlocked || false;
         hero.smeltingSpeedMul     = stats.smeltingSpeedMul     || 1.0;
         hero.smeltingEfficiency   = stats.smeltingEfficiency   || 1.0;
+        hero.smeltExtraYieldChance = stats.smeltExtraYieldChance || 0;
         hero.alloyMasteryBonus    = stats.alloyMasteryBonus    || 0;
         hero.alloyStatBonus       = stats.alloyStatBonus       || 0;
         hero.oreEfficiencyChance  = stats.oreEfficiencyChance  || 0;
+        hero.doubleAlloyChance    = stats.doubleAlloyChance    || 0;
         hero.alloyInventory       = stats.alloyInventory       ? { ...stats.alloyInventory } : {};
         hero.campStash            = (stats.campStash || []).map(e => ({ ...e }));
         hero.chemistUnlocked      = stats.chemistUnlocked      || false;

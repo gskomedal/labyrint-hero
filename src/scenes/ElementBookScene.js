@@ -39,7 +39,7 @@ class ElementBookScene extends Phaser.Scene {
         }).setOrigin(0.5);
 
         this.add.text(cx, py + 36, `Oppdaget: ${discovered}/${total} grunnstoffer`, {
-            fontSize: '11px', color: '#887766', fontFamily: 'monospace'
+            fontSize: '13px', color: '#887766', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         this.add.rectangle(cx, py + 48, panelW - 30, 1, 0x2a2060);
@@ -54,7 +54,7 @@ class ElementBookScene extends Phaser.Scene {
 
         // Tooltip text (shown on hover)
         this.tooltipText = this.add.text(cx, py + panelH - 40, '', {
-            fontSize: '11px', color: '#bbaa99', fontFamily: 'monospace',
+            fontSize: '13px', color: '#bbaa99', fontFamily: 'monospace',
             align: 'center', wordWrap: { width: panelW - 40 }
         }).setOrigin(0.5);
 
@@ -98,7 +98,7 @@ class ElementBookScene extends Phaser.Scene {
                 // Atomic number
                 const numHex = '#' + (catCol).toString(16).padStart(6, '0');
                 this.add.text(cellX + 3, cellY + 2, `${elem.atomicNumber}`, {
-                    fontSize: '7px', color: numHex, fontFamily: 'monospace'
+                    fontSize: '13px', color: numHex, fontFamily: 'monospace'
                 });
 
                 // Symbol
@@ -152,7 +152,7 @@ class ElementBookScene extends Phaser.Scene {
             const startBX = cx - bonusW / 2 + 60;
 
             this.add.text(cx, bonusY - 4, 'GRUPPEPRESTASJONER', {
-                fontSize: '9px', color: '#555544', fontFamily: 'monospace'
+                fontSize: '13px', color: '#555544', fontFamily: 'monospace'
             }).setOrigin(0.5);
 
             ELEMENT_BONUSES.forEach((bonus, i) => {
@@ -161,10 +161,10 @@ class ElementBookScene extends Phaser.Scene {
                 const col = completed ? '#ffcc44' : '#333344';
                 const icon = completed ? '★' : '○';
                 this.add.text(bx, bonusY + 10, `${icon} ${bonus.name}`, {
-                    fontSize: '8px', color: col, fontFamily: 'monospace'
+                    fontSize: '10px', color: col, fontFamily: 'monospace'
                 }).setOrigin(0.5);
                 this.add.text(bx, bonusY + 22, bonus.desc, {
-                    fontSize: '7px', color: completed ? '#887766' : '#222233', fontFamily: 'monospace'
+                    fontSize: '13px', color: completed ? '#887766' : '#222233', fontFamily: 'monospace'
                 }).setOrigin(0.5);
             });
         }

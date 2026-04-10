@@ -30,17 +30,17 @@ class MerchantScene extends Phaser.Scene {
 
         // Gold display
         this._goldText = this.add.text(cx, cy - panelH / 2 + 50, '', {
-            fontSize: '13px', color: '#ffcc00', fontFamily: 'monospace'
+            fontSize: '15px', color: '#ffcc00', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Message area
         this._msgText = this.add.text(cx, cy + panelH / 2 - 40, '', {
-            fontSize: '11px', color: '#88bbff', fontFamily: 'monospace'
+            fontSize: '13px', color: '#88bbff', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Close hint
         this.add.text(cx, cy + panelH / 2 - 14, '[ESC/E] Lukk', {
-            fontSize: '11px', color: '#334455', fontFamily: 'monospace'
+            fontSize: '13px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Close button
@@ -118,7 +118,7 @@ class MerchantScene extends Phaser.Scene {
 
         // Description
         this._d(this.add.text(cx - w / 2 + 50, y + 22, item.desc || '', {
-            fontSize: '9px', color: '#667788', fontFamily: 'monospace'
+            fontSize: '13px', color: '#667788', fontFamily: 'monospace'
         }));
 
         // Price

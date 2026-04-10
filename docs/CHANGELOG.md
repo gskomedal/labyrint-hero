@@ -2,6 +2,31 @@
 
 ---
 
+## v0.9 – 2026-04-09
+
+### Nye funksjoner
+- **Større og lesbar tekst (#79):** Alle fontstørrelser i spillet økt med 2-3px. Minimumsstørrelse er nå 10px (fra 7px). Bedre lesbarhet i alle scener og menyer
+- **Forbedret karakterskaper (#80):** CharacterCreatorScene bruker nå hele 1280×800-lerret. Større rasetabs (120px), bredere stat-barer (220px), større bonusknapper, større navnefelt. Alle fonter økt til 13-15px
+- **Touch-zoom og fullskjerm (#78):** Nye knapper for zoom inn (+), zoom ut (−) og fullskjerm (⛶) øverst til høyre for berøringsskjermer. Fullskjerm bruker Fullscreen API med webkit-fallback
+- **Geolog-skillz styrket (#81):** Malmøye gir nå også mineral-identifisering – uten Geolog-skill vises mineraler som «Ukjent mineral» og elementer oppdages ikke automatisk. Effektiv utvinning gir nå +1 ekstra element per smelting
+- **Metallurg-skillz styrket (#81):** Rask smelting gir nå også +15% sjanse for ekstra utbytte. Legeringsmester gir 20% sjanse for dobbel legering-output. Mestersmie økt til +30% stats og gir spesialegenskaper (våpen: +10% krit, rustning: +1 torneskade)
+
+### Forbedringer
+- **SkillScene utvidet (#79):** Panelet fyller nå hele skjermen (1260×780 i stedet for 940×520). Skill-kort økt til 220×108px med mer plass til tekst og beskrivelser
+- **CharacterCreatorScene fullstendig redesignet (#80):** Ny tre-kolonne layout som fyller hele 1280×800-lerret. Venstre: 2×2 rase-rutenett + egenskaper. Senter: Stort forhåndsvisningsfelt (280px) + heltenavn. Høyre: Utseende-tilpasning. Bunnfelt: Startbonus + startknapp. Visuelt sammenhengende med seksjonspaneler
+
+### Tekniske endringer
+- Fontstørrelser justert i alle 11 scene-filer
+- SkillScene: panelW/panelH bruker nå W-20/H-20, cardW opptil 220px, cardH 108px, tierH 140px
+- CharacterCreatorScene: Fullstendig omskrevet med tre-kolonne panelstruktur og seksjonspaneler
+- TouchControls utvidet med zoom/fullskjerm-knapper og Fullscreen API-integrasjon
+- InputHandler støtter nå touch_zoom_in/touch_zoom_out registry-flagg
+- Nye hero-egenskaper: mineralIdentifyLevel, smeltBonusElement, smeltExtraYieldChance, doubleAlloyChance
+- SmeltingSystem.smelt() støtter bonuselement og ekstra utbytte-mekanikk
+- SmeltingSystem.forgeEquipment() legger til spesialegenskaper ved Mestersmie
+
+---
+
 ## v0.32 – 2026-04-08
 
 ### Nye funksjoner

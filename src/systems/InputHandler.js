@@ -130,10 +130,16 @@ class InputHandler {
 
     handleZoom() {
         const scene = this.scene;
+        const reg   = scene.game.registry;
         const plus  = Phaser.Input.Keyboard.JustDown(scene.zoomInKey)  ||
-                      Phaser.Input.Keyboard.JustDown(scene.zoomInAlt);
+                      Phaser.Input.Keyboard.JustDown(scene.zoomInAlt) ||
+                      reg.get('touch_zoom_in');
         const minus = Phaser.Input.Keyboard.JustDown(scene.zoomOutKey) ||
-                      Phaser.Input.Keyboard.JustDown(scene.zoomOutAlt);
+                      Phaser.Input.Keyboard.JustDown(scene.zoomOutAlt) ||
+                      reg.get('touch_zoom_out');
+        // Clear touch zoom flags
+        if (reg.get('touch_zoom_in'))  reg.set('touch_zoom_in', false);
+        if (reg.get('touch_zoom_out')) reg.set('touch_zoom_out', false);
         const z = scene.cameras.main.zoom;
         if (plus)  scene.cameras.main.setZoom(Math.min(ZOOM_MAX, +(z + ZOOM_STEP).toFixed(2)));
         if (minus) scene.cameras.main.setZoom(Math.max(ZOOM_MIN, +(z - ZOOM_STEP).toFixed(2)));

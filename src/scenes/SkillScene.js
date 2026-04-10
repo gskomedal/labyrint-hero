@@ -19,8 +19,8 @@ class SkillScene extends Phaser.Scene {
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
 
         // ── Panel ─────────────────────────────────────────────────────────────
-        const panelW = Math.min(W - 10, 940);
-        const panelH = Math.min(H - 10, 520);
+        const panelW = W - 20;
+        const panelH = H - 20;
         const px = cx - panelW / 2;
         const py = cy - panelH / 2;
 
@@ -37,7 +37,7 @@ class SkillScene extends Phaser.Scene {
         const titleColor = this.viewOnly ? '#88aacc' : '#f5e642';
         const titleStroke = this.viewOnly ? '#334466' : '#7a6a00';
         this.add.text(cx, py + 18, titleText, {
-            fontSize: '15px', color: titleColor, fontFamily: 'monospace',
+            fontSize: '17px', color: titleColor, fontFamily: 'monospace',
             fontStyle: 'bold', stroke: titleStroke, strokeThickness: 2
         }).setOrigin(0.5);
 
@@ -75,7 +75,7 @@ class SkillScene extends Phaser.Scene {
             }
             // Hero name below portrait
             this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 8, this.heroRef.heroName || '', {
-                fontSize: '9px', color: '#667788', fontFamily: 'monospace'
+                fontSize: '11px', color: '#667788', fontFamily: 'monospace'
             }).setOrigin(0.5);
         }
 
@@ -88,7 +88,7 @@ class SkillScene extends Phaser.Scene {
             ? 'Grønne rammer = tilgjengelig ved neste nivå opp · Grå = låst'
             : 'Grønne rammer = tilgjengelig · Grå = låst · Klikk for å velge';
         this.add.text(cx, py + panelH - 14, footerText, {
-            fontSize: '10px', color: '#33335a', fontFamily: 'monospace'
+            fontSize: '12px', color: '#33335a', fontFamily: 'monospace'
         }).setOrigin(0.5);
     }
 
@@ -96,7 +96,7 @@ class SkillScene extends Phaser.Scene {
         const hero    = this.heroRef;
         const colColor = path.color;
         const hexCol  = '#' + colColor.toString(16).padStart(6, '0');
-        const hdrW = Math.min(160, this._colW - 8);
+        const hdrW = Math.min(220, this._colW - 12);
 
         // Check if entire path is locked
         const pathLocked = (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked)
@@ -111,13 +111,13 @@ class SkillScene extends Phaser.Scene {
         hdrBg.strokeRoundedRect(colCX - hdrW / 2, areaTop, hdrW, 26, 4);
 
         this.add.text(colCX, areaTop + 6, `── ${path.name.toUpperCase()} ──`, {
-            fontSize: '11px', color: pathLocked ? '#333344' : hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '13px', color: pathLocked ? '#333344' : hexCol, fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
         const lockHint = path.unlockCondition === 'first_smelt' ? 'Smelt et mineral!'
             : path.unlockCondition === 'first_synthesis' ? 'Lag en kjemikalie!'
             : 'Finn et mineral!';
         this.add.text(colCX, areaTop + 18, pathLocked ? lockHint : path.desc, {
-            fontSize: '8px', color: pathLocked ? '#333344' : '#445566', fontFamily: 'monospace'
+            fontSize: '10px', color: pathLocked ? '#333344' : '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // If entire path is locked, show a lock overlay and skip drawing skill cards
@@ -129,13 +129,13 @@ class SkillScene extends Phaser.Scene {
                 ? 'Lag en kjemikalie\ni laboratoriet\nfor å låse opp'
                 : 'Plukk opp et\nmineral for å\nlåse opp';
             this.add.text(colCX, areaTop + 110, lockMsg, {
-                fontSize: '9px', color: '#333344', fontFamily: 'monospace', align: 'center'
+                fontSize: '11px', color: '#333344', fontFamily: 'monospace', align: 'center'
             }).setOrigin(0.5);
             return;
         }
 
-        const tierH    = 100;
-        const cardW    = Math.min(160, this._colW - 12), cardH = 84;
+        const tierH    = 140;
+        const cardW    = Math.min(220, this._colW - 16), cardH = 108;
         const tierGapY = areaTop + 28;
 
         path.tiers.forEach((skill, tierIndex) => {
@@ -194,7 +194,7 @@ class SkillScene extends Phaser.Scene {
         tierG.fillStyle(locked ? 0x1a1535 : colColor, locked ? 0.3 : 0.25);
         tierG.fillRoundedRect(cx + w / 2 - 24, y + 2, 22, 14, 3);
         this.add.text(cx + w / 2 - 13, y + 9, tierLabel, {
-            fontSize: '8px', color: locked ? '#333355' : hexCol, fontFamily: 'monospace'
+            fontSize: '10px', color: locked ? '#333355' : hexCol, fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // Lock icon or stack indicator
@@ -203,13 +203,13 @@ class SkillScene extends Phaser.Scene {
         } else if (taken > 0 && skill.maxStack > 1) {
             const stackStr = `${taken}/${skill.maxStack}`;
             this.add.text(cx - w / 2 + 6, y + 9, stackStr, {
-                fontSize: '8px', color: hexCol, fontFamily: 'monospace'
+                fontSize: '10px', color: hexCol, fontFamily: 'monospace'
             }).setOrigin(0, 0.5);
         }
 
         // Skill name
-        this.add.text(cx, y + 18, skill.name, {
-            fontSize: '12px',
+        this.add.text(cx, y + 20, skill.name, {
+            fontSize: '14px',
             color: maxed ? '#445566' : (locked ? '#333355' : '#e8e8ff'),
             fontFamily: 'monospace', fontStyle: 'bold',
             align: 'center', wordWrap: { width: w - 12 }
@@ -218,8 +218,8 @@ class SkillScene extends Phaser.Scene {
         // Category badge + description combined
         const catHex = locked ? '#222233' : '#' + colColor.toString(16).padStart(6, '0');
         const descLine = skill.desc.replace(/\n/g, ', ');
-        this.add.text(cx, y + 36, `[${skill.category}] ${descLine}`, {
-            fontSize: '10px',
+        this.add.text(cx, y + 42, `[${skill.category}] ${descLine}`, {
+            fontSize: '12px',
             color: locked ? '#1e1e30' : (maxed ? '#334455' : '#8899bb'),
             fontFamily: 'monospace', align: 'center',
             wordWrap: { width: w - 10 }
@@ -228,7 +228,7 @@ class SkillScene extends Phaser.Scene {
         // Maxed label
         if (maxed) {
             this.add.text(cx, y + h / 2, 'MAKS', {
-                fontSize: '12px', color: '#2a2a44', fontFamily: 'monospace', fontStyle: 'bold'
+                fontSize: '14px', color: '#2a2a44', fontFamily: 'monospace', fontStyle: 'bold'
             }).setOrigin(0.5);
         }
 
@@ -261,7 +261,7 @@ class SkillScene extends Phaser.Scene {
         if (SKILL_SYNERGIES.length === 0) return;
 
         this.add.text(cx, y - 10, 'SYNERGIER', {
-            fontSize: '9px', color: '#445566', fontFamily: 'monospace'
+            fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         const totalW = SKILL_SYNERGIES.length * 170;
@@ -280,10 +280,10 @@ class SkillScene extends Phaser.Scene {
             }).join('+')} ${syn.name}`;
 
             this.add.text(sx, y + 2, isActive ? '✦ ' + label : '○ ' + label, {
-                fontSize: '9px', color: nameCol, fontFamily: 'monospace'
+                fontSize: '11px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5);
             this.add.text(sx, y + 14, syn.desc, {
-                fontSize: '8px', color: descCol, fontFamily: 'monospace'
+                fontSize: '10px', color: descCol, fontFamily: 'monospace'
             }).setOrigin(0.5);
         });
     }
