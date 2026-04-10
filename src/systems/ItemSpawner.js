@@ -372,6 +372,11 @@ class ItemSpawner {
             this._drawOreIcon(g, px, py, s, mineralDef);
         }
 
+        // Hide mineral if hero doesn't have Geolog mineral_eye skill yet
+        if (!scene.hero || (scene.hero.mineralVisionRadius || 0) <= 0) {
+            g.setVisible(false);
+        }
+
         scene.itemObjects.push({ gridX: gx, gridY: gy, item: mineralDef, graphic: g, isMineral: true });
     }
 

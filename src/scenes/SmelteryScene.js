@@ -139,10 +139,36 @@ class SmelteryScene extends Phaser.Scene {
 
         switch (this._tab) {
             case 'stash': this._drawStashTab(); break;
-            case 'smelt': this._drawSmeltTab(); break;
-            case 'alloy': this._drawAlloyTab(); break;
-            case 'forge': this._drawForgeTab(); break;
+            case 'smelt':
+            case 'alloy':
+            case 'forge':
+                if (this._hasMetallurgSkill()) {
+                    if (this._tab === 'smelt') this._drawSmeltTab();
+                    else if (this._tab === 'alloy') this._drawAlloyTab();
+                    else this._drawForgeTab();
+                } else {
+                    this._drawLockedTab();
+                }
+                break;
         }
+    }
+
+    _hasMetallurgSkill() {
+        return (this.heroRef.skills || []).some(s =>
+            s === 'fast_smelting' || s === 'alloy_mastery' || s === 'master_smith'
+        );
+    }
+
+    _drawLockedTab() {
+        const cx = this.px + this.panelW / 2;
+        const cy = this.contentY + (this.panelH - (this.contentY - this.py)) / 2 - 40;
+        this._d(this.add.text(cx, cy, '🔒', { fontSize: '32px' }).setOrigin(0.5));
+        this._d(this.add.text(cx, cy + 30, 'Krever Metallurg-skill!', {
+            fontSize: '14px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        this._d(this.add.text(cx, cy + 50, 'Lær Rask smelting i skilltreet\nfor å bruke smelteovnen.', {
+            fontSize: '12px', color: '#665544', fontFamily: 'monospace', align: 'center'
+        }).setOrigin(0.5));
     }
 
     _d(obj) { this._dyn.push(obj); return obj; }
@@ -402,11 +428,6 @@ class SmelteryScene extends Phaser.Scene {
         const result = this.smelter.smelt(mineralDef, hero);
 
         this.smelter.consumeFuel(hero, result.energyCost);
-
-        if (!hero.metallurgistUnlocked) {
-            hero.metallurgistUnlocked = true;
-            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY - 1, msg: 'Metallurg-stien er ulåst!', color: '#ff7722' });
-        }
 
         // Remove one mineral from source
         if (source === 'stash') {

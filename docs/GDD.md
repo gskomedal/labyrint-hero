@@ -23,7 +23,7 @@ Et top-down 2D labyrint-RPG i nettleser. Spilleren navigerer en prosedyre-genere
 - **Rendering:** Phaser Graphics API – prosedyretegnet, ingen bildefiler
 - **Lyd:** Web Audio API – prosedyremusikk og SFX, ingen lydfiler
 - **Lagring:** localStorage via SaveManager
-- **Multi-scene pattern:** GameScene + UIScene parallelt; SkillScene, InventoryScene og SettingsScene som overlays
+- **Multi-scene pattern:** GameScene + UIScene parallelt; SkillScene, InventoryScene og SettingsScene som overlays. UIScene har HUD-knapper for Elementbok, Skilltre og Inventar øverst til høyre
 
 ### Filstruktur
 ```
@@ -292,9 +292,9 @@ Livspotte, Stor livspotte, Styrkebrygg (midlertidig +2 ATK i 60 sek), Forsvarsbr
 | T3 | precision | +3 ATK, +3 kjæl.-ATK, +3 kjæl.-HP, +2 hjerter nå | ×1 |
 
 ### Håndverksstier (låses opp)
-- **Geolog** (lås: finn mineral) – mineralidentifisering, mineralsynsradius, utbytte, bonuselementer, garantert sjeldent mineral
-- **Metallurg** (lås: smelt mineral) – smeltetid/energi, ekstra utbytte, legeringsstats, dobbellegering, mestersmie med spesialegenskaper
-- **Kjemiker** (lås: lag kjemikalie) – potion-varighet, bombeskade, eksplosjonsradius
+- **Geolog** (lås: finn mineral) – mineralidentifisering, mineralsynsradius, utbytte, bonuselementer, garantert sjeldent mineral. **Kreves for å se mineraler på kartet.**
+- **Metallurg** (lås: finn leirplass) – smeltetid/energi, ekstra utbytte, legeringsstats, dobbellegering, mestersmie med spesialegenskaper. **Kreves for smelting, legering og smiing.**
+- **Kjemiker** (lås: finn kjemisk lab) – potion-varighet, bombeskade, eksplosjonsradius. **Kreves for å lage kjemikalier.**
 
 ### Synergier
 Aktiveres automatisk når helten har evner fra begge stier i et par:
@@ -459,14 +459,14 @@ Elements-modifikasjonen fletter det periodiske system, geologi, metallurgi og kj
 Periodisk system-overlay med 18×9 rutenett. Oppdagede grunnstoffer vises med symbol og kategori-farge. Gruppeprestasjoner (f.eks. Jernmetaller → +2 HP) vises nederst.
 
 ### Geolog-skillsti (#6)
-Låses opp ved første mineral-funn. Kreves for mineral-identifisering. 3 tiers:
+Låses opp ved første mineral-funn. Kreves for å se mineraler på kartet og for mineral-identifisering. 3 tiers:
 | Tier | Skill | Effekt |
 |------|-------|--------|
 | T1 | Malmøye | +1 mineral-synsradius, mineral-identifisering per stack (maks 3) |
 | T2 | Effektiv utvinning | +25% mineralutbytte, +1 ekstra element ved smelting per stack (maks 3) |
 | T3 | Mesterprospektør | Garantert T4+ mineral per etasje (maks 1) |
 
-**Mineral-identifisering:** Uten Geolog-skill vises mineraler som «Ukjent mineral» og grunnstoffer oppdages ikke automatisk ved oppsamling. Malmøye-skillen gir mineralidentifisering.
+**Mineral-synlighet:** Uten Geolog-skill er mineraler usynlige på kartet. Helten kan fortsatt plukke opp mineraler ved å gå over dem (blindt opptak). Malmøye-skillen gjør mineraler synlige og gir mineral-identifisering. Uten identifisering vises mineraler som «Ukjent mineral» og grunnstoffer oppdages ikke automatisk.
 
 Synergi: **Jordens kraft** (Geolog + Vokter) → +1 forsvar, +1 mineralsynsradius.
 
@@ -483,6 +483,7 @@ Smelting, legeringer og smiing av utstyr.
 **Smiing:** 12 nye våpen/rustninger fra legeringer. Stats overgår vanlig utstyr.
 
 **Metallurg-skillsti (#8):**
+Låses opp ved første besøk i leirplass. **Minst én Metallurg-skill kreves for å bruke smelting, legering og smiing.** Lager-fanen er alltid tilgjengelig.
 | Tier | Skill | Effekt |
 |------|-------|--------|
 | T1 | Rask smelting | -25% energi/smeltetid, +15% sjanse ekstra utbytte per stack (maks 3) |
@@ -498,6 +499,7 @@ Kjemisk syntese av potions, bomber, medisiner og syrer fra rene grunnstoffer.
 **Produkter:** 15 kjemiske produkter i 5 kategorier. Kraftigere enn vanlige consumables – kjemisk livselixir healer 4 HP (vs 2), krutt gjør 8 skade i radius 3 (vs 6 for vanlig bombe), dynamitt 15 skade.
 
 **Kjemiker-skillsti (#9):**
+Låses opp ved første besøk i kjemisk laboratorium. **Minst én Kjemiker-skill kreves for å lage kjemikalier.**
 | Tier | Skill | Effekt |
 |------|-------|--------|
 | T1 | Potente potions | +50% potion-varighet per stack (maks 3) |

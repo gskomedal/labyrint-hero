@@ -130,7 +130,29 @@ class ChemLabScene extends Phaser.Scene {
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
         this._fuelText.setText(`Energi: ${fuel}`);
 
-        this._drawRecipes(fuel);
+        if (this._hasKjemikerSkill()) {
+            this._drawRecipes(fuel);
+        } else {
+            this._drawLockedMessage();
+        }
+    }
+
+    _hasKjemikerSkill() {
+        return (this.heroRef.skills || []).some(s =>
+            s === 'potent_potions' || s === 'acid_mastery' || s === 'explosive_genius'
+        );
+    }
+
+    _drawLockedMessage() {
+        const cx = this.px + this.panelW / 2;
+        const cy = this.contentY + (this.panelH - (this.contentY - this.py)) / 2 - 40;
+        this._d(this.add.text(cx, cy, '🔒', { fontSize: '32px' }).setOrigin(0.5));
+        this._d(this.add.text(cx, cy + 30, 'Krever Kjemiker-skill!', {
+            fontSize: '14px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5));
+        this._d(this.add.text(cx, cy + 50, 'Lær Potente potions i skilltreet\nfor å bruke laboratoriet.', {
+            fontSize: '12px', color: '#445544', fontFamily: 'monospace', align: 'center'
+        }).setOrigin(0.5));
     }
 
     _d(obj) { this._dyn.push(obj); return obj; }
@@ -229,11 +251,6 @@ class ChemLabScene extends Phaser.Scene {
         const added = hero.inventory.addItem(result.item);
         if (!added) {
             EventBus.emit('spawnItem', { gx: hero.gridX, gy: hero.gridY, item: result.item });
-        }
-
-        // Unlock chemist path
-        if (!hero.chemistUnlocked) {
-            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY - 1, msg: 'Kjemiker-stien er ulåst!', color: '#33dd88' });
         }
 
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.item.name}!`, color: '#33dd88' });

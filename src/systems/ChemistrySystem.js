@@ -59,11 +59,6 @@ class ChemistrySystem {
         // Create usable item from molecule definition
         const item = this._createUsableItem(mol, hero);
 
-        // Unlock chemist on first synthesis
-        if (!hero.chemistUnlocked) {
-            hero.chemistUnlocked = true;
-        }
-
         return { success: true, item, energyCost };
     }
 
