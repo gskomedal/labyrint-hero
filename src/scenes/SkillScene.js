@@ -57,30 +57,10 @@ class SkillScene extends Phaser.Scene {
             this._drawPath(path, pi, colCX, py + 50, panelH - 80);
         });
 
-        // ── Character portrait (lower-left corner) ──────────────────────────
-        if (this.heroRef) {
-            const portraitSize = 128;
-            const portraitX = px + 6;
-            const portraitY = py + panelH - portraitSize - 46;
-            const portraitGfx = this.add.graphics();
-            portraitGfx.fillStyle(0x0a0918, 0.7);
-            portraitGfx.fillRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
-            portraitGfx.lineStyle(1, 0x4444aa, 0.3);
-            portraitGfx.strokeRoundedRect(portraitX - 4, portraitY - 4, portraitSize + 8, portraitSize + 8, 5);
-            const eq = this.heroRef.inventory ? this.heroRef.inventory.equipped : {};
-            if (typeof drawDetailedCharacterSprite === 'function') {
-                drawDetailedCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race, eq);
-            } else {
-                drawCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race);
-            }
-            // Hero name below portrait
-            this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 8, this.heroRef.heroName || '', {
-                fontSize: '11px', color: '#667788', fontFamily: 'monospace'
-            }).setOrigin(0.5);
-        }
-
-        // ── Synergies display ──────────────────────────────────────────────────
-        this._drawSynergies(cx, py + panelH - 50, panelW);
+        // ── Synergies display (right below skill cards) ───────────────────────
+        // 3 tiers × (cardH + 10) + header offset = cards end
+        const cardsEndY = py + 50 + 28 + 3 * (140 + 10) - 10;
+        this._drawSynergies(cx, cardsEndY + 12, panelW);
 
         // ── Footer ────────────────────────────────────────────────────────────
         this.add.rectangle(cx, py + panelH - 24, panelW - 30, 1, 0x1a1840);
@@ -256,33 +236,41 @@ class SkillScene extends Phaser.Scene {
 
     _drawSynergies(cx, y, panelW) {
         const active = getActiveSynergies(this.heroRef);
-        const potential = SKILL_SYNERGIES.filter(s => !active.includes(s));
-
         if (SKILL_SYNERGIES.length === 0) return;
 
-        this.add.text(cx, y - 10, 'SYNERGIER', {
+        this.add.text(cx, y, 'SYNERGIER', {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        const totalW = SKILL_SYNERGIES.length * 170;
-        const startX = cx - totalW / 2 + 85;
+        // Multi-row grid: max 5 per row, centered
+        const perRow = 5;
+        const slotW = Math.min(Math.floor((panelW - 40) / perRow), 240);
+        const rowH = 26;
+        const rows = Math.ceil(SKILL_SYNERGIES.length / perRow);
+        let sy = y + 14;
 
         SKILL_SYNERGIES.forEach((syn, i) => {
-            const sx = startX + i * 170;
+            const row = Math.floor(i / perRow);
+            const col = i % perRow;
+            const rowCount = Math.min(perRow, SKILL_SYNERGIES.length - row * perRow);
+            const rowW = rowCount * slotW;
+            const sx = cx - rowW / 2 + col * slotW + slotW / 2;
+
             const isActive = active.some(a => a.id === syn.id);
             const hexCol = '#' + syn.color.toString(16).padStart(6, '0');
             const nameCol = isActive ? hexCol : '#333355';
             const descCol = isActive ? '#8899bb' : '#222233';
 
-            const label = `${syn.paths.map(p => {
+            const initials = syn.paths.map(p => {
                 const path = SKILL_TREE_PATHS.find(pt => pt.id === p);
                 return path ? path.name[0] : '?';
-            }).join('+')} ${syn.name}`;
+            }).join('+');
+            const icon = isActive ? '✦' : '○';
 
-            this.add.text(sx, y + 2, isActive ? '✦ ' + label : '○ ' + label, {
-                fontSize: '11px', color: nameCol, fontFamily: 'monospace'
+            this.add.text(sx, sy + row * rowH, `${icon} ${initials} ${syn.name}`, {
+                fontSize: '10px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5);
-            this.add.text(sx, y + 14, syn.desc, {
+            this.add.text(sx, sy + row * rowH + 12, syn.desc, {
                 fontSize: '10px', color: descCol, fontFamily: 'monospace'
             }).setOrigin(0.5);
         });

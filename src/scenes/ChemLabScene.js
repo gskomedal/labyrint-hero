@@ -176,8 +176,9 @@ class ChemLabScene extends Phaser.Scene {
             const icon = icons[m.subtype] || '⚗';
             this._d(this.add.text(leftX + 6, my + 4, icon, { fontSize: '12px' }));
 
-            // Name + formula
-            this._d(this.add.text(leftX + 24, my + 5, `${m.name}`, {
+            // Name + formula – truncate long names to fit slot
+            const dispName = m.name.length > 28 ? m.name.slice(0, 27) + '…' : m.name;
+            this._d(this.add.text(leftX + 24, my + 5, dispName, {
                 fontSize: '13px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
             }));
             this._d(this.add.text(leftX + 24, my + 19, `${m.formula}  [T${m.tier}]`, {

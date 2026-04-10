@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.33
+**Versjon:** 0.34
 **Sist oppdatert:** 2026-04-10
 
 ---

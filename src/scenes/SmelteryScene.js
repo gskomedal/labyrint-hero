@@ -352,8 +352,9 @@ class SmelteryScene extends Phaser.Scene {
             // Source label
             const srcLabel = m.source === 'stash' ? ' [lager]' : '';
 
-            // Mineral name + count
-            this._d(this.add.text(startX + 8, my + 6, `${m.def.name} (×${m.count})${srcLabel}`, {
+            // Mineral name + count – truncate to fit slot
+            const mName = m.def.name.length > 22 ? m.def.name.slice(0, 21) + '…' : m.def.name;
+            this._d(this.add.text(startX + 8, my + 6, `${mName} (×${m.count})${srcLabel}`, {
                 fontSize: '13px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
             }));
 
@@ -569,7 +570,8 @@ class SmelteryScene extends Phaser.Scene {
                     fontSize: '12px', color: hexCol, fontFamily: 'monospace'
                 }));
                 this._d(this.add.text(startX + 18, rowY + 20, equip.desc, {
-                    fontSize: '12px', color: '#776655', fontFamily: 'monospace'
+                    fontSize: '11px', color: '#776655', fontFamily: 'monospace',
+                    wordWrap: { width: colW - 100 }
                 }));
 
                 const btn = this._d(this.add.text(startX + colW - 60, rowY + 10, '[ Smi ]', {
