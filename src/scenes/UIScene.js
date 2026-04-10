@@ -64,6 +64,31 @@ class UIScene extends Phaser.Scene {
             }
         });
 
+        // Quick-access buttons (Element Book, Skill Tree, Inventory)
+        const quickBtns = [
+            { label: '📖', scene: 'ElementBookScene',
+              launchData: () => ({ heroRef: this.gameScene.hero }) },
+            { label: '⚔', scene: 'SkillScene',
+              launchData: () => ({ heroRef: this.gameScene.hero, viewOnly: true }) },
+            { label: '🎒', scene: 'InventoryScene',
+              launchData: () => ({}) },
+        ];
+        let btnX = W - 34;
+        quickBtns.forEach(def => {
+            const btn = this.add.text(btnX, 10, def.label, {
+                fontSize: '16px', color: '#445566', fontFamily: 'monospace'
+            }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+            btn.on('pointerover', () => btn.setColor('#88bbff'));
+            btn.on('pointerout',  () => btn.setColor('#445566'));
+            btn.on('pointerdown', () => {
+                Audio.init();
+                if (!this.scene.isActive(def.scene) && this.gameScene?.hero) {
+                    this.scene.launch(def.scene, def.launchData());
+                }
+            });
+            btnX -= 22;
+        });
+
         // Hide keyboard hints on touch devices
         if (this.game.registry.get('isTouchDevice')) {
             this.eHint.setVisible(false);

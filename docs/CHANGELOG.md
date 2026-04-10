@@ -2,6 +2,24 @@
 
 ---
 
+## v0.34 – 2026-04-10
+
+### Nye funksjoner
+- **Mineraler krever Geolog-skill:** Mineraler er nå usynlige på kartet uten Malmøye-skillen (Geolog T1). Helten kan fortsatt plukke opp mineraler blindt ved å gå over dem
+- **Smelting krever Metallurg-skill:** Smelt-, Legering- og Smi-fanene i smelteovnen er låst bak Metallurg-skill. Lager-fanen er alltid tilgjengelig
+- **Kjemi krever Kjemiker-skill:** Syntese i kjemisk lab er låst bak Kjemiker-skill
+- **HUD-knapper:** Elementbok (📖), Skilltre (⚔) og Inventar (🎒) tilgjengelig som knapper øverst til høyre i HUD-baren
+- **Nye opplåsingsbetingelser:** Metallurg-stien låses opp ved besøk i leirplass (ikke lenger ved første smelting). Kjemiker-stien låses opp ved besøk i kjemisk lab (ikke lenger ved første syntese)
+
+### Tekniske endringer
+- MapRenderer toggler mineral-grafikk synlighet basert på Geolog-skill i updateFog()
+- SmelteryScene og ChemLabScene sjekker hero.skills[] for aktive skill-krav
+- UIScene utvidet med 3 interaktive snarveiknapper
+- Skill unlock conditions endret: metallurg='camp_room_found', kjemiker='chem_lab_found'
+- Fjernet auto-unlock av metallurgist/chemist fra SmelteryScene og ChemistrySystem
+
+---
+
 ## v0.33 – 2026-04-10
 
 ### Nye funksjoner

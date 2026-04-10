@@ -224,6 +224,11 @@ class GameScene extends Phaser.Scene {
         if (!this._campRoomShown && this._isInCampRoom()) {
             this._campRoomShown = true;
             this._showMessage('Leirplass! Trykk V for å smelte og smi.', '#ff7722');
+            // Unlock metallurg skill path on first camp room visit
+            if (!this.hero.metallurgistUnlocked) {
+                this.hero.metallurgistUnlocked = true;
+                this._floatingText(this.hero.gridX, this.hero.gridY - 1, 'Metallurg-stien er ulåst!', '#ff7722');
+            }
         } else if (!this._isInCampRoom()) {
             this._campRoomShown = false;
         }
@@ -240,6 +245,11 @@ class GameScene extends Phaser.Scene {
     _checkChemLab() {
         if (!this._chemLabShown && this._isInChemLab()) {
             this._chemLabShown = true;
+            // Unlock kjemiker skill path on first chem lab visit
+            if (!this.hero.chemistUnlocked) {
+                this.hero.chemistUnlocked = true;
+                this._floatingText(this.hero.gridX, this.hero.gridY - 1, 'Kjemiker-stien er ulåst!', '#33dd88');
+            }
             if (this.hero.chemLabUnlocked) {
                 this._showMessage('Kjemisk lab! Trykk C for å lage kjemikalier.', '#33dd88');
             } else {

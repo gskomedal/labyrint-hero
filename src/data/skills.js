@@ -158,7 +158,7 @@ const SKILL_TREE_PATHS = [
         desc:  'Smelting og legeringer',
         color: 0xff7722,
         icon:  'M',
-        unlockCondition: 'first_smelt',
+        unlockCondition: 'camp_room_found',
         tiers: [
             {
                 id:       'fast_smelting',
@@ -200,7 +200,7 @@ const SKILL_TREE_PATHS = [
         desc:  'Potions, bomber og medisin',
         color: 0x33dd88,
         icon:  'C',
-        unlockCondition: 'first_synthesis',
+        unlockCondition: 'chem_lab_found',
         tiers: [
             {
                 id:       'potent_potions',
@@ -255,8 +255,8 @@ function isSkillUnlocked(hero, pathIndex, tierIndex) {
 
     // Check path-level unlock condition
     if (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked) return false;
-    if (path.unlockCondition === 'first_smelt' && !hero.metallurgistUnlocked) return false;
-    if (path.unlockCondition === 'first_synthesis' && !hero.chemistUnlocked) return false;
+    if (path.unlockCondition === 'camp_room_found' && !hero.metallurgistUnlocked) return false;
+    if (path.unlockCondition === 'chem_lab_found' && !hero.chemistUnlocked) return false;
 
     // Already at max stack → not available
     if (_countSkill(hero, skill.id) >= skill.maxStack) return false;
