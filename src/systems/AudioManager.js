@@ -2,6 +2,7 @@
 //
 //  Usage: Audio.init(); Audio.playAttack(); Audio.startMusic(worldNum);
 //  Settings are persisted to localStorage.
+//  Music data loaded from src/data/musicPieces.js (MUSIC_PIECES, MUSIC_NF).
 
 const Audio = (function () {
 
@@ -17,275 +18,18 @@ const Audio = (function () {
     let musicVol     = 0.35;
     let sfxVol       = 0.70;
 
-    let _seqHandle   = null;  // setTimeout handle for sequencer
-    let _seqStep     = 0;
-    let _seqTheme    = -1;
+    // Multi-voice sequencer state
+    let _seqHandle   = null;   // scheduling pump timeout handle
+    let _seqPieceIdx = -1;     // current piece index
+    let _voiceStates = [];     // per-voice { noteIdx, nextTime }
+    let _activeOscs  = [];     // tracked oscillators for clean stop
 
-    // ── Music themes (note sequences) ────────────────────────────────────────
-    // Notes encoded as semitone offsets from root (root = 110 Hz / A2).
-    // Each melody/counter is 64 notes (4 phrases of 16), bass is 32 notes,
-    // chords have 8 progressions, perc has 16-step rhythm patterns.
-    // -1 = rest/silence.
+    const SCHEDULE_AHEAD = 0.25;  // seconds to look ahead
+    const PUMP_INTERVAL  = 80;    // ms between scheduler pumps
+
+    // ── SFX helpers ──────────────────────────────────────────────────────────
     const ROOT = 110;
-    const _ = null; // shorthand for percussion rests
-    const THEMES = [
-        // 0 – Forest: Grieg's Morning Mood–inspired, ascending pentatonic
-        //     Scale: A major pentatonic (0,2,4,7,9 + octaves)
-        {
-            name:   'Skog',
-            bpm:    72,
-            // Phrase A: gentle ascending arc | B: higher register exploration
-            // A': return with varied ending | C: flowing development to resolve
-            melody: [
-                12, 14, 16, 19, 21, 19, 16, 14,  12, -1, 16, 19, 21, 24, 21, -1,     // A – original
-                24, 26, 28, 26, 24, -1, 21, 19,  21, 24, 26, 28, 31, 28, 26, -1,     // B – high register
-                12, 14, 16, 19, 21, 19, 16, 14,  16, 19, 21, 24, 26, 24, 21, -1,     // A' – varied ending
-                19, 21, 24, 21, 19, 16, 14, -1,  16, 14, 12, -1, 14, 16, 14, -1,     // C – gentle descent
-            ],
-            bass: [
-                0, -1, 0, 5,  7, -1, 5, 0,       // bars 1-2: tonic
-                7, -1, 5, 4,  2, -1, 4, 5,       // bars 3-4: subdominant motion
-                0, -1, 0, 5,  7, -1, 9, 7,       // bars 5-6: return with lift
-                5, -1, 4, 2,  0, -1, 0, -1,      // bars 7-8: resolution
-            ],
-            counter: [
-                24, -1, -1, -1, 28, -1, -1, -1,  26, -1, -1, -1, 24, -1, -1, -1,     // A – sparse high
-                -1, -1, 31, -1, -1, -1, 28, -1,  -1, -1, 33, -1, -1, 31, -1, -1,     // B – answering
-                24, -1, -1, -1, 28, -1, -1, -1,  26, -1, 28, -1, 26, 24, -1, -1,     // A' – more active
-                -1, 28, -1, 26, -1, 24, -1, -1,  -1, -1, 21, -1, -1, -1, 24, -1,     // C – descending
-            ],
-            chord: [[0,4,7], [5,9,12], [7,11,14], [0,4,7], [2,7,9], [5,9,12], [4,7,12], [0,4,7]],
-            perc: [
-                {dur:0.06,vol:0.04,hp:100}, _, _, _,  {dur:0.03,vol:0.03,hp:3000}, _, _, _,
-                _, _, {dur:0.03,vol:0.02,hp:3000}, _,  {dur:0.03,vol:0.03,hp:3000}, _, _, _,
-            ],
-            bassWave: 'triangle', melWave: 'triangle', counterWave: 'sine',
-            melVol: 0.11, bassVol: 0.14, chordVol: 0.05, counterVol: 0.06,
-        },
-        // 1 – Cave: Mountain King–inspired, creeping Dorian
-        //     Scale: A Dorian (0,2,3,5,7,9,10 + octaves)
-        {
-            name:   'Grotte',
-            bpm:    62,
-            melody: [
-                12, -1, 14, 15, 17, -1, 15, 14,  12, -1, 10, 9, 10, 12, 14, -1,     // A – creeping ascent
-                17, -1, 19, 20, 22, -1, 20, 19,  17, 15, 14, -1, 12, 14, 15, -1,     // B – higher, wider
-                12, -1, 14, 15, 17, -1, 15, 14,  12, 10, 9, 7, 9, 10, 12, -1,       // A' – deeper descent
-                14, 15, 17, 19, 17, 15, 14, 12,  10, -1, 9, 10, 12, -1, 14, -1,     // C – building run
-            ],
-            bass: [
-                0, 0, 3, 0,  5, 3, 0, -2,        // bars 1-2: tonic Dorian
-                5, 5, 7, 5,  3, 0, -2, 0,        // bars 3-4: rising to 5th
-                0, 0, 3, 0,  5, 3, 0, -2,        // bars 5-6: return
-                3, 5, 7, 5,  3, 2, 0, -1,        // bars 7-8: chromatic descent
-            ],
-            counter: [
-                -1, 19, -1, -1, -1, 17, -1, -1,  -1, 15, -1, -1, -1, 14, -1, -1,     // A – ghostly echoes
-                -1, -1, 22, -1, -1, -1, 20, -1,  -1, -1, 19, -1, -1, 17, -1, -1,     // B – higher echoes
-                -1, 19, -1, -1, -1, 17, -1, -1,  -1, 15, -1, 14, -1, 12, -1, -1,     // A' – descending
-                -1, -1, 22, -1, 24, -1, 22, -1,  -1, 19, -1, -1, -1, 17, -1, -1,     // C – building tension
-            ],
-            chord: [[0,3,7], [3,7,10], [5,8,12], [0,3,7], [0,3,6], [5,8,12], [3,7,10], [0,3,7]],
-            perc: [
-                _, _, _, {dur:0.04,vol:0.03,hp:1500},  _, _, _, _,
-                _, _, {dur:0.04,vol:0.02,hp:1500}, _,  _, _, _, {dur:0.04,vol:0.03,hp:1500},
-            ],
-            bassWave: 'sawtooth', melWave: 'triangle', counterWave: 'sine',
-            melVol: 0.09, bassVol: 0.16, chordVol: 0.04, counterVol: 0.05,
-        },
-        // 2 – Ice: Solveig's Song–inspired, sparse Aeolian
-        //     Scale: A Aeolian (0,2,3,5,7,8,10 + octaves)
-        {
-            name:   'Is',
-            bpm:    54,
-            melody: [
-                24, -1, 22, 19, 17, -1, 19, -1,  22, 24, 26, -1, 24, -1, 22, -1,     // A – sighing descent
-                19, -1, -1, 17, 15, -1, -1, 17,  19, -1, 22, -1, -1, -1, 19, -1,     // B – sustained, low
-                24, -1, 22, 19, 17, -1, 19, 22,  24, 26, 27, -1, 26, 24, 22, -1,     // A' – rising hope
-                27, -1, 26, -1, 24, -1, 22, -1,  19, -1, 17, -1, 19, -1, -1, -1,     // C – slow descent
-            ],
-            bass: [
-                0, -1, 7, -1,  5, -1, 3, -1,     // bars 1-2
-                3, -1, 5, -1,  7, -1, 5, -1,     // bars 3-4: warmer
-                0, -1, 7, -1,  5, -1, 3, -1,     // bars 5-6: return
-                5, -1, 3, -1,  0, -1, -1, -1,    // bars 7-8: resolve
-            ],
-            counter: [
-                -1, -1, -1, -1, 29, -1, -1, -1,  -1, -1, -1, -1, 31, -1, -1, -1,     // A – very sparse
-                -1, -1, -1, -1, -1, -1, -1, -1,  -1, -1, -1, -1, 27, -1, -1, -1,     // B – almost silent
-                -1, -1, -1, -1, 29, -1, -1, -1,  -1, -1, 31, -1, -1, -1, 29, -1,     // A' – slightly more
-                -1, -1, 31, -1, -1, -1, 29, -1,  -1, -1, -1, -1, -1, -1, 27, -1,     // C – fading
-            ],
-            chord: [[0,3,7], [-1,-1,-1], [5,8,12], [3,7,10], [0,3,7], [-1,-1,-1], [7,10,14], [0,3,7]],
-            perc: [
-                _, _, _, _,  _, _, _, _,
-                {dur:0.04,vol:0.015,hp:4000}, _, _, _,  _, _, _, _,
-            ],
-            bassWave: 'sine', melWave: 'triangle', counterWave: 'sine',
-            melVol: 0.10, bassVol: 0.11, chordVol: 0.04, counterVol: 0.05,
-        },
-        // 3 – Volcanic: Phrygian storm, driving and intense
-        //     Scale: A Phrygian-ish (0,1,3,5,7,8,10,11 + octaves)
-        {
-            name:   'Vulkan',
-            bpm:    92,
-            melody: [
-                12, 11, 12, 15, 17, 15, 12, 11,  8, -1, 11, 12, 15, 17, 15, -1,     // A – relentless
-                20, 19, 17, 15, 17, 19, 20, -1,  17, 15, 12, 11, 12, 15, 17, -1,     // B – high register
-                12, 11, 12, 15, 17, 15, 12, 11,  8, 7, 5, 3, 5, 7, 8, -1,           // A' – deeper descent
-                12, 15, 17, 20, 17, 15, 12, -1,  11, 12, 15, 12, 11, 8, 11, -1,     // C – angular leaps
-            ],
-            bass: [
-                0, 0, -1, 0,  5, 3, 0, -1,       // bars 1-2: hammering tonic
-                5, 5, -1, 5,  3, 1, 0, -1,       // bars 3-4: chromatic
-                0, 0, -1, 0,  5, 3, 0, -1,       // bars 5-6: return
-                3, 5, 7, 5,  3, 1, 0, -1,        // bars 7-8: building
-            ],
-            counter: [
-                -1, -1, 24, -1, -1, -1, 23, -1,  -1, -1, 20, -1, -1, -1, 24, -1,     // A – stabs
-                -1, -1, -1, 27, -1, -1, -1, 24,  -1, -1, -1, 23, -1, -1, -1, 20,     // B – syncopated
-                -1, -1, 24, -1, -1, -1, 23, -1,  -1, -1, 20, -1, -1, 17, -1, -1,     // A' – lower stabs
-                24, -1, -1, -1, 27, -1, -1, -1,  23, -1, 24, -1, 20, -1, 23, -1,     // C – active
-            ],
-            chord: [[0,3,7], [0,1,5], [-1,-1,-1], [5,8,12], [0,3,6], [1,5,8], [-1,-1,-1], [0,3,7]],
-            perc: [
-                {dur:0.07,vol:0.06,hp:80}, _, {dur:0.03,vol:0.04,hp:2500}, _,
-                {dur:0.05,vol:0.05,hp:600}, _, {dur:0.03,vol:0.04,hp:2500}, _,
-                {dur:0.07,vol:0.06,hp:80}, _, {dur:0.03,vol:0.04,hp:2500}, {dur:0.03,vol:0.03,hp:2500},
-                {dur:0.05,vol:0.05,hp:600}, _, {dur:0.03,vol:0.04,hp:2500}, _,
-            ],
-            bassWave: 'sawtooth', melWave: 'square', counterWave: 'triangle',
-            melVol: 0.07, bassVol: 0.19, chordVol: 0.05, counterVol: 0.04,
-        },
-        // 4 – Temple: Holberg Suite–inspired, stately Baroque
-        //     Scale: A major / pentatonic (0,2,4,5,7,9,11 + octaves)
-        {
-            name:   'Tempel',
-            bpm:    63,
-            melody: [
-                19, 17, 15, 12, 15, 17, 19, -1,  21, 19, 17, 15, 17, 19, 21, -1,     // A – descending scale
-                24, 23, 21, 19, 21, 23, 24, -1,  26, 24, 23, 21, 23, 24, 26, -1,     // B – higher register
-                19, 17, 15, 12, 15, 17, 19, -1,  21, 19, 17, 15, 14, 12, 14, -1,     // A' – deeper ending
-                15, 17, 19, 21, 24, 21, 19, 17,  15, -1, 12, 14, 15, 17, 19, -1,     // C – sweeping run
-            ],
-            bass: [
-                0, -1, 7, 5,  3, -1, 5, 0,       // bars 1-2: stately
-                4, -1, 7, 5,  4, -1, 2, 0,       // bars 3-4: subdominant
-                0, -1, 7, 5,  3, -1, 5, 0,       // bars 5-6: return
-                5, -1, 4, 2,  0, -1, 7, 0,       // bars 7-8: resolution
-            ],
-            counter: [
-                12, -1, -1, 7,  -1, -1, 12, -1,  14, -1, -1, 10, -1, -1, 14, -1,     // A – open fifths
-                -1, -1, 16, -1, -1, -1, 19, -1,  -1, -1, 21, -1, -1, -1, 19, -1,     // B – ascending
-                12, -1, -1, 7,  -1, -1, 12, -1,  14, -1, -1, 10, 9, 7, -1, -1,       // A' – closing
-                -1, 12, -1, 14, -1, 16, -1, 14,  12, -1, -1, 9, -1, -1, 12, -1,     // C – scalar motion
-            ],
-            chord: [[0,4,7], [7,11,14], [5,9,12], [0,4,7], [4,7,11], [5,9,12], [2,5,9], [0,4,7]],
-            perc: [
-                {dur:0.05,vol:0.04,hp:120}, _, _, _,  {dur:0.04,vol:0.03,hp:2000}, _, _, _,
-                {dur:0.05,vol:0.04,hp:120}, _, _, _,  {dur:0.04,vol:0.03,hp:2000}, _, _, _,
-            ],
-            bassWave: 'triangle', melWave: 'sine', counterWave: 'triangle',
-            melVol: 0.10, bassVol: 0.13, chordVol: 0.045, counterVol: 0.06,
-        },
-        // 5 – Deep Magma: Hall of the Mountain King–inspired, dark and relentless
-        //     Scale: A minor/diminished (0,2,3,5,6,7,8,10 + octaves)
-        {
-            name:   'Dyplag',
-            bpm:    78,
-            melody: [
-                12, 14, 15, 17, 18, 17, 15, 14,  12, 10, 8, 7, 8, 10, 12, -1,       // A – chromatic creep
-                15, 17, 18, 20, 22, 20, 18, 17,  15, 14, 12, 10, 12, 14, 15, -1,     // B – higher sequence
-                12, 14, 15, 17, 18, 17, 15, 14,  12, 10, 8, 6, 5, 3, 5, -1,         // A' – deep descent
-                8, 10, 12, 14, 15, 14, 12, -1,   10, 8, 7, 5, 7, 8, 10, -1,         // C – pedal tone motion
-            ],
-            bass: [
-                0, 0, -1, 0,  -3, 0, -5, 0,      // bars 1-2: menacing pedal
-                3, 3, -1, 3,  0, -3, -5, 0,      // bars 3-4: rising bass
-                0, 0, -1, 0,  -3, 0, -5, 0,      // bars 5-6: return
-                -5, -3, 0, 3,  5, 3, 0, -1,      // bars 7-8: ascending run
-            ],
-            counter: [
-                -1, -1, -1, -1, 24, -1, -1, -1,  -1, -1, -1, -1, 20, -1, -1, -1,     // A – deep stabs
-                -1, -1, 27, -1, -1, -1, -1, -1,  -1, -1, 24, -1, -1, -1, -1, -1,     // B – wider stabs
-                -1, -1, -1, -1, 24, -1, -1, -1,  -1, -1, -1, -1, 18, -1, -1, -1,     // A' – tritone stab
-                -1, 20, -1, -1, -1, 24, -1, -1,  -1, 18, -1, -1, -1, 22, -1, -1,     // C – call and answer
-            ],
-            chord: [[0,3,6], [0,3,7], [-1,-1,-1], [5,8,11], [0,3,6], [3,6,10], [-1,-1,-1], [0,3,7]],
-            perc: [
-                {dur:0.08,vol:0.06,hp:60}, _, {dur:0.04,vol:0.04,hp:2000}, _,
-                {dur:0.06,vol:0.05,hp:400}, _, {dur:0.04,vol:0.04,hp:2000}, _,
-                {dur:0.08,vol:0.06,hp:60}, _, {dur:0.04,vol:0.04,hp:2000}, _,
-                {dur:0.06,vol:0.05,hp:400}, _, {dur:0.04,vol:0.04,hp:2000}, {dur:0.04,vol:0.03,hp:2000},
-            ],
-            bassWave: 'sawtooth', melWave: 'square', counterWave: 'sawtooth',
-            melVol: 0.07, bassVol: 0.21, chordVol: 0.04, counterVol: 0.04,
-        },
-        // 6 – Underworld: Grieg's late Romantic, whole-tone with mournful melody
-        //     Scale: Whole-tone (0,2,4,6,8,10 + octaves)
-        {
-            name:   'Underverden',
-            bpm:    48,
-            melody: [
-                24, 22, -1, 20, 18, -1, 16, 18,  20, -1, 22, 24, -1, 26, 24, -1,     // A – drifting descent
-                28, -1, 26, 24, 22, -1, 20, -1,  22, 24, 26, -1, 28, 30, 28, -1,     // B – high floating
-                24, 22, -1, 20, 18, -1, 16, 14,  16, -1, 18, 20, -1, 22, 24, -1,     // A' – deeper then rise
-                26, -1, 24, -1, 22, -1, 20, -1,  18, -1, 16, -1, 18, 20, 22, -1,     // C – stately descent
-            ],
-            bass: [
-                0, -1, 2, -1,  4, -1, 6, -1,     // bars 1-2: whole-tone climb
-                4, -1, 6, -1,  8, -1, 6, -1,     // bars 3-4: upper motion
-                0, -1, 2, -1,  4, -1, 6, -1,     // bars 5-6: return
-                6, -1, 4, -1,  2, -1, 0, -1,     // bars 7-8: descend home
-            ],
-            counter: [
-                -1, -1, 12, -1, -1, -1, 10, -1,  -1, -1, 14, -1, -1, -1, 12, -1,     // A – eerie echoes
-                -1, -1, -1, 16, -1, -1, -1, 14,  -1, -1, -1, 12, -1, -1, -1, 14,     // B – syncopated
-                -1, -1, 12, -1, -1, -1, 10, -1,  -1, -1, 8, -1, -1, -1, 10, -1,     // A' – lower
-                -1, 14, -1, -1, -1, 12, -1, -1,  -1, 10, -1, -1, -1, 12, -1, -1,     // C – answering
-            ],
-            chord: [[0,4,8], [-1,-1,-1], [2,6,10], [4,8,12], [6,10,14], [-1,-1,-1], [0,4,8], [2,6,10]],
-            perc: [
-                _, _, _, _,  _, _, {dur:0.05,vol:0.02,hp:3000}, _,
-                _, _, _, _,  _, _, _, _,
-            ],
-            bassWave: 'sine', melWave: 'sine', counterWave: 'triangle',
-            melVol: 0.09, bassVol: 0.14, chordVol: 0.055, counterVol: 0.05,
-        },
-        // 7 – Earth's Core: Triumphal March–inspired, Lydian fanfare
-        //     Scale: A Lydian (0,2,4,6,7,9,11 + octaves)
-        {
-            name:   'Kjerne',
-            bpm:    72,
-            melody: [
-                12, -1, 16, 18, 19, 21, 23, 24,  23, 21, 19, 18, 16, -1, 19, -1,     // A – fanfare ascent
-                24, -1, 26, 28, 30, 31, 30, 28,  26, 24, 23, -1, 21, 24, 23, -1,     // B – heroic high
-                12, -1, 16, 18, 19, 21, 23, 24,  26, 24, 23, 21, 19, -1, 16, -1,     // A' – extended descent
-                19, 21, 23, 24, 26, 28, 26, 24,  23, 21, 19, 16, 18, 19, 21, -1,     // C – triumphant sweep
-            ],
-            bass: [
-                0, 0, 7, 5,  4, 5, 7, 0,         // bars 1-2: march
-                4, 4, 7, 5,  4, 2, 0, -1,        // bars 3-4: subdominant
-                0, 0, 7, 5,  4, 5, 7, 0,         // bars 5-6: return
-                7, 9, 7, 5,  4, 2, 0, -1,        // bars 7-8: heroic descent
-            ],
-            counter: [
-                24, -1, -1, -1, 31, -1, 28, -1,  26, -1, -1, -1, 28, -1, -1, -1,     // A – fanfare answer
-                -1, -1, 31, -1, -1, -1, 35, -1,  -1, -1, 33, -1, 31, -1, -1, -1,     // B – high flourish
-                24, -1, -1, -1, 31, -1, 28, -1,  26, -1, 28, -1, 26, 24, -1, -1,     // A' – closing
-                -1, 28, -1, 31, -1, 33, -1, 31,  28, -1, 26, -1, 24, -1, 28, -1,     // C – scalar answer
-            ],
-            chord: [[0,4,7], [0,4,7], [5,9,12], [7,11,14], [4,6,11], [0,4,7], [5,9,12], [7,11,14]],
-            perc: [
-                {dur:0.06,vol:0.05,hp:100}, _, {dur:0.04,vol:0.04,hp:1500}, _,
-                {dur:0.05,vol:0.04,hp:800}, _, {dur:0.04,vol:0.04,hp:1500}, _,
-                {dur:0.06,vol:0.05,hp:100}, _, {dur:0.04,vol:0.04,hp:1500}, _,
-                {dur:0.05,vol:0.04,hp:800}, _, {dur:0.04,vol:0.04,hp:1500}, _,
-            ],
-            bassWave: 'sawtooth', melWave: 'triangle', counterWave: 'triangle',
-            melVol: 0.11, bassVol: 0.17, chordVol: 0.06, counterVol: 0.06,
-        },
-    ];
+    function _freq(semi) { return ROOT * Math.pow(2, semi / 12); }
 
     // ── Reverb impulse (simple convolver) ────────────────────────────────────
     function _buildReverb(decay = 1.8) {
@@ -304,12 +48,9 @@ const Audio = (function () {
         return conv;
     }
 
-    // ── Semitone to frequency ────────────────────────────────────────────────
-    function _freq(semi) { return ROOT * Math.pow(2, semi / 12); }
-
     // ── Play a short note ────────────────────────────────────────────────────
     function _note(freq, dur, dest, type = 'sine', vol = 0.2, when = 0) {
-        if (!ctx || freq <= 0) return;
+        if (!ctx || freq <= 0) return null;
         const now = ctx.currentTime + when;
         const osc = ctx.createOscillator();
         const env = ctx.createGain();
@@ -323,6 +64,7 @@ const Audio = (function () {
         env.connect(dest);
         osc.start(now);
         osc.stop(now + dur + 0.05);
+        return osc;
     }
 
     // ── Noise burst (for SFX) ────────────────────────────────────────────────
@@ -348,59 +90,49 @@ const Audio = (function () {
         src.stop(now + dur + 0.05);
     }
 
-    // ── Music sequencer ───────────────────────────────────────────────────────
-    function _tick(theme, step) {
-        if (!ctx || !musicEnabled) return;
-        const now = ctx.currentTime;
-        const beatMs = (60 / theme.bpm) * 250;  // 1/16 note in ms
+    // ── Multi-voice music sequencer (look-ahead scheduling) ──────────────────
+    function _schedulePump() {
+        if (!ctx || !musicEnabled || _seqPieceIdx < 0) return;
 
-        // Bass line (each beat = 4 steps, so 4 bass notes per bar)
-        const bIdx    = Math.floor(step / 2) % theme.bass.length;
-        const bassSem = theme.bass[bIdx];
-        if (bassSem >= 0) {
-            _note(_freq(bassSem - 12), 0.28, musicGain, theme.bassWave, theme.bassVol);
-        }
+        const piece   = MUSIC_PIECES[_seqPieceIdx];
+        if (!piece) return;
+        const beatDur = 60 / piece.bpm;
+        const now     = ctx.currentTime;
+        const horizon = now + SCHEDULE_AHEAD;
 
-        // Melody (runs at full 1/16 speed, with subtle velocity variation)
-        const mIdx    = step % theme.melody.length;
-        const melSem  = theme.melody[mIdx];
-        if (melSem >= 0) {
-            const dest = reverbNode ? reverbNode : musicGain;
-            const vel  = theme.melVol * (0.85 + Math.random() * 0.30);
-            _note(_freq(melSem), 0.22, dest, theme.melWave, vel);
-        }
+        for (let v = 0; v < piece.voices.length; v++) {
+            const voice = piece.voices[v];
+            const state = _voiceStates[v];
+            if (!state) continue;
 
-        // Counter-melody (runs at 1/16 speed, provides harmonic depth)
-        if (theme.counter) {
-            const ctrIdx = step % theme.counter.length;
-            const ctrSem = theme.counter[ctrIdx];
-            if (ctrSem >= 0) {
-                const dest = reverbNode ? reverbNode : musicGain;
-                const wave = theme.counterWave || 'sine';
-                const vol  = (theme.counterVol || 0.05) * (0.85 + Math.random() * 0.30);
-                _note(_freq(ctrSem), 0.30, dest, wave, vol);
-            }
-        }
+            while (state.nextTime < horizon) {
+                const noteObj = voice.notes[state.noteIdx];
+                const noteDur = noteObj.d * beatDur;
 
-        // Chord stabs on beat 1 & 3 of each bar
-        if (step % 8 === 0 || step % 8 === 4) {
-            const cIdx = Math.floor(step / 8) % theme.chord.length;
-            for (const semi of theme.chord[cIdx]) {
-                if (semi >= 0) {
-                    _note(_freq(semi), 0.55, musicGain, 'sine', theme.chordVol);
+                if (noteObj.n !== 'R') {
+                    const freq = MUSIC_NF[noteObj.n];
+                    if (freq) {
+                        // First voice gets reverb, others go direct
+                        const dest = (v === 0 && reverbNode) ? reverbNode : musicGain;
+                        const when = Math.max(0, state.nextTime - now);
+                        const vel  = voice.vol * 0.12 * (0.88 + Math.random() * 0.24);
+                        const osc  = _note(freq, noteDur * 0.9, dest, voice.wave, vel, when);
+                        if (osc) {
+                            _activeOscs.push(osc);
+                            osc.onended = function() {
+                                const idx = _activeOscs.indexOf(osc);
+                                if (idx >= 0) _activeOscs.splice(idx, 1);
+                            };
+                        }
+                    }
                 }
+
+                state.nextTime += noteDur;
+                state.noteIdx  = (state.noteIdx + 1) % voice.notes.length;
             }
         }
 
-        // Percussion (noise-based rhythm, loops independently)
-        if (theme.perc) {
-            const pIdx = step % theme.perc.length;
-            const p = theme.perc[pIdx];
-            if (p) _noise(p.dur, musicGain, p.vol, 0, p.hp);
-        }
-
-        _seqStep    = (step + 1) % (theme.melody.length * 2);
-        _seqHandle  = setTimeout(() => _tick(theme, _seqStep), beatMs);
+        _seqHandle = setTimeout(_schedulePump, PUMP_INTERVAL);
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -441,36 +173,54 @@ const Audio = (function () {
         /** Start themed background music for a given world number */
         startMusic(worldNum) {
             if (!ctx) return;
-            // Map world number to music theme using same logic as visual themes
+            // Map world number to music piece using same logic as visual themes
             let themeIdx;
             if (worldNum <= 7) {
-                // Match visual theme mapping exactly
-                themeIdx = Math.min(Math.floor((worldNum - 1) / 2), THEMES.length - 1);
+                themeIdx = Math.min(Math.floor((worldNum - 1) / 2), MUSIC_PIECES.length - 1);
             } else if (typeof getZone !== 'undefined') {
                 const zone = getZone(worldNum);
-                themeIdx = Math.min(zone.themeIdx, THEMES.length - 1);
+                themeIdx = Math.min(zone.themeIdx, MUSIC_PIECES.length - 1);
             } else {
-                themeIdx = THEMES.length - 1;
+                themeIdx = MUSIC_PIECES.length - 1;
             }
-            // Always restart music on new world (theme may be same but feels fresh)
+            // Always restart music on new world
             this.stopMusic();
-            _seqTheme = themeIdx;
-            _seqStep  = 0;
-            if (musicEnabled) _tick(THEMES[themeIdx], 0);
+            _seqPieceIdx = themeIdx;
+            if (musicEnabled) {
+                const startTime = ctx.currentTime + 0.05;
+                const piece = MUSIC_PIECES[themeIdx];
+                _voiceStates = piece.voices.map(() => ({
+                    noteIdx: 0,
+                    nextTime: startTime
+                }));
+                _schedulePump();
+            }
         },
 
         /** Stop background music */
         stopMusic() {
             if (_seqHandle) { clearTimeout(_seqHandle); _seqHandle = null; }
-            _seqTheme = -1;
+            // Stop any currently playing music notes
+            _activeOscs.forEach(osc => { try { osc.stop(); } catch(_) {} });
+            _activeOscs = [];
+            _voiceStates = [];
+            _seqPieceIdx = -1;
         },
 
         /** Restart after settings change */
         _restartMusic() {
-            const theme = _seqTheme;
+            const pieceIdx = _seqPieceIdx;
             this.stopMusic();
-            _seqTheme = theme;
-            if (musicEnabled && ctx && theme >= 0) _tick(THEMES[theme], 0);
+            _seqPieceIdx = pieceIdx;
+            if (musicEnabled && ctx && pieceIdx >= 0) {
+                const startTime = ctx.currentTime + 0.05;
+                const piece = MUSIC_PIECES[pieceIdx];
+                _voiceStates = piece.voices.map(() => ({
+                    noteIdx: 0,
+                    nextTime: startTime
+                }));
+                _schedulePump();
+            }
         },
 
         // ── SFX ─────────────────────────────────────────────────────────────
@@ -560,7 +310,15 @@ const Audio = (function () {
         setMusicEnabled(v) {
             musicEnabled = !!v;
             if (!musicEnabled) this.stopMusic();
-            else if (_seqTheme >= 0) _tick(THEMES[_seqTheme], _seqStep);
+            else if (_seqPieceIdx >= 0) {
+                const startTime = ctx.currentTime + 0.05;
+                const piece = MUSIC_PIECES[_seqPieceIdx];
+                _voiceStates = piece.voices.map(() => ({
+                    noteIdx: 0,
+                    nextTime: startTime
+                }));
+                _schedulePump();
+            }
             this.saveSettings();
         },
 

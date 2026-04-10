@@ -2,6 +2,22 @@
 
 ---
 
+## v0.33 – 2026-04-10
+
+### Nye funksjoner
+- **Flerstemt musikksystem:** Helt nytt musikksystem med flerstemt polyfoni (3-5 stemmer per stykke) i stedet for den gamle enkeltstemme-sekvenseren
+- **8 Grieg-inspirerte komposisjoner:** Morgenstemning, Dovregubbens hall, Solveigs vuggevise, Trollenes marsj, Holberg Suite, Peer Gynts hjemkomst, Åses død og Triumfmarsj
+- **Variable notelengder:** Hver stemme har nå individuelle notelengder i stedet for fast 1/16-takt
+- **Velocity-humanisering:** Subtil tilfeldig volumvariasjon per note for mer levende lyd
+- **Ren stopp av musikk:** Aktive oscillatorer stoppes umiddelbart ved sceneskifte eller musikk-av
+
+### Tekniske endringer
+- Ny `musicPieces.js` datafil med 8 stykker, notefrekvenstabell og hjelpe-funksjoner
+- AudioManager omskrevet med look-ahead scheduling (Web Audio API-tidsstyrt) for presis flerstemt synkronisering
+- Musikkdata separert fra logikk (følger eksisterende mønster med separate datafiler)
+
+---
+
 ## v0.9 – 2026-04-09
 
 ### Nye funksjoner
