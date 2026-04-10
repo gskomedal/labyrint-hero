@@ -2,6 +2,14 @@
 
 ---
 
+## v0.34 – 2026-04-10
+
+### Forbedringer
+- **Skarpere tekst:** All tekst rendres nå i 2× oppløsning for å motvirke uskarp skalering. CSS `image-rendering: pixelated` fjernet fra canvas
+- **Tekst-overflow fikset:** Varenavn i handelsmann, tooltips i inventar, mineralnavn i smelteverket, molekylnavn i kjemilabben og utstyrsnavn i HUD forkortes/brytes nå slik at de holder seg innenfor panelgrensene
+
+---
+
 ## v0.33 – 2026-04-10
 
 ### Nye funksjoner
