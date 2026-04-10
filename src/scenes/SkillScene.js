@@ -80,7 +80,7 @@ class SkillScene extends Phaser.Scene {
         }
 
         // ── Synergies display ──────────────────────────────────────────────────
-        this._drawSynergies(cx, py + panelH - 50, panelW);
+        this._drawSynergies(cx, py + panelH - 60, panelW);
 
         // ── Footer ────────────────────────────────────────────────────────────
         this.add.rectangle(cx, py + panelH - 24, panelW - 30, 1, 0x1a1840);
@@ -256,7 +256,6 @@ class SkillScene extends Phaser.Scene {
 
     _drawSynergies(cx, y, panelW) {
         const active = getActiveSynergies(this.heroRef);
-        const potential = SKILL_SYNERGIES.filter(s => !active.includes(s));
 
         if (SKILL_SYNERGIES.length === 0) return;
 
@@ -264,11 +263,15 @@ class SkillScene extends Phaser.Scene {
             fontSize: '11px', color: '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        const totalW = SKILL_SYNERGIES.length * 170;
-        const startX = cx - totalW / 2 + 85;
+        // Fit synergies within panel width
+        const count = SKILL_SYNERGIES.length;
+        const maxSlotW = Math.floor((panelW - 40) / count);
+        const slotW = Math.min(maxSlotW, 160);
+        const totalW = count * slotW;
+        const startX = cx - totalW / 2 + slotW / 2;
 
         SKILL_SYNERGIES.forEach((syn, i) => {
-            const sx = startX + i * 170;
+            const sx = startX + i * slotW;
             const isActive = active.some(a => a.id === syn.id);
             const hexCol = '#' + syn.color.toString(16).padStart(6, '0');
             const nameCol = isActive ? hexCol : '#333355';
@@ -279,10 +282,13 @@ class SkillScene extends Phaser.Scene {
                 return path ? path.name[0] : '?';
             }).join('+')} ${syn.name}`;
 
-            this.add.text(sx, y + 2, isActive ? '✦ ' + label : '○ ' + label, {
-                fontSize: '11px', color: nameCol, fontFamily: 'monospace'
+            const fullLabel = isActive ? '✦ ' + label : '○ ' + label;
+            const truncLabel = fullLabel.length > 18 ? fullLabel.slice(0, 17) + '…' : fullLabel;
+            this.add.text(sx, y + 2, truncLabel, {
+                fontSize: '10px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5);
-            this.add.text(sx, y + 14, syn.desc, {
+            const truncDesc = syn.desc.length > 20 ? syn.desc.slice(0, 19) + '…' : syn.desc;
+            this.add.text(sx, y + 14, truncDesc, {
                 fontSize: '10px', color: descCol, fontFamily: 'monospace'
             }).setOrigin(0.5);
         });
