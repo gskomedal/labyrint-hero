@@ -51,42 +51,37 @@ class UIScene extends Phaser.Scene {
         });
         this.petHpGfx = this.add.graphics();
 
-        // Settings gear button
-        const gearBtn = this.add.text(W - 14, 10, '⚙', { fontSize: '18px', color: '#445566', fontFamily: 'monospace' })
-            .setOrigin(1, 0)
-            .setInteractive({ useHandCursor: true });
-        gearBtn.on('pointerover',  () => gearBtn.setColor('#88bbff'));
-        gearBtn.on('pointerout',   () => gearBtn.setColor('#445566'));
-        gearBtn.on('pointerdown',  () => {
-            Audio.init();
-            if (!this.scene.isActive('SettingsScene')) {
-                this.scene.launch('SettingsScene');
-            }
-        });
-
-        // Quick-access buttons (Element Book, Skill Tree, Inventory)
-        const quickBtns = [
+        // HUD buttons – centered in the top bar
+        const hudBtns = [
             { label: '📖', scene: 'ElementBookScene',
               launchData: () => ({ heroRef: this.gameScene.hero }) },
             { label: '⚔', scene: 'SkillScene',
               launchData: () => ({ heroRef: this.gameScene.hero, viewOnly: true }) },
             { label: '🎒', scene: 'InventoryScene',
               launchData: () => ({}) },
+            { label: '⚙', scene: 'SettingsScene',
+              launchData: () => ({}) },
         ];
-        let btnX = W - 34;
-        quickBtns.forEach(def => {
+        const btnSpacing = 28;
+        const totalW = (hudBtns.length - 1) * btnSpacing;
+        let btnX = W / 2 - totalW / 2;
+        hudBtns.forEach(def => {
             const btn = this.add.text(btnX, 10, def.label, {
                 fontSize: '16px', color: '#445566', fontFamily: 'monospace'
-            }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+            }).setOrigin(0.5, 0).setInteractive({ useHandCursor: true });
             btn.on('pointerover', () => btn.setColor('#88bbff'));
             btn.on('pointerout',  () => btn.setColor('#445566'));
             btn.on('pointerdown', () => {
                 Audio.init();
-                if (!this.scene.isActive(def.scene) && this.gameScene?.hero) {
-                    this.scene.launch(def.scene, def.launchData());
+                if (!this.scene.isActive(def.scene)) {
+                    if (def.scene === 'SettingsScene') {
+                        this.scene.launch(def.scene);
+                    } else if (this.gameScene?.hero) {
+                        this.scene.launch(def.scene, def.launchData());
+                    }
                 }
             });
-            btnX -= 22;
+            btnX += btnSpacing;
         });
 
         // Hide keyboard hints on touch devices
