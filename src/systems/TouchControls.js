@@ -29,15 +29,11 @@ class TouchControls {
         this._createDpad();
         this._createActionButtons();
         this._createMenuButtons();
-
-        // Reposition DOM d-pad on resize / orientation change
-        this._resizeHandler = () => this._repositionDomDpad();
-        window.addEventListener('resize', this._resizeHandler);
     }
 
     // ── D-Pad ────────────────────────────────────────────────────────────────
-    // Uses DOM elements so the d-pad can be placed outside the game canvas
-    // in the letterbox area on wide screens.
+    // DOM-based d-pad fixed to the bottom-left corner of the viewport.
+    // CSS position:fixed handles rotation and resize automatically.
 
     _createDpad() {
         const reg = this.game.registry;
@@ -46,51 +42,69 @@ class TouchControls {
         const old = document.getElementById('touch-dpad');
         if (old) old.remove();
 
-        // Create a full-viewport fixed container
+        // Container: fixed to bottom-left, no JS repositioning needed
         const container = document.createElement('div');
         container.id = 'touch-dpad';
         container.style.cssText =
-            'position:fixed;top:0;left:0;width:100vw;height:100vh;' +
-            'z-index:9999;pointer-events:none;overflow:visible;';
+            'position:fixed;bottom:12px;left:12px;' +
+            'z-index:9999;pointer-events:none;';
         document.body.appendChild(container);
         this._domDpad = container;
 
-        const sz = 58;
-        const gap = 6;
+        // Use vmin-based sizing so buttons scale with screen size
+        // 8vmin ≈ 58px on a 720px screen, scales up/down naturally
+        const btnSize = '8vmin';
+        const btnGap  = '1vmin';
+        const fontSize = '3.5vmin';
 
-        const directions = [
-            { label: '\u25B2', dx:  0, dy: -1, ox: 0,            oy: -(sz + gap) },
-            { label: '\u25BC', dx:  0, dy:  1, ox: 0,            oy:  (sz + gap) },
-            { label: '\u25C0', dx: -1, dy:  0, ox: -(sz + gap),  oy: 0           },
-            { label: '\u25B6', dx:  1, dy:  0, ox:  (sz + gap),  oy: 0           },
+        // D-pad grid: 3×3 grid with buttons at cross positions
+        const grid = document.createElement('div');
+        grid.style.cssText =
+            'display:grid;' +
+            'grid-template-columns:' + btnSize + ' ' + btnSize + ' ' + btnSize + ';' +
+            'grid-template-rows:' + btnSize + ' ' + btnSize + ' ' + btnSize + ';' +
+            'gap:' + btnGap + ';';
+        container.appendChild(grid);
+
+        // Grid cells: 0=empty, {label,dx,dy} = button
+        const cells = [
+            null,                                   // 0,0
+            { label: '\u25B2', dx:  0, dy: -1 },   // 1,0 (up)
+            null,                                   // 2,0
+            { label: '\u25C0', dx: -1, dy:  0 },   // 0,1 (left)
+            null,                                   // 1,1 (center - empty)
+            { label: '\u25B6', dx:  1, dy:  0 },   // 2,1 (right)
+            null,                                   // 0,2
+            { label: '\u25BC', dx:  0, dy:  1 },   // 1,2 (down)
+            null,                                   // 2,2
         ];
 
         this._dpadButtons = [];
-        for (const dir of directions) {
+        for (const cell of cells) {
+            if (!cell) {
+                // Empty grid cell
+                const spacer = document.createElement('div');
+                grid.appendChild(spacer);
+                continue;
+            }
+
             const btn = document.createElement('div');
-            btn.textContent = dir.label;
+            btn.textContent = cell.label;
             btn.style.cssText =
-                'position:absolute;' +
-                'width:' + sz + 'px;height:' + sz + 'px;' +
                 'border-radius:10px;' +
                 'background:rgba(51,68,102,0.5);' +
                 'border:2px solid rgba(51,68,102,0.7);' +
                 'color:#aabbdd;' +
-                'font-family:monospace;font-size:26px;' +
+                'font-family:monospace;font-size:' + fontSize + ';' +
                 'display:flex;align-items:center;justify-content:center;' +
                 'pointer-events:auto;' +
                 'user-select:none;-webkit-user-select:none;' +
                 'touch-action:none;';
 
-            // Store offset for positioning
-            btn._ox = dir.ox;
-            btn._oy = dir.oy;
-
-            // Press handler (both touch and mouse)
             const onPress = (e) => {
                 e.preventDefault();
-                reg.set('touch_dx', dir.dx);
-                reg.set('touch_dy', dir.dy);
+                reg.set('touch_dx', cell.dx);
+                reg.set('touch_dy', cell.dy);
                 btn.style.background = 'rgba(68,102,170,0.75)';
                 btn.style.color = '#ffffff';
             };
@@ -109,65 +123,8 @@ class TouchControls {
             btn.addEventListener('mouseup', onRelease);
             btn.addEventListener('mouseleave', onRelease);
 
-            container.appendChild(btn);
+            grid.appendChild(btn);
             this._dpadButtons.push(btn);
-        }
-
-        // Position after a short delay so the canvas has time to be sized
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                this._repositionDomDpad();
-            });
-        });
-    }
-
-    /** Reposition DOM d-pad: place in letterbox area if space, otherwise over canvas left edge */
-    _repositionDomDpad() {
-        if (!this._domDpad || !this._dpadButtons.length) return;
-
-        const canvas = this.game.canvas;
-        const rect = canvas.getBoundingClientRect();
-
-        // Guard: if canvas isn't rendered yet, retry next frame
-        if (rect.width === 0 || rect.height === 0) {
-            requestAnimationFrame(() => this._repositionDomDpad());
-            return;
-        }
-
-        const sz = 58;
-        const gap = 6;
-        const dpadW = sz * 3 + gap * 2;
-
-        // Scale factor: how much the canvas is scaled from internal 1280x800
-        const scale = rect.height / 800;
-
-        // Available space to the left of the game canvas
-        const leftSpace = rect.left;
-
-        // Center of d-pad placement
-        let centerX, centerY;
-
-        if (leftSpace > dpadW * scale / 2 + 20) {
-            // Enough space in the letterbox: place d-pad centered in the left bar
-            centerX = leftSpace / 2;
-        } else {
-            // Not enough space: place at left edge of canvas + offset (inside canvas)
-            centerX = rect.left + (sz + gap + 24) * scale;
-        }
-
-        // Vertically: bottom area of the screen
-        centerY = rect.bottom - (24 + sz + gap) * scale;
-
-        // Position and scale each button
-        for (const btn of this._dpadButtons) {
-            const scaledSz  = Math.round(sz * scale);
-            const scaledGap = Math.round(gap * scale);
-            btn.style.width  = scaledSz + 'px';
-            btn.style.height = scaledSz + 'px';
-            btn.style.fontSize    = Math.round(26 * scale) + 'px';
-            btn.style.borderRadius = Math.round(10 * scale) + 'px';
-            btn.style.left = Math.round(centerX + btn._ox * scale - scaledSz / 2) + 'px';
-            btn.style.top  = Math.round(centerY + btn._oy * scale - scaledSz / 2) + 'px';
         }
     }
 
@@ -396,10 +353,6 @@ class TouchControls {
         if (this._domDpad) {
             this._domDpad.remove();
             this._domDpad = null;
-        }
-        if (this._resizeHandler) {
-            window.removeEventListener('resize', this._resizeHandler);
-            this._resizeHandler = null;
         }
         this._dpadButtons = [];
     }
