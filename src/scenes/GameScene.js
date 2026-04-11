@@ -18,7 +18,7 @@ class GameScene extends Phaser.Scene {
     /** Returns multipliers based on difficulty setting */
     _diffMods() {
         switch (this.difficulty) {
-            case 'easy': return { hpMul: 0.65, atkMul: 0.75, trapCount: 0, xpMul: 1.20, trapDmgMul: 0.5 };
+            case 'easy': return { hpMul: 0.50, atkMul: 0.60, trapCount: 0, xpMul: 1.30, trapDmgMul: 0.3 };
             case 'hard': return { hpMul: 1.40, atkMul: 1.25, trapCount: 3, xpMul: 0.80, trapDmgMul: 1.6 };
             default:     return { hpMul: 1.00, atkMul: 1.00, trapCount: 0, xpMul: 1.00, trapDmgMul: 1.0 };
         }
@@ -58,6 +58,7 @@ class GameScene extends Phaser.Scene {
 
         // ── Hero ─────────────────────────────────────────────────────────────
         this.hero = new Hero(this, 1, 1);
+        this.hero.worldNum = this.worldNum;
         this._shownSynergies = [];
         if (this.heroStats) {
             this.hero.applyStats(this.heroStats, true);
@@ -175,7 +176,9 @@ class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.eKey) || touchInv) {
                 this.scene.launch('InventoryScene');
             }
-            if (Phaser.Input.Keyboard.JustDown(this.elementBookKey) && !this.scene.isActive('ElementBookScene')) {
+            const touchBook = this.game.registry.get('touch_elementbook');
+            if (touchBook) this.game.registry.set('touch_elementbook', false);
+            if ((Phaser.Input.Keyboard.JustDown(this.elementBookKey) || touchBook) && !this.scene.isActive('ElementBookScene')) {
                 this.scene.launch('ElementBookScene', { heroRef: this.hero });
             }
             const touchSmelt = this.game.registry.get('touch_smeltery');
@@ -188,13 +191,15 @@ class GameScene extends Phaser.Scene {
             if (touchChem) this.game.registry.set('touch_chemlab', false);
             if ((Phaser.Input.Keyboard.JustDown(this.chemLabKey) || touchChem) && !this.scene.isActive('ChemLabScene') && this._isInChemLab()) {
                 if (this.hero.chemLabUnlocked) {
-                    this.scene.launch('ChemLabScene', { heroRef: this.hero });
+                    this.scene.launch('ChemLabScene', { heroRef: this.hero, worldNum: this.worldNum });
                 } else {
                     this._showMessage('Beseir en soneboss for å låse opp laboratoriet!', '#33dd88');
                 }
             }
 
-            if (Phaser.Input.Keyboard.JustDown(this.skillTreeKey) && !this.scene.isActive('SkillScene')) {
+            const touchSkill = this.game.registry.get('touch_skilltree');
+            if (touchSkill) this.game.registry.set('touch_skilltree', false);
+            if ((Phaser.Input.Keyboard.JustDown(this.skillTreeKey) || touchSkill) && !this.scene.isActive('SkillScene')) {
                 this.scene.launch('SkillScene', { heroRef: this.hero, viewOnly: true });
             }
 

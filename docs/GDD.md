@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.34
-**Sist oppdatert:** 2026-04-10
+**Versjon:** 0.35
+**Sist oppdatert:** 2026-04-11
 
 ---
 
@@ -32,7 +32,7 @@ src/
   maze.js                   – MazeGenerator (DFS + ekstra passasjer)
   utils/SaveManager.js      – localStorage persistens
   data/skills.js            – 12 passive evner
-  data/items.js             – 27 gjenstander (våpen, rustning, forbruk, verktøy) + sjeldenhetsystem
+  data/items.js             – 31 gjenstander (våpen, rustning, forbruk, verktøy) + sjeldenhetsystem
   graphics/CharacterSprite.js – prosedyrekaraktertegning (4 raser, 2 kjønn, 10 frisyrer, 4 klesstiler)
   graphics/DetailedCharacterSprite.js – høyoppløselig karakterportrett (64-grid) med utstyrsvisning for menyskjermer
   graphics/SceneBackgrounds.js – tematiske bakgrunner for leirplass og kjemilab
@@ -163,15 +163,22 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 - **Monsterangrep:** `attack + 30% sjanse: +1`
 - **Forsvar:** trekkes fra innkommende skade, minimum 1
 
-### Monstere (v0.19 balanse)
+### Monstere (v0.35 balanse)
 | Type | Base-HP | Base-ATK | XP | HP-skala | ATK-skala |
 |------|---------|----------|-----|----------|-----------|
-| Goblin | 10 | 2 | 10 | +50% per verden | +25% per verden |
-| Orc | 18 | 4 | 25 | +50% per verden | +25% per verden |
-| Troll | 30 | 6 | 50 | +50% per verden | +25% per verden |
+| Goblin | 10 | 2 | 10 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) |
+| Orc | 18 | 4 | 25 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) |
+| Troll | 30 | 6 | 50 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) |
 | Boss | 50 + V×35 | 3 + V×2 | 150 | – (eget uttrykk) | – (570ms tick) |
 
-Verdensnummer V brukes til å skalere både HP og skade – kamp bør alltid føles risikofylt.
+Helten starter med 3 base-angrep. Verdensnummer V brukes til å skalere både HP og skade. Skalering er mykere tidlig og hardere sent for å bevare utfordringen.
+
+### Vanskelighetsgrader (v0.35)
+| Innstilling | Monster HP | Monster ATK | XP-bonus | Felle-skade |
+|-------------|-----------|-------------|----------|-------------|
+| Lett | ×0.50 | ×0.60 | ×1.30 | ×0.3 |
+| Normal | ×1.00 | ×1.00 | ×1.00 | ×1.0 |
+| Vanskelig | ×1.40 | ×1.25 | ×0.80 | ×1.6 |
 
 ### Bump-mekanikk
 Bevegelse inn i monster-rute: helten setter facing uten å angripe (visuell flash). Trykk SPACE/F for å angripe i facing-retning.
@@ -255,19 +262,21 @@ Våpen og rustning har sjeldenhetsgrader som påvirker stats:
 - **E** åpner/lukker; bruk holder inventory åpent (refresh-in-place)
 - **Venstreklikk:** bruk/utstyr — **Høyreklikk/Hold:** flytt til kjæledyr (eller slipp på gulvet)
 
-### Våpen (tier 1–4)
-Melee: Dolk, Tresverd, Spyd, Jernsverd, Stridsøks, Krigshammer, Trollstav
-Bue (R-angrep): Kortbue, Alvebue, Armbrøst
+### Våpen (tier 1–5)
+Melee: Dolk, Tresverd, Spyd, Jernsverd, Stridsøks, Krigshammer, Trollstav, Runesverd (T5), Mithriløks (T5)
+Bue (R-angrep): Kortbue, Alvebue, Armbrøst, Dragebue (T5)
 
-### Rustning (tier 1–4)
-Lærpansring, Vattert vest (+1 hjerte), Ringbrynje, Platedrakt, Magikappe, Drageskjell
+### Rustning (tier 1–5)
+Lærpansring, Vattert vest (+1 hjerte), Ringbrynje, Platedrakt, Magikappe, Drageskjell, Mithrilrustning (T5, +1 hjerte)
 
 ### Verktøy
 - **Nøkkel:** auto-konsumeres ved DOOR
 - **Hakke:** konsumeres ved SPACE/F mot CRACKED_WALL
 
 ### Forbruksgjenstander
-Livspotte, Stor livspotte, Styrkebrygg (midlertidig +2 ATK i 60 sek), Forsvarsbrygg (midlertidig +1 DEF i 60 sek), Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe, Blendgranate, Motgift
+Livspotte, Stor livspotte, Styrkebrygg (midlertidig +ATK i 60 sek, skalerer med verden), Forsvarsbrygg (midlertidig +DEF i 60 sek, skalerer med verden), Hjerte-krystall, Erfaringsrulle, Kart-rulle, Bombe (skade skalerer med verden), Blendgranate (ATK-reduksjon skalerer med verden), Motgift
+
+**Verdenskalering (v0.35):** Bomber, potions og kjemiske produkter skalerer med +25% per verdensnummer. F.eks. en vanlig bombe gjør 6 skade i verden 1, ~15 i verden 5 og ~21 i verden 9.
 
 ---
 
@@ -364,7 +373,7 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 | 4 monstertyper + sprites | ✅ Ferdig | Goblin, Orc, Troll, Boss |
 | Boss-faser (2 faser) | ✅ Ferdig | Fase 2 ved ≤50% HP: rasende, økt ATK |
 | Inventory + drop | ✅ Ferdig | 10-spors, høyreklikk-drop |
-| 27 gjenstander | ✅ Ferdig | Alle tier 1–4 |
+| 31 gjenstander | ✅ Ferdig | Alle tier 1–5 |
 | Skattekiste-system | ✅ Ferdig | 2–3 per verden |
 | Monster-drop system | ✅ Ferdig | 45% per drap, boss-garantert |
 | Nøkkel/hakke-mekanikk | ✅ Ferdig | |
