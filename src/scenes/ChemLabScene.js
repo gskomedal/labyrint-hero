@@ -7,6 +7,7 @@ class ChemLabScene extends Phaser.Scene {
 
     init(data) {
         this.heroRef = data.heroRef || null;
+        this.worldNum = data.worldNum || 1;
     }
 
     create() {
@@ -239,7 +240,7 @@ class ChemLabScene extends Phaser.Scene {
 
     _doSynthesize(moleculeId) {
         const hero = this.heroRef;
-        const result = this.chem.synthesize(moleculeId, hero);
+        const result = this.chem.synthesize(moleculeId, hero, this.worldNum);
         if (!result.success) return;
 
         // Consume fuel if needed

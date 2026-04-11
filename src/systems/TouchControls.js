@@ -5,6 +5,7 @@ class TouchControls {
         this.scene = scene;
         this.game  = scene.game;
         this.widgets = [];
+        this._menuWidgets = []; // menu buttons tracked separately for visibility
     }
 
     create() {
@@ -20,18 +21,23 @@ class TouchControls {
         reg.set('touch_use', false);
         reg.set('touch_smeltery', false);
         reg.set('touch_chemlab', false);
+        reg.set('touch_skilltree', false);
+        reg.set('touch_elementbook', false);
 
         this._createDpad();
         this._createActionButtons();
+        this._createMenuButtons();
     }
 
-    // ── D-Pad (bottom-left) ──────────────────────────────────────────────────
+    // ── D-Pad (bottom-left, shifted further left on wide screens) ────────────
 
     _createDpad() {
         const sz   = 58;
         const gap  = 6;
-        const baseX = 24 + sz + gap;
+        const W = this.scene.cameras.main.width;
         const H = this.scene.cameras.main.height;
+        // Move d-pad further left: use 15% from left edge, but cap at original position
+        const baseX = Math.min(24 + sz + gap, Math.round(W * 0.06) + sz / 2);
         const baseY = H - 24 - sz - gap;
 
         const directions = [
@@ -84,7 +90,7 @@ class TouchControls {
         this.widgets.push(bg, txt, zone);
     }
 
-    // ── Action Buttons (bottom-right) ────────────────────────────────────────
+    // ── Action Buttons (bottom-right, always visible) ────────────────────────
 
     _createActionButtons() {
         const sz   = 56;
@@ -95,13 +101,9 @@ class TouchControls {
         const baseY = H - 24 - sz / 2;
 
         const buttons = [
-            { label: 'ATK', key: 'touch_attack',    color: 0xaa3333, ox: 0,           oy: 0           },
-            { label: 'BOW', key: 'touch_bow',       color: 0x997722, ox: -(sz + gap), oy: 0           },
-            { label: 'USE', key: 'touch_use',       color: 0x339988, ox: -(sz + gap) * 2, oy: 0       },
-            { label: 'INV', key: 'touch_inventory', color: 0x335588, ox: 0,           oy: -(sz + gap) },
-            { label: 'MAP', key: 'touch_minimap',   color: 0x338844, ox: -(sz + gap), oy: -(sz + gap) },
-            { label: 'SMI', key: 'touch_smeltery',  color: 0xff7722, ox: -(sz + gap) * 2, oy: -(sz + gap) },
-            { label: 'LAB', key: 'touch_chemlab',   color: 0x33dd88, ox: 0,            oy: -(sz + gap) * 2 },
+            { label: 'ATK', key: 'touch_attack',    color: 0xaa3333, ox: 0,               oy: 0 },
+            { label: 'BOW', key: 'touch_bow',       color: 0x997722, ox: -(sz + gap),      oy: 0 },
+            { label: 'USE', key: 'touch_use',       color: 0x339988, ox: -(sz + gap) * 2,  oy: 0 },
         ];
 
         for (const btn of buttons) {
@@ -112,6 +114,39 @@ class TouchControls {
 
         // ── Zoom & fullscreen buttons (top-right corner) ─────────────────────
         this._createZoomButtons();
+    }
+
+    // ── Menu Buttons (above action row, conditional visibility) ──────────────
+
+    _createMenuButtons() {
+        const sz   = 48;
+        const gap  = 8;
+        const W = this.scene.cameras.main.width;
+        const H = this.scene.cameras.main.height;
+        const baseX = W - 24 - sz / 2;
+        const baseY = H - 24 - 56 / 2 - 10 - 56 - 10 - sz / 2; // above action row
+
+        // Menu buttons: always-visible first, then conditional ones
+        const menuDefs = [
+            { label: 'INV', key: 'touch_inventory',   color: 0x335588, unlockKey: null },
+            { label: 'MAP', key: 'touch_minimap',      color: 0x338844, unlockKey: null },
+            { label: 'SKL', key: 'touch_skilltree',    color: 0x8866cc, unlockKey: null },
+            { label: 'BOK', key: 'touch_elementbook',  color: 0x997755, unlockKey: 'geologistUnlocked' },
+            { label: 'SMI', key: 'touch_smeltery',     color: 0xff7722, unlockKey: 'metallurgistUnlocked' },
+            { label: 'LAB', key: 'touch_chemlab',      color: 0x33dd88, unlockKey: 'chemLabUnlocked' },
+        ];
+
+        // Layout: 3 columns, rows going up
+        const cols = 3;
+        for (let i = 0; i < menuDefs.length; i++) {
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = baseX - col * (sz + gap);
+            const y = baseY - row * (sz + gap);
+            const def = menuDefs[i];
+            const btnWidgets = this._makeMenuButton(x, y, sz, def.label, def.key, def.color);
+            this._menuWidgets.push({ widgets: btnWidgets, unlockKey: def.unlockKey });
+        }
     }
 
     // ── Zoom & fullscreen (top-right) ────────────────────────────────────────
@@ -219,6 +254,53 @@ class TouchControls {
         this.widgets.push(bg, txt, zone);
     }
 
+    /** Creates a menu button and returns its widget array for visibility control */
+    _makeMenuButton(x, y, sz, label, regKey, color) {
+        const scene = this.scene;
+        const reg   = this.game.registry;
+        const alpha = 0.35;
+        const pressAlpha = 0.7;
+
+        const bg = scene.add.graphics();
+        this._drawRoundedBtn(bg, x, y, sz, color, alpha);
+        bg.setDepth(100);
+
+        const txt = scene.add.text(x, y, label, {
+            fontSize: '12px', color: '#eeeeff', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101).setAlpha(0.6);
+
+        const zone = scene.add.zone(x, y, sz, sz).setInteractive().setDepth(102);
+
+        zone.on('pointerdown', () => {
+            reg.set(regKey, true);
+            this._drawRoundedBtn(bg, x, y, sz, color, pressAlpha);
+            txt.setAlpha(1);
+        });
+
+        const release = () => {
+            this._drawRoundedBtn(bg, x, y, sz, color, alpha);
+            txt.setAlpha(0.6);
+        };
+
+        zone.on('pointerup', release);
+        zone.on('pointerout', release);
+
+        this.widgets.push(bg, txt, zone);
+        return [bg, txt, zone];
+    }
+
+    /** Update menu button visibility based on hero unlock flags */
+    updateVisibility(hero) {
+        if (!hero) return;
+        for (const entry of this._menuWidgets) {
+            if (!entry.unlockKey) continue;
+            const visible = !!hero[entry.unlockKey];
+            for (const w of entry.widgets) {
+                w.setVisible(visible);
+            }
+        }
+    }
+
     // ── Shared draw helper ───────────────────────────────────────────────────
 
     _drawRoundedBtn(gfx, cx, cy, sz, color, alpha) {
@@ -236,5 +318,6 @@ class TouchControls {
     destroy() {
         for (const w of this.widgets) w.destroy();
         this.widgets = [];
+        this._menuWidgets = [];
     }
 }

@@ -93,6 +93,14 @@ const ITEM_DEFS = {
         id: 'magic_staff', name: 'Trollstav', type: 'weapon',
         color: 0xaa44ff, desc: '+3 Angrep, +2 Forsvar', atk: 3, def: 2, tier: 3
     },
+    runic_blade: {
+        id: 'runic_blade', name: 'Runesverd', type: 'weapon',
+        color: 0x44aaff, desc: '+6 Angrep', atk: 6, tier: 5
+    },
+    mithril_axe: {
+        id: 'mithril_axe', name: 'Mithriløks', type: 'weapon',
+        color: 0xaaddff, desc: '+7 Angrep', atk: 7, tier: 5
+    },
 
     // ── Ranged Weapons (subtype: 'bow') ───────────────────────────────────────
     shortbow: {
@@ -106,6 +114,10 @@ const ITEM_DEFS = {
     crossbow: {
         id: 'crossbow', name: 'Armbrøst', type: 'weapon', subtype: 'bow',
         color: 0x886644, desc: '+5 Angrep på avstand (trykk R)', atk: 5, tier: 4
+    },
+    dragon_bow: {
+        id: 'dragon_bow', name: 'Dragebue', type: 'weapon', subtype: 'bow',
+        color: 0xff6622, desc: '+7 Angrep på avstand (trykk R)', atk: 7, tier: 5
     },
 
     // ── Armor ─────────────────────────────────────────────────────────────────
@@ -133,6 +145,10 @@ const ITEM_DEFS = {
         id: 'dragon_scale', name: 'Drageskjell', type: 'armor',
         color: 0xff6622, desc: '+4 Forsvar', def: 4, tier: 4
     },
+    mithril_armor: {
+        id: 'mithril_armor', name: 'Mithrilrustning', type: 'armor',
+        color: 0xaaddff, desc: '+5 Forsvar, +1 Hjerte', def: 5, hearts: 1, tier: 5
+    },
 
     // ── Consumables ───────────────────────────────────────────────────────────
     health_pot: {
@@ -155,13 +171,23 @@ const ITEM_DEFS = {
     },
     strength_brew: {
         id: 'strength_brew', name: 'Styrkebrygg', type: 'consumable',
-        color: 0xff8800, desc: '+2 Angrep (60 sek)', tier: 2,
-        use(hero) { hero.addTempBuff('attack', 2, 60000); return true; }
+        color: 0xff8800, desc: '+Angrep (60 sek)', tier: 2,
+        use(hero, scene) {
+            const worldScale = 1 + ((scene?.worldNum || hero.worldNum || 1) - 1) * 0.15;
+            const amt = Math.max(2, Math.round(2 * worldScale));
+            hero.addTempBuff('attack', amt, 60000);
+            return true;
+        }
     },
     defense_brew: {
         id: 'defense_brew', name: 'Forsvarsbrygg', type: 'consumable',
-        color: 0x4488ff, desc: '+1 Forsvar (60 sek)', tier: 2,
-        use(hero) { hero.addTempBuff('defense', 1, 60000); return true; }
+        color: 0x4488ff, desc: '+Forsvar (60 sek)', tier: 2,
+        use(hero, scene) {
+            const worldScale = 1 + ((scene?.worldNum || hero.worldNum || 1) - 1) * 0.15;
+            const amt = Math.max(1, Math.round(1 * worldScale));
+            hero.addTempBuff('defense', amt, 60000);
+            return true;
+        }
     },
     xp_scroll: {
         id: 'xp_scroll', name: 'Erfaringsrulle', type: 'consumable',
@@ -202,36 +228,38 @@ const ITEM_DEFS = {
     },
     bomb: {
         id: 'bomb', name: 'Bombe', type: 'consumable',
-        color: 0x333333, desc: 'Skader alle monstre innen 3 ruter (6 skade). Tilordne til Q.', tier: 2,
+        color: 0x333333, desc: 'Skader alle monstre innen 3 ruter. Tilordne til Q.', tier: 2,
         use(hero, scene) {
             if (!scene) return false;
+            const worldScale = 1 + ((scene.worldNum || 1) - 1) * 0.25;
+            const baseDmg = Math.round(6 * worldScale);
             let hits = 0;
             for (const m of scene.monsters) {
                 if (!m.alive) continue;
                 const d = Math.abs(m.gridX - hero.gridX) + Math.abs(m.gridY - hero.gridY);
-                if (d <= 3) { m.takeDamage(6); hits++; }
+                if (d <= 3) { m.takeDamage(baseDmg); hits++; }
             }
             scene.monsters = scene.monsters.filter(m => m.alive);
-            // Visual explosion effect
             scene.cameras.main.shake(200, 0.015);
-            scene._floatingText(hero.gridX, hero.gridY, `💥 Bombe! ${hits} treff`, '#ff4400');
+            scene._floatingText(hero.gridX, hero.gridY, `💥 Bombe! ${hits} treff (${baseDmg})`, '#ff4400');
             return true;
         }
     },
     flashbang: {
         id: 'flashbang', name: 'Blendgranate', type: 'consumable',
-        color: 0xffffcc, desc: 'Halvér angrepet til monstre innen 4 ruter. Tilordne til Q.', tier: 2,
+        color: 0xffffcc, desc: 'Redusér angrepet til monstre innen 4 ruter. Tilordne til Q.', tier: 2,
         use(hero, scene) {
             if (!scene) return false;
+            const worldScale = 1 + ((scene.worldNum || 1) - 1) * 0.1;
+            const reduction = Math.max(2, Math.round(2 * worldScale));
             let hits = 0;
             for (const m of scene.monsters) {
                 if (!m.alive) continue;
                 const d = Math.abs(m.gridX - hero.gridX) + Math.abs(m.gridY - hero.gridY);
-                if (d <= 4) { m.attack = Math.max(1, Math.floor(m.attack / 2)); hits++; }
+                if (d <= 4) { m.attack = Math.max(1, m.attack - reduction); hits++; }
             }
-            // Visual flash effect
             scene.cameras.main.flash(200, 255, 255, 200);
-            scene._floatingText(hero.gridX, hero.gridY, `✦ Blendet ${hits} monstre!`, '#ffffaa');
+            scene._floatingText(hero.gridX, hero.gridY, `✦ Blendet ${hits} monstre! (-${reduction} ATK)`, '#ffffaa');
             return true;
         }
     },
@@ -291,6 +319,9 @@ const ITEM_POOL = {
         'flashbang', 'heart_crystal', 'map_scroll', 'frost_salve', 'burn_salve'],
     4: ['war_hammer', 'crossbow', 'magic_staff', 'robe_magic', 'plate_armor',
         'dragon_scale', 'big_health_pot', 'strength_brew', 'bomb',
+        'heart_crystal', 'flashbang', 'frost_salve', 'burn_salve'],
+    5: ['runic_blade', 'mithril_axe', 'dragon_bow', 'mithril_armor',
+        'dragon_scale', 'big_health_pot', 'strength_brew', 'bomb',
         'heart_crystal', 'flashbang', 'frost_salve', 'burn_salve']
 };
 
@@ -299,7 +330,7 @@ const ITEM_POOL = {
  *  @param {number} minRarityIdx  Minimum rarity (0=common, 1=rare, etc.)
  */
 function randomItemForWorld(worldNum, minRarityIdx = 0) {
-    const tier = Math.min(4, Math.ceil(worldNum / 2));
+    const tier = Math.min(5, Math.ceil(worldNum / 2));
     const pool = ITEM_POOL[tier];
     const baseDef = ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];
     const rarity = rollRarity(worldNum, minRarityIdx);
@@ -308,7 +339,7 @@ function randomItemForWorld(worldNum, minRarityIdx = 0) {
 
 /** Return a random item of a specific type for the given tier, excluding ids in the exclude Set */
 function randomItemByType(worldNum, type, exclude = new Set(), minRarityIdx = 0) {
-    const tier = Math.min(4, Math.ceil(worldNum / 2));
+    const tier = Math.min(5, Math.ceil(worldNum / 2));
     const pool = ITEM_POOL[tier].filter(id => ITEM_DEFS[id].type === type && !exclude.has(id));
     if (pool.length === 0) return null;
     const baseDef = ITEM_DEFS[pool[Math.floor(Math.random() * pool.length)]];

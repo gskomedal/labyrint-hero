@@ -60,7 +60,7 @@ const BOSS_TICK_MS   = 570;  // ms between boss attack ticks (slower than regula
 const MOVE_DELAY_MS   = 140;  // ms between steps when key held
 const MOVE_ANIM_MS    = 90;   // ms for hero/monster slide tween
 
-const HERO_BASE_ATTACK  = 2;
+const HERO_BASE_ATTACK  = 3;
 const HERO_BASE_HEARTS  = 5;
 // v0.7 balance: monsters are significantly tougher
 const MONSTER_BASE_HP   = { goblin: 10, orc: 18,  troll: 30,  boss: 35 };

@@ -42,7 +42,7 @@ class ChemistrySystem {
      * @param {object} hero
      * @returns {{ success: boolean, item: object, energyCost: number }}
      */
-    synthesize(moleculeId, hero) {
+    synthesize(moleculeId, hero, worldNum) {
         const mol = MOLECULE_DEFS[moleculeId];
         if (!mol) return { success: false };
 
@@ -57,7 +57,7 @@ class ChemistrySystem {
         const energyCost = this._adjustedEnergy(mol.energyCost, hero);
 
         // Create usable item from molecule definition
-        const item = this._createUsableItem(mol, hero);
+        const item = this._createUsableItem(mol, hero, worldNum);
 
         return { success: true, item, energyCost };
     }
@@ -84,8 +84,10 @@ class ChemistrySystem {
 
     // ── Create usable inventory item from molecule ──────────────────────────
 
-    _createUsableItem(mol, hero) {
+    _createUsableItem(mol, hero, worldNum) {
         const eff = mol.effects;
+        const wn = worldNum || hero.worldNum || 1;
+        const worldScale = 1 + (wn - 1) * 0.25;
         const potencyMul = 1 + (hero.potionPotencyBonus || 0);
         const durationMul = 1 + (hero.potionDurationBonus || 0);
         const bombDmgMul = 1 + (hero.chemBombBonus || 0);
@@ -109,7 +111,7 @@ class ChemistrySystem {
 
         // Build the use() function based on effect type
         if (eff.onUse === 'heal') {
-            const hp = Math.round(eff.healHP * potencyMul);
+            const hp = Math.round(eff.healHP * potencyMul * worldScale);
             item.desc = `+${hp} HP`;
             item.use = (hero, scene) => {
                 hero.hearts = Math.min(hero.hearts + hp, hero.maxHearts);
@@ -117,7 +119,7 @@ class ChemistrySystem {
                 return true;
             };
         } else if (eff.onUse === 'buff') {
-            const amt = Math.round(eff.amount * potencyMul);
+            const amt = Math.round(eff.amount * potencyMul * worldScale);
             const dur = Math.round(eff.durationMs * durationMul);
             item.desc = `+${amt} ${eff.stat} (${Math.round(dur / 1000)}s)`;
             item.use = (hero) => {
@@ -125,7 +127,7 @@ class ChemistrySystem {
                 return true;
             };
         } else if (eff.onUse === 'cure_all') {
-            const hp = Math.round((eff.healHP || 0) * potencyMul);
+            const hp = Math.round((eff.healHP || 0) * potencyMul * worldScale);
             item.use = (hero, scene) => {
                 hero.clearAllEffects();
                 if (hp > 0) hero.hearts = Math.min(hero.hearts + hp, hero.maxHearts);
@@ -133,7 +135,7 @@ class ChemistrySystem {
                 return true;
             };
         } else if (eff.onUse === 'bomb') {
-            const dmg = Math.round(eff.damage * bombDmgMul);
+            const dmg = Math.round(eff.damage * bombDmgMul * worldScale);
             const rad = Math.round(eff.radius * bombRadMul);
             item.desc = `${dmg} skade, radius ${rad}`;
             item.use = (hero, scene) => {
@@ -147,7 +149,7 @@ class ChemistrySystem {
                 return true;
             };
         } else if (eff.onUse === 'acid_bomb') {
-            const dmg = Math.round(eff.damage * bombDmgMul);
+            const dmg = Math.round(eff.damage * bombDmgMul * worldScale);
             const rad = Math.round(eff.radius * bombRadMul);
             const dur = eff.duration || 3;
             item.desc = `${dmg} skade + etsende ${dur} runder, radius ${rad}`;

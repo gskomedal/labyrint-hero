@@ -45,6 +45,14 @@ class SkillScene extends Phaser.Scene {
         if (this.viewOnly) {
             this.input.keyboard.on('keydown-T', () => this.scene.stop());
             this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
+
+            // Close button (top-right)
+            const closeBtn = this.add.text(px + panelW - 20, py + 8, '✕', {
+                fontSize: '18px', color: '#88aacc', fontFamily: 'monospace'
+            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+            closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
+            closeBtn.on('pointerout',  () => closeBtn.setColor('#88aacc'));
+            closeBtn.on('pointerdown', () => this.scene.stop());
         }
 
         this.add.rectangle(cx, py + 38, panelW - 30, 1, 0x2a2060);

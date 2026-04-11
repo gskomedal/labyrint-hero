@@ -362,5 +362,10 @@ class UIScene extends Phaser.Scene {
         } else {
             this.bossBar.setVisible(false);
         }
+
+        // ── Touch button visibility (unlock-gated) ───────────────────────────
+        if (this.touchControls) {
+            this.touchControls.updateVisibility(hero);
+        }
     }
 }
