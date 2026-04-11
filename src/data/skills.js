@@ -156,6 +156,7 @@ const SKILL_TREE_PATHS = [
         id:    'metallurg',
         name:  'Metallurg',
         desc:  'Smelting og legeringer',
+        prerequisitePath: 'geolog',  // must have at least 1 geolog skill
         color: 0xff7722,
         icon:  'M',
         unlockCondition: 'camp_room_found',
@@ -257,6 +258,15 @@ function isSkillUnlocked(hero, pathIndex, tierIndex) {
     if (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked) return false;
     if (path.unlockCondition === 'camp_room_found' && !hero.metallurgistUnlocked) return false;
     if (path.unlockCondition === 'chem_lab_found' && !hero.chemistUnlocked) return false;
+
+    // Check prerequisite path (e.g. metallurg requires at least 1 geolog skill)
+    if (path.prerequisitePath) {
+        const prereqPath = SKILL_TREE_PATHS.find(p => p.id === path.prerequisitePath);
+        if (prereqPath) {
+            const hasPrereq = prereqPath.tiers.some(t => _countSkill(hero, t.id) > 0);
+            if (!hasPrereq) return false;
+        }
+    }
 
     // Already at max stack → not available
     if (_countSkill(hero, skill.id) >= skill.maxStack) return false;

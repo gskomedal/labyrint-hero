@@ -573,22 +573,6 @@ class MapRenderer {
             }
         }
 
-        // Toggle mineral graphic visibility based on Geolog skill
-        if (scene.itemObjects) {
-            const hasGeoSkill = mr > 0;
-            for (const obj of scene.itemObjects) {
-                if (!obj.isMineral) continue;
-                if (!hasGeoSkill) {
-                    obj.graphic.setVisible(false);
-                } else {
-                    const fx = obj.gridX, fy = obj.gridY;
-                    const inBounds = fx >= 0 && fx < scene.tileW && fy >= 0 && fy < scene.tileH;
-                    const fogState = inBounds ? scene.fog[fy][fx] : FOG.DARK;
-                    obj.graphic.setVisible(fogState !== FOG.DARK);
-                }
-            }
-        }
-
         this._drawFog();
     }
 

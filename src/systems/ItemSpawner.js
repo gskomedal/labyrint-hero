@@ -372,11 +372,6 @@ class ItemSpawner {
             this._drawOreIcon(g, px, py, s, mineralDef);
         }
 
-        // Hide mineral if hero doesn't have Geolog mineral_eye skill yet
-        if (!scene.hero || (scene.hero.mineralVisionRadius || 0) <= 0) {
-            g.setVisible(false);
-        }
-
         scene.itemObjects.push({ gridX: gx, gridY: gy, item: mineralDef, graphic: g, isMineral: true });
     }
 
@@ -457,6 +452,9 @@ class ItemSpawner {
                     obj.graphic.destroy();
                     scene.itemObjects.splice(i, 1);
 
+                    // Can hero identify minerals? (requires Geolog skill)
+                    const canIdentify = obj.isMineral && (scene.hero.mineralIdentifyLevel || 0) > 0;
+
                     // Element discovery for minerals
                     if (obj.isMineral && obj.item.yields && scene.hero.elementTracker) {
                         // Unlock geologist path on first mineral pickup
@@ -464,8 +462,6 @@ class ItemSpawner {
                             scene.hero.geologistUnlocked = true;
                             scene._floatingText(hx, hy - 1, 'Geolog-stien er ulåst!', '#997755');
                         }
-                        // Only discover/identify elements if hero has Geologist skill
-                        const canIdentify = (scene.hero.mineralIdentifyLevel || 0) > 0;
                         if (canIdentify) {
                             for (const y of obj.item.yields) {
                                 const isNew = scene.hero.elementTracker.discover(y.symbol);
@@ -494,7 +490,9 @@ class ItemSpawner {
                     const pickupColor = tierColor
                         || ((rarDef && obj.item.rarity !== 'common') ? rarDef.textColor : '#ffee88');
                     const suffix = toPet ? ` (${scene.pet.petName})` : '';
-                    scene._floatingText(hx, hy, `+ ${obj.item.name}${suffix}`, pickupColor);
+                    const displayName = (obj.isMineral && typeof getMineralDisplayName !== 'undefined')
+                        ? getMineralDisplayName(obj.item, scene.hero) : obj.item.name;
+                    scene._floatingText(hx, hy, `+ ${displayName}${suffix}`, pickupColor);
                 } else {
                     scene._showMessage('Ryggsekken er full! (Høyreklikk for å droppe)', '#ff8844');
                 }
