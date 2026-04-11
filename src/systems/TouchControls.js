@@ -7,6 +7,7 @@ class TouchControls {
         this.widgets = [];
         this._menuWidgets = []; // menu buttons tracked separately for visibility
         this._domDpad = null;   // DOM-based d-pad container (for off-canvas placement)
+        this._dpadButtons = [];
     }
 
     create() {
@@ -41,10 +42,16 @@ class TouchControls {
     _createDpad() {
         const reg = this.game.registry;
 
-        // Create a DOM container for the d-pad
+        // Remove any lingering d-pad from previous world
+        const old = document.getElementById('touch-dpad');
+        if (old) old.remove();
+
+        // Create a full-viewport fixed container
         const container = document.createElement('div');
         container.id = 'touch-dpad';
-        container.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;';
+        container.style.cssText =
+            'position:fixed;top:0;left:0;width:100vw;height:100vh;' +
+            'z-index:9999;pointer-events:none;overflow:visible;';
         document.body.appendChild(container);
         this._domDpad = container;
 
@@ -62,61 +69,77 @@ class TouchControls {
         for (const dir of directions) {
             const btn = document.createElement('div');
             btn.textContent = dir.label;
-            btn.style.cssText = `
-                position:absolute;
-                width:${sz}px; height:${sz}px;
-                border-radius:10px;
-                background:rgba(51,68,102,0.5);
-                border:2px solid rgba(51,68,102,0.7);
-                color:#aabbdd;
-                font-family:monospace;
-                font-size:26px;
-                display:flex; align-items:center; justify-content:center;
-                pointer-events:auto;
-                user-select:none;
-                -webkit-user-select:none;
-                touch-action:none;
-            `;
-            // Position relative to container center
+            btn.style.cssText =
+                'position:absolute;' +
+                'width:' + sz + 'px;height:' + sz + 'px;' +
+                'border-radius:10px;' +
+                'background:rgba(51,68,102,0.5);' +
+                'border:2px solid rgba(51,68,102,0.7);' +
+                'color:#aabbdd;' +
+                'font-family:monospace;font-size:26px;' +
+                'display:flex;align-items:center;justify-content:center;' +
+                'pointer-events:auto;' +
+                'user-select:none;-webkit-user-select:none;' +
+                'touch-action:none;';
+
+            // Store offset for positioning
             btn._ox = dir.ox;
             btn._oy = dir.oy;
 
-            btn.addEventListener('touchstart', (e) => {
+            // Press handler (both touch and mouse)
+            const onPress = (e) => {
                 e.preventDefault();
                 reg.set('touch_dx', dir.dx);
                 reg.set('touch_dy', dir.dy);
                 btn.style.background = 'rgba(68,102,170,0.75)';
                 btn.style.color = '#ffffff';
-            }, { passive: false });
+            };
 
-            const release = () => {
+            const onRelease = () => {
                 reg.set('touch_dx', 0);
                 reg.set('touch_dy', 0);
                 btn.style.background = 'rgba(51,68,102,0.5)';
                 btn.style.color = '#aabbdd';
             };
 
-            btn.addEventListener('touchend', release);
-            btn.addEventListener('touchcancel', release);
+            btn.addEventListener('touchstart', onPress, { passive: false });
+            btn.addEventListener('touchend', onRelease);
+            btn.addEventListener('touchcancel', onRelease);
+            btn.addEventListener('mousedown', onPress);
+            btn.addEventListener('mouseup', onRelease);
+            btn.addEventListener('mouseleave', onRelease);
 
             container.appendChild(btn);
             this._dpadButtons.push(btn);
         }
 
-        // Position immediately
-        this._repositionDomDpad();
+        // Position after a short delay so the canvas has time to be sized
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this._repositionDomDpad();
+            });
+        });
     }
 
     /** Reposition DOM d-pad: place in letterbox area if space, otherwise over canvas left edge */
     _repositionDomDpad() {
-        if (!this._domDpad) return;
+        if (!this._domDpad || !this._dpadButtons.length) return;
 
         const canvas = this.game.canvas;
         const rect = canvas.getBoundingClientRect();
+
+        // Guard: if canvas isn't rendered yet, retry next frame
+        if (rect.width === 0 || rect.height === 0) {
+            requestAnimationFrame(() => this._repositionDomDpad());
+            return;
+        }
+
         const sz = 58;
         const gap = 6;
-        const dpadW = sz * 3 + gap * 2; // total d-pad width
-        const dpadH = sz * 3 + gap * 2; // total d-pad height
+        const dpadW = sz * 3 + gap * 2;
+
+        // Scale factor: how much the canvas is scaled from internal 1280x800
+        const scale = rect.height / 800;
 
         // Available space to the left of the game canvas
         const leftSpace = rect.left;
@@ -124,25 +147,24 @@ class TouchControls {
         // Center of d-pad placement
         let centerX, centerY;
 
-        if (leftSpace > dpadW / 2 + 20) {
+        if (leftSpace > dpadW * scale / 2 + 20) {
             // Enough space in the letterbox: place d-pad centered in the left bar
             centerX = leftSpace / 2;
         } else {
-            // Not enough space: place at left edge of canvas + small offset
-            centerX = rect.left + (sz + gap + 24) * (rect.width / 1280);
+            // Not enough space: place at left edge of canvas + offset (inside canvas)
+            centerX = rect.left + (sz + gap + 24) * scale;
         }
 
-        // Vertically: bottom area of the screen, matching game's bottom area
-        centerY = rect.bottom - (24 + sz + gap) * (rect.height / 800);
+        // Vertically: bottom area of the screen
+        centerY = rect.bottom - (24 + sz + gap) * scale;
 
-        // Position each button relative to center
+        // Position and scale each button
         for (const btn of this._dpadButtons) {
-            const scale = rect.height / 800; // scale buttons with canvas
-            const scaledSz = Math.round(sz * scale);
+            const scaledSz  = Math.round(sz * scale);
             const scaledGap = Math.round(gap * scale);
-            btn.style.width = scaledSz + 'px';
+            btn.style.width  = scaledSz + 'px';
             btn.style.height = scaledSz + 'px';
-            btn.style.fontSize = Math.round(26 * scale) + 'px';
+            btn.style.fontSize    = Math.round(26 * scale) + 'px';
             btn.style.borderRadius = Math.round(10 * scale) + 'px';
             btn.style.left = Math.round(centerX + btn._ox * scale - scaledSz / 2) + 'px';
             btn.style.top  = Math.round(centerY + btn._oy * scale - scaledSz / 2) + 'px';
@@ -185,7 +207,6 @@ class TouchControls {
         const baseX = W - 24 - sz / 2;
         const baseY = H - 24 - 56 / 2 - 10 - 56 - 10 - sz / 2; // above action row
 
-        // Menu buttons: always-visible first, then conditional ones
         const menuDefs = [
             { label: 'INV', key: 'touch_inventory',   color: 0x335588, unlockKey: null },
             { label: 'MAP', key: 'touch_minimap',      color: 0x338844, unlockKey: null },
@@ -195,7 +216,6 @@ class TouchControls {
             { label: 'LAB', key: 'touch_chemlab',      color: 0x33dd88, unlockKey: 'chemLabUnlocked' },
         ];
 
-        // Layout: 3 columns, rows going up
         const cols = 3;
         for (let i = 0; i < menuDefs.length; i++) {
             const col = i % cols;
@@ -219,17 +239,12 @@ class TouchControls {
         const startX = W - 20 - sz / 2;
         const startY = 64 + sz / 2;
 
-        // Zoom in (+)
         this._makeSimpleButton(startX, startY, sz, '+', 0x336699, () => {
             reg.set('touch_zoom_in', true);
         });
-
-        // Zoom out (-)
         this._makeSimpleButton(startX - (sz + gap), startY, sz, '−', 0x336699, () => {
             reg.set('touch_zoom_out', true);
         });
-
-        // Fullscreen toggle
         this._makeSimpleButton(startX - (sz + gap) * 2, startY, sz, '⛶', 0x446688, () => {
             this._toggleFullscreen();
         });
@@ -313,7 +328,6 @@ class TouchControls {
         this.widgets.push(bg, txt, zone);
     }
 
-    /** Creates a menu button and returns its widget array for visibility control */
     _makeMenuButton(x, y, sz, label, regKey, color) {
         const scene = this.scene;
         const reg   = this.game.registry;

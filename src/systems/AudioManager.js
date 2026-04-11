@@ -140,7 +140,11 @@ const Audio = (function () {
 
         /** Call once on first user gesture (browser AudioContext requirement) */
         init() {
-            if (ctx) return;
+            if (ctx) {
+                // Context already created but might be suspended (browser autoplay policy)
+                if (ctx.state === 'suspended') ctx.resume();
+                return;
+            }
             try {
                 ctx = new (window.AudioContext || window.webkitAudioContext)();
                 masterGain = ctx.createGain();
