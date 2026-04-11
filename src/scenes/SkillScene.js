@@ -78,36 +78,60 @@ class SkillScene extends Phaser.Scene {
         const hexCol  = '#' + colColor.toString(16).padStart(6, '0');
         const hdrW = Math.min(220, this._colW - 12);
 
-        // Check if entire path is locked
+        // Check if entire path is locked (unlock condition not met)
         const pathLocked = (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked)
             || (path.unlockCondition === 'camp_room_found' && !hero.metallurgistUnlocked)
             || (path.unlockCondition === 'chem_lab_found' && !hero.chemistUnlocked);
 
+        // Check prerequisite path (e.g. metallurg requires geolog skill)
+        let prereqMissing = false;
+        if (!pathLocked && path.prerequisitePath) {
+            const prereqPath = SKILL_TREE_PATHS.find(p => p.id === path.prerequisitePath);
+            if (prereqPath) {
+                prereqMissing = !prereqPath.tiers.some(t =>
+                    (hero.skills || []).includes(t.id));
+            }
+        }
+
+        const isLocked = pathLocked || prereqMissing;
+
         // Path header
         const hdrBg = this.add.graphics();
-        hdrBg.fillStyle(pathLocked ? 0x111118 : colColor, pathLocked ? 0.15 : 0.12);
+        hdrBg.fillStyle(isLocked ? 0x111118 : colColor, isLocked ? 0.15 : 0.12);
         hdrBg.fillRoundedRect(colCX - hdrW / 2, areaTop, hdrW, 26, 4);
-        hdrBg.lineStyle(1, pathLocked ? 0x222233 : colColor, pathLocked ? 0.3 : 0.5);
+        hdrBg.lineStyle(1, isLocked ? 0x222233 : colColor, isLocked ? 0.3 : 0.5);
         hdrBg.strokeRoundedRect(colCX - hdrW / 2, areaTop, hdrW, 26, 4);
 
         this.add.text(colCX, areaTop + 6, `── ${path.name.toUpperCase()} ──`, {
-            fontSize: '13px', color: pathLocked ? '#333344' : hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '13px', color: isLocked ? '#333344' : hexCol, fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
-        const lockHint = path.unlockCondition === 'camp_room_found' ? 'Finn en leirplass!'
-            : path.unlockCondition === 'chem_lab_found' ? 'Finn et kjemisk lab!'
-            : 'Finn et mineral!';
-        this.add.text(colCX, areaTop + 18, pathLocked ? lockHint : path.desc, {
-            fontSize: '10px', color: pathLocked ? '#333344' : '#445566', fontFamily: 'monospace'
+        let lockHint;
+        if (prereqMissing) {
+            const prereqName = SKILL_TREE_PATHS.find(p => p.id === path.prerequisitePath)?.name || '???';
+            lockHint = `Krever ${prereqName}-skill!`;
+        } else {
+            lockHint = path.unlockCondition === 'camp_room_found' ? 'Finn en leirplass!'
+                : path.unlockCondition === 'chem_lab_found' ? 'Finn et kjemisk lab!'
+                : 'Finn et mineral!';
+        }
+        this.add.text(colCX, areaTop + 18, isLocked ? lockHint : path.desc, {
+            fontSize: '10px', color: isLocked ? '#333344' : '#445566', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
         // If entire path is locked, show a lock overlay and skip drawing skill cards
-        if (pathLocked) {
+        if (isLocked) {
             this.add.text(colCX, areaTop + 80, '🔒', { fontSize: '24px' }).setOrigin(0.5);
-            const lockMsg = path.unlockCondition === 'camp_room_found'
-                ? 'Finn en leirplass\nfor å låse opp'
-                : path.unlockCondition === 'chem_lab_found'
-                ? 'Finn et kjemisk lab\nfor å låse opp'
-                : 'Plukk opp et\nmineral for å\nlåse opp';
+            let lockMsg;
+            if (prereqMissing) {
+                const prereqName = SKILL_TREE_PATHS.find(p => p.id === path.prerequisitePath)?.name || '???';
+                lockMsg = `Lær ${prereqName}-skill\nfør du kan velge\ndenne stien`;
+            } else if (path.unlockCondition === 'camp_room_found') {
+                lockMsg = 'Finn en leirplass\nfor å låse opp';
+            } else if (path.unlockCondition === 'chem_lab_found') {
+                lockMsg = 'Finn et kjemisk lab\nfor å låse opp';
+            } else {
+                lockMsg = 'Plukk opp et\nmineral for å\nlåse opp';
+            }
             this.add.text(colCX, areaTop + 110, lockMsg, {
                 fontSize: '11px', color: '#333344', fontFamily: 'monospace', align: 'center'
             }).setOrigin(0.5);

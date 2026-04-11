@@ -337,6 +337,37 @@ function rollBossMineral(worldNum) {
     return MINERAL_DEFS.malachite;
 }
 
+/**
+ * Return a display name for a mineral based on hero's identification ability.
+ * Without Geolog skill: generic description based on appearance (color/subtype).
+ * With Geolog skill: actual mineral name.
+ */
+function getMineralDisplayName(mineralDef, hero) {
+    if (!mineralDef || mineralDef.type !== 'mineral') return mineralDef ? mineralDef.name : '???';
+    if ((hero.mineralIdentifyLevel || 0) > 0) return mineralDef.name;
+
+    // Generic descriptions based on color and subtype
+    if (mineralDef.subtype === 'crystal') {
+        const col = mineralDef.color || 0xffffff;
+        const r = (col >> 16) & 0xff, g = (col >> 8) & 0xff, b = col & 0xff;
+        if (r > 180 && g < 100 && b < 100) return 'Rødlig krystall';
+        if (r < 100 && g > 150 && b < 100) return 'Grønnlig krystall';
+        if (r < 100 && g < 100 && b > 150) return 'Blålig krystall';
+        if (r > 180 && g > 150 && b < 100) return 'Gyllen krystall';
+        if (r > 150 && g < 100 && b > 150) return 'Fiolett krystall';
+        return 'Ukjent krystall';
+    }
+    const col = mineralDef.color || 0x888888;
+    const r = (col >> 16) & 0xff, g = (col >> 8) & 0xff, b = col & 0xff;
+    if (r > 150 && g < 100 && b < 100) return 'Rødlig malm';
+    if (r > 150 && g > 120 && b < 80) return 'Gulbrun malm';
+    if (r < 100 && g > 130) return 'Grønnlig malm';
+    if (r < 100 && g < 100 && b > 130) return 'Blålig malm';
+    if (r > 180 && g > 180 && b > 180) return 'Lys malm';
+    if (r < 80 && g < 80 && b < 80) return 'Mørk malm';
+    return 'Ukjent malm';
+}
+
 // Rarity color mapping for mineral tiers (matches existing rarity system visuals)
 const MINERAL_TIER_COLORS = {
     1: 0x888888, // grey – common

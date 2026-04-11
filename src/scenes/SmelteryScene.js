@@ -159,6 +159,12 @@ class SmelteryScene extends Phaser.Scene {
         );
     }
 
+    _hasGeologSkill() {
+        return (this.heroRef.skills || []).some(s =>
+            s === 'mineral_eye' || s === 'efficient_mining' || s === 'master_prospector'
+        );
+    }
+
     _drawLockedTab() {
         const cx = this.px + this.panelW / 2;
         const cy = this.contentY + (this.panelH - (this.contentY - this.py)) / 2 - 40;
@@ -166,7 +172,10 @@ class SmelteryScene extends Phaser.Scene {
         this._d(this.add.text(cx, cy + 30, 'Krever Metallurg-skill!', {
             fontSize: '14px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5));
-        this._d(this.add.text(cx, cy + 50, 'Lær Rask smelting i skilltreet\nfor å bruke smelteovnen.', {
+        const hint = this._hasGeologSkill()
+            ? 'Lær Rask smelting i skilltreet\nfor å bruke smelteovnen.'
+            : 'Du trenger Geolog-skill først,\nderetter Metallurg-skill.';
+        this._d(this.add.text(cx, cy + 50, hint, {
             fontSize: '12px', color: '#665544', fontFamily: 'monospace', align: 'center'
         }).setOrigin(0.5));
     }
@@ -204,7 +213,9 @@ class SmelteryScene extends Phaser.Scene {
             const col = def.color || 0xaaaaaa;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
 
-            this._d(this.add.text(leftX + 4, bpY, `${def.name} ×${entry.count}`, {
+            const stashDepName = (def.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
+                ? getMineralDisplayName(def, hero) : def.name;
+            this._d(this.add.text(leftX + 4, bpY, `${stashDepName} ×${entry.count}`, {
                 fontSize: '12px', color: hexCol, fontFamily: 'monospace'
             }));
 
@@ -241,11 +252,13 @@ class SmelteryScene extends Phaser.Scene {
                 if (sY > this.py + this.panelH - 60) break;
 
                 const def = this._getStashItemDef(stashEntry.id);
-                const name = def ? def.name : stashEntry.id;
+                const rawStName = def ? def.name : stashEntry.id;
+                const stName = (def && def.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
+                    ? getMineralDisplayName(def, hero) : rawStName;
                 const col = def ? def.color : 0xaaaaaa;
                 const hexCol = '#' + col.toString(16).padStart(6, '0');
 
-                this._d(this.add.text(rightX + 4, sY, `${name} ×${stashEntry.count}`, {
+                this._d(this.add.text(rightX + 4, sY, `${stName} ×${stashEntry.count}`, {
                     fontSize: '12px', color: hexCol, fontFamily: 'monospace'
                 }));
 
@@ -378,14 +391,19 @@ class SmelteryScene extends Phaser.Scene {
             // Source label
             const srcLabel = m.source === 'stash' ? ' [lager]' : '';
 
-            // Mineral name + count – truncate to fit slot
-            const mName = m.def.name.length > 22 ? m.def.name.slice(0, 21) + '…' : m.def.name;
+            // Mineral name + count – show generic name if not identified
+            const canId = (hero.mineralIdentifyLevel || 0) > 0;
+            const rawName = (typeof getMineralDisplayName !== 'undefined')
+                ? getMineralDisplayName(m.def, hero) : m.def.name;
+            const mName = rawName.length > 22 ? rawName.slice(0, 21) + '…' : rawName;
             this._d(this.add.text(startX + 8, my + 6, `${mName} (×${m.count})${srcLabel}`, {
                 fontSize: '13px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
             }));
 
-            // Yield preview
-            const yieldStr = m.def.yields.map(y => `${y.symbol}×${y.amount}`).join(', ');
+            // Yield preview – hide element details if not identified
+            const yieldStr = canId
+                ? m.def.yields.map(y => `${y.symbol}×${y.amount}`).join(', ')
+                : '???';
             this._d(this.add.text(startX + 8, my + 22, `→ ${yieldStr}  |  Energi: ${check.energyCost}`, {
                 fontSize: '13px', color: '#776655', fontFamily: 'monospace'
             }));
