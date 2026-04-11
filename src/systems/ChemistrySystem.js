@@ -87,7 +87,7 @@ class ChemistrySystem {
     _createUsableItem(mol, hero, worldNum) {
         const eff = mol.effects;
         const wn = worldNum || hero.worldNum || 1;
-        const worldScale = 1 + (wn - 1) * 0.25;
+        const worldScale = 1 + (wn - 1) * 0.4;
         const potencyMul = 1 + (hero.potionPotencyBonus || 0);
         const durationMul = 1 + (hero.potionDurationBonus || 0);
         const bombDmgMul = 1 + (hero.chemBombBonus || 0);

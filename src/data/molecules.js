@@ -26,8 +26,8 @@ const MOLECULE_DEFS = {
         formula: 'KNO₃', tier: 2, color: 0xcccccc, stackSize: 20,
         recipe: [{ symbol: 'K', amount: 1 }, { symbol: 'N', amount: 1 }],
         energyCost: 1,
-        effects: { onUse: 'bomb', damage: 5, radius: 2 },
-        desc: 'Svakt sprengstoff. 5 skade i radius 2.'
+        effects: { onUse: 'bomb', damage: 8, radius: 2 },
+        desc: 'Svakt sprengstoff. 8 skade i radius 2.'
     },
 
     // ── Acids ────────────────────────────────────────────────────────────────
@@ -36,15 +36,15 @@ const MOLECULE_DEFS = {
         formula: 'H₂SO₄', tier: 2, color: 0xdddd00, stackSize: 10,
         recipe: [{ symbol: 'S', amount: 1 }, { symbol: 'H', amount: 1 }],
         energyCost: 1,
-        effects: { onUse: 'acid_bomb', damage: 4, radius: 2, statusEffect: 'acid_burn', duration: 3 },
-        desc: 'Sterk syre. Kast for å etse monstre (4 skade).'
+        effects: { onUse: 'acid_bomb', damage: 7, radius: 2, statusEffect: 'acid_burn', duration: 3 },
+        desc: 'Sterk syre. Kast for å etse monstre (7 skade).'
     },
     hydrochloric_acid: {
         id: 'hydrochloric_acid', name: 'Saltsyre', type: 'molecule', subtype: 'acid',
         formula: 'HCl', tier: 2, color: 0xaaff44, stackSize: 10,
         recipe: [{ symbol: 'H', amount: 1 }, { symbol: 'Cl', amount: 1 }],
         energyCost: 1,
-        effects: { onUse: 'acid_bomb', damage: 3, radius: 2, statusEffect: 'acid_burn', duration: 2 },
+        effects: { onUse: 'acid_bomb', damage: 5, radius: 2, statusEffect: 'acid_burn', duration: 2 },
         desc: 'Svakere syre. Billig å lage.'
     },
 
@@ -106,8 +106,8 @@ const MOLECULE_DEFS = {
         formula: 'K + S + C', tier: 2, color: 0x333333, stackSize: 10,
         recipe: [{ symbol: 'K', amount: 1 }, { symbol: 'S', amount: 1 }, { symbol: 'C', amount: 1 }],
         energyCost: 1,
-        effects: { onUse: 'bomb', damage: 8, radius: 3 },
-        desc: 'Klassisk krutt. 8 skade i radius 3.'
+        effects: { onUse: 'bomb', damage: 12, radius: 3 },
+        desc: 'Klassisk krutt. 12 skade i radius 3.'
     },
     smoke_bomb: {
         id: 'smoke_bomb', name: 'Røykbombe', type: 'molecule', subtype: 'explosive',
@@ -122,16 +122,16 @@ const MOLECULE_DEFS = {
         formula: 'S + Fe', tier: 3, color: 0xcccc00, stackSize: 5,
         recipe: [{ symbol: 'S', amount: 2 }, { symbol: 'Fe', amount: 1 }],
         energyCost: 2,
-        effects: { onUse: 'acid_bomb', damage: 6, radius: 3, statusEffect: 'acid_burn', duration: 4 },
-        desc: 'AoE syreskade: 6 skade + etsende i 4 runder.'
+        effects: { onUse: 'acid_bomb', damage: 10, radius: 3, statusEffect: 'acid_burn', duration: 4 },
+        desc: 'AoE syreskade: 10 skade + etsende i 4 runder.'
     },
     dynamite: {
         id: 'dynamite', name: 'Dynamitt', type: 'molecule', subtype: 'explosive',
         formula: 'C + N', tier: 4, color: 0xff4422, stackSize: 5,
         recipe: [{ symbol: 'C', amount: 2 }, { symbol: 'N', amount: 2 }],
         energyCost: 3,
-        effects: { onUse: 'bomb', damage: 15, radius: 4 },
-        desc: 'Massiv eksplosjon! 15 skade i radius 4.'
+        effects: { onUse: 'bomb', damage: 20, radius: 4 },
+        desc: 'Massiv eksplosjon! 20 skade i radius 4.'
     },
 };
 

@@ -6,18 +6,18 @@
 
 ### Nye funksjoner
 - **Lukkeknapp på alle menyer (#92):** SkillScene (ferdighetstreet) har nå en ✕-knapp for å lukke i visnings-modus. LeaderboardScene har fått lukkeknapp og ESC-snarvei
-- **Touch-kontroller omstrukturert (#88):** Handlingsknapper (ATK, BOW, USE) er nå separert fra menyknapper (INV, MAP, SKL, BOK, SMI, LAB). Menyknapper vises kun når funksjonen er opplåst. D-pad flyttet lenger til venstre. Nye touch-knapper for Skilltre (SKL) og Elementbok (BOK)
+- **Touch-kontroller omstrukturert (#88):** Handlingsknapper (ATK, BOW, USE) er nå separert fra menyknapper (INV, MAP, SKL, BOK, SMI, LAB). Menyknapper vises kun når funksjonen er opplåst. D-pad er nå DOM-basert og plasseres i letterbox-området ved siden av spillvinduet på brede skjermer. Nye touch-knapper for Skilltre (SKL) og Elementbok (BOK)
 - **Tier 5-utstyr (#89):** Runesverd (+6 ATK), Mithriløks (+7 ATK), Dragebue (+7 ATK bue), Mithrilrustning (+5 DEF, +1 hjerte) tilgjengelig fra verden 9+
 
 ### Balansering
 - **Enklere lett modus (#89):** Monster-HP multiplier redusert fra 0.65→0.50, angrep fra 0.75→0.60, XP-bonus økt til 1.30
 - **Mykere monsterskalering (#89):** HP-vekst per verden redusert fra 0.5→0.35 (med ekstra 0.15 etter verden 8). Angrepsvekst redusert fra 0.25→0.20
 - **Økt base-angrep (#89):** Helten starter med 3 angrep i stedet for 2
-- **Bomber og potions skalerer med verden (#90):** Alle bomber, elixirer, helbredelse og buffs fra kjemisystemet skalerer nå +25% per verden. Vanlige bomber, styrkebrygg og forsvarsbrygg skalerer også
+- **Bomber og potions skalerer med verden (#90):** Alle bomber, elixirer, helbredelse og buffs fra kjemisystemet skalerer nå +40% per verden. Base-skade på kjemibomber økt kraftig (salpeter 5→8, krutt 8→12, syrebombe 6→10, dynamitt 15→20). Vanlige bomber (8 base), styrkebrygg og forsvarsbrygg skalerer også
 - **Sterkere blendgranater (#90):** Blendgranater reduserer nå monsterangrep med et fast tall som skalerer med verden, i stedet for å halvere
 
 ### Tekniske endringer
-- TouchControls omskrevet med separate action/meny-grupper og dynamisk synlighet via updateVisibility()
+- TouchControls omskrevet: D-pad er nå DOM-basert (HTML-elementer) for plassering utenfor canvas. Reposisjoneres automatisk ved resize. Action/meny separert med dynamisk synlighet via updateVisibility()
 - ChemistrySystem.synthesize() og _createUsableItem() mottar nå worldNum for skalering
 - ChemLabScene sender worldNum ved oppstart
 - Hero-objektet får worldNum satt i GameScene.create()

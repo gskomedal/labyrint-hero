@@ -231,8 +231,8 @@ const ITEM_DEFS = {
         color: 0x333333, desc: 'Skader alle monstre innen 3 ruter. Tilordne til Q.', tier: 2,
         use(hero, scene) {
             if (!scene) return false;
-            const worldScale = 1 + ((scene.worldNum || 1) - 1) * 0.25;
-            const baseDmg = Math.round(6 * worldScale);
+            const worldScale = 1 + ((scene.worldNum || 1) - 1) * 0.4;
+            const baseDmg = Math.round(8 * worldScale);
             let hits = 0;
             for (const m of scene.monsters) {
                 if (!m.alive) continue;
