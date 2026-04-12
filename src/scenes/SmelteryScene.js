@@ -21,8 +21,8 @@ class SmelteryScene extends Phaser.Scene {
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.82);
 
         // ── Panel ─────────────────────────────────────────────────────────────
-        this.panelW = Math.min(W - 10, 700);
-        this.panelH = Math.min(H - 10, 500);
+        this.panelW = W - 20;
+        this.panelH = H - 20;
         this.px = cx - this.panelW / 2;
         this.py = cy - this.panelH / 2;
 
@@ -32,20 +32,6 @@ class SmelteryScene extends Phaser.Scene {
         panel.fillRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
         if (SceneBackgrounds.addCampBackground) {
             SceneBackgrounds.addCampBackground(this, this.px, this.py, this.panelW, this.panelH);
-        }
-
-        // ── Character portrait (sits in the scene, lower-right of bg) ─────────
-        const portraitSize = 120;
-        const portraitX = this.px + this.panelW - portraitSize - 6;
-        const portraitY = this.py + this.panelH - portraitSize - 6;
-        const portraitGfx = this.add.graphics();
-        if (this.heroRef) {
-            const eq = this.heroRef.inventory ? this.heroRef.inventory.equipped : {};
-            if (typeof drawDetailedCharacterSprite === 'function') {
-                drawDetailedCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race, eq);
-            } else {
-                drawCharacterSprite(portraitGfx, portraitX, portraitY, portraitSize, this.heroRef.appearance, this.heroRef.race);
-            }
         }
 
         // ── Dark content area (high contrast zone for UI) ─────────────────────
@@ -115,6 +101,15 @@ class SmelteryScene extends Phaser.Scene {
 
         // ── Content area ──────────────────────────────────────────────────────
         this.contentY = tabY + 24;
+        this._scrollOffsets = { stash: 0, smelt: 0, alloy: 0, forge: 0 };
+        this._elementFilter = null; // null = show all, or element symbol string
+
+        // Mouse wheel scrolling (per-tab offset)
+        this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            this._scrollOffsets[this._tab] = Math.max(0, this._scrollOffsets[this._tab] + deltaY * 0.5);
+            this._refresh();
+        });
+
         this._refresh();
     }
 
@@ -124,7 +119,7 @@ class SmelteryScene extends Phaser.Scene {
         // Dark backing behind content for readability
         const cbg = this._d(this.add.graphics());
         cbg.fillStyle(0x0a0608, 0.78);
-        cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 150, this.panelH - (this.contentY - this.py) - 10, 4);
+        cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 12, this.panelH - (this.contentY - this.py) - 10, 4);
 
         // Update tab button colors
         UIHelper.updateTabButtons(this._tabBtns, ['stash', 'smelt', 'alloy', 'forge'], this._tab, '#ff7722', '#554433');
@@ -150,6 +145,19 @@ class SmelteryScene extends Phaser.Scene {
                     this._drawLockedTab();
                 }
                 break;
+        }
+
+        // Scroll indicators
+        const scrollOff = this._scrollOffsets[this._tab] || 0;
+        if (scrollOff > 0) {
+            this._d(this.add.text(this.px + this.panelW / 2, this.contentY - 2, '▲ mer ▲', {
+                fontSize: '10px', color: '#665544', fontFamily: 'monospace'
+            }).setOrigin(0.5, 1));
+        }
+        if (this._lastContentOverflow) {
+            this._d(this.add.text(this.px + this.panelW / 2, this.py + this.panelH - 14, '▼ mer ▼', {
+                fontSize: '10px', color: '#665544', fontFamily: 'monospace'
+            }).setOrigin(0.5));
         }
     }
 
@@ -188,14 +196,21 @@ class SmelteryScene extends Phaser.Scene {
         const hero = this.heroRef;
         const cx = this.px + this.panelW / 2;
         let y = this.contentY;
-        const colW = Math.min(320, this.panelW / 2 - 30);
+        const colW = Math.min(420, this.panelW / 2 - 30);
         const leftX = this.px + 20;
         const rightX = cx + 10;
+        const scrollOff = this._scrollOffsets.stash || 0;
+        const visTop = this.contentY - 10;
+        const visBot = this.py + this.panelH - 40;
+        this._lastContentOverflow = false;
 
         // ── Left side: Backpack (deposit from) ──────────────────────────────
-        this._d(this.add.text(leftX, y, 'RYGGSEKK → Lager', {
-            fontSize: '12px', color: '#887766', fontFamily: 'monospace', fontStyle: 'bold'
-        }));
+        const hdrLeftY = y - scrollOff;
+        if (hdrLeftY >= visTop && hdrLeftY <= visBot) {
+            this._d(this.add.text(leftX, hdrLeftY, 'RYGGSEKK → Lager', {
+                fontSize: '12px', color: '#887766', fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+        }
         y += 16;
 
         let bpY = y;
@@ -205,51 +220,67 @@ class SmelteryScene extends Phaser.Scene {
             if (!entry) continue;
             const def = hero.inventory._getItemDef(entry);
             if (!def) continue;
-            // Only allow depositing minerals, fuel, and alloy-type items
             if (def.type !== 'mineral' && def.type !== 'fuel') continue;
-            if (bpY > this.py + this.panelH - 60) break;
             hasDepositable = true;
+
+            const adjY = bpY - scrollOff;
+            bpY += 20;
+            if (adjY > visBot) { this._lastContentOverflow = true; continue; }
+            if (adjY < visTop) continue;
 
             const col = def.color || 0xaaaaaa;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
 
             const stashDepName = (def.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
                 ? getMineralDisplayName(def, hero) : def.name;
-            this._d(this.add.text(leftX + 4, bpY, `${stashDepName} ×${entry.count}`, {
+            this._d(this.add.text(leftX + 4, adjY, `${stashDepName} ×${entry.count}`, {
                 fontSize: '12px', color: hexCol, fontFamily: 'monospace'
             }));
 
-            const btn = this._d(this.add.text(leftX + colW - 10, bpY, '→', {
+            const btn = this._d(this.add.text(leftX + colW - 10, adjY, '→', {
                 fontSize: '12px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
             }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
             const slotIdx = i;
             btn.on('pointerover', () => btn.setColor('#ffaa44'));
             btn.on('pointerout', () => btn.setColor('#ff7722'));
             btn.on('pointerdown', () => this._depositItem(slotIdx));
-            bpY += 20;
         }
         if (!hasDepositable) {
-            this._d(this.add.text(leftX + 4, bpY, 'Ingen mineraler/brensel', {
-                fontSize: '13px', color: '#444433', fontFamily: 'monospace'
-            }));
+            const adjY = y - scrollOff;
+            if (adjY >= visTop && adjY <= visBot) {
+                this._d(this.add.text(leftX + 4, adjY, 'Ingen mineraler/brensel', {
+                    fontSize: '13px', color: '#444433', fontFamily: 'monospace'
+                }));
+            }
         }
 
         // ── Right side: Stash (withdraw from) ──────────────────────────────
-        let sY = this.contentY;
-        this._d(this.add.text(rightX, sY, 'LAGER → Ryggsekk', {
-            fontSize: '12px', color: '#887766', fontFamily: 'monospace', fontStyle: 'bold'
-        }));
-        sY += 16;
+        let sBaseY = this.contentY;
+        const hdrRightY = sBaseY - scrollOff;
+        if (hdrRightY >= visTop && hdrRightY <= visBot) {
+            this._d(this.add.text(rightX, hdrRightY, 'LAGER → Ryggsekk', {
+                fontSize: '12px', color: '#887766', fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+        }
+        sBaseY += 16;
 
         if (hero.campStash.length === 0) {
-            this._d(this.add.text(rightX + 4, sY, 'Lageret er tomt.', {
-                fontSize: '13px', color: '#444433', fontFamily: 'monospace'
-            }));
+            const adjY = sBaseY - scrollOff;
+            if (adjY >= visTop && adjY <= visBot) {
+                this._d(this.add.text(rightX + 4, adjY, 'Lageret er tomt.', {
+                    fontSize: '13px', color: '#444433', fontFamily: 'monospace'
+                }));
+            }
         } else {
+            let sY = sBaseY;
             for (let si = 0; si < hero.campStash.length; si++) {
                 const stashEntry = hero.campStash[si];
                 if (!stashEntry || stashEntry.count <= 0) continue;
-                if (sY > this.py + this.panelH - 60) break;
+
+                const adjY = sY - scrollOff;
+                sY += 20;
+                if (adjY > visBot) { this._lastContentOverflow = true; continue; }
+                if (adjY < visTop) continue;
 
                 const def = this._getStashItemDef(stashEntry.id);
                 const rawStName = def ? def.name : stashEntry.id;
@@ -258,24 +289,23 @@ class SmelteryScene extends Phaser.Scene {
                 const col = def ? def.color : 0xaaaaaa;
                 const hexCol = '#' + col.toString(16).padStart(6, '0');
 
-                this._d(this.add.text(rightX + 4, sY, `${stName} ×${stashEntry.count}`, {
+                this._d(this.add.text(rightX + 4, adjY, `${stName} ×${stashEntry.count}`, {
                     fontSize: '12px', color: hexCol, fontFamily: 'monospace'
                 }));
 
-                const btn = this._d(this.add.text(rightX + colW - 10, sY, '←', {
+                const btn = this._d(this.add.text(rightX + colW - 10, adjY, '←', {
                     fontSize: '12px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
                 const idx = si;
                 btn.on('pointerover', () => btn.setColor('#ffaa44'));
                 btn.on('pointerout', () => btn.setColor('#ff7722'));
                 btn.on('pointerdown', () => this._withdrawItem(idx));
-                sY += 20;
             }
         }
 
         // Stash capacity label
         const totalStashed = hero.campStash.reduce((s, e) => s + (e.count || 0), 0);
-        this._d(this.add.text(cx, this.py + this.panelH - 30, `Lagret: ${totalStashed} gjenstander  |  Klikk → for å lagre, ← for å hente`, {
+        this._d(this.add.text(cx, this.py + this.panelH - 24, `Lagret: ${totalStashed} gjenstander  |  Klikk → for å lagre, ← for å hente`, {
             fontSize: '13px', color: '#665544', fontFamily: 'monospace'
         }).setOrigin(0.5));
     }
@@ -336,11 +366,31 @@ class SmelteryScene extends Phaser.Scene {
         const hero = this.heroRef;
         const cx = this.px + this.panelW / 2;
         let y = this.contentY;
+        const scrollOff = this._scrollOffsets.smelt || 0;
+        const visTop = this.contentY - 10;
+        const visBot = this.py + this.panelH - 40;
+        this._lastContentOverflow = false;
 
         this._d(this.add.text(cx, y, 'Velg et mineral å smelte (ryggsekk + lager):', {
             fontSize: '12px', color: '#887766', fontFamily: 'monospace'
         }).setOrigin(0.5));
         y += 18;
+
+        // Element filter indicator
+        if (this._elementFilter) {
+            const filterElem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[this._elementFilter] : null;
+            const fCol = filterElem ? '#' + filterElem.color.toString(16).padStart(6, '0') : '#ff7722';
+            this._d(this.add.text(this.px + 20, y, `Filter: ${this._elementFilter}`, {
+                fontSize: '12px', color: fCol, fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+            const clearBtn = this._d(this.add.text(this.px + 100, y, '✕ Fjern filter', {
+                fontSize: '12px', color: '#886644', fontFamily: 'monospace'
+            }).setInteractive({ useHandCursor: true }));
+            clearBtn.on('pointerover', () => clearBtn.setColor('#ffaa44'));
+            clearBtn.on('pointerout', () => clearBtn.setColor('#886644'));
+            clearBtn.on('pointerdown', () => { this._elementFilter = null; this._scrollOffsets.smelt = 0; this._refresh(); });
+            y += 16;
+        }
 
         // List minerals in backpack
         const minerals = [];
@@ -363,20 +413,32 @@ class SmelteryScene extends Phaser.Scene {
             }
         }
 
-        if (minerals.length === 0) {
-            this._d(this.add.text(cx, y + 30, 'Ingen mineraler i ryggsekk eller lager.', {
+        // Apply element filter
+        const filtered = this._elementFilter
+            ? minerals.filter(m => m.def.yields.some(y => y.symbol === this._elementFilter))
+            : minerals;
+
+        if (filtered.length === 0) {
+            const msg = this._elementFilter
+                ? `Ingen mineraler gir ${this._elementFilter}.`
+                : 'Ingen mineraler i ryggsekk eller lager.';
+            this._d(this.add.text(cx, y + 30, msg, {
                 fontSize: '13px', color: '#444433', fontFamily: 'monospace'
             }).setOrigin(0.5));
+            // Still show element inventory
+            this._drawElementInventory(this.px + 20, y + 60, Math.min(500, this.panelW - 40));
             return;
         }
 
         const fuel = this.smelter.calculateFuelEnergy(hero);
-        const colW = Math.min(320, this.panelW - 40);
-        const startX = cx - colW / 2;
+        const colW = Math.min(500, this.panelW - 40);
+        const startX = this.px + 20;
 
-        minerals.forEach((m, idx) => {
-            const my = y + idx * 52;
-            if (my > this.py + this.panelH - 60) return; // overflow guard
+        filtered.forEach((m, idx) => {
+            const baseY = y + idx * 52;
+            const my = baseY - scrollOff;
+            if (my > visBot) { this._lastContentOverflow = true; return; }
+            if (my < visTop - 46) return;
             const check = this.smelter.canSmelt(m.def, fuel, hero);
             const col = check.canSmelt ? 0xff7722 : 0x443322;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
@@ -395,18 +457,37 @@ class SmelteryScene extends Phaser.Scene {
             const canId = (hero.mineralIdentifyLevel || 0) > 0;
             const rawName = (typeof getMineralDisplayName !== 'undefined')
                 ? getMineralDisplayName(m.def, hero) : m.def.name;
-            const mName = rawName.length > 22 ? rawName.slice(0, 21) + '…' : rawName;
+            const mName = rawName.length > 28 ? rawName.slice(0, 27) + '…' : rawName;
             this._d(this.add.text(startX + 8, my + 6, `${mName} (×${m.count})${srcLabel}`, {
                 fontSize: '13px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
             }));
 
             // Yield preview – hide element details if not identified
-            const yieldStr = canId
-                ? m.def.yields.map(y => `${y.symbol}×${y.amount}`).join(', ')
-                : '???';
-            this._d(this.add.text(startX + 8, my + 22, `→ ${yieldStr}  |  Energi: ${check.energyCost}`, {
-                fontSize: '13px', color: '#776655', fontFamily: 'monospace'
-            }));
+            // Highlight the filtered element
+            if (canId) {
+                let yieldX = startX + 8;
+                this._d(this.add.text(yieldX, my + 22, '→ ', {
+                    fontSize: '13px', color: '#776655', fontFamily: 'monospace'
+                }));
+                yieldX += 20;
+                m.def.yields.forEach((yld, yi) => {
+                    const isMatch = this._elementFilter && yld.symbol === this._elementFilter;
+                    const yCol = isMatch ? '#ffcc44' : '#776655';
+                    const txt = `${yld.symbol}×${yld.amount}${yi < m.def.yields.length - 1 ? ', ' : ''}`;
+                    const t = this._d(this.add.text(yieldX, my + 22, txt, {
+                        fontSize: '13px', color: yCol, fontFamily: 'monospace',
+                        fontStyle: isMatch ? 'bold' : 'normal'
+                    }));
+                    yieldX += t.width;
+                });
+                this._d(this.add.text(yieldX + 4, my + 22, `|  Energi: ${check.energyCost}`, {
+                    fontSize: '13px', color: '#776655', fontFamily: 'monospace'
+                }));
+            } else {
+                this._d(this.add.text(startX + 8, my + 22, `→ ???  |  Energi: ${check.energyCost}`, {
+                    fontSize: '13px', color: '#776655', fontFamily: 'monospace'
+                }));
+            }
 
             // Smelt button
             if (check.canSmelt) {
@@ -428,8 +509,11 @@ class SmelteryScene extends Phaser.Scene {
         });
 
         // Element inventory display
-        const elemY = y + Math.min(minerals.length, 6) * 52 + 10;
-        this._drawElementInventory(startX, elemY, colW);
+        const elemBaseY = y + filtered.length * 52 + 10;
+        const elemY = elemBaseY - scrollOff;
+        if (elemY <= visBot) {
+            this._drawElementInventory(startX, Math.max(elemY, visTop), colW);
+        }
     }
 
     _doSmelt(slotIndex, mineralDef) {
@@ -476,6 +560,10 @@ class SmelteryScene extends Phaser.Scene {
         const hero = this.heroRef;
         const cx = this.px + this.panelW / 2;
         let y = this.contentY;
+        const scrollOff = this._scrollOffsets.alloy || 0;
+        const visTop = this.contentY - 10;
+        const visBot = this.py + this.panelH - 40;
+        this._lastContentOverflow = false;
 
         this._d(this.add.text(cx, y, 'Kombiner grunnstoffer til legeringer:', {
             fontSize: '12px', color: '#887766', fontFamily: 'monospace'
@@ -484,19 +572,22 @@ class SmelteryScene extends Phaser.Scene {
 
         const fuel = this.smelter.calculateFuelEnergy(hero);
         const alloys = this.smelter.getAvailableAlloys(hero, fuel);
-        const colW = Math.min(320, this.panelW - 40);
-        const startX = cx - colW / 2;
+        const colW = Math.min(500, this.panelW - 40);
+        const startX = this.px + 20;
 
         if (alloys.length === 0) {
             this._d(this.add.text(cx, y + 30, 'Ingen legeringer tilgjengelig.', {
                 fontSize: '13px', color: '#444433', fontFamily: 'monospace'
             }).setOrigin(0.5));
+            this._drawElementInventory(startX, y + 60, colW);
             return;
         }
 
         alloys.forEach((entry, idx) => {
-            const ay = y + idx * 56;
-            if (ay > this.py + this.panelH - 80) return;
+            const baseY = y + idx * 56;
+            const ay = baseY - scrollOff;
+            if (ay > visBot) { this._lastContentOverflow = true; return; }
+            if (ay < visTop - 50) return;
             const a = entry.alloy;
             const col = entry.canCraft ? 0xff7722 : 0x443322;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
@@ -540,8 +631,11 @@ class SmelteryScene extends Phaser.Scene {
         });
 
         // Element inventory
-        const elemY = y + Math.min(alloys.length, 6) * 56 + 10;
-        this._drawElementInventory(startX, elemY, colW);
+        const elemBaseY = y + alloys.length * 56 + 10;
+        const elemY = elemBaseY - scrollOff;
+        if (elemY <= visBot) {
+            this._drawElementInventory(startX, Math.max(elemY, visTop), colW);
+        }
     }
 
     _doCraftAlloy(alloyId) {
@@ -567,6 +661,10 @@ class SmelteryScene extends Phaser.Scene {
         const hero = this.heroRef;
         const cx = this.px + this.panelW / 2;
         let y = this.contentY;
+        const scrollOff = this._scrollOffsets.forge || 0;
+        const visTop = this.contentY - 10;
+        const visBot = this.py + this.panelH - 40;
+        this._lastContentOverflow = false;
 
         this._d(this.add.text(cx, y, 'Smi utstyr fra legeringer:', {
             fontSize: '12px', color: '#887766', fontFamily: 'monospace'
@@ -576,8 +674,8 @@ class SmelteryScene extends Phaser.Scene {
         // List available alloys the player has
         const alloyInv = hero.alloyInventory || {};
         const available = Object.entries(alloyInv).filter(([, count]) => count > 0);
-        const colW = Math.min(320, this.panelW - 40);
-        const startX = cx - colW / 2;
+        const colW = Math.min(500, this.panelW - 40);
+        const startX = this.px + 20;
 
         if (available.length === 0) {
             this._d(this.add.text(cx, y + 30, 'Ingen legeringer å smi med.\nLag legeringer i "Lag legering"-fanen først.', {
@@ -591,36 +689,41 @@ class SmelteryScene extends Phaser.Scene {
             const alloy = ALLOY_DEFS[alloyId];
             if (!alloy) continue;
 
-            this._d(this.add.text(startX, rowY, `${alloy.name} (×${count}):`, {
-                fontSize: '13px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
-            }));
+            const adjHdr = rowY - scrollOff;
+            if (adjHdr >= visTop && adjHdr <= visBot) {
+                this._d(this.add.text(startX, adjHdr, `${alloy.name} (×${count}):`, {
+                    fontSize: '13px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+                }));
+            }
             rowY += 18;
 
             const equipment = this.smelter.getForgeableEquipment(alloyId);
             equipment.forEach(equip => {
-                if (rowY > this.py + this.panelH - 50) return;
+                const adjY = rowY - scrollOff;
+                rowY += 40;
+                if (adjY > visBot) { this._lastContentOverflow = true; return; }
+                if (adjY < visTop - 36) return;
+
                 const hexCol = '#' + (equip.color || 0xaabbcc).toString(16).padStart(6, '0');
 
                 const bg = this._d(this.add.graphics());
                 bg.fillStyle(equip.color || 0xaabbcc, 0.08);
-                bg.fillRoundedRect(startX + 10, rowY, colW - 20, 36, 3);
+                bg.fillRoundedRect(startX + 10, adjY, colW - 20, 36, 3);
 
-                this._d(this.add.text(startX + 18, rowY + 6, `${equip.name} (${equip.type === 'weapon' ? 'Våpen' : 'Rustning'})`, {
+                this._d(this.add.text(startX + 18, adjY + 6, `${equip.name} (${equip.type === 'weapon' ? 'Våpen' : 'Rustning'})`, {
                     fontSize: '12px', color: hexCol, fontFamily: 'monospace'
                 }));
-                this._d(this.add.text(startX + 18, rowY + 20, equip.desc, {
+                this._d(this.add.text(startX + 18, adjY + 20, equip.desc, {
                     fontSize: '11px', color: '#776655', fontFamily: 'monospace',
                     wordWrap: { width: colW - 100 }
                 }));
 
-                const btn = this._d(this.add.text(startX + colW - 60, rowY + 10, '[ Smi ]', {
+                const btn = this._d(this.add.text(startX + colW - 60, adjY + 10, '[ Smi ]', {
                     fontSize: '12px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
                 btn.on('pointerover', () => btn.setColor('#ffaa44'));
                 btn.on('pointerout', () => btn.setColor('#ff7722'));
                 btn.on('pointerdown', () => this._doForge(alloyId, equip.id));
-
-                rowY += 40;
             });
             rowY += 6;
         }
@@ -649,31 +752,81 @@ class SmelteryScene extends Phaser.Scene {
 
     // ── Element inventory display ────────────────────────────────────────────
 
+    /** Build reverse lookup: element symbol → list of mineral names that yield it. */
+    _getElementMineralSources() {
+        if (this._elemSrcCache) return this._elemSrcCache;
+        const map = {};
+        if (typeof MINERAL_DEFS === 'undefined') return map;
+        for (const [, mDef] of Object.entries(MINERAL_DEFS)) {
+            if (!mDef.yields) continue;
+            for (const y of mDef.yields) {
+                if (!map[y.symbol]) map[y.symbol] = [];
+                const name = (typeof getMineralDisplayName !== 'undefined')
+                    ? getMineralDisplayName(mDef, this.heroRef) : mDef.name;
+                if (!map[y.symbol].includes(name)) map[y.symbol].push(name);
+            }
+        }
+        this._elemSrcCache = map;
+        return map;
+    }
+
     _drawElementInventory(startX, y, colW) {
         const collected = this.heroRef.elementTracker.collected;
         const entries = Object.entries(collected).filter(([, v]) => v > 0);
         if (entries.length === 0) return;
 
-        this._d(this.add.text(startX, y, 'Lagrede grunnstoffer:', {
-            fontSize: '13px', color: '#665544', fontFamily: 'monospace'
+        this._d(this.add.text(startX, y, 'Lagrede grunnstoffer (klikk for å filtrere):', {
+            fontSize: '12px', color: '#665544', fontFamily: 'monospace'
         }));
-        y += 14;
+        y += 16;
 
-        // Render as compact badges
+        const sources = this._getElementMineralSources();
+
+        // Render as compact clickable badges
         let bx = startX, by = y;
         for (const [symbol, count] of entries) {
             const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
             const col = elem ? elem.color : 0xaaaaaa;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
+            const isActive = this._elementFilter === symbol;
 
             const badge = this._d(this.add.text(bx, by, `${symbol}:${count}`, {
-                fontSize: '13px', color: hexCol, fontFamily: 'monospace',
-                backgroundColor: '#0a0818', padding: { x: 3, y: 1 }
-            }));
+                fontSize: '13px', color: isActive ? '#ffffff' : hexCol, fontFamily: 'monospace',
+                backgroundColor: isActive ? '#442200' : '#0a0818',
+                padding: { x: 4, y: 2 }
+            }).setInteractive({ useHandCursor: true }));
+
+            const sym = symbol;
+            badge.on('pointerover', () => {
+                badge.setBackgroundColor('#221100');
+                // Show mineral sources as tooltip-style text
+                const srcList = sources[sym];
+                if (srcList && srcList.length > 0) {
+                    this._tooltipText = this._d(this.add.text(startX, by + 22, `${sym} ← ${srcList.join(', ')}`, {
+                        fontSize: '11px', color: '#998877', fontFamily: 'monospace',
+                        backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
+                    }));
+                }
+            });
+            badge.on('pointerout', () => {
+                badge.setBackgroundColor(isActive ? '#442200' : '#0a0818');
+                if (this._tooltipText) {
+                    this._tooltipText.destroy();
+                    this._tooltipText = null;
+                }
+            });
+            badge.on('pointerdown', () => {
+                this._elementFilter = this._elementFilter === sym ? null : sym;
+                this._scrollOffsets.smelt = 0;
+                this._elemSrcCache = null;
+                if (this._tab !== 'smelt') this._tab = 'smelt';
+                this._refresh();
+            });
+
             bx += badge.width + 6;
-            if (bx > startX + colW - 40) {
+            if (bx > startX + colW - 50) {
                 bx = startX;
-                by += 16;
+                by += 22;
             }
         }
     }

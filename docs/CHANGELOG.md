@@ -2,6 +2,13 @@
 
 ---
 
+## v0.36 – 2026-04-12
+
+### Nye funksjoner
+- **Smelteovn UI-forbedring (#85):** Panelet bruker nå nesten hele skjermen (W-20 × H-20) i stedet for 700×500px. Karakter-portrettet fjernet for å gi mer plass. Alle fire faner (Lager, Smelt, Legering, Smi) støtter nå scrolling med musehjulet. Scroll-indikatorer (▲/▼) vises når innholdet flyter over. Grunnstoff-merker er klikkbare for å filtrere minerallisten etter hvilke mineraler som gir et bestemt grunnstoff. Hover over et grunnstoff viser hvilke mineraler som er kilde til det
+
+---
+
 ## v0.35 – 2026-04-11
 
 ### Nye funksjoner
