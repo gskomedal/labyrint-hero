@@ -67,6 +67,14 @@ function validateScore(entry) {
     if (entry.heroName && (typeof entry.heroName !== 'string' || entry.heroName.length > 30))
         return 'Invalid heroName';
 
+    // Only accept world completions, not deaths
+    if (entry.result === 'death')
+        return 'Deaths are not recorded on the global leaderboard';
+
+    // Must have cleared at least 1 world
+    if (worldsCleared < 1)
+        return 'Must have cleared at least 1 world';
+
     return null; // valid
 }
 
@@ -84,7 +92,7 @@ function sanitizeEntry(entry) {
         mineralsCollected:  Math.floor(entry.mineralsCollected || 0),
         elementsDiscovered: Math.floor(entry.elementsDiscovered || 0),
         timeSeconds:        Math.floor(entry.timeSeconds || 0),
-        result:             entry.result === 'death' ? 'death' : 'worldComplete',
+        result:             'worldComplete',
         date:               entry.date || new Date().toISOString().slice(0, 10),
     };
 }

@@ -1,9 +1,23 @@
 // ─── Labyrint Hero – Global Leaderboard API Client ───────────────────────────
 // Thin wrapper for the global leaderboard REST API.
 // Fails silently on network errors – local leaderboard is the fallback.
+//
+// ┌──────────────────────────────────────────────────────────────────────────┐
+// │  HOW TO ACTIVATE THE GLOBAL LEADERBOARD                                 │
+// │                                                                          │
+// │  1. cd backend/                                                          │
+// │  2. npm install -g wrangler                                              │
+// │  3. wrangler login                                                       │
+// │  4. wrangler kv namespace create LEADERBOARD                             │
+// │  5. Copy the namespace ID into backend/wrangler.toml                     │
+// │  6. wrangler deploy                                                      │
+// │  7. Set the API_URL below to your deployed worker URL                    │
+// │                                                                          │
+// │  See backend/README.md for full details.                                 │
+// └──────────────────────────────────────────────────────────────────────────┘
 
 const GlobalLeaderboard = {
-    // Configure this URL to point to your deployed Cloudflare Worker (or other backend)
+    // ⬇ CHANGE THIS to your deployed Cloudflare Worker URL ⬇
     API_URL: 'https://labyrint-hero-leaderboard.workers.dev',
 
     /**
