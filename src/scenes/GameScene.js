@@ -344,8 +344,9 @@ class GameScene extends Phaser.Scene {
             }
         }
 
-        SaveManager.save(this.worldNum + 1, this._getFullStats());
         const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
+        this.hero.totalPlayTime = (this.hero.totalPlayTime || 0) + worldTime;
+        SaveManager.save(this.worldNum + 1, this._getFullStats());
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
                 type: 'worldComplete', worldNum: this.worldNum,
@@ -363,8 +364,9 @@ class GameScene extends Phaser.Scene {
         Audio.playDeath();
         Audio.stopMusic();
         this._stopOverlayScenes();
-        SaveManager.save(this.worldNum, this._getFullStats());
         const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
+        this.hero.totalPlayTime = (this.hero.totalPlayTime || 0) + worldTime;
+        SaveManager.save(this.worldNum, this._getFullStats());
         this.time.delayedCall(700, () => {
             this.scene.start('GameOverScene', {
                 type: 'death', worldNum: this.worldNum,
