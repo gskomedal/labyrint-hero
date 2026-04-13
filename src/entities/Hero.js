@@ -226,7 +226,8 @@ class Hero {
         if (totalDodge > 0 && Math.random() < totalDodge) {
             return false; // dodged – hero is fine
         }
-        const totalDef = this.defense + cb.defense;
+        const armorMul = 1 + (this.elementArmorBonus || 0);
+        const totalDef = Math.round((this.defense + cb.defense) * armorMul);
         const dmg = Math.max(1, amount - totalDef);
         this.hearts -= dmg;
         if (this.hearts <= 0) {

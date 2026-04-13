@@ -77,6 +77,20 @@ const MINERAL_DEFS = {
     },
 
     // ── Tier 2 – Uncommon ores ───────────────────────────────────────────────
+    borax: {
+        id: 'borax', name: 'Boraks', type: 'mineral', subtype: 'ore',
+        formula: 'Na₂B₄O₇', tier: 2, color: 0xddddcc,
+        yields: [{ symbol: 'B', amount: 4, chance: 1.0 }, { symbol: 'Na', amount: 2, chance: 0.5 }],
+        energyCost: 1, smeltingTime: 2, stackSize: 10,
+        desc: 'Hvitt bor-mineral. Viktig kilde til bor.'
+    },
+    thortveitite: {
+        id: 'thortveitite', name: 'Thortveititt', type: 'mineral', subtype: 'ore',
+        formula: 'Sc₂Si₂O₇', tier: 2, color: 0xaabb99,
+        yields: [{ symbol: 'Sc', amount: 2, chance: 1.0 }, { symbol: 'Si', amount: 2, chance: 0.5 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Sjelden skandiumkilde. Oppkalt etter norsk mineralog.'
+    },
     pyrite: {
         id: 'pyrite', name: 'Pyritt', type: 'mineral', subtype: 'ore',
         formula: 'FeS\u2082', tier: 2, color: 0xccbb44,
@@ -100,6 +114,34 @@ const MINERAL_DEFS = {
     },
 
     // ── Tier 3 – Rare ores ──────────────────────────────────────────────────
+    zircon: {
+        id: 'zircon', name: 'Zirkon', type: 'mineral', subtype: 'ore',
+        formula: 'ZrSiO₄', tier: 3, color: 0xccaa77,
+        yields: [{ symbol: 'Zr', amount: 3, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.5 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Robust silikatmineral. Rik zirkoniumkilde.'
+    },
+    pentlandite: {
+        id: 'pentlandite', name: 'Pentlanditt', type: 'mineral', subtype: 'ore',
+        formula: '(Fe,Ni)₉S₈', tier: 3, color: 0x998844,
+        yields: [{ symbol: 'Ni', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.6 }, { symbol: 'S', amount: 2, chance: 0.4 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Viktigste nikkelmalm. Gyllen metallisk glans.'
+    },
+    spodumene: {
+        id: 'spodumene', name: 'Spodumen', type: 'mineral', subtype: 'ore',
+        formula: 'LiAlSi₂O₆', tier: 3, color: 0xddccee,
+        yields: [{ symbol: 'Li', amount: 3, chance: 1.0 }, { symbol: 'Al', amount: 1, chance: 0.4 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Viktigste litiumkilde. Brukes i batteriproduksjon.'
+    },
+    cobaltite: {
+        id: 'cobaltite', name: 'Kobaltitt', type: 'mineral', subtype: 'ore',
+        formula: 'CoAsS', tier: 3, color: 0x5566aa,
+        yields: [{ symbol: 'Co', amount: 3, chance: 1.0 }, { symbol: 'As', amount: 1, chance: 0.5 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Sølvgrå koboltmalm. Gir intens blåfarge.'
+    },
     chalcopyrite: {
         id: 'chalcopyrite', name: 'Kalkopyritt', type: 'mineral', subtype: 'ore',
         formula: 'CuFeS\u2082', tier: 3, color: 0xbb9933,
@@ -130,6 +172,41 @@ const MINERAL_DEFS = {
     },
 
     // ── Tier 4 – Epic ores ──────────────────────────────────────────────────
+    columbite: {
+        id: 'columbite', name: 'Kolumbitt', type: 'mineral', subtype: 'ore',
+        formula: '(Fe,Mn)(Nb,Ta)₂O₆', tier: 4, color: 0x443322,
+        yields: [{ symbol: 'Nb', amount: 2, chance: 1.0 }, { symbol: 'Ta', amount: 1, chance: 0.4 }, { symbol: 'Fe', amount: 1, chance: 0.3 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Sort niob-tantal-malm. Viktig for elektronikk.'
+    },
+    monazite: {
+        id: 'monazite', name: 'Monazitt', type: 'mineral', subtype: 'ore',
+        formula: '(Ce,La,Nd)PO₄', tier: 4, color: 0xcc8855,
+        yields: [{ symbol: 'Ce', amount: 2, chance: 1.0 }, { symbol: 'La', amount: 1, chance: 0.6 }, { symbol: 'Nd', amount: 1, chance: 0.4 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Brun fosfatmalm. Hovedkilde til sjeldne jordarter.'
+    },
+    bastnaesite: {
+        id: 'bastnaesite', name: 'Bastnäsitt', type: 'mineral', subtype: 'ore',
+        formula: '(Ce,La)(CO₃)F', tier: 4, color: 0xddaa66,
+        yields: [{ symbol: 'Ce', amount: 2, chance: 1.0 }, { symbol: 'La', amount: 1, chance: 0.5 }, { symbol: 'F', amount: 1, chance: 0.3 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Gulbrun lantanide-malm. Oppkalt etter Bastnäs i Sverige.'
+    },
+    greenockite: {
+        id: 'greenockite', name: 'Greenockitt', type: 'mineral', subtype: 'ore',
+        formula: 'CdS', tier: 4, color: 0xddcc22,
+        yields: [{ symbol: 'Cd', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Gul kadmiummalm. Giftig – håndter med forsiktighet!'
+    },
+    wolframite: {
+        id: 'wolframite', name: 'Wolframitt', type: 'mineral', subtype: 'ore',
+        formula: '(Fe,Mn)WO₄', tier: 4, color: 0x443344,
+        yields: [{ symbol: 'W', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }, { symbol: 'Mn', amount: 1, chance: 0.3 }],
+        energyCost: 5, smeltingTime: 6, stackSize: 10,
+        desc: 'Mørk tungsteinmalm. Gir wolfram – hardeste metallet.'
+    },
     galena: {
         id: 'galena', name: 'Galena', type: 'mineral', subtype: 'ore',
         formula: 'PbS', tier: 4, color: 0x667788,
@@ -153,6 +230,13 @@ const MINERAL_DEFS = {
     },
 
     // ── Tier 5 – Legendary ──────────────────────────────────────────────────
+    pgm_ore: {
+        id: 'pgm_ore', name: 'PGM-malm', type: 'mineral', subtype: 'ore',
+        formula: 'PGM', tier: 5, color: 0xccccaa,
+        yields: [{ symbol: 'Ru', amount: 1, chance: 0.7 }, { symbol: 'Rh', amount: 1, chance: 0.5 }, { symbol: 'Pd', amount: 1, chance: 0.6 }],
+        energyCost: 5, smeltingTime: 6, stackSize: 10,
+        desc: 'Sjelden platinametall-malm. Inneholder ruthenium, rhodium og palladium.'
+    },
     argentite: {
         id: 'argentite', name: 'Argentitt', type: 'mineral', subtype: 'ore',
         formula: 'Ag\u2082S', tier: 5, color: 0xaaaacc,
@@ -263,10 +347,10 @@ const MINERAL_DEFS = {
 
 const MINERAL_POOL = {
     1: ['quartz', 'hematite', 'magnetite', 'limestone', 'halite', 'bauxite', 'olivine', 'ice_crystal', 'sylvite'],
-    2: ['pyrite', 'ilmenite', 'apatite', 'niter'],
-    3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite'],
-    4: ['galena', 'cassiterite', 'cinnabar'],
-    5: ['argentite', 'native_gold', 'native_silver'],
+    2: ['pyrite', 'ilmenite', 'apatite', 'niter', 'borax', 'thortveitite'],
+    3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite', 'zircon', 'pentlandite', 'spodumene', 'cobaltite'],
+    4: ['galena', 'cassiterite', 'cinnabar', 'columbite', 'monazite', 'bastnaesite', 'greenockite', 'wolframite'],
+    5: ['argentite', 'native_gold', 'native_silver', 'pgm_ore'],
     6: ['uraninite'],
 };
 

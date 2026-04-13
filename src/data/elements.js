@@ -1,5 +1,5 @@
 // ─── Labyrint Hero – Elements Dataset ─────────────────────────────────────────
-// ~50 elements from the periodic table relevant to the geology/metallurgy mod.
+// All 90 natural elements (1-92 excl. synthetic Tc and Pm) from the periodic table.
 // Tier 1-6 reflects real-world geochemical abundance.
 // Phase 1: discovery tracking only. Phase 2+ adds smelting and crafting.
 
@@ -23,7 +23,10 @@ const ELEMENTS = {
     S:  { symbol: 'S',  name: 'Svovel',     atomicNumber: 16, category: 'nonmetal',    period: 3, group: 16, tier: 2, color: 0xdddd00, foundNative: true,  stackSize: 99, description: 'Gulaktig ikke-metall. Lukter vondt. Nøkkelstoff i kjemi.' },
     Cl: { symbol: 'Cl', name: 'Klor',       atomicNumber: 17, category: 'nonmetal',    period: 3, group: 17, tier: 2, color: 0x88ff88, foundNative: false, stackSize: 99, description: 'Giftig gass. Finnes i steinsalt (NaCl).' },
     N:  { symbol: 'N',  name: 'Nitrogen',   atomicNumber: 7,  category: 'nonmetal',    period: 2, group: 15, tier: 2, color: 0x4488ff, foundNative: false, stackSize: 99, description: '78% av lufta. Viktig for krutt og gjødsel.' },
+    B:  { symbol: 'B',  name: 'Bor',        atomicNumber: 5,  category: 'metalloid',   period: 2, group: 13, tier: 2, color: 0x99aa88, foundNative: false, stackSize: 99, description: 'Hardt halvmetall. Finnes i boraks.' },
     V:  { symbol: 'V',  name: 'Vanadium',   atomicNumber: 23, category: 'metal',       period: 4, group: 5,  tier: 2, color: 0x7799bb, foundNative: false, stackSize: 99, description: 'Sjeldent metall. Gjør stål ekstra hardt.' },
+    Sc: { symbol: 'Sc', name: 'Skandium',   atomicNumber: 21, category: 'metal',       period: 4, group: 3,  tier: 2, color: 0xbbccbb, foundNative: false, stackSize: 99, description: 'Lett overgangsmetall. Brukes i fly- og romfartslegeringer.' },
+    Zr: { symbol: 'Zr', name: 'Zirkonium',  atomicNumber: 40, category: 'metal',       period: 5, group: 4,  tier: 2, color: 0xaabbaa, foundNative: false, stackSize: 99, description: 'Korrosjonsbestandig. Brukes i kjernekraftverk.' },
 
     // ── Tier 3 – Rare ───────────────────────────────────────────────────────
     Cu: { symbol: 'Cu', name: 'Kobber',     atomicNumber: 29, category: 'metal',       period: 4, group: 11, tier: 3, color: 0xcc7744, foundNative: true,  stackSize: 99, description: 'Rødlig metall. Et av de eldste metallene mennesket brukte.' },
@@ -33,6 +36,11 @@ const ELEMENTS = {
     Li: { symbol: 'Li', name: 'Litium',     atomicNumber: 3,  category: 'alkali',      period: 2, group: 1,  tier: 3, color: 0xddaacc, foundNative: false, stackSize: 99, description: 'Det letteste metallet. Flyter på vann.' },
     F:  { symbol: 'F',  name: 'Fluor',      atomicNumber: 9,  category: 'nonmetal',    period: 2, group: 17, tier: 3, color: 0xaaffaa, foundNative: false, stackSize: 99, description: 'Mest reaktive ikke-metall. Etser nesten alt.' },
     Co: { symbol: 'Co', name: 'Kobolt',     atomicNumber: 27, category: 'metal',       period: 4, group: 9,  tier: 3, color: 0x4466cc, foundNative: false, stackSize: 99, description: 'Gir intens blåfarge. Viktig i legeringer.' },
+    Y:  { symbol: 'Y',  name: 'Yttrium',    atomicNumber: 39, category: 'metal',       period: 5, group: 3,  tier: 3, color: 0xbbccdd, foundNative: false, stackSize: 99, description: 'Sjeldent jordmetall. Brukes i LED-lys og lasere.' },
+    Nb: { symbol: 'Nb', name: 'Niob',       atomicNumber: 41, category: 'metal',       period: 5, group: 5,  tier: 3, color: 0x8899bb, foundNative: false, stackSize: 99, description: 'Superleder ved lav temperatur. Brukes i stållegeringer.' },
+    La: { symbol: 'La', name: 'Lantan',     atomicNumber: 57, category: 'lanthanide',  period: 6, group: 3,  tier: 3, color: 0xbbddcc, foundNative: false, stackSize: 99, description: 'Første lantanide. Brukes i kameralinser og batterier.' },
+    Nd: { symbol: 'Nd', name: 'Neodym',     atomicNumber: 60, category: 'lanthanide',  period: 6, group: 3,  tier: 3, color: 0xccbbdd, foundNative: false, stackSize: 99, description: 'Verdens sterkeste permanentmagneter lages av neodym.' },
+    Hf: { symbol: 'Hf', name: 'Hafnium',    atomicNumber: 72, category: 'metal',       period: 6, group: 4,  tier: 3, color: 0x99aabb, foundNative: false, stackSize: 99, description: 'Tåler ekstrem varme. Brukes i reaktorkontrollstaver.' },
 
     // ── Tier 4 – Epic ───────────────────────────────────────────────────────
     Pb: { symbol: 'Pb', name: 'Bly',        atomicNumber: 82, category: 'metal',       period: 6, group: 14, tier: 4, color: 0x667788, foundNative: false, stackSize: 99, description: 'Tungt og mykt. Brukt siden oldtiden.' },
@@ -53,6 +61,11 @@ const ELEMENTS = {
     Os: { symbol: 'Os', name: 'Osmium',     atomicNumber: 76, category: 'noble_metal', period: 6, group: 8,  tier: 5, color: 0xaabbcc, foundNative: true,  stackSize: 99, description: 'Det tyngste grunnstoffet. Dobbelt så tungt som bly.' },
     Re: { symbol: 'Re', name: 'Rhenium',    atomicNumber: 75, category: 'metal',       period: 6, group: 7,  tier: 5, color: 0xbbbbcc, foundNative: false, stackSize: 99, description: 'Et av de sjeldneste metallene i jordskorpen.' },
     Te: { symbol: 'Te', name: 'Tellur',     atomicNumber: 52, category: 'metalloid',   period: 5, group: 16, tier: 5, color: 0xaabb99, foundNative: true,  stackSize: 99, description: 'Sjelden halvmetall. Brukes i solceller.' },
+    Tl: { symbol: 'Tl', name: 'Thallium',   atomicNumber: 81, category: 'metal',       period: 6, group: 13, tier: 5, color: 0x889999, foundNative: false, stackSize: 99, description: 'Ekstremt giftig metall. Tidligere brukt som rottegift.' },
+    Eu: { symbol: 'Eu', name: 'Europium',   atomicNumber: 63, category: 'lanthanide',  period: 6, group: 3,  tier: 5, color: 0xddccaa, foundNative: false, stackSize: 99, description: 'Gir rødt lys i TV-skjermer. Sjeldneste lantanide.' },
+    Tb: { symbol: 'Tb', name: 'Terbium',    atomicNumber: 65, category: 'lanthanide',  period: 6, group: 3,  tier: 5, color: 0xccddaa, foundNative: false, stackSize: 99, description: 'Grønn fluorescens. Brukes i energisparepærer.' },
+    Ho: { symbol: 'Ho', name: 'Holmium',    atomicNumber: 67, category: 'lanthanide',  period: 6, group: 3,  tier: 5, color: 0xddddbb, foundNative: false, stackSize: 99, description: 'Sterkeste magnetiske moment. Brukes i lasere.' },
+    Lu: { symbol: 'Lu', name: 'Lutetium',   atomicNumber: 71, category: 'lanthanide',  period: 6, group: 3,  tier: 5, color: 0xccccaa, foundNative: false, stackSize: 99, description: 'Siste og sjeldneste lantanide. Brukes i PET-skanning.' },
 
     // ── Tier 6 – Mythic ─────────────────────────────────────────────────────
     U:  { symbol: 'U',  name: 'Uran',       atomicNumber: 92, category: 'actinide',    period: 7, group: 3,  tier: 6, color: 0x44cc44, foundNative: false, stackSize: 99, description: 'Radioaktivt. Muliggjør fisjon.' },
@@ -61,6 +74,13 @@ const ELEMENTS = {
     He: { symbol: 'He', name: 'Helium',     atomicNumber: 2,  category: 'noble',       period: 1, group: 18, tier: 6, color: 0xffffcc, foundNative: false, stackSize: 99, description: 'Nest letteste grunnstoff. Muliggjør fusjon.' },
     Ir: { symbol: 'Ir', name: 'Iridium',    atomicNumber: 77, category: 'noble_metal', period: 6, group: 9,  tier: 6, color: 0xeeeedd, foundNative: true,  stackSize: 99, description: 'Hardeste naturlige metall. Ekstremt sjeldent.' },
     Ne: { symbol: 'Ne', name: 'Neon',       atomicNumber: 10, category: 'noble',       period: 2, group: 18, tier: 6, color: 0xff6644, foundNative: false, stackSize: 99, description: 'Rødlig lysgass. Brukes i neonskilt.' },
+    Fr: { symbol: 'Fr', name: 'Francium',   atomicNumber: 87, category: 'alkali',      period: 7, group: 1,  tier: 6, color: 0xddbb88, foundNative: false, stackSize: 99, description: 'Mest ustabilt naturlige grunnstoff. Ekstremt radioaktivt.' },
+    Ac: { symbol: 'Ac', name: 'Aktinium',   atomicNumber: 89, category: 'actinide',    period: 7, group: 3,  tier: 6, color: 0x66cc88, foundNative: false, stackSize: 99, description: 'Selvlysende aktinide. Sender ut blålig glød.' },
+    Pa: { symbol: 'Pa', name: 'Protaktinium', atomicNumber: 91, category: 'actinide',  period: 7, group: 3,  tier: 6, color: 0x55bb77, foundNative: false, stackSize: 99, description: 'Sjeldent og radioaktivt. Mellom thorium og uran.' },
+    Po: { symbol: 'Po', name: 'Polonium',   atomicNumber: 84, category: 'metalloid',   period: 6, group: 16, tier: 6, color: 0xaacc99, foundNative: false, stackSize: 99, description: 'Ekstremt radioaktivt. Oppdaget av Marie Curie.' },
+    At: { symbol: 'At', name: 'Astat',      atomicNumber: 85, category: 'nonmetal',    period: 6, group: 17, tier: 6, color: 0x8899aa, foundNative: false, stackSize: 99, description: 'Sjeldneste naturlige grunnstoff. Radioaktivt halogen.' },
+    Rn: { symbol: 'Rn', name: 'Radon',      atomicNumber: 86, category: 'noble',       period: 6, group: 18, tier: 6, color: 0xbbccdd, foundNative: false, stackSize: 99, description: 'Radioaktiv edelgass. Siver opp fra berggrunn.' },
+    Tm: { symbol: 'Tm', name: 'Thulium',    atomicNumber: 69, category: 'lanthanide',  period: 6, group: 3,  tier: 6, color: 0xddccdd, foundNative: false, stackSize: 99, description: 'Sjeldneste stabile lantanide. Brukes i røntgenapparater.' },
     Ar: { symbol: 'Ar', name: 'Argon',      atomicNumber: 18, category: 'noble',       period: 3, group: 18, tier: 5, color: 0xaaccff, foundNative: false, stackSize: 99, description: '1% av lufta. Brukes som inert beskyttende gass.' },
     Kr: { symbol: 'Kr', name: 'Krypton',    atomicNumber: 36, category: 'noble',       period: 4, group: 18, tier: 5, color: 0xccddff, foundNative: false, stackSize: 99, description: 'Sjelden edelgass. Ikke fra Supermans hjemplanet.' },
     Xe: { symbol: 'Xe', name: 'Xenon',      atomicNumber: 54, category: 'noble',       period: 5, group: 18, tier: 5, color: 0xddccff, foundNative: false, stackSize: 99, description: 'Tung edelgass. Brukes i kraftige lamper.' },
@@ -73,6 +93,18 @@ const ELEMENTS = {
     Cs: { symbol: 'Cs', name: 'Cesium',     atomicNumber: 55, category: 'alkali',      period: 6, group: 1,  tier: 5, color: 0xddaa77, foundNative: false, stackSize: 99, description: 'Mest elektropositive grunnstoff. Smelter i hendene.' },
     Ga: { symbol: 'Ga', name: 'Gallium',    atomicNumber: 31, category: 'metal',       period: 4, group: 13, tier: 4, color: 0xaabbdd, foundNative: false, stackSize: 99, description: 'Smelter i hendene. Viktig halvleder-materiale.' },
     W:  { symbol: 'W',  name: 'Wolfram',    atomicNumber: 74, category: 'metal',       period: 6, group: 6,  tier: 4, color: 0x667788, foundNative: false, stackSize: 99, description: 'Høyeste smeltepunkt av alle metaller. Brukes i glødelamper.' },
+    Cd: { symbol: 'Cd', name: 'Kadmium',    atomicNumber: 48, category: 'metal',       period: 5, group: 12, tier: 4, color: 0xbbbbcc, foundNative: false, stackSize: 99, description: 'Giftig tungmetall. Brukes i batterier og pigmenter.' },
+    In: { symbol: 'In', name: 'Indium',     atomicNumber: 49, category: 'metal',       period: 5, group: 13, tier: 4, color: 0xaabbcc, foundNative: false, stackSize: 99, description: 'Mykt metall. Viktig i berøringsskjermer.' },
+    Ta: { symbol: 'Ta', name: 'Tantal',     atomicNumber: 73, category: 'metal',       period: 6, group: 5,  tier: 4, color: 0x8899aa, foundNative: false, stackSize: 99, description: 'Ekstremt korrosjonsbestandig. Brukes i elektronikk.' },
+    Ru: { symbol: 'Ru', name: 'Ruthenium',  atomicNumber: 44, category: 'noble_metal', period: 5, group: 8,  tier: 4, color: 0xaabbbb, foundNative: true,  stackSize: 99, description: 'Sjeldent platinametall. Ekstremt hardt.' },
+    Rh: { symbol: 'Rh', name: 'Rhodium',    atomicNumber: 45, category: 'noble_metal', period: 5, group: 9,  tier: 4, color: 0xccccdd, foundNative: true,  stackSize: 99, description: 'Dyrest av alle metaller. Brukes i katalysatorer.' },
+    Pr: { symbol: 'Pr', name: 'Praseodym',  atomicNumber: 59, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xbbccaa, foundNative: false, stackSize: 99, description: 'Grønn lantanide. Brukes i magneter og glass.' },
+    Sm: { symbol: 'Sm', name: 'Samarium',   atomicNumber: 62, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xddccbb, foundNative: false, stackSize: 99, description: 'Brukes i sterke magneter og kreftbehandling.' },
+    Gd: { symbol: 'Gd', name: 'Gadolinium', atomicNumber: 64, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xccddcc, foundNative: false, stackSize: 99, description: 'Magnetisk lantanide. Brukes i MR-kontrastvæske.' },
+    Dy: { symbol: 'Dy', name: 'Dysprosium', atomicNumber: 66, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xbbccdd, foundNative: false, stackSize: 99, description: 'Forsterker magneter. Svært viktig for vindturbiner.' },
+    Er: { symbol: 'Er', name: 'Erbium',     atomicNumber: 68, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xddbbcc, foundNative: false, stackSize: 99, description: 'Rosa lantanide. Brukes i fiberoptikk.' },
+    Yb: { symbol: 'Yb', name: 'Ytterbium',  atomicNumber: 70, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xccccbb, foundNative: false, stackSize: 99, description: 'Sjelden jordart. Brukes i lasere og atomklokker.' },
+    Ce: { symbol: 'Ce', name: 'Cerium',     atomicNumber: 58, category: 'lanthanide',  period: 6, group: 3,  tier: 2, color: 0xddddaa, foundNative: false, stackSize: 99, description: 'Vanligste lantanide. Brukes i katalysatorer og lighter-flint.' },
 };
 
 // ── Periodic table layout (standard 18-column, rows 1–7 + lanthanides/actinides) ─
@@ -85,6 +117,7 @@ const PERIODIC_TABLE_LAYOUT = [
     // Period 2
     { symbol: 'Li', row: 1, col: 0 },
     { symbol: 'Be', row: 1, col: 1 },
+    { symbol: 'B',  row: 1, col: 12 },
     { symbol: 'C',  row: 1, col: 13 },
     { symbol: 'N',  row: 1, col: 14 },
     { symbol: 'O',  row: 1, col: 15 },
@@ -102,6 +135,7 @@ const PERIODIC_TABLE_LAYOUT = [
     // Period 4
     { symbol: 'K',  row: 3, col: 0 },
     { symbol: 'Ca', row: 3, col: 1 },
+    { symbol: 'Sc', row: 3, col: 2 },
     { symbol: 'Ti', row: 3, col: 3 },
     { symbol: 'V',  row: 3, col: 4 },
     { symbol: 'Cr', row: 3, col: 5 },
@@ -120,9 +154,16 @@ const PERIODIC_TABLE_LAYOUT = [
     // Period 5
     { symbol: 'Rb', row: 4, col: 0 },
     { symbol: 'Sr', row: 4, col: 1 },
+    { symbol: 'Y',  row: 4, col: 2 },
+    { symbol: 'Zr', row: 4, col: 3 },
+    { symbol: 'Nb', row: 4, col: 4 },
     { symbol: 'Mo', row: 4, col: 5 },
+    { symbol: 'Ru', row: 4, col: 7 },
+    { symbol: 'Rh', row: 4, col: 8 },
     { symbol: 'Pd', row: 4, col: 9 },
     { symbol: 'Ag', row: 4, col: 10 },
+    { symbol: 'Cd', row: 4, col: 11 },
+    { symbol: 'In', row: 4, col: 12 },
     { symbol: 'Sn', row: 4, col: 13 },
     { symbol: 'Sb', row: 4, col: 14 },
     { symbol: 'Te', row: 4, col: 15 },
@@ -131,6 +172,8 @@ const PERIODIC_TABLE_LAYOUT = [
     // Period 6
     { symbol: 'Cs', row: 5, col: 0 },
     { symbol: 'Ba', row: 5, col: 1 },
+    { symbol: 'Hf', row: 5, col: 3 },
+    { symbol: 'Ta', row: 5, col: 4 },
     { symbol: 'W',  row: 5, col: 5 },
     { symbol: 'Re', row: 5, col: 6 },
     { symbol: 'Os', row: 5, col: 7 },
@@ -138,11 +181,34 @@ const PERIODIC_TABLE_LAYOUT = [
     { symbol: 'Pt', row: 5, col: 9 },
     { symbol: 'Au', row: 5, col: 10 },
     { symbol: 'Hg', row: 5, col: 11 },
+    { symbol: 'Tl', row: 5, col: 12 },
     { symbol: 'Pb', row: 5, col: 13 },
     { symbol: 'Bi', row: 5, col: 14 },
-    // Period 7 (actinides placed in main table)
+    { symbol: 'Po', row: 5, col: 15 },
+    { symbol: 'At', row: 5, col: 16 },
+    { symbol: 'Rn', row: 5, col: 17 },
+    // Period 7
+    { symbol: 'Fr', row: 6, col: 0 },
     { symbol: 'Ra', row: 6, col: 1 },
+    // Lanthanides (row 7)
+    { symbol: 'La', row: 7, col: 2 },
+    { symbol: 'Ce', row: 7, col: 3 },
+    { symbol: 'Pr', row: 7, col: 4 },
+    { symbol: 'Nd', row: 7, col: 5 },
+    { symbol: 'Sm', row: 7, col: 7 },
+    { symbol: 'Eu', row: 7, col: 8 },
+    { symbol: 'Gd', row: 7, col: 9 },
+    { symbol: 'Tb', row: 7, col: 10 },
+    { symbol: 'Dy', row: 7, col: 11 },
+    { symbol: 'Ho', row: 7, col: 12 },
+    { symbol: 'Er', row: 7, col: 13 },
+    { symbol: 'Tm', row: 7, col: 14 },
+    { symbol: 'Yb', row: 7, col: 15 },
+    { symbol: 'Lu', row: 7, col: 16 },
+    // Actinides (row 8)
+    { symbol: 'Ac', row: 8, col: 2 },
     { symbol: 'Th', row: 8, col: 3 },
+    { symbol: 'Pa', row: 8, col: 4 },
     { symbol: 'U',  row: 8, col: 5 },
 ];
 
@@ -155,7 +221,15 @@ const ELEMENT_BONUSES = [
     { id: 'noble_gases',    name: 'Edelgasser',      desc: 'Fusjonsteknologi',    symbols: ['He', 'Ne', 'Ar', 'Kr', 'Xe'],   reward: { fusionUnlock: true } },
     { id: 'alkali',         name: 'Alkalimetaller',  desc: '+20% kjemi',          symbols: ['Li', 'Na', 'K', 'Rb', 'Cs'],    reward: { chemEfficiency: 0.2 } },
     { id: 'period_1',       name: 'Periode 1',       desc: 'Big Bang',            symbols: ['H', 'He'],                      reward: { cosmicPower: true } },
-    { id: 'period_2',       name: 'Periode 2',       desc: '+10% XP permanent',   symbols: ['Li', 'Be', 'C', 'N', 'O', 'F', 'Ne'], reward: { xpMultiplier: 0.1 } },
+    { id: 'period_2',       name: 'Periode 2',       desc: '+10% XP permanent',   symbols: ['Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne'], reward: { xpMultiplier: 0.1 } },
+    { id: 'alkaline_earth', name: 'Alkaliske jordmetaller', desc: '+15% rustning', symbols: ['Be', 'Mg', 'Ca', 'Sr', 'Ba'], reward: { armorStatBonus: 0.15 } },
+    { id: 'pgm',            name: 'Platinametaller', desc: '+30% legeringskvalitet', symbols: ['Ru', 'Rh', 'Pd', 'Os', 'Ir', 'Pt'], reward: { alloyQualityBonus: 0.3 } },
+    { id: 'actinides',      name: 'Aktinider',      desc: 'Fisjon oppgradert',   symbols: ['U', 'Th', 'Pa'],               reward: { fissionUpgrade: true } },
+    { id: 'period_3',       name: 'Periode 3',       desc: 'Mineraler hos handelsmann', symbols: ['Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar'], reward: { merchantMinerals: true } },
+    { id: 'period_4',       name: 'Periode 4',       desc: '«Industrialist»-tittel', symbols: ['K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr'], reward: { title: 'Industrialist' } },
+    { id: 'all_nonmetals',  name: 'Alle ikke-metaller', desc: '2× potionsstyrke', symbols: ['H', 'C', 'N', 'O', 'F', 'P', 'S', 'Cl', 'Se'], reward: { potionStrengthMul: 2.0 } },
+    { id: 'all_lanthanides', name: 'Alle lantanider', desc: 'Magisk AoE-angrep',  symbols: ['La', 'Ce', 'Pr', 'Nd', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu'], reward: { magicAoe: true } },
+    { id: 'all_92_natural', name: 'Elementmester',   desc: 'Legendarisk tittel + unik gjenstand', symbols: Object.keys(typeof ELEMENTS !== 'undefined' ? ELEMENTS : {}), reward: { title: 'Elementmester', legendaryItem: true } },
 ];
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

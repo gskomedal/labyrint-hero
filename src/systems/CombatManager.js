@@ -174,7 +174,7 @@ class CombatManager {
         scene.monstersKilled++;
 
         const goldBase = GOLD_DROP[monster.type] || (monster.type === 'zone_boss' ? 200 : 5);
-        const crystalGoldMul = 1 + (scene.hero.getCrystalBonuses().goldMultiplier || 0);
+        const crystalGoldMul = 1 + (scene.hero.getCrystalBonuses().goldMultiplier || 0) + (scene.hero.elementGoldMul || 0);
         const gold = Math.round((goldBase + Math.floor(Math.random() * goldBase * 0.5) + scene.worldNum * 2) * crystalGoldMul);
         scene.hero.gold += gold;
         scene._floatingText(monster.gridX, monster.gridY, `+${gold}g`, '#ffcc00');

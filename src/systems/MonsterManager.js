@@ -68,7 +68,8 @@ class MonsterManager {
                 scene.poisonTickTimer = 0;
                 scene.hero.poisonTurns--;
                 const cb = scene.hero.getCrystalBonuses();
-                if (cb.poisonResist > 0 && Math.random() < cb.poisonResist) {
+                const totalPoisonResist = (cb.poisonResist || 0) + (scene.hero.elementPoisonResist || 0);
+                if (totalPoisonResist > 0 && Math.random() < totalPoisonResist) {
                     scene._floatingText(scene.hero.gridX, scene.hero.gridY, '☠ Motstått!', '#88ff88');
                 } else {
                     const died = scene.hero.takeDamage(1);

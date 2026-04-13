@@ -476,10 +476,13 @@ class ItemSpawner {
                         } else {
                             scene._floatingText(hx, hy, 'Ukjent mineral – lær Geolog!', '#776655');
                         }
-                        // Check for completion bonuses
+                        // Check for completion bonuses and apply rewards
                         const newBonuses = scene.hero.elementTracker.checkCompletions();
                         for (const bonus of newBonuses) {
                             scene._floatingText(hx, hy, `${bonus.name} fullført! ${bonus.desc}`, '#ffcc00');
+                        }
+                        if (newBonuses.length > 0) {
+                            scene.hero.elementTracker.applyBonusRewards(scene.hero);
                         }
                     }
 

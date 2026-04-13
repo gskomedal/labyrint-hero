@@ -549,7 +549,13 @@ class SmelteryScene extends Phaser.Scene {
         const elemStr = result.elements.map(e => `${e.symbol}×${e.amount}`).join(', ');
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smeltet: ${elemStr}`, color: '#ff7722' });
 
-        hero.elementTracker.checkCompletions();
+        const newBonuses = hero.elementTracker.checkCompletions();
+        if (newBonuses.length > 0) {
+            hero.elementTracker.applyBonusRewards(hero);
+            for (const bonus of newBonuses) {
+                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00' });
+            }
+        }
         Audio.playPickup();
         this._refresh();
     }
