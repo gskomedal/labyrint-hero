@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.35
-**Sist oppdatert:** 2026-04-11
+**Versjon:** 0.37
+**Sist oppdatert:** 2026-04-13
 
 ---
 
@@ -451,8 +451,8 @@ Synergier gir insentiv til å investere bredt istedenfor å spesialisere seg.
 Elements-modifikasjonen fletter det periodiske system, geologi, metallurgi og kjemi inn i spillet. Fase 1 legger geologi-grunnlaget.
 
 ### Nye datafiler
-- `src/data/elements.js` – ~50 grunnstoffer med symbol, atomnummer, kategori, tier (1-6), farge
-- `src/data/minerals.js` – ~20 malmer og ~10 krystaller med utbyttetabell (yields), energikostnad, smeltetid
+- `src/data/elements.js` – 90 naturlige grunnstoffer (H–U, unntatt Tc og Pm) med symbol, atomnummer, kategori, tier (1-6), farge. 15 elementbonuser for gruppe/periode/kategori-fullføringer
+- `src/data/minerals.js` – ~36 malmer og ~9 krystaller med utbyttetabell (yields), energikostnad, smeltetid
 - `src/systems/ElementTracker.js` – Sporer oppdagelser og gruppeprestasjoner
 
 ### Mineraler i labyrinten

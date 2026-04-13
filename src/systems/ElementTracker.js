@@ -66,6 +66,36 @@ class ElementTracker {
         return Object.keys(this.completedBonuses).length;
     }
 
+    /**
+     * Apply all completed bonus rewards to a hero.
+     * Safe to call multiple times – idempotent via hero.appliedElementBonuses tracker.
+     */
+    applyBonusRewards(hero) {
+        if (typeof ELEMENT_BONUSES === 'undefined') return;
+        if (!hero.appliedElementBonuses) hero.appliedElementBonuses = {};
+        for (const bonus of ELEMENT_BONUSES) {
+            if (!this.completedBonuses[bonus.id]) continue;
+            if (hero.appliedElementBonuses[bonus.id]) continue;
+            hero.appliedElementBonuses[bonus.id] = true;
+            const r = bonus.reward;
+            if (r.maxHearts)        hero.maxHearts += r.maxHearts;
+            if (r.goldMultiplier)   hero.elementGoldMul = (hero.elementGoldMul || 0) + r.goldMultiplier;
+            if (r.poisonResist)     hero.elementPoisonResist = (hero.elementPoisonResist || 0) + r.poisonResist;
+            if (r.chemEfficiency)   hero.smeltingEfficiency += r.chemEfficiency;
+            if (r.xpMultiplier)     hero.xpMultiplier += r.xpMultiplier;
+            if (r.armorStatBonus)   hero.elementArmorBonus = (hero.elementArmorBonus || 0) + r.armorStatBonus;
+            if (r.alloyQualityBonus) hero.alloyMasteryBonus += r.alloyQualityBonus;
+            if (r.potionStrengthMul) hero.potionPotencyBonus += (r.potionStrengthMul - 1.0);
+            if (r.cosmicPower)      hero.cosmicPower = true;
+            if (r.fusionUnlock)     hero.fusionUnlocked = true;
+            if (r.fissionUpgrade)   hero.fissionUpgraded = true;
+            if (r.merchantMinerals) hero.merchantMineralsUnlocked = true;
+            if (r.magicAoe)         hero.magicAoeUnlocked = true;
+            if (r.title)            hero.elementTitle = r.title;
+            if (r.legendaryItem)    hero.legendaryItemEarned = true;
+        }
+    }
+
     // ── Serialization ────────────────────────────────────────────────────────
 
     serialize() {

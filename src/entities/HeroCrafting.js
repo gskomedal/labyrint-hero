@@ -38,6 +38,19 @@ const HeroCrafting = {
         // Zone progression (Phase 4)
         hero.completedZones = [];
 
+        // Element bonus rewards
+        hero.appliedElementBonuses = {};
+        hero.elementGoldMul = 0;
+        hero.elementPoisonResist = 0;
+        hero.elementArmorBonus = 0;
+        hero.cosmicPower = false;
+        hero.fusionUnlocked = false;
+        hero.fissionUpgraded = false;
+        hero.merchantMineralsUnlocked = false;
+        hero.magicAoeUnlocked = false;
+        hero.elementTitle = null;
+        hero.legendaryItemEarned = false;
+
         // Camp stash – persistent storage for minerals, fuel, etc.
         hero.campStash = [];
     },
@@ -70,6 +83,17 @@ const HeroCrafting = {
             chemRadiusBonus:      hero.chemRadiusBonus,
             toxicBladeChance:     hero.toxicBladeChance,
             completedZones:       [...hero.completedZones],
+            appliedElementBonuses: { ...hero.appliedElementBonuses },
+            elementGoldMul:       hero.elementGoldMul,
+            elementPoisonResist:  hero.elementPoisonResist,
+            elementArmorBonus:    hero.elementArmorBonus,
+            cosmicPower:          hero.cosmicPower,
+            fusionUnlocked:       hero.fusionUnlocked,
+            fissionUpgraded:      hero.fissionUpgraded,
+            merchantMineralsUnlocked: hero.merchantMineralsUnlocked,
+            magicAoeUnlocked:     hero.magicAoeUnlocked,
+            elementTitle:         hero.elementTitle,
+            legendaryItemEarned:  hero.legendaryItemEarned,
         };
     },
 
@@ -100,5 +124,16 @@ const HeroCrafting = {
         hero.chemRadiusBonus      = stats.chemRadiusBonus      || 0;
         hero.toxicBladeChance     = stats.toxicBladeChance     || 0;
         hero.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
+        hero.appliedElementBonuses = stats.appliedElementBonuses ? { ...stats.appliedElementBonuses } : {};
+        hero.elementGoldMul       = stats.elementGoldMul       || 0;
+        hero.elementPoisonResist  = stats.elementPoisonResist  || 0;
+        hero.elementArmorBonus    = stats.elementArmorBonus    || 0;
+        hero.cosmicPower          = stats.cosmicPower          || false;
+        hero.fusionUnlocked       = stats.fusionUnlocked       || false;
+        hero.fissionUpgraded      = stats.fissionUpgraded      || false;
+        hero.merchantMineralsUnlocked = stats.merchantMineralsUnlocked || false;
+        hero.magicAoeUnlocked     = stats.magicAoeUnlocked     || false;
+        hero.elementTitle         = stats.elementTitle         || null;
+        hero.legendaryItemEarned  = stats.legendaryItemEarned  || false;
     }
 };

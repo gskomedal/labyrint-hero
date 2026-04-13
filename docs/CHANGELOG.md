@@ -2,6 +2,31 @@
 
 ---
 
+## v0.37 – 2026-04-13
+
+### Nye funksjoner
+- **Komplett periodisk system:** Alle 90 naturlige grunnstoffer (H–U, unntatt syntetiske Tc og Pm) er nå i spillet. Elementboken viser et komplett periodisk system med lantanider og aktinider
+- **12 nye mineraler:** Boraks, thortveititt, zirkon, pentlanditt, spodumen, kobaltitt, kolumbitt, monazitt, bastnäsitt, greenockitt, wolframitt og PGM-malm gir spillere tilgang til nye grunnstoffer
+- **8 nye elementbonuser:** Alkaliske jordmetaller (+15% rustning), platinametaller (+30% legeringskvalitet), aktinider (fisjon), periode 3 (mineraler hos handelsmann), periode 4 («Industrialist»-tittel), alle ikke-metaller (2× potionsstyrke), alle lantanider (magisk AoE), alle 92 naturlige («Elementmester»)
+- **Elementbonuser gir nå reelle belønninger:** Fullførte elementgrupper gir faktiske gameplay-bonuser (HP, gullfunn, giftresistans, XP, rustning, legeringskvalitet, potionsstyrke) i stedet for bare en melding
+- **Handelsmann selger mineraler og brensel:** Handelsmannen tilbyr nå ett mineral (verden 1+) og brensel (verden 5+) i tillegg til vanlige varer
+- **Olje og naturgass:** Nye brenseltyper med 8 og 10 energi. Finnes i gasslommer fra verden 10+
+- **Mineraler på minikartet:** Geologer med Malmøye-skill ser nå mineralplasseringer som fargede prikker på minikartet
+- **Hurtigreise mellom soner:** Etter å ha fullført en sone vises en «HURTIGREISE»-knapp på seiersskjermen. Velg en fullført sone for å starte der
+- **Syrebrenning på monstre:** Syrebomber gir nå etsende skade over tid (reduserer forsvar med 1 per runde) i stedet for et engangskutt. Forsvar gjenopprettes når effekten utløper
+- **Stun-system for monstre:** Monstre med stun-effekt hopper over sin tur
+
+### Tekniske endringer
+- ElementTracker: Ny `applyBonusRewards(hero)`-metode som anvender fullførte bonuser på helten (idempotent)
+- HeroCrafting: 11 nye hero-egenskaper for elementbonuser (elementGoldMul, elementPoisonResist, elementArmorBonus, etc.)
+- Monster: Nye `applyStun()`, `applyAcidBurn()` og `tickStatusEffects()`-metoder
+- MonsterManager ticker monsterstatus-effekter før bevegelse
+- ItemSpawner: `_generateMerchantStock()` utvidet med mineraler og brensel. Ny `_mineralPrice()`-metode
+- CombatManager: Elementgullbonus inkludert i gulldrop-beregning
+- constants.js: Ny `getZoneStartWorld()`-hjelpefunksjon
+
+---
+
 ## v0.36 – 2026-04-12
 
 ### Nye funksjoner

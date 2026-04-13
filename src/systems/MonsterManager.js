@@ -68,7 +68,8 @@ class MonsterManager {
                 scene.poisonTickTimer = 0;
                 scene.hero.poisonTurns--;
                 const cb = scene.hero.getCrystalBonuses();
-                if (cb.poisonResist > 0 && Math.random() < cb.poisonResist) {
+                const totalPoisonResist = (cb.poisonResist || 0) + (scene.hero.elementPoisonResist || 0);
+                if (totalPoisonResist > 0 && Math.random() < totalPoisonResist) {
                     scene._floatingText(scene.hero.gridX, scene.hero.gridY, '☠ Motstått!', '#88ff88');
                 } else {
                     const died = scene.hero.takeDamage(1);
@@ -149,6 +150,9 @@ class MonsterManager {
             const isBoss = m.type === 'boss';
             if (isBoss && !bossReady) continue;
             if (!isBoss && !regularReady) continue;
+            // Tick monster status effects (acid burn, stun)
+            if (m.tickStatusEffects) m.tickStatusEffects();
+            if (m.stunTurns > 0) continue; // stunned – skip turn
             this._moveMonster(m);
         }
     }

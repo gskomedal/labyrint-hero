@@ -289,11 +289,13 @@ class ItemSpawner {
                     roomMinerals = 3 + Math.floor(Math.random() * 3);
                     mineralFn = () => rollBossMineral(wn); // T5-T6 minerals
                 } else if (room.type === 'gas_pocket') {
-                    // Gas pockets spawn extra fuel instead of minerals
+                    // Gas pockets spawn oil/gas in deep zones, coal otherwise
                     roomMinerals = 0;
+                    const fuels = wn >= 15 ? [FUEL_DEFS.natural_gas, FUEL_DEFS.oil] : wn >= 10 ? [FUEL_DEFS.oil, FUEL_DEFS.coal] : [FUEL_DEFS.coal];
                     for (const tile of room.tiles) {
                         if (!scene.itemObjects.some(o => o.gridX === tile.x && o.gridY === tile.y)) {
-                            this._spawnFuelAt(tile.x, tile.y, FUEL_DEFS.coal);
+                            const fuel = fuels[Math.floor(Math.random() * fuels.length)];
+                            this._spawnFuelAt(tile.x, tile.y, fuel);
                         }
                     }
                 } else {
@@ -476,10 +478,13 @@ class ItemSpawner {
                         } else {
                             scene._floatingText(hx, hy, 'Ukjent mineral – lær Geolog!', '#776655');
                         }
-                        // Check for completion bonuses
+                        // Check for completion bonuses and apply rewards
                         const newBonuses = scene.hero.elementTracker.checkCompletions();
                         for (const bonus of newBonuses) {
                             scene._floatingText(hx, hy, `${bonus.name} fullført! ${bonus.desc}`, '#ffcc00');
+                        }
+                        if (newBonuses.length > 0) {
+                            scene.hero.elementTracker.applyBonusRewards(scene.hero);
                         }
                     }
 
@@ -561,13 +566,40 @@ class ItemSpawner {
         const arm = randomItemByType(wn, 'armor', new Set());
         if (arm) stock.push({ item: arm, price: this._itemPrice(arm, wn) });
         stock.push({ item: ITEM_DEFS.key, price: 10 + wn * 3 });
+
+        // Mineral for sale (world 1+)
+        if (typeof rollMineralForWorld !== 'undefined') {
+            const mineral = rollMineralForWorld(wn);
+            if (mineral) {
+                const mItem = { ...mineral, count: 1 };
+                stock.push({ item: mItem, price: this._mineralPrice(mineral) });
+            }
+        }
+
+        // Fuel for sale (world 5+)
+        if (wn >= 5 && typeof FUEL_DEFS !== 'undefined') {
+            const fuelIds = Object.keys(FUEL_DEFS);
+            const fuelId = fuelIds[Math.floor(Math.random() * fuelIds.length)];
+            const fuel = FUEL_DEFS[fuelId];
+            if (fuel) {
+                const fItem = { id: fuelId, name: fuel.name, type: 'fuel', tier: fuel.tier || 1, color: fuel.color, desc: fuel.desc || `Brensel (${fuel.energy} energi)`, count: 3 };
+                stock.push({ item: fItem, price: 5 + fuel.energy * 3 });
+            }
+        }
+
         return stock;
+    }
+
+    _mineralPrice(mineral) {
+        const tierPrices = { 1: 8, 2: 15, 3: 30, 4: 55, 5: 100, 6: 200 };
+        return tierPrices[mineral.tier] || 20;
     }
 
     _itemPrice(item, worldNum) {
         let base = 20;
         if (item.type === 'consumable') base = 12;
         if (item.type === 'tool') base = 8;
+        if (item.type === 'mineral') return this._mineralPrice(item);
         const tierMul = (item.tier || 1) * 10;
         const rarityMul = item.rarity ? (RARITIES.findIndex(r => r.id === item.rarity) + 1) : 1;
         return Math.round((base + tierMul) * rarityMul * MERCHANT_MARKUP + worldNum * 2);

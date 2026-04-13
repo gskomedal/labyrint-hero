@@ -201,6 +201,20 @@ class UIScene extends Phaser.Scene {
             g.fillRect(px, py, sc, sc);
         }
 
+        // Minerals (tier-colored dots, requires Geologist skill)
+        if ((gs.hero.mineralVisionRadius || 0) > 0 && gs.itemObjects) {
+            for (const obj of gs.itemObjects) {
+                if (!obj.isMineral) continue;
+                if (gs.fog[obj.gridY] && gs.fog[obj.gridY][obj.gridX] === FOG.DARK) continue;
+                const px = mx + obj.gridX * sc;
+                const py = my + obj.gridY * sc;
+                const tierCol = (typeof MINERAL_TIER_COLORS !== 'undefined' && obj.item)
+                    ? (MINERAL_TIER_COLORS[obj.item.tier] || 0x88ff88) : 0x88ff88;
+                g.fillStyle(tierCol, 0.8);
+                g.fillRect(px, py, sc, sc);
+            }
+        }
+
         // Pet (pink dot)
         if (gs.pet && gs.pet.alive) {
             const ppx = mx + gs.pet.gridX * sc;

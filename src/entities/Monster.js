@@ -186,6 +186,44 @@ class Monster {
         });
     }
 
+    // ── Status effects ─────────────────────────────────────────────────────────
+
+    applyStun(turns) {
+        this.stunTurns = Math.max(this.stunTurns || 0, turns);
+    }
+
+    applyAcidBurn(turns) {
+        if (!this._acidBurnActive) {
+            this._acidBurnActive = true;
+            this._acidBurnTurns = turns;
+            this._acidDefReduced = 0;
+        } else {
+            this._acidBurnTurns = Math.max(this._acidBurnTurns, turns);
+        }
+    }
+
+    /** Call each turn to tick status effects. Returns true if monster died. */
+    tickStatusEffects() {
+        // Stun
+        if (this.stunTurns > 0) this.stunTurns--;
+
+        // Acid burn – reduce defense by 1 each turn
+        if (this._acidBurnActive && this._acidBurnTurns > 0) {
+            this._acidBurnTurns--;
+            if ((this.defense || 0) > 0) {
+                this.defense--;
+                this._acidDefReduced++;
+            }
+            if (this._acidBurnTurns <= 0) {
+                this._acidBurnActive = false;
+                // Restore reduced defense
+                this.defense = (this.defense || 0) + (this._acidDefReduced || 0);
+                this._acidDefReduced = 0;
+            }
+        }
+        return false;
+    }
+
     destroy() {
         if (this.graphics && this.graphics.scene) this.graphics.destroy();
         if (this.hpBar    && this.hpBar.scene)    this.hpBar.destroy();
