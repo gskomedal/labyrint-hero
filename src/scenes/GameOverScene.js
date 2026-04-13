@@ -34,7 +34,7 @@ class GameOverScene extends Phaser.Scene {
                 mineralsCollected:  this.heroStats.mineralsCollected || 0,
                 elementsDiscovered: elementsDiscovered,
                 result:             'worldComplete',
-                timeSeconds:        this.timeSeconds
+                timeSeconds:        this.heroStats.totalPlayTime || this.timeSeconds
             };
             Leaderboard.record(entry);
 

@@ -243,7 +243,7 @@ class LeaderboardScene extends Phaser.Scene {
             cx + 180,  // Elem (elements)
             cx + 235,  // Tid
         ];
-        const headers = ['#', 'Navn', 'Rase', 'Vrdn', 'Niv\u00e5', 'Drap', 'Gull', 'Min', 'Elem', 'Tid'];
+        const headers = ['#', 'Navn', 'Rase', 'Vrdn', 'Niv\u00e5', 'Drap', 'Gull', 'Min', 'Grst', 'Tid'];
         headers.forEach((h, i) => {
             this._dyn.push(this.add.text(cols[i], y0, h, hdrStyle));
         });

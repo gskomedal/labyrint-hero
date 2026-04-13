@@ -15,6 +15,7 @@ const HeroCrafting = {
         hero.smeltBonusElement = 0;
         hero.guaranteedRareMineral = false;
         hero.mineralsCollected = 0;
+        hero.totalPlayTime = 0; // cumulative seconds across all worlds
 
         // Metallurgy mod (Phase 2)
         hero.metallurgistUnlocked = false;
@@ -67,6 +68,7 @@ const HeroCrafting = {
             smeltBonusElement:    hero.smeltBonusElement,
             guaranteedRareMineral: hero.guaranteedRareMineral,
             mineralsCollected:    hero.mineralsCollected,
+            totalPlayTime:        hero.totalPlayTime,
             metallurgistUnlocked: hero.metallurgistUnlocked,
             smeltingSpeedMul:     hero.smeltingSpeedMul,
             smeltingEfficiency:   hero.smeltingEfficiency,
@@ -109,6 +111,7 @@ const HeroCrafting = {
         hero.smeltBonusElement    = stats.smeltBonusElement    || 0;
         hero.guaranteedRareMineral = stats.guaranteedRareMineral || false;
         hero.mineralsCollected    = stats.mineralsCollected    || 0;
+        hero.totalPlayTime        = stats.totalPlayTime        || 0;
         hero.metallurgistUnlocked = stats.metallurgistUnlocked || false;
         hero.smeltingSpeedMul     = stats.smeltingSpeedMul     || 1.0;
         hero.smeltingEfficiency   = stats.smeltingEfficiency   || 1.0;
