@@ -1,0 +1,9 @@
+name = "labyrint-hero-leaderboard"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[[kv_namespaces]]
+binding = "LEADERBOARD"
+id = "<YOUR_KV_NAMESPACE_ID>"
+# Create with: wrangler kv namespace create LEADERBOARD
+# Then replace the id above with the output.

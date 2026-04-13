@@ -20,17 +20,28 @@ class GameOverScene extends Phaser.Scene {
 
         // Record to leaderboard only on world completion, not death (#58)
         if (this.type !== 'death') {
-            Leaderboard.record({
-                heroName:       this.heroStats.heroName || 'Helt',
-                race:           this.heroStats.race || 'human',
-                difficulty:     this.difficulty,
-                worldsCleared:  this.worldNum,
-                level:          this.heroStats.level || 1,
-                monstersKilled: this.monstersKilled,
-                goldEarned:     this.heroStats.gold || 0,
-                result:         'worldComplete',
-                timeSeconds:    this.timeSeconds
-            });
+            const et = this.heroStats.elementTracker || {};
+            const elementsDiscovered = et.discovered
+                ? Object.keys(et.discovered).length : 0;
+            const entry = {
+                heroName:           this.heroStats.heroName || 'Helt',
+                race:               this.heroStats.race || 'human',
+                difficulty:         this.difficulty,
+                worldsCleared:      this.worldNum,
+                level:              this.heroStats.level || 1,
+                monstersKilled:     this.monstersKilled,
+                goldEarned:         this.heroStats.gold || 0,
+                mineralsCollected:  this.heroStats.mineralsCollected || 0,
+                elementsDiscovered: elementsDiscovered,
+                result:             'worldComplete',
+                timeSeconds:        this.timeSeconds
+            };
+            Leaderboard.record(entry);
+
+            // Submit to global leaderboard (fire-and-forget) (#64)
+            if (typeof GlobalLeaderboard !== 'undefined') {
+                GlobalLeaderboard.submitScore(entry);
+            }
         }
 
         if (this.type === 'death') {

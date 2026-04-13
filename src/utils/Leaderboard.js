@@ -15,10 +15,12 @@ const Leaderboard = {
             worldsCleared:  entry.worldsCleared || 0,
             level:          entry.level || 1,
             monstersKilled: entry.monstersKilled || 0,
-            goldEarned:     entry.goldEarned || 0,
-            timeSeconds:    entry.timeSeconds || 0,
-            result:         entry.result || 'death',
-            date:           new Date().toISOString().slice(0, 10)
+            goldEarned:         entry.goldEarned || 0,
+            mineralsCollected:  entry.mineralsCollected || 0,
+            elementsDiscovered: entry.elementsDiscovered || 0,
+            timeSeconds:        entry.timeSeconds || 0,
+            result:             entry.result || 'death',
+            date:               new Date().toISOString().slice(0, 10)
         });
         // Sort by worlds cleared (desc), then level (desc), then monsters killed (desc)
         scores.sort((a, b) =>

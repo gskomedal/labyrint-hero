@@ -2,6 +2,24 @@
 
 ---
 
+## v0.38 – 2026-04-13
+
+### Nye funksjoner
+- **Global ledertavle (#64):** Spillere kan nå sammenligne resultater med andre spillere over hele verden via en global ledertavle. Lokal og global fane med «Lokal»/«Global»-veksler. Globale resultater hentes fra en Cloudflare Worker + KV-backend
+- **Nye ledertavle-kategorier (#64):** To nye kolonner i ledertavlen: «Min» (mineraler samlet) og «Elem» (grunnstoffer oppdaget). Begge spores gjennom hele spillet og lagres i ledertavlen
+- **Global innsending ved verdensklarering:** Poengsummen sendes automatisk til den globale ledertavlen ved verdensklarering (brann-og-glem, blokkerer ikke seierskjermen). Feiler stille ved nettverksproblemer
+- **Grunnleggende anti-juks:** Serveren avviser umulige poengsummer (f.eks. verden 25 på nivå 1, verdensklarering på under 10 sekunder)
+
+### Tekniske endringer
+- Ny fil `src/utils/GlobalLeaderboard.js`: API-klient med `submitScore()` og `fetchScores()` for global ledertavle
+- Ny backend `backend/worker.js`: Cloudflare Worker med KV-lagring, REST API (`POST /scores`, `GET /scores`), CORS-støtte og anti-juks-validering
+- HeroCrafting: Ny `mineralsCollected`-egenskap som økes ved mineralopptak i ItemSpawner
+- Leaderboard: Nye felter `mineralsCollected` og `elementsDiscovered` i innleggsobjektet
+- LeaderboardScene: Fullstendig omskrevet med fane-veksler (Lokal/Global), lasting/feiltilstander og 10 kolonner
+- GameOverScene: Sender inn poengsum til global ledertavle ved verdensklarering
+
+---
+
 ## v0.37 – 2026-04-13
 
 ### Nye funksjoner
