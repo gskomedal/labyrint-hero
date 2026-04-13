@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.37
+**Versjon:** 0.38
 **Sist oppdatert:** 2026-04-13
 
 ---
@@ -355,6 +355,38 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 
 ---
 
+## 11b. Ledertavle (v0.38)
+
+### Lokal ledertavle
+- Lagres i `localStorage` under nøkkel `labyrint_hero_leaderboard`
+- Maks 50 innlegg, sortert etter verdener klarert → nivå → drap
+- Registrerer kun verdensklarering, ikke død
+
+### Global ledertavle (#64)
+- Backend: Cloudflare Worker + KV-lagring (`backend/worker.js`)
+- REST API: `POST /scores` for innsending, `GET /scores` for henting (topp 100)
+- Automatisk innsending ved verdensklarering (brann-og-glem, feiler stille)
+- Filtrering: rase og vanskelighetsgrad
+
+### Kategorier
+| Kolonne | Beskrivelse |
+|---------|-------------|
+| Verden | Antall verdener klarert |
+| Nivå | Heltens nivå ved registrering |
+| Drap | Totalt antall monstre drept |
+| Gull | Gull opptjent |
+| Min | Mineraler samlet i løpet av spillet |
+| Elem | Unike grunnstoffer oppdaget |
+| Tid | Tid brukt (mm:ss) |
+
+### Anti-juks
+Serveren avviser umulige poengsummer:
+- Verden 3+ på nivå 1
+- Verdensklarering på under 10 sekunder
+- Verdier utenfor gyldige områder
+
+---
+
 ## 12. Implementert – statusoversikt (v0.8)
 
 | System | Status | Kommentar |
@@ -395,7 +427,7 @@ Aktiveres automatisk når helten har evner fra begge stier i et par:
 | Gull + økonomi | ✅ Ferdig | Gullvaluta fra monstre/kister; handelsmann |
 | Gjenstandssjeldenhet | ✅ Ferdig | 5 sjeldenhetsgrader med stat-boost |
 | Touch/mobil-støtte | ✅ Ferdig | D-pad, handlingsknapper, responsiv skalering, langt-trykk drop |
-| Leaderboard | ✅ Ferdig | Ledertavle med filtrering og tidssporing per verden |
+| Leaderboard | ✅ Ferdig | Lokal + global ledertavle med filtrering, mineraler samlet, elementer oppdaget |
 
 ---
 

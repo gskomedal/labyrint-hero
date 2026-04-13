@@ -454,6 +454,9 @@ class ItemSpawner {
                     obj.graphic.destroy();
                     scene.itemObjects.splice(i, 1);
 
+                    // Track mineral pickups for leaderboard
+                    if (obj.isMineral) scene.hero.mineralsCollected++;
+
                     // Can hero identify minerals? (requires Geolog skill)
                     const canIdentify = obj.isMineral && (scene.hero.mineralIdentifyLevel || 0) > 0;
 
