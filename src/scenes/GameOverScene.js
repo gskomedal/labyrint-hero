@@ -113,10 +113,60 @@ class GameOverScene extends Phaser.Scene {
             });
         });
 
-        const menu = this._button(cx, cy + 136, '[ HOVED MENY ]', '#666688', 14);
+        // Fast travel (if player has completed multiple zones)
+        const completedZones = this.heroStats.completedZones || [];
+        if (completedZones.length > 0 && typeof ZONES !== 'undefined') {
+            const travelBtn = this._button(cx, cy + 126, '[ HURTIGREISE ]', '#44aadd', 14);
+            travelBtn.on('pointerdown', () => this._showFastTravel(cx, cy));
+        }
+
+        const menuY = completedZones.length > 0 ? cy + 160 : cy + 136;
+        const menu = this._button(cx, menuY, '[ HOVED MENY ]', '#666688', 14);
         menu.on('pointerdown', () => this.scene.start('MenuScene'));
 
         this.tweens.add({ targets: next, alpha: 0.5, duration: 600, yoyo: true, repeat: -1 });
+    }
+
+    _showFastTravel(cx, cy) {
+        // Overlay panel
+        if (this._ftPanel) return;
+        const W = this.cameras.main.width;
+        const H = this.cameras.main.height;
+        const panel = this.add.graphics();
+        panel.fillStyle(0x000000, 0.85);
+        panel.fillRect(cx - 200, cy - 100, 400, 200);
+        panel.lineStyle(2, 0x44aadd, 1);
+        panel.strokeRect(cx - 200, cy - 100, 400, 200);
+        this._ftPanel = panel;
+
+        this.add.text(cx, cy - 80, 'Velg sone:', {
+            fontSize: '16px', color: '#44aadd', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        const completedZones = this.heroStats.completedZones || [];
+        let yOff = cy - 50;
+        for (const zone of ZONES) {
+            const completed = completedZones.includes(zone.id);
+            const col = completed ? '#44ff88' : '#555566';
+            const label = completed ? `▸ ${zone.name} (Verden ${zone.worlds[0]})` : `  ${zone.name} (låst)`;
+            const btn = this.add.text(cx, yOff, label, {
+                fontSize: '13px', color: col, fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            if (completed) {
+                btn.setInteractive({ useHandCursor: true });
+                btn.on('pointerover', () => btn.setAlpha(0.7));
+                btn.on('pointerout',  () => btn.setAlpha(1));
+                btn.on('pointerdown', () => {
+                    const startWorld = typeof getZoneStartWorld !== 'undefined' ? getZoneStartWorld(zone.id) : zone.worlds[0];
+                    this.scene.start('GameScene', {
+                        worldNum: startWorld,
+                        heroStats: this.heroStats,
+                        difficulty: this.difficulty
+                    });
+                });
+            }
+            yOff += 24;
+        }
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────

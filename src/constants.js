@@ -99,6 +99,11 @@ function isZoneBossWorld(worldNum) {
     return worldNum === zone.worlds[zone.worlds.length - 1];
 }
 
+function getZoneStartWorld(zoneId) {
+    const zone = ZONES.find(z => z.id === zoneId);
+    return zone ? zone.worlds[0] : 1;
+}
+
 const AGGRO_RADIUS      = 12;    // tiles; monster won't chase beyond this
 
 // Gold economy
