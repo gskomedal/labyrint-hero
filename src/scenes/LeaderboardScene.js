@@ -31,13 +31,13 @@ class LeaderboardScene extends Phaser.Scene {
         this.add.rectangle(cx, 52, 400, 1, 0x333355);
 
         // Tab buttons (Local / Global)
-        this._buildTabs(cx, 60);
+        this._buildTabs(cx, 58);
 
-        // Filter buttons
-        this._buildFilters(cx, 80);
+        // Filter buttons (race row + difficulty row)
+        this._buildFilters(cx, 76);
 
         // Scroll area
-        this._listY = 100;
+        this._listY = 112;
         this._scrollOffset = 0;
         this._refreshList();
 
@@ -48,7 +48,8 @@ class LeaderboardScene extends Phaser.Scene {
 
         // Mouse wheel scrolling
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-            const maxScroll = Math.max(0, (this._totalRows - 12) * 20);
+            const visibleRows = Math.floor((H - this._listY - 70) / 20);
+            const maxScroll = Math.max(0, (this._totalRows - visibleRows) * 20);
             this._scrollOffset = Phaser.Math.Clamp(this._scrollOffset + deltaY * 0.5, 0, maxScroll);
             this._refreshList();
         });
@@ -120,40 +121,32 @@ class LeaderboardScene extends Phaser.Scene {
         ];
 
         const ts = { fontSize: '11px', color: '#556677', fontFamily: 'monospace' };
-        this.add.text(cx - 220, y, 'Rase:', ts);
+        const restartWith = (race, diff) => {
+            this.scene.restart({ filterRace: race, filterDiff: diff, tab: this._tab });
+        };
 
+        // Row 1: Race filter
+        this.add.text(cx - 220, y, 'Rase:', ts);
         let rx = cx - 185;
         for (const r of RACES) {
             const btn = this.add.text(rx, y, `[${r.label}]`, {
                 fontSize: '11px', color: this._filterRace === r.id ? '#f5e642' : '#667788',
                 fontFamily: 'monospace'
             }).setInteractive({ useHandCursor: true });
-            btn.on('pointerdown', () => {
-                this._filterRace = r.id;
-                this.scene.restart({
-                    filterRace: this._filterRace,
-                    filterDiff: this._filterDiff,
-                    tab: this._tab
-                });
-            });
+            btn.on('pointerdown', () => restartWith(r.id, this._filterDiff));
             rx += btn.width + 6;
         }
 
-        this.add.text(cx + 40, y, 'Diff:', ts);
-        let dx = cx + 70;
+        // Row 2: Difficulty filter
+        const y2 = y + 15;
+        this.add.text(cx - 220, y2, 'Diff:', ts);
+        let dx = cx - 185;
         for (const d of DIFFS) {
-            const btn = this.add.text(dx, y, `[${d.label}]`, {
+            const btn = this.add.text(dx, y2, `[${d.label}]`, {
                 fontSize: '11px', color: this._filterDiff === d.id ? '#f5e642' : '#667788',
                 fontFamily: 'monospace'
             }).setInteractive({ useHandCursor: true });
-            btn.on('pointerdown', () => {
-                this._filterDiff = d.id;
-                this.scene.restart({
-                    filterRace: this._filterRace,
-                    filterDiff: this._filterDiff,
-                    tab: this._tab
-                });
-            });
+            btn.on('pointerdown', () => restartWith(this._filterRace, d.id));
             dx += btn.width + 6;
         }
     }
@@ -239,16 +232,16 @@ class LeaderboardScene extends Phaser.Scene {
         // Header – 10 columns: #, Navn, Rase, Verden, Nivå, Drap, Gull, Min, Elem, Tid
         const hdrStyle = { fontSize: '11px', color: '#556677', fontFamily: 'monospace' };
         const cols = [
-            cx - 235,  // #
-            cx - 185,  // Navn
-            cx - 115,  // Rase
-            cx - 55,   // Verden
-            cx - 15,   // Nivå
-            cx + 25,   // Drap
+            cx - 280,  // #
+            cx - 240,  // Navn
+            cx - 150,  // Rase
+            cx - 90,   // Verden
+            cx - 40,   // Nivå
+            cx + 10,   // Drap
             cx + 65,   // Gull
-            cx + 105,  // Min (minerals)
-            cx + 140,  // Elem (elements)
-            cx + 180,  // Tid
+            cx + 130,  // Min (minerals)
+            cx + 180,  // Elem (elements)
+            cx + 235,  // Tid
         ];
         const headers = ['#', 'Navn', 'Rase', 'Vrdn', 'Niv\u00e5', 'Drap', 'Gull', 'Min', 'Elem', 'Tid'];
         headers.forEach((h, i) => {
@@ -287,7 +280,7 @@ class LeaderboardScene extends Phaser.Scene {
             // Result indicator
             const resCol = s.result === 'death' ? '#ff4444' : '#44ee66';
             const resIcon = s.result === 'death' ? '\u2620' : '\u2713';
-            this._dyn.push(this.add.text(cols[9] + 40, ry, resIcon, { ...style, color: resCol }));
+            this._dyn.push(this.add.text(cols[9] + 45, ry, resIcon, { ...style, color: resCol }));
         }
     }
 }
