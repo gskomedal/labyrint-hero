@@ -23,6 +23,18 @@ const FUEL_DEFS = {
         energyValue: 3,
         desc: 'Finnes i gruver. Gir 3 energi.'
     },
+    oil: {
+        id: 'oil', name: 'Råolje', type: 'fuel',
+        color: 0x111100, tier: 2, stackSize: 10,
+        energyValue: 8,
+        desc: 'Flytende brensel fra dypet. Gir 8 energi.'
+    },
+    natural_gas: {
+        id: 'natural_gas', name: 'Naturgass', type: 'fuel',
+        color: 0x88ccff, tier: 2, stackSize: 10,
+        energyValue: 10,
+        desc: 'Ren brennbar gass. Gir 10 energi.'
+    },
 };
 
 // ── Alloy definitions ────────────────────────────────────────────────────────
