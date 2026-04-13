@@ -150,6 +150,9 @@ class MonsterManager {
             const isBoss = m.type === 'boss';
             if (isBoss && !bossReady) continue;
             if (!isBoss && !regularReady) continue;
+            // Tick monster status effects (acid burn, stun)
+            if (m.tickStatusEffects) m.tickStatusEffects();
+            if (m.stunTurns > 0) continue; // stunned – skip turn
             this._moveMonster(m);
         }
     }

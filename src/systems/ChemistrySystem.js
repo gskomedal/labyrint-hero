@@ -160,8 +160,8 @@ class ChemistrySystem {
                     const d = Math.abs(m.gridX - hero.gridX) + Math.abs(m.gridY - hero.gridY);
                     if (d <= rad) {
                         m.takeDamage(dmg);
-                        // Acid burn: reduce defense temporarily
-                        m.defense = Math.max(0, (m.defense || 0) - 2);
+                        // Acid burn: reduce defense over time
+                        if (m.applyAcidBurn) m.applyAcidBurn(dur);
                     }
                 }
                 scene.monsters = scene.monsters.filter(m => m.alive);
