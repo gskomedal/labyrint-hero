@@ -1,7 +1,7 @@
 # Labyrint Hero – Elements-modifikasjon
-**Versjon:** 0.2 (designforslag)
-**Sist oppdatert:** 2026-03-30
-**Status:** Designfase – ikke implementert
+**Versjon:** 0.3 (fase 1–4 fullført, dataset komplett)
+**Sist oppdatert:** 2026-04-13
+**Status:** Fase 1–4 implementert. Fase 5 (Fysikk) utsatt.
 
 ---
 
@@ -462,7 +462,7 @@ Med en dypere verden trenger spilleren bedre kartlegging:
 - [x] Eksplosiver: Krutt (8 dmg), Røykbombe (stun), Syrebombe (etsende), Dynamitt (15 dmg)
 - [x] Medisiner: Universell motgift, Smertestillende
 - [x] Kjemiker-sti i skill tree (Potente potions, Syremestring, Eksplosjonsgenial)
-- [ ] Energi-utvidelse: Olje/Gass (utsatt til Fase 4)
+- [x] Energi-utvidelse: Olje/Gass (v0.37)
 
 ### Fase 4 – Verdensekspansjon ✅ (v0.26)
 - [x] Sonesystem: 5 geologiske soner (Overflatelag, Grunnfjell, Dyplag, Underverden, Jordens kjerne)
@@ -472,8 +472,8 @@ Med en dypere verden trenger spilleren bedre kartlegging:
 - [x] 4 nye spesialrom: Malmkammer (5+), Hydrotermalkilde (8+), Gasslomme (10+), Magmakammer (18+)
 - [x] Sone-UI: HUD viser «Sonens navn Etasje/Total»
 - [x] Soneprogresjon: Fullførte soner lagres i hero.completedZones
-- [ ] Hurtigreise mellom fullførte soner (UI-valg ved sonemeny – utsatt)
-- [ ] Utvidet minikart med Geolog-skills (utsatt)
+- [x] Hurtigreise mellom fullførte soner (v0.37 – knapp på seiersskjerm)
+- [x] Utvidet minikart med Geolog-skills (v0.37 – mineraler vises som fargede prikker)
 
 ### Fase 5 – Fysikk og endgame (Issue-prioritet: Lav)
 - [ ] Halvleder-crafting (Si, Ge, GaAs)
