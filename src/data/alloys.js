@@ -229,6 +229,21 @@ const ALLOY_DEFS = {
         stackSize: 10,
         desc: 'Lantanide-krystall. Lyser. Gir bærer +1 synsfelt.'
     },
+    scandium_alloy: {
+        id: 'scandium_alloy', name: 'Skandiumlegering', type: 'alloy',
+        formula: 'Sc + Al + Mg', tier: 4,
+        color: 0xbbddcc,
+        recipe: [
+            { symbol: 'Sc', amount: 1 },
+            { symbol: 'Al', amount: 2 },
+            { symbol: 'Mg', amount: 1 }
+        ],
+        energyCost: 6,
+        smeltingTime: 5,
+        statBonuses: { attack: 3, defense: 3, hearts: 2 },
+        stackSize: 10,
+        desc: 'Romfartslegering. Ekstremt lett og stiv – +2 HP per del.'
+    },
 };
 
 // ── Alloy-forged equipment templates ─────────────────────────────────────────
@@ -256,6 +271,8 @@ const ALLOY_EQUIPMENT = {
     tantalum_cuirass: { id: 'tantalum_cuirass', name: 'Tantalpansring',      type: 'armor',  alloyId: 'tantalum_plate',   color: 0x889988, def: 6, hearts: 2, desc: '+6 DEF, +2 HP (tantal)' },
     phosphor_blade:   { id: 'phosphor_blade',   name: 'Fosfor-klinge',       type: 'weapon', alloyId: 'phosphor_crystal', color: 0xddffcc, atk: 6, def: 2, visionBonus: 1, desc: '+6 ATK, +2 DEF, +1 syn (fosfor)' },
     phosphor_shield:  { id: 'phosphor_shield',  name: 'Fosfor-skjold',       type: 'armor',  alloyId: 'phosphor_crystal', color: 0xddffcc, def: 5, hearts: 2, visionBonus: 1, desc: '+5 DEF, +2 HP, +1 syn (fosfor)' },
+    scandium_rapier:  { id: 'scandium_rapier',  name: 'Skandium-rapir',      type: 'weapon', alloyId: 'scandium_alloy',   color: 0xbbddcc, atk: 6, hearts: 1, desc: '+6 ATK, +1 HP (skandium)' },
+    scandium_harness: { id: 'scandium_harness', name: 'Skandium-harnisk',    type: 'armor',  alloyId: 'scandium_alloy',   color: 0xbbddcc, def: 5, hearts: 3, desc: '+5 DEF, +3 HP (lettrustning)' },
 };
 
 // ── Alloy tier colors (for UI) ──────────────────────────────────────────────
