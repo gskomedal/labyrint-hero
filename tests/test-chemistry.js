@@ -72,7 +72,10 @@ describe('ChemistrySystem – synthesize', () => {
         expect(oLeft).toBeLessThan(5);
     });
 
-    it('unlocks chemist on first synthesis', () => {
+    it('produces a usable item with a use() function', () => {
+        // chemistUnlocked is toggled by GameScene when the hero enters a lab
+        // room, not by the ChemistrySystem itself; assert on the synthesised
+        // item shape instead.
         const chem = new ChemistrySystem();
         const tracker = new ElementTracker();
         tracker.collect('H', 5);
@@ -80,15 +83,17 @@ describe('ChemistrySystem – synthesize', () => {
         const hero = {
             elementTracker: tracker,
             smeltingEfficiency: 1.0,
-            chemistUnlocked: false,
             potionPotencyBonus: 0,
+            potionMagnitudeBonus: 0,
             potionDurationBonus: 0,
             chemBombBonus: 0,
-            chemRadiusBonus: 0
+            chemRadiusBonus: 0,
+            maxHearts: 6, hearts: 6
         };
 
-        chem.synthesize('water', hero);
-        expect(hero.chemistUnlocked).toBeTrue();
+        const result = chem.synthesize('water', hero, 1);
+        expect(result.success).toBeTrue();
+        expect(typeof result.item.use).toBe('function');
     });
 
     it('returns failure for unknown molecule', () => {

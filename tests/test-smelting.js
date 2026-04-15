@@ -3,7 +3,7 @@
 describe('SmeltingSystem – canSmelt', () => {
     it('returns true with enough fuel', () => {
         const smelter = new SmeltingSystem();
-        const mineral = MINERAL_DEFS.copper_ore;
+        const mineral = MINERAL_DEFS.chalcopyrite;
         const hero = { smeltingEfficiency: 0, miningYieldBonus: 0, oreEfficiencyChance: 0, elementTracker: new ElementTracker() };
         const result = smelter.canSmelt(mineral, 100, hero);
         expect(result.canSmelt).toBeTrue();
@@ -12,7 +12,7 @@ describe('SmeltingSystem – canSmelt', () => {
 
     it('returns false with zero fuel', () => {
         const smelter = new SmeltingSystem();
-        const mineral = MINERAL_DEFS.copper_ore;
+        const mineral = MINERAL_DEFS.chalcopyrite;
         const hero = { smeltingEfficiency: 0, miningYieldBonus: 0, oreEfficiencyChance: 0, elementTracker: new ElementTracker() };
         const result = smelter.canSmelt(mineral, 0, hero);
         expect(result.canSmelt).toBeFalse();
@@ -22,7 +22,7 @@ describe('SmeltingSystem – canSmelt', () => {
 describe('SmeltingSystem – smelt', () => {
     it('produces elements from a mineral', () => {
         const smelter = new SmeltingSystem();
-        const mineral = MINERAL_DEFS.copper_ore;
+        const mineral = MINERAL_DEFS.chalcopyrite;
         const hero = {
             smeltingEfficiency: 0,
             miningYieldBonus: 0,
@@ -44,7 +44,7 @@ describe('SmeltingSystem – smelt', () => {
 
     it('returns correct energy cost', () => {
         const smelter = new SmeltingSystem();
-        const mineral = MINERAL_DEFS.copper_ore;
+        const mineral = MINERAL_DEFS.chalcopyrite;
         const hero = { smeltingEfficiency: 0, miningYieldBonus: 0, oreEfficiencyChance: 0, elementTracker: new ElementTracker() };
         const result = smelter.smelt(mineral, hero);
         expect(result.energyCost).toBe(mineral.energyCost);
@@ -52,7 +52,7 @@ describe('SmeltingSystem – smelt', () => {
 
     it('collects elements in hero tracker', () => {
         const smelter = new SmeltingSystem();
-        const mineral = MINERAL_DEFS.copper_ore;
+        const mineral = MINERAL_DEFS.chalcopyrite;
         const tracker = new ElementTracker();
         const hero = {
             smeltingEfficiency: 0,
