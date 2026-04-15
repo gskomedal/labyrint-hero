@@ -122,32 +122,45 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'mineral_eye',
                 name:     'Malmøye',
-                desc:     '+1 mineral-syn\nIdentifiser mineraler',
+                desc:     '+1 mineral-syn\nID-er mineraler\nMerker på minikart',
                 category: 'GEO',
                 maxStack: 3,
                 apply(hero) {
                     hero.mineralVisionRadius = (hero.mineralVisionRadius || 0) + 1;
                     hero.mineralIdentifyLevel = (hero.mineralIdentifyLevel || 0) + 1;
+                    hero.mineralMinimap = true;
                 }
             },
             {
                 id:       'efficient_mining',
                 name:     'Effektiv utvinning',
-                desc:     '+25% mineral-utbytte\n+1 ekstra element\nved smelting',
+                desc:     '25% sjanse for\ndobbelt utbytte\n(stabler til 75%)',
                 category: 'GEO',
                 maxStack: 3,
                 apply(hero) {
-                    hero.miningYieldBonus = (hero.miningYieldBonus || 0) + 0.25;
+                    // Replaces flat miningYieldBonus with a clear double-yield chance per stack.
+                    hero.doubleYieldChance = (hero.doubleYieldChance || 0) + 0.25;
                     hero.smeltBonusElement = (hero.smeltBonusElement || 0) + 1;
                 }
             },
             {
                 id:       'master_prospector',
                 name:     'Mesterprospektør',
-                desc:     'Garantert T4+\nmineral per etasje',
+                desc:     'Garantert T4+\nmineral per etasje\n(T5+ fra verden 5)',
                 category: 'GEO',
                 maxStack: 1,
-                apply(hero) { hero.guaranteedRareMineral = true; }
+                apply(hero) {
+                    hero.guaranteedRareMineral = true;
+                    hero.prospectorHighTier = true;
+                }
+            },
+            {
+                id:       'geode_splitter',
+                name:     'Geode-splitter',
+                desc:     'Hvert 10. smeltede\nmineral gir en gratis\ntilfeldig gemstein',
+                category: 'GEO',
+                maxStack: 1,
+                apply(hero) { hero.geodeSplitter = true; }
             },
         ]
     },
@@ -164,33 +177,44 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'fast_smelting',
                 name:     'Rask smelting',
-                desc:     '-25% smeltetid/energi\n+15% sjanse for\nekstra utbytte',
+                desc:     '-25% smeltetid/energi\n+15% sjanse for\nekstra utbytte\n(maks stack: batch 5)',
                 category: 'UTIL',
                 maxStack: 3,
                 apply(hero) {
                     hero.smeltingSpeedMul = (hero.smeltingSpeedMul || 1.0) * 0.75;
                     hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) * 0.75;
                     hero.smeltExtraYieldChance = (hero.smeltExtraYieldChance || 0) + 0.15;
+                    // Track stack count so UI can unlock batch-smelt at max stack.
+                    hero.fastSmeltStacks = (hero.fastSmeltStacks || 0) + 1;
+                    if (hero.fastSmeltStacks >= 3) hero.batchSmeltSize = 5;
                 }
             },
             {
                 id:       'alloy_mastery',
                 name:     'Legeringsmester',
-                desc:     '+15% legering-stats\n20% sjanse for\ndobbel legering',
+                desc:     '+25% legering-stats\n20% sjanse for\ndobbel legering',
                 category: 'UTIL',
                 maxStack: 2,
                 apply(hero) {
-                    hero.alloyMasteryBonus = (hero.alloyMasteryBonus || 0) + 0.15;
+                    hero.alloyMasteryBonus = (hero.alloyMasteryBonus || 0) + 0.25;
                     hero.doubleAlloyChance = (hero.doubleAlloyChance || 0) + 0.20;
                 }
             },
             {
                 id:       'master_smith',
                 name:     'Mestersmie',
-                desc:     '+30% stats på smidd\nutstyr, utstyr får\nspesialegenskaper',
+                desc:     '+50% stats på smidd\nutstyr, spesial-\negenskaper garantert',
                 category: 'ATK',
                 maxStack: 1,
-                apply(hero) { hero.alloyStatBonus = (hero.alloyStatBonus || 0) + 0.30; }
+                apply(hero) { hero.alloyStatBonus = (hero.alloyStatBonus || 0) + 0.50; }
+            },
+            {
+                id:       'reforge',
+                name:     'Reforge',
+                desc:     'Reforge eksisterende\nutstyr for å rulle\nstats på nytt (5 energi)',
+                category: 'UTIL',
+                maxStack: 1,
+                apply(hero) { hero.reforgeUnlocked = true; }
             },
         ]
     },
@@ -206,29 +230,44 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'potent_potions',
                 name:     'Potente potions',
-                desc:     '+50% varighet\npå potions',
+                desc:     '+50% varighet\n+25% styrke\npå potions',
                 category: 'UTIL',
                 maxStack: 3,
-                apply(hero) { hero.potionDurationBonus = (hero.potionDurationBonus || 0) + 0.50; }
+                apply(hero) {
+                    hero.potionDurationBonus = (hero.potionDurationBonus || 0) + 0.50;
+                    hero.potionMagnitudeBonus = (hero.potionMagnitudeBonus || 0) + 0.25;
+                }
             },
             {
                 id:       'acid_mastery',
                 name:     'Syremestring',
-                desc:     '+30% kjemisk\nbombe-skade',
+                desc:     '+40% kjemisk\nbombe-skade\n-2 Def på syreofre',
                 category: 'ATK',
                 maxStack: 2,
-                apply(hero) { hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.30; }
+                apply(hero) {
+                    hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.40;
+                    hero.chemAcidDefShred = (hero.chemAcidDefShred || 0) + 2;
+                }
             },
             {
                 id:       'explosive_genius',
                 name:     'Eksplosjonsgenial',
-                desc:     '+50% skade\n+1 radius på bomber',
+                desc:     '+50% skade, +1 radius\n60% "Dobbel brygging"\npå bomber',
                 category: 'ATK',
                 maxStack: 1,
                 apply(hero) {
                     hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.50;
                     hero.chemRadiusBonus = (hero.chemRadiusBonus || 0) + 0.30;
+                    hero.chemDoubleBrewChance = (hero.chemDoubleBrewChance || 0) + 0.60;
                 }
+            },
+            {
+                id:       'volatile_mastery',
+                name:     'Volatil mestring',
+                desc:     'Bomber kjeder til\n1 nærliggende fiende\nved 50% skade',
+                category: 'ATK',
+                maxStack: 1,
+                apply(hero) { hero.chemBombChain = true; }
             },
         ]
     },
@@ -377,6 +416,18 @@ const SKILL_SYNERGIES = [
         color: 0x66cc88,
         apply(hero) { hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.20; hero.critChance = Math.min(0.75, hero.critChance + 0.10); },
         unapply(hero) { hero.chemBombBonus = Math.max(0, (hero.chemBombBonus || 0) - 0.20); hero.critChance = Math.max(0, hero.critChance - 0.10); },
+    },
+    {
+        // Three-path synergy: requires ≥1 skill from each of Geolog, Metallurg, and Kjemiker.
+        // Unlocks transmutation (convert 5 of any element into 1 of an adjacent element)
+        // via a button in the Chemistry Lab.
+        id:    'transmutation',
+        name:  'Transmutasjon',
+        desc:  '5 av grunnstoff X → 1 av nabo (kjemilab)',
+        paths: ['geolog', 'metallurg', 'kjemiker'],
+        color: 0xff88cc,
+        apply(hero) { hero.transmutationUnlocked = true; },
+        unapply(hero) { hero.transmutationUnlocked = false; },
     },
 ];
 

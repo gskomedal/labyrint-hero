@@ -12,8 +12,13 @@ const HeroCrafting = {
         hero.mineralVisionRadius = 0;
         hero.mineralIdentifyLevel = 0;
         hero.miningYieldBonus = 0;
+        hero.doubleYieldChance = 0;       // Geolog T2: double-yield chance per stack
         hero.smeltBonusElement = 0;
         hero.guaranteedRareMineral = false;
+        hero.prospectorHighTier = false;  // Geolog T3 world 5+ upgrade
+        hero.mineralMinimap = false;      // Geolog T1: mineral dots on minimap
+        hero.geodeSplitter = false;       // Geolog T4: gemstone every 10 smelts
+        hero.smeltCountForGeode = 0;
         hero.mineralsCollected = 0;
         hero.totalPlayTime = 0; // cumulative seconds across all worlds
 
@@ -26,6 +31,9 @@ const HeroCrafting = {
         hero.alloyStatBonus = 0;
         hero.oreEfficiencyChance = 0;
         hero.doubleAlloyChance = 0;
+        hero.fastSmeltStacks = 0;      // Metallurg T1 stack count
+        hero.batchSmeltSize = 1;       // Metallurg T1 max-stack: batch-smelt amount
+        hero.reforgeUnlocked = false;  // Metallurg T4: reforge action
         hero.alloyInventory = {};
 
         // Chemistry mod (Phase 3)
@@ -33,8 +41,13 @@ const HeroCrafting = {
         hero.chemLabUnlocked = false;
         hero.potionDurationBonus = 0;
         hero.potionPotencyBonus = 0;
+        hero.potionMagnitudeBonus = 0;     // Kjemiker T1: potion stat-size buff
         hero.chemBombBonus = 0;
         hero.chemRadiusBonus = 0;
+        hero.chemAcidDefShred = 0;         // Kjemiker T2: acid bomb -Def on hit
+        hero.chemDoubleBrewChance = 0;     // Kjemiker T3: 2-for-1 bomb craft chance
+        hero.chemBombChain = false;        // Kjemiker T4: bomb chain to 1 extra
+        hero.transmutationUnlocked = false; // Transmutasjon synergy (3-path)
         hero.toxicBladeChance = 0;
 
         // Zone progression (Phase 4)
@@ -65,8 +78,13 @@ const HeroCrafting = {
             mineralVisionRadius:  hero.mineralVisionRadius,
             mineralIdentifyLevel: hero.mineralIdentifyLevel,
             miningYieldBonus:     hero.miningYieldBonus,
+            doubleYieldChance:    hero.doubleYieldChance,
             smeltBonusElement:    hero.smeltBonusElement,
             guaranteedRareMineral: hero.guaranteedRareMineral,
+            prospectorHighTier:   hero.prospectorHighTier,
+            mineralMinimap:       hero.mineralMinimap,
+            geodeSplitter:        hero.geodeSplitter,
+            smeltCountForGeode:   hero.smeltCountForGeode,
             mineralsCollected:    hero.mineralsCollected,
             totalPlayTime:        hero.totalPlayTime,
             metallurgistUnlocked: hero.metallurgistUnlocked,
@@ -77,14 +95,22 @@ const HeroCrafting = {
             alloyStatBonus:       hero.alloyStatBonus,
             oreEfficiencyChance:  hero.oreEfficiencyChance,
             doubleAlloyChance:    hero.doubleAlloyChance,
+            fastSmeltStacks:      hero.fastSmeltStacks,
+            batchSmeltSize:       hero.batchSmeltSize,
+            reforgeUnlocked:      hero.reforgeUnlocked,
             alloyInventory:       { ...hero.alloyInventory },
             campStash:            hero.campStash.map(e => ({ ...e })),
             chemistUnlocked:      hero.chemistUnlocked,
             chemLabUnlocked:      hero.chemLabUnlocked,
             potionDurationBonus:  hero.potionDurationBonus,
             potionPotencyBonus:   hero.potionPotencyBonus,
+            potionMagnitudeBonus: hero.potionMagnitudeBonus,
             chemBombBonus:        hero.chemBombBonus,
             chemRadiusBonus:      hero.chemRadiusBonus,
+            chemAcidDefShred:     hero.chemAcidDefShred,
+            chemDoubleBrewChance: hero.chemDoubleBrewChance,
+            chemBombChain:        hero.chemBombChain,
+            transmutationUnlocked: hero.transmutationUnlocked,
             toxicBladeChance:     hero.toxicBladeChance,
             completedZones:       [...hero.completedZones],
             appliedElementBonuses: { ...hero.appliedElementBonuses },
@@ -108,8 +134,13 @@ const HeroCrafting = {
         hero.mineralVisionRadius  = stats.mineralVisionRadius  || 0;
         hero.mineralIdentifyLevel = stats.mineralIdentifyLevel || 0;
         hero.miningYieldBonus     = stats.miningYieldBonus     || 0;
+        hero.doubleYieldChance    = stats.doubleYieldChance    || 0;
         hero.smeltBonusElement    = stats.smeltBonusElement    || 0;
         hero.guaranteedRareMineral = stats.guaranteedRareMineral || false;
+        hero.prospectorHighTier   = stats.prospectorHighTier   || false;
+        hero.mineralMinimap       = stats.mineralMinimap       || false;
+        hero.geodeSplitter        = stats.geodeSplitter        || false;
+        hero.smeltCountForGeode   = stats.smeltCountForGeode   || 0;
         hero.mineralsCollected    = stats.mineralsCollected    || 0;
         hero.totalPlayTime        = stats.totalPlayTime        || 0;
         hero.metallurgistUnlocked = stats.metallurgistUnlocked || false;
@@ -120,14 +151,22 @@ const HeroCrafting = {
         hero.alloyStatBonus       = stats.alloyStatBonus       || 0;
         hero.oreEfficiencyChance  = stats.oreEfficiencyChance  || 0;
         hero.doubleAlloyChance    = stats.doubleAlloyChance    || 0;
+        hero.fastSmeltStacks      = stats.fastSmeltStacks      || 0;
+        hero.batchSmeltSize       = stats.batchSmeltSize       || 1;
+        hero.reforgeUnlocked      = stats.reforgeUnlocked      || false;
         hero.alloyInventory       = stats.alloyInventory       ? { ...stats.alloyInventory } : {};
         hero.campStash            = (stats.campStash || []).map(e => ({ ...e }));
         hero.chemistUnlocked      = stats.chemistUnlocked      || false;
         hero.chemLabUnlocked      = stats.chemLabUnlocked      || false;
         hero.potionDurationBonus  = stats.potionDurationBonus  || 0;
         hero.potionPotencyBonus   = stats.potionPotencyBonus   || 0;
+        hero.potionMagnitudeBonus = stats.potionMagnitudeBonus || 0;
         hero.chemBombBonus        = stats.chemBombBonus        || 0;
         hero.chemRadiusBonus      = stats.chemRadiusBonus      || 0;
+        hero.chemAcidDefShred     = stats.chemAcidDefShred     || 0;
+        hero.chemDoubleBrewChance = stats.chemDoubleBrewChance || 0;
+        hero.chemBombChain        = stats.chemBombChain        || false;
+        hero.transmutationUnlocked = stats.transmutationUnlocked || false;
         hero.toxicBladeChance     = stats.toxicBladeChance     || 0;
         hero.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
         hero.appliedElementBonuses = stats.appliedElementBonuses ? { ...stats.appliedElementBonuses } : {};
