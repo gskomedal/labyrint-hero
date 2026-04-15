@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.39
+**Versjon:** 0.40
 **Sist oppdatert:** 2026-04-15
 
 ---
@@ -527,9 +527,10 @@ Smelting, legeringer og smiing av utstyr.
 Låses opp ved første besøk i leirplass. **Minst én Metallurg-skill kreves for å bruke smelting, legering og smiing.** Lager-fanen er alltid tilgjengelig.
 | Tier | Skill | Effekt |
 |------|-------|--------|
-| T1 | Rask smelting | -25% energi/smeltetid, +15% sjanse ekstra utbytte per stack (maks 3) |
-| T2 | Legeringsmester | +15% legering-stats, 20% sjanse for dobbel legering per stack (maks 2) |
-| T3 | Mestersmie | +30% stats på smidd utstyr, spesialegenskaper (våpen: +10% krit, rustning: +1 torneskade) (maks 1) |
+| T1 | Rask smelting | -25% energi/smeltetid, +15% sjanse ekstra utbytte per stack (maks 3). Ved maks-stack låses batch-smelting (×5) opp |
+| T2 | Legeringsmester | +25% legering-stats, 20% sjanse for dobbel legering per stack (maks 2) |
+| T3 | Mestersmie | +50% stats på smidd utstyr, spesialegenskaper (våpen: +10% krit, rustning: +1 torneskade) (maks 1) |
+| T4 | Reforge | Ruller stats på utstyrt våpen/rustning på nytt for 5 energi i smie-fanen (maks 1) |
 
 ### Fase 3: Kjemi (v0.25)
 
@@ -543,9 +544,20 @@ Kjemisk syntese av potions, bomber, medisiner og syrer fra rene grunnstoffer.
 Låses opp ved første besøk i kjemisk laboratorium. **Minst én Kjemiker-skill kreves for å lage kjemikalier.**
 | Tier | Skill | Effekt |
 |------|-------|--------|
-| T1 | Potente potions | +50% potion-varighet per stack (maks 3) |
-| T2 | Syremestring | +30% kjemisk bombe-skade per stack (maks 2) |
-| T3 | Eksplosjonsgenial | +50% skade, +1 radius på bomber (maks 1) |
+| T1 | Potente potions | +50% varighet og +25% styrke på potions per stack (maks 3) |
+| T2 | Syremestring | +40% kjemisk bombe-skade per stack, syrebomber reduserer fiende-Def med 2 (maks 2) |
+| T3 | Eksplosjonsgenial | +50% skade, +1 radius, 60% «Dobbel brygging» på bombekrafting (maks 1) |
+| T4 | Volatil mestring | Bomber kjeder til 1 nærliggende fiende ved 50% skade (maks 1) |
+
+**Geolog-skillsti (#7) oppdaterte tier:**
+| Tier | Skill | Effekt |
+|------|-------|--------|
+| T1 | Malmøye | +1 mineral-syn, identifiser mineraler, merker på minikart (maks 3) |
+| T2 | Effektiv utvinning | 25%/50%/75% sjanse for dobbelt utbytte per stack, +1 bonus-element ved smelting (maks 3) |
+| T3 | Mesterprospektør | Garantert T4+ mineral per etasje; T5+ fra verden 5 (maks 1) |
+| T4 | Geode-splitter | Hvert 10. mineral smeltet gir en gratis ekstra grunnstoff-enhet (maks 1) |
+
+**Ny 3-sti-synergi Transmutasjon:** Krever ≥1 skill fra Geolog, Metallurg og Kjemiker. Låser opp konvertering av 5 av et grunnstoff → 1 av nabo (atomnummer ±1) via ↔-knapp på grunnstoff-merker i kjemilab.
 
 ### Fase 4: Verdensekspansjon (v0.26)
 

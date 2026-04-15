@@ -2,6 +2,37 @@
 
 ---
 
+## v0.40 – 2026-04-15
+
+### Nye funksjoner
+- **Utvidet element-bruk (#99):** 2 nye mineraler (molybdenitt, barytt), 5 nye legeringer (manganstål, molybdenstål, wolframkarbid, tantalplate, fosforkrystall) og 6 nye smidde utstyrsstykker. 8 nye kjemikalier: sinkklorid-antiseptikum, bor-signalbombe, barium-fyrverkeri, thermittladning (25 skade, ignorer 4 Def), neodym-magnetbombe (22 skade, radius 5), wolfram-styrkedrikk, lantan-livselixir (+10 HP), plasmakjerne (30 skade med plasmakjede). Tidligere ubrukte grunnstoffer som Mn, W, Ta, Mo, Ba, Ce, La, Nd, Nd, B og Zn har nå praktisk nytte
+- **Bombeskade skalerer bedre i høyere verdener (#100):** Bombers verdensskala er økt fra +40% per verden til +60% per verden, pluss et flatt +2 skade per verden. Bomberadius får +1 fra verden 5 og +2 fra verden 8. Helbredelsespotions skalerer nå som 25% av maks HP fra verden 4+ så de forblir relevante. Syrebrenning varer +1 runde per 4 verdener
+- **Ny bombemekanikk: Def-penetrering og plasmakjede (#100):** Thermittladning ignorerer 4 Forsvar ved treff. Plasmakjerne kjeder til 2 nærmeste fiender utenfor radius for 50% skade. Motoren støtter disse via `defPierce`- og `chain`-felter i molekyldefinisjoner
+- **Skill-omarbeiding: Geolog, Metallurg, Kjemiker (#101):** Alle tre sti-er har fått økte tall og synlige effekter:
+  - **Geolog T2 Effektiv utvinning:** 25%/50%/75% sjanse per stack for **dobbelt** utbytte (tidligere +25% flat). Popup-tekst ved utløsning
+  - **Geolog T3 Mesterprospektør:** Garantert mineral oppgraderes til T5+ fra verden 5
+  - **NY Geolog T4 Geode-splitter:** Hvert 10. mineral smeltet gir en gratis ekstra grunnstoff-enhet
+  - **Metallurg T1 Rask smelting (maks stack):** Låser opp batch-smelting (×5) på minerallister
+  - **Metallurg T2 Legeringsmester:** +25% legerings-stats per stack (opp fra +15%)
+  - **Metallurg T3 Mestersmie:** +50% stats på smidd utstyr (opp fra +30%)
+  - **NY Metallurg T4 Reforge:** Ruller stats på utstyrt våpen/rustning på nytt for 5 energi i smie-fanen
+  - **Kjemiker T1 Potente potions:** +50% varighet *og* +25% styrke per stack (tidligere bare varighet)
+  - **Kjemiker T2 Syremestring:** +40% skade (opp fra +30%) og syrebomber reduserer fiendes Forsvar med 2
+  - **Kjemiker T3 Eksplosjonsgenial:** +50% skade, +1 radius *og* 60% «Dobbel brygging» på bombekrafting
+  - **NY Kjemiker T4 Volatil mestring:** Bomber kjeder til 1 ekstra fiende ved 50% skade
+- **Ny synergi: Transmutasjon (#101):** 3-sti-synergi (Geolog + Metallurg + Kjemiker). Låser opp konvertering av 5 av et grunnstoff → 1 av nabo (atomnummer ±1) i kjemilab via ↔-knapp på grunnstoff-merker. Hjelper med å bruke orphaned rare earths
+
+### Tekniske endringer
+- ChemistrySystem: Separat `bombScale` vs `potionScale` med flat bombgulv (`+world*2`); ny `transmute()`-funksjon; støtte for `defPierce` og `chain` på bombedefinisjoner; syrebomber kan nå redusere fiendes Forsvar via `chemAcidDefShred`
+- SmeltingSystem.smelt() returnerer nå `doubled` og `geodeElement` for Geolog-effekter
+- Inventory._apply/_unapply støtter `visionBonus` på utstyr (brukt av nye fosforkrystall-våpen/-skjold)
+- skills.js: 3 nye T4-ferdigheter (Geode-splitter, Reforge, Volatil mestring); ny 3-sti synergy «Transmutasjon»
+- HeroCrafting: 13 nye hero-egenskaper for nye ferdigheter (doubleYieldChance, geodeSplitter, batchSmeltSize, reforgeUnlocked, potionMagnitudeBonus, chemAcidDefShred, chemDoubleBrewChance, chemBombChain, transmutationUnlocked, m.fl.) – alle med serialize/applyStats-støtte
+- SmelteryScene: Nytt `[ ×N ]`-batchknapp på smelt-fanen når maks-stack Rask smelting er nådd; ny Reforge-sekkjon øverst på Smi-fanen når Reforge er låst opp; Geolog-dobbelt-utbytte og Geode-drops vises som floating text
+- ChemLabScene: Transmutasjon-hint + ↔-knapp per grunnstoff-merke når synergien er aktiv; «Dobbel brygging» gir automatisk ekstra bombe i inventoryen
+
+---
+
 ## v0.39 – 2026-04-15
 
 ### Nye funksjoner
