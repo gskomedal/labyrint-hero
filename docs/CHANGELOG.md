@@ -2,6 +2,20 @@
 
 ---
 
+## v0.39 – 2026-04-15
+
+### Nye funksjoner
+- **Mindre og mer lesbare leir-/kjemi-paneler (#98):** SmelteryScene krymper fra nesten hele lerretet (W-20 × H-20) til et sentrert panel på maks 1080×680, og ChemLabScene utvider litt til 760×600 for å romme større fonter. Tittel, faner, knapper og listetekst har fått økt skriftstørrelse (12–14px → 14–18px) for bedre lesbarhet
+- **Drag-scrolling med mus og berøring (#98):** Begge scener støtter nå å scrolle ved å dra med musen eller med fingeren i tillegg til musehjulet. En 8px-terskel sørger for at korte klikk fortsatt utløser knapper
+- **Scrollbar-indikator (#98):** Tynn vertikal scrollbar på høyre side av innholdsområdet viser nåværende posisjon og scroll-rekkevidde. Scroll-offset klampes automatisk til innholdets høyde slik at over-scrolling er umulig
+
+### Tekniske endringer
+- SmelteryScene: Ny `_clampScroll()`, `_viewportHeight()` og `_maxScrolls` per fane. Hver `_draw*Tab()` setter `_contentEndY` som brukes i `_refresh()` til å beregne maks scroll og tegne scrollbar-tommel
+- ChemLabScene: Samme mønster for en enkelt `_scrollOffset`/`_maxScroll`. Panelet har også fått litt større karakter-portrett (120 → 130px)
+- Felles input-mønster: `pointerdown`/`pointermove`/`pointerup` på scene-input med drag-threshold, eksisterer side om side med eksisterende `wheel`-handler
+
+---
+
 ## v0.38 – 2026-04-13
 
 ### Nye funksjoner
