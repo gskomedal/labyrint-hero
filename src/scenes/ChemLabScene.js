@@ -22,8 +22,10 @@ class ChemLabScene extends Phaser.Scene {
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.82);
 
         // ── Panel ─────────────────────────────────────────────────────────────
-        this.panelW = Math.min(W - 10, 700);
-        this.panelH = Math.min(H - 10, 520);
+        // Slightly larger than before to accommodate bumped fonts without
+        // crowding the portrait. Leaves margin around the canvas.
+        this.panelW = Math.min(W - 80, 760);
+        this.panelH = Math.min(H - 80, 600);
         this.px = cx - this.panelW / 2;
         this.py = cy - this.panelH / 2;
 
@@ -36,7 +38,7 @@ class ChemLabScene extends Phaser.Scene {
         }
 
         // ── Character portrait (sits in the scene, lower-right of bg) ─────────
-        const portraitSize = 120;
+        const portraitSize = 130;
         const portraitX = this.px + this.panelW - portraitSize - 6;
         const portraitY = this.py + this.panelH - portraitSize - 6;
         const portraitGfx = this.add.graphics();
@@ -63,17 +65,17 @@ class ChemLabScene extends Phaser.Scene {
         panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
 
         // Title
-        this.add.text(cx, this.py + 18, 'KJEMISK LABORATORIUM', {
-            fontSize: '14px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
+        this.add.text(cx, this.py + 22, 'KJEMISK LABORATORIUM', {
+            fontSize: '18px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Fuel indicator
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
-        this._fuelText = this.add.text(this.px + this.panelW - 20, this.py + 18, `Energi: ${fuel}`, {
-            fontSize: '12px', color: '#448844', fontFamily: 'monospace'
+        this._fuelText = this.add.text(this.px + this.panelW - 20, this.py + 22, `Energi: ${fuel}`, {
+            fontSize: '14px', color: '#448844', fontFamily: 'monospace'
         }).setOrigin(1, 0.5);
 
-        this.add.rectangle(cx, this.py + 34, this.panelW - 20, 1, 0x113322);
+        this.add.rectangle(cx, this.py + 42, this.panelW - 20, 1, 0x113322);
 
         // ── Filter buttons ────────────────────────────────────────────────────
         this._filterBtns = [];
@@ -84,38 +86,68 @@ class ChemLabScene extends Phaser.Scene {
             { id: 'medicine', label: 'Medisin' },
             { id: 'acid', label: 'Syrer' },
         ];
-        const filterY = this.py + 50;
+        const filterY = this.py + 62;
+        const filterStep = Math.min(120, (this.panelW - 80) / filters.length);
         filters.forEach((f, i) => {
-            const fx = this.px + 30 + i * 100 + 45;
+            const fx = this.px + 30 + i * filterStep + filterStep / 2;
             const active = this._filter === f.id;
             const btn = this.add.text(fx, filterY, f.label, {
-                fontSize: '12px', color: active ? '#33dd88' : '#335533',
+                fontSize: '16px', color: active ? '#33dd88' : '#335533',
                 fontFamily: 'monospace', fontStyle: active ? 'bold' : 'normal'
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
             btn.on('pointerdown', () => { this._filter = f.id; this._refresh(); });
             this._filterBtns.push(btn);
         });
 
-        this.add.rectangle(cx, filterY + 12, this.panelW - 20, 1, 0x113322);
+        this.add.rectangle(cx, filterY + 16, this.panelW - 20, 1, 0x113322);
 
         // Close
-        const closeBtn = this.add.text(this.px + this.panelW - 20, this.py + 8, '✕', {
-            fontSize: '18px', color: '#448844', fontFamily: 'monospace'
+        const closeBtn = this.add.text(this.px + this.panelW - 20, this.py + 10, '✕', {
+            fontSize: '22px', color: '#448844', fontFamily: 'monospace'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         closeBtn.on('pointerdown', () => this.scene.stop());
         this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
         this.input.keyboard.on('keydown-C', () => this.scene.stop());
 
-        this.contentY = filterY + 22;
+        this.contentY = filterY + 28;
         this._scrollOffset = 0;
+        this._maxScroll = 0;
 
         // Mouse wheel scrolling for recipe list
         this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
-            this._scrollOffset = Math.max(0, this._scrollOffset + deltaY * 0.5);
+            this._scrollOffset = this._clampScroll(this._scrollOffset + deltaY * 0.5);
             this._refresh();
         });
 
+        // Touch / mouse-drag scrolling with small movement threshold so that
+        // short taps still trigger interactive [Lag] buttons.
+        this._dragState = { active: false, startY: 0, startOffset: 0, engaged: false };
+        this.input.on('pointerdown', (pointer) => {
+            this._dragState.active = true;
+            this._dragState.engaged = false;
+            this._dragState.startY = pointer.y;
+            this._dragState.startOffset = this._scrollOffset;
+        });
+        this.input.on('pointermove', (pointer) => {
+            if (!this._dragState.active || !pointer.isDown) return;
+            const dy = pointer.y - this._dragState.startY;
+            if (!this._dragState.engaged && Math.abs(dy) < 8) return;
+            this._dragState.engaged = true;
+            this._scrollOffset = this._clampScroll(this._dragState.startOffset - dy);
+            this._refresh();
+        });
+        this.input.on('pointerup', () => { this._dragState.active = false; });
+        this.input.on('pointerupoutside', () => { this._dragState.active = false; });
+
         this._refresh();
+    }
+
+    _clampScroll(v) {
+        return Math.max(0, Math.min(v, this._maxScroll || 0));
+    }
+
+    _viewportHeight() {
+        return this.panelH - (this.contentY - this.py) - 30;
     }
 
     _refresh() {
@@ -124,7 +156,7 @@ class ChemLabScene extends Phaser.Scene {
         // Dark backing behind content for readability
         const cbg = this._d(this.add.graphics());
         cbg.fillStyle(0x080a10, 0.78);
-        cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 150, this.panelH - (this.contentY - this.py) - 10, 4);
+        cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 160, this.panelH - (this.contentY - this.py) - 10, 4);
 
         UIHelper.updateTabButtons(this._filterBtns, ['all', 'potion', 'explosive', 'medicine', 'acid'], this._filter, '#33dd88', '#335533');
 
@@ -135,6 +167,26 @@ class ChemLabScene extends Phaser.Scene {
             this._drawRecipes(fuel);
         } else {
             this._drawLockedMessage();
+            this._contentEndY = this.contentY;
+        }
+
+        // Compute max scroll from last-drawn content, clamp and draw scrollbar.
+        const viewportH = this._viewportHeight();
+        const contentSpan = Math.max(0, (this._contentEndY || 0) - this.contentY);
+        this._maxScroll = Math.max(0, contentSpan - viewportH);
+        this._scrollOffset = this._clampScroll(this._scrollOffset);
+
+        if (this._maxScroll > 0) {
+            const trackX = this.px + this.panelW - 170;
+            const trackY = this.contentY;
+            const trackH = viewportH;
+            const thumbH = Math.max(24, trackH * (trackH / (trackH + this._maxScroll)));
+            const thumbY = trackY + (trackH - thumbH) * (this._scrollOffset / this._maxScroll);
+            const bar = this._d(this.add.graphics());
+            bar.fillStyle(0x113322, 0.6);
+            bar.fillRoundedRect(trackX, trackY, 4, trackH, 2);
+            bar.fillStyle(0x33dd88, 0.7);
+            bar.fillRoundedRect(trackX, thumbY, 4, thumbH, 2);
         }
     }
 
@@ -147,12 +199,12 @@ class ChemLabScene extends Phaser.Scene {
     _drawLockedMessage() {
         const cx = this.px + this.panelW / 2;
         const cy = this.contentY + (this.panelH - (this.contentY - this.py)) / 2 - 40;
-        this._d(this.add.text(cx, cy, '🔒', { fontSize: '32px' }).setOrigin(0.5));
-        this._d(this.add.text(cx, cy + 30, 'Krever Kjemiker-skill!', {
-            fontSize: '14px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
+        this._d(this.add.text(cx, cy, '🔒', { fontSize: '36px' }).setOrigin(0.5));
+        this._d(this.add.text(cx, cy + 34, 'Krever Kjemiker-skill!', {
+            fontSize: '16px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(0.5));
-        this._d(this.add.text(cx, cy + 50, 'Lær Potente potions i skilltreet\nfor å bruke laboratoriet.', {
-            fontSize: '12px', color: '#445544', fontFamily: 'monospace', align: 'center'
+        this._d(this.add.text(cx, cy + 58, 'Lær Potente potions i skilltreet\nfor å bruke laboratoriet.', {
+            fontSize: '14px', color: '#445544', fontFamily: 'monospace', align: 'center'
         }).setOrigin(0.5));
     }
 
@@ -162,9 +214,11 @@ class ChemLabScene extends Phaser.Scene {
         const hero = this.heroRef;
         const cx = this.px + this.panelW / 2;
         let y = this.contentY;
-        const colW = Math.min(340, this.panelW - 40);
+        // Leave room on the right for element inventory column.
+        const colW = Math.min(400, this.panelW - 180);
         const leftX = this.px + 20;
-        const rightX = cx + 10;
+        const rightX = this.px + this.panelW - 160;
+        const rowStep = 62;
 
         // Left column: recipes
         let allMols = this.chem.getAvailableMolecules(hero, fuel);
@@ -175,14 +229,17 @@ class ChemLabScene extends Phaser.Scene {
         }
 
         if (allMols.length === 0) {
-            this._d(this.add.text(cx, y + 40, 'Ingen oppskrifter tilgjengelig.', {
-                fontSize: '13px', color: '#334433', fontFamily: 'monospace'
+            this._d(this.add.text(leftX + colW / 2, y + 40, 'Ingen oppskrifter tilgjengelig.', {
+                fontSize: '14px', color: '#334433', fontFamily: 'monospace'
             }).setOrigin(0.5));
         }
 
+        const visBot = this.py + this.panelH - 30;
+
         allMols.forEach((entry, idx) => {
-            const my = y + idx * 58 - (this._scrollOffset || 0);
-            if (my > this.py + this.panelH - 80 || my < y - 20) return;
+            const baseY = y + idx * rowStep;
+            const my = baseY - (this._scrollOffset || 0);
+            if (my > visBot || my < y - rowStep) return;
             const m = entry.mol;
             const can = entry.canCraft;
             const col = can ? 0x33dd88 : 0x223322;
@@ -190,22 +247,22 @@ class ChemLabScene extends Phaser.Scene {
 
             const bg = this._d(this.add.graphics());
             bg.fillStyle(col, 0.08);
-            bg.fillRoundedRect(leftX, my, colW, 52, 4);
+            bg.fillRoundedRect(leftX, my, colW, 56, 4);
             bg.lineStyle(1, col, 0.3);
-            bg.strokeRoundedRect(leftX, my, colW, 52, 4);
+            bg.strokeRoundedRect(leftX, my, colW, 56, 4);
 
             // Subtype icon
             const icons = { base: '⚗', acid: '🧪', potion: '🧪', medicine: '💊', explosive: '💣', salt: '⚗' };
             const icon = icons[m.subtype] || '⚗';
-            this._d(this.add.text(leftX + 6, my + 4, icon, { fontSize: '12px' }));
+            this._d(this.add.text(leftX + 6, my + 4, icon, { fontSize: '14px' }));
 
             // Name + formula – truncate long names to fit slot
-            const dispName = m.name.length > 28 ? m.name.slice(0, 27) + '…' : m.name;
-            this._d(this.add.text(leftX + 24, my + 5, dispName, {
-                fontSize: '13px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            const dispName = m.name.length > 26 ? m.name.slice(0, 25) + '…' : m.name;
+            this._d(this.add.text(leftX + 28, my + 5, dispName, {
+                fontSize: '15px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
             }));
-            this._d(this.add.text(leftX + 24, my + 19, `${m.formula}  [T${m.tier}]`, {
-                fontSize: '12px', color: '#556655', fontFamily: 'monospace'
+            this._d(this.add.text(leftX + 28, my + 22, `${m.formula}  [T${m.tier}]`, {
+                fontSize: '13px', color: '#556655', fontFamily: 'monospace'
             }));
 
             // Recipe elements
@@ -214,18 +271,18 @@ class ChemLabScene extends Phaser.Scene {
                 const ok = have >= r.amount;
                 return `${r.symbol}:${have}/${r.amount}${ok ? '' : '!'}`;
             }).join('  ');
-            this._d(this.add.text(leftX + 6, my + 33, recipeStr, {
-                fontSize: '12px', color: '#556655', fontFamily: 'monospace'
+            this._d(this.add.text(leftX + 6, my + 38, recipeStr, {
+                fontSize: '13px', color: '#556655', fontFamily: 'monospace'
             }));
 
             // Effect preview
-            this._d(this.add.text(leftX + colW - 8, my + 36, m.desc.length > 35 ? m.desc.slice(0, 33) + '…' : m.desc, {
+            this._d(this.add.text(leftX + colW - 8, my + 40, m.desc.length > 32 ? m.desc.slice(0, 30) + '…' : m.desc, {
                 fontSize: '12px', color: '#445544', fontFamily: 'monospace'
             }).setOrigin(1, 0));
 
             if (can) {
-                const btn = this._d(this.add.text(leftX + colW - 50, my + 10, '[ Lag ]', {
-                    fontSize: '13px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
+                const btn = this._d(this.add.text(leftX + colW - 56, my + 10, '[ Lag ]', {
+                    fontSize: '15px', color: '#33dd88', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
                 btn.on('pointerover', () => btn.setColor('#66ffaa'));
                 btn.on('pointerout', () => btn.setColor('#33dd88'));
@@ -235,7 +292,10 @@ class ChemLabScene extends Phaser.Scene {
 
         // Right side: element inventory
         const elemY = this.contentY;
-        this._drawElementCounts(rightX, elemY, colW - 20);
+        this._drawElementCounts(rightX, elemY, 150);
+
+        // End-of-content for scrollbar
+        this._contentEndY = y + allMols.length * rowStep;
     }
 
     _doSynthesize(moleculeId) {
@@ -262,29 +322,29 @@ class ChemLabScene extends Phaser.Scene {
 
     _drawElementCounts(x, y, w) {
         this._d(this.add.text(x, y, 'GRUNNSTOFFER:', {
-            fontSize: '13px', color: '#556655', fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '14px', color: '#556655', fontFamily: 'monospace', fontStyle: 'bold'
         }));
 
         const collected = this.heroRef.elementTracker.collected;
         const entries = Object.entries(collected).filter(([, v]) => v > 0);
         if (entries.length === 0) {
-            this._d(this.add.text(x, y + 14, 'Ingen lagret.', {
-                fontSize: '13px', color: '#334433', fontFamily: 'monospace'
+            this._d(this.add.text(x, y + 18, 'Ingen lagret.', {
+                fontSize: '14px', color: '#334433', fontFamily: 'monospace'
             }));
             return;
         }
 
-        let bx = x, by = y + 14;
+        let bx = x, by = y + 18;
         for (const [symbol, count] of entries) {
             const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
             const col = elem ? elem.color : 0xaaaaaa;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
             const badge = this._d(this.add.text(bx, by, `${symbol}:${count}`, {
-                fontSize: '13px', color: hexCol, fontFamily: 'monospace',
+                fontSize: '14px', color: hexCol, fontFamily: 'monospace',
                 backgroundColor: '#081808', padding: { x: 3, y: 1 }
             }));
             bx += badge.width + 6;
-            if (bx > x + w - 30) { bx = x; by += 16; }
+            if (bx > x + w - 30) { bx = x; by += 20; }
         }
     }
 }

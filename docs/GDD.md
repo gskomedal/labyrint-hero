@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.38
-**Sist oppdatert:** 2026-04-13
+**Versjon:** 0.39
+**Sist oppdatert:** 2026-04-15
 
 ---
 
@@ -515,7 +515,7 @@ Synergi: **Jordens kraft** (Geolog + Vokter) → +1 forsvar, +1 mineralsynsradiu
 
 Smelting, legeringer og smiing av utstyr.
 
-**Leirplass (Camp Room):** Garantert fra verden 2+, 50% sjanse i verden 1. Trygg sone med smelteovn og **persistent lager (stash)** der spilleren kan lagre mineraler, brensel og andre ressurser mellom besøk. Frigjør ryggsekken for kamp. Åpnes med V-tast. Visuelt tema med bål, telt, trær, stjernehimmel og røyk. Panelet bruker nesten full skjermstørrelse. Alle faner støtter scrolling med musehjul, og grunnstoff-merker er klikkbare for å filtrere minerallisten etter element.
+**Leirplass (Camp Room):** Garantert fra verden 2+, 50% sjanse i verden 1. Trygg sone med smelteovn og **persistent lager (stash)** der spilleren kan lagre mineraler, brensel og andre ressurser mellom besøk. Frigjør ryggsekken for kamp. Åpnes med V-tast. Visuelt tema med bål, telt, trær, stjernehimmel og røyk. Panelet er sentrert med luft rundt kanten (opptil 1080×680) og har større fonter for lesbarhet. Alle faner støtter scrolling med musehjul, drag med mus og drag med finger (touch), og en scrollbar-tommel viser posisjonen. Grunnstoff-merker er klikkbare for å filtrere minerallisten etter element.
 
 **Smelting:** Mineraler + brensel → rene grunnstoffer. Brensel (tre=1, kull=3 energi) spawner i labyrinten.
 
@@ -535,7 +535,7 @@ Låses opp ved første besøk i leirplass. **Minst én Metallurg-skill kreves fo
 
 Kjemisk syntese av potions, bomber, medisiner og syrer fra rene grunnstoffer.
 
-**Kjemisk laboratorium:** Spesialrom fra verden 3+ med grønn glød. Åpnes med C-tast. Filterbare oppskrifter etter kategori. Visuelt tema med labbenk, hyller med flasker, erlenmeyerkolber, reagensrør, periodisk tabell-hint og bobler. Karakterportrett i nedre høyre hjørne.
+**Kjemisk laboratorium:** Spesialrom fra verden 3+ med grønn glød. Åpnes med C-tast. Filterbare oppskrifter etter kategori. Visuelt tema med labbenk, hyller med flasker, erlenmeyerkolber, reagensrør, periodisk tabell-hint og bobler. Karakterportrett i nedre høyre hjørne. Panelet (760×600) har større fonter og støtter scrolling via musehjul, drag (mus eller finger) og en synlig scrollbar-tommel.
 
 **Produkter:** 15 kjemiske produkter i 5 kategorier. Kraftigere enn vanlige consumables – kjemisk livselixir healer 4 HP (vs 2), krutt gjør 8 skade i radius 3 (vs 6 for vanlig bombe), dynamitt 15 skade.
 
