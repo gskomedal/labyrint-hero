@@ -155,6 +155,80 @@ const ALLOY_DEFS = {
         stackSize: 10,
         desc: 'Hardeste legering. Legendarisk.'
     },
+    // ── New alloys (v0.40): expanded element usage ────────────────────────────
+    manganese_steel: {
+        id: 'manganese_steel', name: 'Manganstål', type: 'alloy',
+        formula: 'Fe + Mn + C', tier: 3,
+        color: 0x9988aa,
+        recipe: [
+            { symbol: 'Fe', amount: 3 },
+            { symbol: 'Mn', amount: 1 },
+            { symbol: 'C', amount: 1 }
+        ],
+        energyCost: 5,
+        smeltingTime: 5,
+        statBonuses: { attack: 4, defense: 3 },
+        stackSize: 10,
+        desc: 'Manganherdet stål. Tåler slag og har +20% holdbarhet.'
+    },
+    moly_steel: {
+        id: 'moly_steel', name: 'Molybdenstål', type: 'alloy',
+        formula: 'Fe + Mo + C', tier: 4,
+        color: 0x8899aa,
+        recipe: [
+            { symbol: 'Fe', amount: 2 },
+            { symbol: 'Mo', amount: 1 },
+            { symbol: 'C', amount: 1 }
+        ],
+        energyCost: 6,
+        smeltingTime: 6,
+        statBonuses: { attack: 4, defense: 2 },
+        stackSize: 10,
+        desc: 'Superlegering. Høy slagstyrke.'
+    },
+    tungsten_carbide: {
+        id: 'tungsten_carbide', name: 'Wolframkarbid', type: 'alloy',
+        formula: 'W + C', tier: 4,
+        color: 0x556677,
+        recipe: [
+            { symbol: 'W', amount: 2 },
+            { symbol: 'C', amount: 1 }
+        ],
+        energyCost: 7,
+        smeltingTime: 7,
+        statBonuses: { attack: 6 },
+        stackSize: 10,
+        desc: 'Ekstremt hardt. Perfekt til våpeneggene.'
+    },
+    tantalum_plate: {
+        id: 'tantalum_plate', name: 'Tantalplate', type: 'alloy',
+        formula: 'Ta + Fe', tier: 4,
+        color: 0x889988,
+        recipe: [
+            { symbol: 'Ta', amount: 2 },
+            { symbol: 'Fe', amount: 1 }
+        ],
+        energyCost: 6,
+        smeltingTime: 6,
+        statBonuses: { defense: 4, hearts: 1 },
+        stackSize: 10,
+        desc: 'Korrosjonsbestandig. Brukes i rustning med ekstra HP.'
+    },
+    phosphor_crystal: {
+        id: 'phosphor_crystal', name: 'Fosforkrystall', type: 'alloy',
+        formula: 'Ce + La + Nd', tier: 5,
+        color: 0xddffcc,
+        recipe: [
+            { symbol: 'Ce', amount: 1 },
+            { symbol: 'La', amount: 1 },
+            { symbol: 'Nd', amount: 1 }
+        ],
+        energyCost: 7,
+        smeltingTime: 6,
+        statBonuses: { attack: 3, defense: 3, hearts: 1, vision: 1 },
+        stackSize: 10,
+        desc: 'Lantanide-krystall. Lyser. Gir bærer +1 synsfelt.'
+    },
 };
 
 // ── Alloy-forged equipment templates ─────────────────────────────────────────
@@ -175,6 +249,13 @@ const ALLOY_EQUIPMENT = {
     dural_vest:        { id: 'dural_vest',        name: 'Duralvest',         type: 'armor', alloyId: 'duraluminium',     color: 0xbbccdd, def: 4, hearts: 2, desc: '+4 DEF, +2 HP (lett)' },
     titanium_plate:    { id: 'titanium_plate',    name: 'Titanrustning',     type: 'armor', alloyId: 'titanium_alloy',   color: 0x99aacc, def: 7, hearts: 2, desc: '+7 DEF, +2 HP (titan)' },
     pt_ir_armor:       { id: 'pt_ir_armor',       name: 'Pt-Ir rustning',    type: 'armor', alloyId: 'platinum_iridium', color: 0xeeeedd, def: 8, hearts: 3, desc: '+8 DEF, +3 HP (Pt-Ir)' },
+    // ── New alloy equipment (v0.40) ─────────────────────────────────────────
+    manganese_sword:  { id: 'manganese_sword',  name: 'Manganstål-sverd',   type: 'weapon', alloyId: 'manganese_steel',  color: 0x9988aa, atk: 5, def: 1, desc: '+5 ATK, +1 DEF (manganstål)' },
+    tungsten_axe:     { id: 'tungsten_axe',     name: 'Wolframøks',          type: 'weapon', alloyId: 'tungsten_carbide', color: 0x556677, atk: 8, desc: '+8 ATK (wolframkarbid)' },
+    moly_pike:        { id: 'moly_pike',        name: 'Molybden-lanse',      type: 'weapon', alloyId: 'moly_steel',       color: 0x8899aa, atk: 7, desc: '+7 ATK (molybden)' },
+    tantalum_cuirass: { id: 'tantalum_cuirass', name: 'Tantalpansring',      type: 'armor',  alloyId: 'tantalum_plate',   color: 0x889988, def: 6, hearts: 2, desc: '+6 DEF, +2 HP (tantal)' },
+    phosphor_blade:   { id: 'phosphor_blade',   name: 'Fosfor-klinge',       type: 'weapon', alloyId: 'phosphor_crystal', color: 0xddffcc, atk: 6, def: 2, visionBonus: 1, desc: '+6 ATK, +2 DEF, +1 syn (fosfor)' },
+    phosphor_shield:  { id: 'phosphor_shield',  name: 'Fosfor-skjold',       type: 'armor',  alloyId: 'phosphor_crystal', color: 0xddffcc, def: 5, hearts: 2, visionBonus: 1, desc: '+5 DEF, +2 HP, +1 syn (fosfor)' },
 };
 
 // ── Alloy tier colors (for UI) ──────────────────────────────────────────────
