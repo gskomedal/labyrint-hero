@@ -59,7 +59,15 @@ class ChemistrySystem {
         // Create usable item from molecule definition
         const item = this._createUsableItem(mol, hero, worldNum);
 
-        return { success: true, item, energyCost };
+        // Kjemiker T3 "Double Brew": chance to produce an extra bomb per craft.
+        let bonusItem = null;
+        if (mol.subtype === 'explosive' && (hero.chemDoubleBrewChance || 0) > 0) {
+            if (Math.random() < hero.chemDoubleBrewChance) {
+                bonusItem = this._createUsableItem(mol, hero, worldNum);
+            }
+        }
+
+        return { success: true, item, bonusItem, energyCost };
     }
 
     /**
@@ -87,11 +95,22 @@ class ChemistrySystem {
     _createUsableItem(mol, hero, worldNum) {
         const eff = mol.effects;
         const wn = worldNum || hero.worldNum || 1;
-        const worldScale = 1 + (wn - 1) * 0.4;
+        // Separate scaling curves: bombs scale faster than potions so they
+        // keep pace with world monster HP; potions keep the older curve so
+        // buffs don't become overpowered.
+        const potionScale = 1 + (wn - 1) * 0.4;
+        const bombScale = 1 + (wn - 1) * 0.6;
+        const bombFloor = wn * 2; // flat damage bonus per world
+        // Radius auto-upgrade kicks in at world 5 and 8 so high-world bombs
+        // feel noticeably more effective.
+        const bombRadiusBonus = (wn >= 8 ? 2 : (wn >= 5 ? 1 : 0));
         const potencyMul = 1 + (hero.potionPotencyBonus || 0);
+        const potionMagnitudeMul = 1 + (hero.potionMagnitudeBonus || 0);
         const durationMul = 1 + (hero.potionDurationBonus || 0);
         const bombDmgMul = 1 + (hero.chemBombBonus || 0);
         const bombRadMul = 1 + (hero.chemRadiusBonus || 0);
+        const acidDefShred = hero.chemAcidDefShred || 0;
+        const bombChainBonus = hero.chemBombChain ? 1 : 0;
 
         const item = {
             id: mol.id,
@@ -111,7 +130,12 @@ class ChemistrySystem {
 
         // Build the use() function based on effect type
         if (eff.onUse === 'heal') {
-            const hp = Math.round(eff.healHP * potencyMul * worldScale);
+            // From world 4+ healing potions scale with % max HP so they stay
+            // meaningful against higher HP pools.
+            const flatHP = Math.round(eff.healHP * potencyMul * potionMagnitudeMul * potionScale);
+            const hp = wn >= 4
+                ? Math.max(flatHP, Math.round((hero.maxHearts || flatHP) * 0.25 * potencyMul))
+                : flatHP;
             item.desc = `+${hp} HP`;
             item.use = (hero, scene) => {
                 hero.hearts = Math.min(hero.hearts + hp, hero.maxHearts);
@@ -119,7 +143,7 @@ class ChemistrySystem {
                 return true;
             };
         } else if (eff.onUse === 'buff') {
-            const amt = Math.round(eff.amount * potencyMul * worldScale);
+            const amt = Math.round(eff.amount * potencyMul * potionMagnitudeMul * potionScale);
             const dur = Math.round(eff.durationMs * durationMul);
             item.desc = `+${amt} ${eff.stat} (${Math.round(dur / 1000)}s)`;
             item.use = (hero) => {
@@ -127,7 +151,7 @@ class ChemistrySystem {
                 return true;
             };
         } else if (eff.onUse === 'cure_all') {
-            const hp = Math.round((eff.healHP || 0) * potencyMul * worldScale);
+            const hp = Math.round((eff.healHP || 0) * potencyMul * potionMagnitudeMul * potionScale);
             item.use = (hero, scene) => {
                 hero.clearAllEffects();
                 if (hp > 0) hero.hearts = Math.min(hero.hearts + hp, hero.maxHearts);
@@ -135,23 +159,49 @@ class ChemistrySystem {
                 return true;
             };
         } else if (eff.onUse === 'bomb') {
-            const dmg = Math.round(eff.damage * bombDmgMul * worldScale);
-            const rad = Math.round(eff.radius * bombRadMul);
-            item.desc = `${dmg} skade, radius ${rad}`;
+            const dmg = Math.round(eff.damage * bombDmgMul * bombScale + bombFloor);
+            const rad = Math.round(eff.radius * bombRadMul) + bombRadiusBonus;
+            const defPierce = eff.defPierce || 0;
+            const chainCount = (eff.chain || 0) + bombChainBonus;
+            item.desc = `${dmg} skade, radius ${rad}` + (defPierce ? `, ignorer ${defPierce} Def` : '');
             item.use = (hero, scene) => {
                 if (!scene) return false;
+                const hitIds = new Set();
+                const applyHit = (m, mul = 1) => {
+                    if (!m || !m.alive || hitIds.has(m)) return;
+                    hitIds.add(m);
+                    let dealt = Math.max(1, Math.round(dmg * mul));
+                    if (defPierce > 0 && typeof m.defense === 'number') {
+                        dealt += Math.min(defPierce, m.defense);
+                    }
+                    m.takeDamage(dealt);
+                };
+                // Primary AoE
                 for (const m of scene.monsters) {
                     if (!m.alive) continue;
                     const d = Math.abs(m.gridX - hero.gridX) + Math.abs(m.gridY - hero.gridY);
-                    if (d <= rad) m.takeDamage(dmg);
+                    if (d <= rad) applyHit(m);
+                }
+                // Chain lightning to nearest survivors outside the radius at 50% dmg
+                for (let i = 0; i < chainCount; i++) {
+                    let best = null, bestD = Infinity;
+                    for (const m of scene.monsters) {
+                        if (!m.alive || hitIds.has(m)) continue;
+                        const d = Math.abs(m.gridX - hero.gridX) + Math.abs(m.gridY - hero.gridY);
+                        if (d < bestD) { best = m; bestD = d; }
+                    }
+                    if (best) applyHit(best, 0.5);
+                    else break;
                 }
                 scene.monsters = scene.monsters.filter(m => m.alive);
                 return true;
             };
         } else if (eff.onUse === 'acid_bomb') {
-            const dmg = Math.round(eff.damage * bombDmgMul * worldScale);
-            const rad = Math.round(eff.radius * bombRadMul);
-            const dur = eff.duration || 3;
+            const dmg = Math.round(eff.damage * bombDmgMul * bombScale + bombFloor);
+            const rad = Math.round(eff.radius * bombRadMul) + bombRadiusBonus;
+            // Burn duration scales with world: +1 round per 4 worlds.
+            const dur = (eff.duration || 3) + Math.floor(wn / 4);
+            const defShred = acidDefShred; // extra Def reduced by Kjemiker T2 buff
             item.desc = `${dmg} skade + etsende ${dur} runder, radius ${rad}`;
             item.use = (hero, scene) => {
                 if (!scene) return false;
@@ -162,6 +212,9 @@ class ChemistrySystem {
                         m.takeDamage(dmg);
                         // Acid burn: reduce defense over time
                         if (m.applyAcidBurn) m.applyAcidBurn(dur);
+                        if (defShred > 0 && typeof m.defense === 'number') {
+                            m.defense = Math.max(0, m.defense - defShred);
+                        }
                     }
                 }
                 scene.monsters = scene.monsters.filter(m => m.alive);
@@ -196,5 +249,37 @@ class ChemistrySystem {
 
     _adjustedEnergy(baseCost, hero) {
         return Math.max(0, Math.round(baseCost * (hero.smeltingEfficiency || 1.0)));
+    }
+
+    // ── Transmutation (3-path synergy) ──────────────────────────────────────
+    /**
+     * Transmutasjon-synergi: convert 5 of `symbol` into 1 of a neighbouring
+     * element (atomic number ±1). Returns the produced symbol or null if
+     * the hero lacks the skill / enough of the source / no valid neighbour.
+     * Neighbour preference: next atomic number (rollover to previous if top).
+     */
+    transmute(hero, symbol) {
+        if (!hero || !hero.transmutationUnlocked) return null;
+        const have = hero.elementTracker.getCount(symbol);
+        if (have < 5) return null;
+        if (typeof ELEMENTS === 'undefined' || !ELEMENTS[symbol]) return null;
+        const srcZ = ELEMENTS[symbol].atomicNumber;
+
+        // Build atomic-number → symbol map once.
+        const byZ = {};
+        for (const [sym, def] of Object.entries(ELEMENTS)) {
+            byZ[def.atomicNumber] = sym;
+        }
+        // Prefer Z+1, fall back to Z-1.
+        const targetSym = byZ[srcZ + 1] || byZ[srcZ - 1];
+        if (!targetSym || targetSym === symbol) return null;
+
+        hero.elementTracker.collected[symbol] = have - 5;
+        if (hero.elementTracker.collected[symbol] <= 0) {
+            delete hero.elementTracker.collected[symbol];
+        }
+        hero.elementTracker.collect(targetSym, 1);
+        hero.elementTracker.discover(targetSym);
+        return targetSym;
     }
 }
