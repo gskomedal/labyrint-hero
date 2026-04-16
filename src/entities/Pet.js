@@ -2,10 +2,10 @@
 // A companion that follows the hero, assists in combat, and persists across worlds.
 
 const PET_TYPES = {
-    fox:    { name: 'Rev',      color: 0xff8833, attack: 1, maxHp: 8,  desc: 'Rask og lojal' },
-    cat:    { name: 'Katt',     color: 0xccaa66, attack: 1, maxHp: 6,  desc: 'Stille og presis' },
-    dragon: { name: 'Drage',    color: 0xff4466, attack: 2, maxHp: 10, desc: 'Liten men farlig' },
-    owl:    { name: 'Ugle',     color: 0x88aacc, attack: 1, maxHp: 6,  desc: 'Klok og skarpsynt' },
+    fox:    { name: 'Rev',      color: 0xff8833, attack: 1, maxHp: 14, desc: 'Rask og lojal' },
+    cat:    { name: 'Katt',     color: 0xccaa66, attack: 1, maxHp: 12, desc: 'Stille og presis' },
+    dragon: { name: 'Drage',    color: 0xff4466, attack: 2, maxHp: 18, desc: 'Liten men farlig' },
+    owl:    { name: 'Ugle',     color: 0x88aacc, attack: 1, maxHp: 12, desc: 'Klok og skarpsynt' },
 };
 
 class Pet {
@@ -25,6 +25,9 @@ class Pet {
 
         // Pet backpack (4 slots for carrying items)
         this.backpack = new Array(4).fill(null);
+
+        // Pet equipment (craftable at the Smeltery / Chemistry Lab)
+        this.equipped = { weapon: null, armor: null };
 
         this.graphics = scene.add.graphics();
         this.graphics.setDepth(4);
@@ -292,9 +295,35 @@ class Pet {
         };
     }
 
-    get effectiveAttack() { return this.attack + this._heroBonuses().atk; }
-    get effectiveMaxHp()  { return this.maxHp  + this._heroBonuses().hp; }
-    get effectiveDef()    { return this._heroBonuses().def; }
+    get effectiveAttack() {
+        const eq = this.equipped.weapon;
+        return this.attack + this._heroBonuses().atk + (eq ? (eq.petAtk || 0) : 0);
+    }
+    get effectiveMaxHp() {
+        const eqW = this.equipped.weapon, eqA = this.equipped.armor;
+        return this.maxHp + this._heroBonuses().hp
+            + (eqW ? (eqW.petHp || 0) : 0) + (eqA ? (eqA.petHp || 0) : 0);
+    }
+    get effectiveDef() {
+        const eq = this.equipped.armor;
+        return this._heroBonuses().def + (eq ? (eq.petDef || 0) : 0);
+    }
+
+    /** Equip a pet item. Returns the previously equipped item or null. */
+    equipItem(item) {
+        const slot = item.petSlot; // 'weapon' or 'armor'
+        if (!slot) return null;
+        const old = this.equipped[slot];
+        this.equipped[slot] = item;
+        return old;
+    }
+
+    /** Unequip an item from the given slot. Returns the item or null. */
+    unequipItem(slot) {
+        const old = this.equipped[slot];
+        this.equipped[slot] = null;
+        return old;
+    }
 
     // ── Combat ────────────────────────────────────────────────────────────────
 
@@ -435,18 +464,23 @@ class Pet {
     // ── Serialisation ─────────────────────────────────────────────────────────
 
     serialize() {
+        const serializeSlot = (entry) => {
+            if (!entry) return null;
+            if (entry.count !== undefined) return { id: entry.id, count: entry.count };
+            if (entry.rarity && entry.rarity !== 'common') return { id: entry.id, rarity: entry.rarity };
+            return entry.id || null;
+        };
         return {
             typeId:   this.typeId,
             hp:       this.hp,
             maxHp:    this.maxHp,
             attack:   this.attack,
             alive:    this.alive,
-            backpack: this.backpack.map(entry => {
-                if (!entry) return null;
-                if (entry.count !== undefined) return { id: entry.id, count: entry.count };
-                if (entry.rarity && entry.rarity !== 'common') return { id: entry.id, rarity: entry.rarity };
-                return entry.id || null;
-            }),
+            equipped: {
+                weapon: this.equipped.weapon ? this.equipped.weapon.id : null,
+                armor:  this.equipped.armor  ? this.equipped.armor.id  : null,
+            },
+            backpack: this.backpack.map(serializeSlot),
         };
     }
 
@@ -459,6 +493,16 @@ class Pet {
         pet.alive  = data.alive !== false;
         if (!pet.alive) {
             pet.graphics.setVisible(false);
+        }
+        // Restore pet equipment
+        if (data.equipped) {
+            const petItems = typeof PET_EQUIPMENT !== 'undefined' ? PET_EQUIPMENT : {};
+            if (data.equipped.weapon && petItems[data.equipped.weapon]) {
+                pet.equipped.weapon = petItems[data.equipped.weapon];
+            }
+            if (data.equipped.armor && petItems[data.equipped.armor]) {
+                pet.equipped.armor = petItems[data.equipped.armor];
+            }
         }
         // Restore pet backpack
         if (data.backpack) {

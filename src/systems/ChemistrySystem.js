@@ -242,6 +242,23 @@ class ChemistrySystem {
                 hero.addTempBuff('invisible', 1, dur);
                 return true;
             };
+        } else if (eff.onUse === 'pet_permanent_hp') {
+            const amt = eff.amount || 2;
+            item.desc = `Kjæledyr +${amt} permanent maks HP`;
+            item.use = (hero, scene) => {
+                if (!scene || !scene.pet || !scene.pet.alive) return false;
+                scene.pet.maxHp += amt;
+                scene.pet.hp = Math.min(scene.pet.hp + amt, scene.pet.effectiveMaxHp);
+                return true;
+            };
+        } else if (eff.onUse === 'pet_permanent_atk') {
+            const amt = eff.amount || 1;
+            item.desc = `Kjæledyr +${amt} permanent angrep`;
+            item.use = (hero, scene) => {
+                if (!scene || !scene.pet || !scene.pet.alive) return false;
+                scene.pet.attack += amt;
+                return true;
+            };
         }
 
         return item;

@@ -836,13 +836,17 @@ class SmelteryScene extends Phaser.Scene {
                 if (adjY > visBot) { return; }
                 if (adjY < visTop - 40) return;
 
+                const isPet = !!equip.petSlot;
                 const hexCol = '#' + (equip.color || 0xaabbcc).toString(16).padStart(6, '0');
+                const typeLabel = isPet
+                    ? (equip.petSlot === 'weapon' ? '🐾 Kjæledyr-klo' : '🐾 Kjæledyr-rust')
+                    : (equip.type === 'weapon' ? 'Våpen' : 'Rustning');
 
                 const bg = this._d(this.add.graphics());
                 bg.fillStyle(equip.color || 0xaabbcc, 0.08);
                 bg.fillRoundedRect(startX + 10, adjY, colW - 20, 40, 3);
 
-                this._d(this.add.text(startX + 18, adjY + 6, `${equip.name} (${equip.type === 'weapon' ? 'Våpen' : 'Rustning'})`, {
+                this._d(this.add.text(startX + 18, adjY + 6, `${equip.name} (${typeLabel})`, {
                     fontSize: '14px', color: hexCol, fontFamily: 'monospace'
                 }));
                 this._d(this.add.text(startX + 18, adjY + 22, equip.desc, {
@@ -851,11 +855,11 @@ class SmelteryScene extends Phaser.Scene {
                 }));
 
                 const btn = this._d(this.add.text(startX + colW - 70, adjY + 12, '[ Smi ]', {
-                    fontSize: '14px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+                    fontSize: '14px', color: isPet ? '#ffaadd' : '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
-                btn.on('pointerover', () => btn.setColor('#ffaa44'));
-                btn.on('pointerout', () => btn.setColor('#ff7722'));
-                btn.on('pointerdown', () => this._doForge(alloyId, equip.id));
+                btn.on('pointerover', () => btn.setColor(isPet ? '#ffccee' : '#ffaa44'));
+                btn.on('pointerout', () => btn.setColor(isPet ? '#ffaadd' : '#ff7722'));
+                btn.on('pointerdown', () => isPet ? this._doPetForge(alloyId, equip) : this._doForge(alloyId, equip.id));
             });
             rowY += 8;
         }
@@ -878,6 +882,38 @@ class SmelteryScene extends Phaser.Scene {
         }
 
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smidd: ${result.item.name}!`, color: '#ffaa44' });
+
+        Audio.playPickup();
+        this._refresh();
+    }
+
+    /** Forge a pet equipment piece (claws / collar / harness). */
+    _doPetForge(alloyId, petEquipDef) {
+        const hero = this.heroRef;
+        if (!hero.alloyInventory || (hero.alloyInventory[alloyId] || 0) < 1) return;
+
+        hero.alloyInventory[alloyId]--;
+        if (hero.alloyInventory[alloyId] <= 0) delete hero.alloyInventory[alloyId];
+
+        // Try to equip directly on the pet (auto-swap with old item to hero backpack).
+        const gs = this.scene.get('GameScene');
+        const pet = gs && gs.pet && gs.pet.alive ? gs.pet : null;
+        if (pet) {
+            const old = pet.equipItem(petEquipDef);
+            if (old) {
+                // Unequipped previous item → put in hero backpack or drop.
+                if (!hero.inventory.addItem(old)) {
+                    EventBus.emit('spawnItem', { gx: hero.gridX, gy: hero.gridY, item: old });
+                }
+            }
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `${pet.petName}: ${petEquipDef.name}!`, color: '#ffaadd' });
+        } else {
+            // No living pet: put the item in hero's backpack for later.
+            if (!hero.inventory.addItem(petEquipDef)) {
+                EventBus.emit('spawnItem', { gx: hero.gridX, gy: hero.gridY, item: petEquipDef });
+            }
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smidd: ${petEquipDef.name}`, color: '#ffaadd' });
+        }
 
         Audio.playPickup();
         this._refresh();

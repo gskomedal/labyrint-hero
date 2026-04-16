@@ -24,7 +24,7 @@ class InventoryScene extends Phaser.Scene {
         const bpCount = this.inv.backpack.length;
         const bpRows = Math.ceil(bpCount / 5);
         const extraBpSpace = Math.max(0, (bpRows - 2) * 60);
-        const panelH = (hasPet ? 500 : 420) + extraBpSpace;
+        const panelH = (hasPet ? 560 : 420) + extraBpSpace;
         const panelY = cy;
         this.add.rectangle(cx, panelY, panelW, panelH, 0x0d0b1e).setStrokeStyle(2, 0x334466);
 
@@ -104,7 +104,7 @@ class InventoryScene extends Phaser.Scene {
         const bpCount = this.inv.backpack.length;
         const bpRows = Math.ceil(bpCount / 5);
         const extraBpSpace = Math.max(0, (bpRows - 2) * 60);
-        const panelH = (hasPet ? 500 : 420) + extraBpSpace;
+        const panelH = (hasPet ? 560 : 420) + extraBpSpace;
         const panelY = cy;
 
         // Update stats line
@@ -430,7 +430,8 @@ class InventoryScene extends Phaser.Scene {
 
         // Pet label with name and HP (to the right of portrait)
         const labelX = petPortX + petPortSize + 12;
-        const hpText = `${pet.petName}  HP: ${pet.hp}/${pet.effectiveMaxHp}  ATK: ${pet.effectiveAttack}`;
+        const defStr = pet.effectiveDef > 0 ? `  DEF: ${pet.effectiveDef}` : '';
+        const hpText = `${pet.petName}  HP: ${pet.hp}/${pet.effectiveMaxHp}  ATK: ${pet.effectiveAttack}${defStr}`;
         this._d(this.add.text(labelX, baseY, `KJÆLEDYR  ·  ${hpText}`, {
             fontSize: '13px', color: '#ffaadd', fontFamily: 'monospace'
         }));
@@ -439,11 +440,20 @@ class InventoryScene extends Phaser.Scene {
             fontSize: '13px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(1, 0));
 
+        // Pet equipment slots (weapon + armor)
+        const eqY = baseY + 18;
+        this._d(this.add.text(labelX, eqY, 'Utstyr:', {
+            fontSize: '12px', color: '#886688', fontFamily: 'monospace'
+        }));
+        const eqSlotSize = 42;
+        this._makePetEquipSlot(labelX + 54, eqY + eqSlotSize / 2 + 2, eqSlotSize, 'weapon', pet);
+        this._makePetEquipSlot(labelX + 54 + eqSlotSize + 8, eqY + eqSlotSize / 2 + 2, eqSlotSize, 'armor', pet);
+
         // Pet backpack slots (4 slots in a row, to the right of portrait)
         const slotSize = 52, gap = 8;
         const totalW = 4 * slotSize + 3 * gap;
         const startX = labelX;
-        const slotsY = baseY + 20;
+        const slotsY = eqY + eqSlotSize + 12;
 
         for (let i = 0; i < 4; i++) {
             const sx = startX + i * (slotSize + gap) + slotSize / 2;
@@ -529,6 +539,42 @@ class InventoryScene extends Phaser.Scene {
             bg.setInteractive({ useHandCursor: true });
             bg.on('pointerover', () => bg.setFillStyle(0x1a1830));
             bg.on('pointerout',  () => bg.setFillStyle(0x120a18));
+        }
+    }
+
+    /** Draw a pet equipment slot (weapon or armor). Tap to unequip back to hero backpack. */
+    _makePetEquipSlot(x, y, size, slot, pet) {
+        const item = pet.equipped[slot];
+        const label = slot === 'weapon' ? 'Klo' : 'Rust';
+        const col = item ? (item.color || 0xffaadd) : 0x1a0a1a;
+
+        const bg = this._d(this.add.rectangle(x, y, size, size, 0x1a0a1a).setStrokeStyle(1, col));
+        if (item) {
+            this._drawItemIcon(x, y, item, size - 8);
+            this._d(this.add.text(x, y + size / 2 - 2, item.name.length > 8 ? item.name.slice(0, 7) + '…' : item.name, {
+                fontSize: '10px', color: '#ffaadd', fontFamily: 'monospace'
+            }).setOrigin(0.5, 1));
+            bg.setInteractive({ useHandCursor: true });
+            bg.on('pointerover', () => {
+                bg.setFillStyle(0x2a1a2a);
+                this._showTooltip(x, y - size / 2 - 4, item);
+            });
+            bg.on('pointerout', () => { bg.setFillStyle(0x1a0a1a); this._hideTooltip(); });
+            bg.on('pointerdown', () => {
+                this._hideTooltip();
+                const removed = pet.unequipItem(slot);
+                if (removed) {
+                    // Try to put in hero inventory, otherwise drop on ground.
+                    if (!this.inv.addItem(removed)) {
+                        EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: removed });
+                    }
+                }
+                this._refresh();
+            });
+        } else {
+            this._d(this.add.text(x, y, label, {
+                fontSize: '11px', color: '#443344', fontFamily: 'monospace'
+            }).setOrigin(0.5));
         }
     }
 

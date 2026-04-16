@@ -275,6 +275,22 @@ const ALLOY_EQUIPMENT = {
     scandium_harness: { id: 'scandium_harness', name: 'Skandium-harnisk',    type: 'armor',  alloyId: 'scandium_alloy',   color: 0xbbddcc, def: 5, hearts: 3, desc: '+5 DEF, +3 HP (lettrustning)' },
 };
 
+// ── Pet equipment (forged from alloys at the Smeltery) ──────────────────────
+// petSlot: 'weapon' or 'armor'. petAtk/petDef/petHp are additive bonuses.
+
+const PET_EQUIPMENT = {
+    // Pet weapons (claws / fangs)
+    bronze_claws:    { id: 'bronze_claws',    name: 'Bronsekløer',       petSlot: 'weapon', alloyId: 'bronze',           color: 0xcc8844, petAtk: 2,              desc: '+2 ATK (kjæledyr)' },
+    steel_fangs:     { id: 'steel_fangs',     name: 'Ståltenner',        petSlot: 'weapon', alloyId: 'steel',            color: 0xaabbcc, petAtk: 3,              desc: '+3 ATK (kjæledyr)' },
+    tungsten_claws:  { id: 'tungsten_claws',  name: 'Wolframkløer',      petSlot: 'weapon', alloyId: 'tungsten_carbide', color: 0x556677, petAtk: 5,              desc: '+5 ATK (kjæledyr)' },
+    phosphor_fangs:  { id: 'phosphor_fangs',  name: 'Fosfortenner',      petSlot: 'weapon', alloyId: 'phosphor_crystal', color: 0xddffcc, petAtk: 4, petHp: 2,    desc: '+4 ATK, +2 HP (kjæledyr)' },
+    // Pet armor (collars / harnesses)
+    bronze_collar:   { id: 'bronze_collar',   name: 'Bronsehalsbånd',    petSlot: 'armor',  alloyId: 'bronze',           color: 0xcc8844, petDef: 1, petHp: 3,    desc: '+1 DEF, +3 HP (kjæledyr)' },
+    steel_harness:   { id: 'steel_harness',   name: 'Stålsele',          petSlot: 'armor',  alloyId: 'steel',            color: 0xaabbcc, petDef: 2, petHp: 4,    desc: '+2 DEF, +4 HP (kjæledyr)' },
+    scandium_vest:   { id: 'scandium_vest',   name: 'Skandiumvest',      petSlot: 'armor',  alloyId: 'scandium_alloy',   color: 0xbbddcc, petDef: 3, petHp: 6,    desc: '+3 DEF, +6 HP (kjæledyr)' },
+    titanium_harness:{ id: 'titanium_harness', name: 'Titansele',        petSlot: 'armor',  alloyId: 'titanium_alloy',   color: 0x99aacc, petDef: 4, petHp: 8,    desc: '+4 DEF, +8 HP (kjæledyr)' },
+};
+
 // ── Alloy tier colors (for UI) ──────────────────────────────────────────────
 
 const ALLOY_TIER_COLORS = {
