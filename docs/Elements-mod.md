@@ -1,7 +1,9 @@
 # Labyrint Hero – Elements-modifikasjon
-**Versjon:** 0.3 (fase 1–4 fullført, dataset komplett)
-**Sist oppdatert:** 2026-04-13
+**Versjon:** 0.4 (fase 1–4 fullført, orphan-oppryddning v0.40)
+**Sist oppdatert:** 2026-04-15
 **Status:** Fase 1–4 implementert. Fase 5 (Fysikk) utsatt.
+
+**v0.40-oppdatering:** 2 nye mineraler (molybdenitt, barytt) og 5 nye legeringer + 8 nye molekyler gir praktisk bruk for Mn, Mo, W, Ta, Ba, B, Ce, La, Nd, Zn. Bombeskade er separert fra potionskala og skalerer +60% per verden (mot +40% før) med flat bombgulv; radius +1 fra verden 5 og +2 fra verden 8. Geolog/Metallurg/Kjemiker har fått T4-ferdigheter (Geode-splitter, Reforge, Volatil mestring) og en 3-sti-synergi Transmutasjon (5 → 1 nabo på atomnummer). Se CHANGELOG v0.40 for full diff.
 
 ---
 

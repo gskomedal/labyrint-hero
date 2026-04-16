@@ -133,6 +133,72 @@ const MOLECULE_DEFS = {
         effects: { onUse: 'bomb', damage: 20, radius: 4 },
         desc: 'Massiv eksplosjon! 20 skade i radius 4.'
     },
+
+    // ── New molecules (v0.40): expanded element usage + stronger bombs ───────
+    zinc_antiseptic: {
+        id: 'zinc_antiseptic', name: 'Sinkklorid-antiseptikum', type: 'molecule', subtype: 'medicine',
+        formula: 'ZnCl\u2082', tier: 2, color: 0xaaddee, stackSize: 10,
+        recipe: [{ symbol: 'Zn', amount: 1 }, { symbol: 'Cl', amount: 2 }],
+        energyCost: 1,
+        effects: { onUse: 'cure_all', healHP: 4 },
+        desc: 'Renser sår. Fjerner statuseffekter og healer 4 HP.'
+    },
+    boron_flare: {
+        id: 'boron_flare', name: 'Bor-signalbombe', type: 'molecule', subtype: 'explosive',
+        formula: 'B + Na + O', tier: 2, color: 0x99ff44, stackSize: 10,
+        recipe: [{ symbol: 'B', amount: 2 }, { symbol: 'Na', amount: 1 }, { symbol: 'O', amount: 1 }],
+        energyCost: 1,
+        effects: { onUse: 'bomb', damage: 10, radius: 3 },
+        desc: 'Grønt signalfyr. 10 skade i radius 3.'
+    },
+    barium_firework: {
+        id: 'barium_firework', name: 'Barium-fyrverkeri', type: 'molecule', subtype: 'explosive',
+        formula: 'Ba + K + O', tier: 3, color: 0x66dd88, stackSize: 10,
+        recipe: [{ symbol: 'Ba', amount: 1 }, { symbol: 'K', amount: 1 }, { symbol: 'O', amount: 2 }],
+        energyCost: 2,
+        effects: { onUse: 'bomb', damage: 14, radius: 4 },
+        desc: 'Grønn eksplosjon. 14 skade i radius 4.'
+    },
+    thermite_charge: {
+        id: 'thermite_charge', name: 'Thermittladning', type: 'molecule', subtype: 'explosive',
+        formula: 'Fe + Al + S', tier: 3, color: 0xff8844, stackSize: 5,
+        recipe: [{ symbol: 'Fe', amount: 2 }, { symbol: 'Al', amount: 2 }, { symbol: 'S', amount: 1 }],
+        energyCost: 2,
+        effects: { onUse: 'bomb', damage: 25, radius: 3, defPierce: 4 },
+        desc: 'Gjennom-brennende. 25 skade, ignorer 4 Forsvar, radius 3.'
+    },
+    neodym_magnetbomb: {
+        id: 'neodym_magnetbomb', name: 'Neodym-magnetbombe', type: 'molecule', subtype: 'explosive',
+        formula: 'Nd + Fe', tier: 4, color: 0xaa88ff, stackSize: 5,
+        recipe: [{ symbol: 'Nd', amount: 1 }, { symbol: 'Fe', amount: 2 }],
+        energyCost: 3,
+        effects: { onUse: 'bomb', damage: 22, radius: 5 },
+        desc: 'Massiv magnetpuls. 22 skade i radius 5.'
+    },
+    tungsten_brew: {
+        id: 'tungsten_brew', name: 'Wolfram-styrkedrikk', type: 'molecule', subtype: 'potion',
+        formula: 'W + P', tier: 4, color: 0x998844, stackSize: 5,
+        recipe: [{ symbol: 'W', amount: 1 }, { symbol: 'P', amount: 1 }],
+        energyCost: 2,
+        effects: { onUse: 'buff', stat: 'attack', amount: 5, durationMs: 90000 },
+        desc: '+5 Angrep i 90 sek.'
+    },
+    lanthan_elixir: {
+        id: 'lanthan_elixir', name: 'Lantan-livselixir', type: 'molecule', subtype: 'potion',
+        formula: 'La + Ca + H', tier: 4, color: 0xffaacc, stackSize: 5,
+        recipe: [{ symbol: 'La', amount: 1 }, { symbol: 'Ca', amount: 2 }, { symbol: 'H', amount: 1 }],
+        energyCost: 2,
+        effects: { onUse: 'heal', healHP: 10 },
+        desc: 'Mektig livselixir. +10 HP.'
+    },
+    plasma_core: {
+        id: 'plasma_core', name: 'Plasmakjerne', type: 'molecule', subtype: 'explosive',
+        formula: 'Nd + Ir + O', tier: 5, color: 0x66ffff, stackSize: 3,
+        recipe: [{ symbol: 'Nd', amount: 1 }, { symbol: 'Ir', amount: 1 }, { symbol: 'O', amount: 2 }],
+        energyCost: 4,
+        effects: { onUse: 'bomb', damage: 30, radius: 4, chain: 2 },
+        desc: 'Plasmakjede. 30 skade, lyner til 2 naboer, radius 4.'
+    },
 };
 
 // ── Tier colors for molecules ────────────────────────────────────────────────
@@ -141,4 +207,5 @@ const MOLECULE_TIER_COLORS = {
     2: 0x33dd88,
     3: 0x44aaff,
     4: 0xaa44ff,
+    5: 0x66ffff,
 };

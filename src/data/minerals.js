@@ -267,6 +267,20 @@ const MINERAL_DEFS = {
         energyCost: 5, smeltingTime: 8, stackSize: 10,
         desc: 'Sort og tung. Radioaktivt! Urankilde.'
     },
+    molybdenite: {
+        id: 'molybdenite', name: 'Molybdenitt', type: 'mineral', subtype: 'ore',
+        formula: 'MoS\u2082', tier: 4, color: 0x667788,
+        yields: [{ symbol: 'Mo', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Sølvgrå, flisete krystaller. Molybdenkilde.'
+    },
+    barite: {
+        id: 'barite', name: 'Barytt', type: 'mineral', subtype: 'ore',
+        formula: 'BaSO\u2084', tier: 3, color: 0xccbb99,
+        yields: [{ symbol: 'Ba', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.5 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Tungt hvitt mineral. Bariumkilde, brukes i fyrverkeri.'
+    },
 
     // ── Crystals / Gemstones (subtype: 'crystal') ───────────────────────────
     clear_quartz: {

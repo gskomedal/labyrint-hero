@@ -33,6 +33,7 @@ class SmeltingSystem {
     smelt(mineralDef, hero) {
         const energyCost = this._adjustedEnergyCost(mineralDef.energyCost, hero);
         const elements = [];
+        let doubledSomething = false;
 
         for (const y of mineralDef.yields) {
             // Base chance + mining yield bonus from Geologist skill
@@ -46,7 +47,12 @@ class SmeltingSystem {
                 }
                 // Geologist smeltBonusElement: extra element per smelt
                 amount += (hero.smeltBonusElement || 0);
-                // Metallurgist smeltExtraYieldChance: chance for double yield
+                // Geologist T2 "Effektiv utvinning": double-yield chance per stack
+                if ((hero.doubleYieldChance || 0) > 0 && Math.random() < hero.doubleYieldChance) {
+                    amount *= 2;
+                    doubledSomething = true;
+                }
+                // Metallurgist smeltExtraYieldChance: chance for +50% yield
                 if ((hero.smeltExtraYieldChance || 0) > 0 && Math.random() < hero.smeltExtraYieldChance) {
                     amount = Math.ceil(amount * 1.5);
                 }
@@ -58,7 +64,23 @@ class SmeltingSystem {
             }
         }
 
-        return { elements, energyCost };
+        // Geolog T4 "Geode Splitter": every 10 smelts yields a free random gemstone.
+        let geodeElement = null;
+        if (hero.geodeSplitter) {
+            hero.smeltCountForGeode = (hero.smeltCountForGeode || 0) + 1;
+            if (hero.smeltCountForGeode >= 10) {
+                hero.smeltCountForGeode = 0;
+                // Grant 1 of a random already-discovered element (rarer preferred).
+                const discovered = Object.keys(hero.elementTracker.discovered || {});
+                if (discovered.length > 0) {
+                    const pick = discovered[Math.floor(Math.random() * discovered.length)];
+                    hero.elementTracker.collect(pick, 1);
+                    geodeElement = { symbol: pick, amount: 1 };
+                }
+            }
+        }
+
+        return { elements, energyCost, doubled: doubledSomething, geodeElement };
     }
 
     // ── Alloy Crafting: Elements → Alloy ─────────────────────────────────────

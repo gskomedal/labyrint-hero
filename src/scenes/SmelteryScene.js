@@ -560,6 +560,31 @@ class SmelteryScene extends Phaser.Scene {
                 } else {
                     btn.on('pointerdown', () => this._doSmelt(m.slot, m.def));
                 }
+                // Metallurg T1 max-stack: batch smelt button that processes up to batchSmeltSize
+                // at once. Only shown when hero has the batch capability and mineral count>1.
+                const batchN = hero.batchSmeltSize || 1;
+                if (batchN > 1 && m.count > 1) {
+                    const label = `[ ×${Math.min(batchN, m.count)} ]`;
+                    const bbtn = this._d(this.add.text(startX + colW - 140, my + 14, label, {
+                        fontSize: '14px', color: '#ffcc44', fontFamily: 'monospace', fontStyle: 'bold'
+                    }).setInteractive({ useHandCursor: true }));
+                    bbtn.on('pointerover', () => bbtn.setColor('#ffee88'));
+                    bbtn.on('pointerout', () => bbtn.setColor('#ffcc44'));
+                    bbtn.on('pointerdown', () => {
+                        for (let i = 0; i < batchN; i++) {
+                            // Re-read current count each iteration; stop if empty or out of fuel.
+                            const entry = m.source === 'stash'
+                                ? hero.campStash[m.slot]
+                                : hero.inventory.backpack[m.slot];
+                            if (!entry || entry.count <= 0) break;
+                            const fuelNow = this.smelter.calculateFuelEnergy(hero);
+                            const chk = this.smelter.canSmelt(m.def, fuelNow, hero);
+                            if (!chk.canSmelt) break;
+                            if (m.source === 'stash') this._doSmeltFromStash(m.slot, m.def);
+                            else this._doSmelt(m.slot, m.def);
+                        }
+                    });
+                }
             } else {
                 this._d(this.add.text(startX + colW - 80, my + 14, 'Lite brensel', {
                     fontSize: '14px', color: '#443322', fontFamily: 'monospace'
@@ -608,6 +633,16 @@ class SmelteryScene extends Phaser.Scene {
 
         const elemStr = result.elements.map(e => `${e.symbol}×${e.amount}`).join(', ');
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smeltet: ${elemStr}`, color: '#ff7722' });
+
+        // Geolog T2 visible feedback when double-yield triggered.
+        if (result.doubled) {
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY - 1, msg: 'Dobbelt utbytte!', color: '#ffcc44' });
+        }
+        // Geolog T4 geode drop feedback.
+        if (result.geodeElement) {
+            const g = result.geodeElement;
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY - 2, msg: `Geode! +${g.amount} ${g.symbol}`, color: '#88ccff' });
+        }
 
         const newBonuses = hero.elementTracker.checkCompletions();
         if (newBonuses.length > 0) {
@@ -738,6 +773,35 @@ class SmelteryScene extends Phaser.Scene {
         }).setOrigin(0.5));
         y += 22;
 
+        // Metallurg T4 "Reforge": reroll equipped weapon/armor stats for 5 energy.
+        if (hero.reforgeUnlocked) {
+            const rx = this.px + 20;
+            const ry = y;
+            const ww = this.smelter;
+            const fuel = ww.calculateFuelEnergy(hero);
+            this._d(this.add.text(rx, ry, `Reforge (5 energi) – ruller stats på nytt på utstyrt gjenstand:`, {
+                fontSize: '13px', color: '#ffcc88', fontFamily: 'monospace'
+            }));
+            const makeBtn = (offset, slot, label) => {
+                const eq = hero.inventory && hero.inventory.equipped ? hero.inventory.equipped[slot] : null;
+                const txt = eq ? `[ ${label}: ${eq.name} ]` : `[ ${label}: — ]`;
+                const t = this._d(this.add.text(rx + offset, ry + 18, txt, {
+                    fontSize: '13px',
+                    color: (eq && fuel >= 5) ? '#ffcc44' : '#554433',
+                    fontFamily: 'monospace', fontStyle: 'bold'
+                }));
+                if (eq && fuel >= 5) {
+                    t.setInteractive({ useHandCursor: true });
+                    t.on('pointerover', () => t.setColor('#ffee88'));
+                    t.on('pointerout', () => t.setColor('#ffcc44'));
+                    t.on('pointerdown', () => this._doReforge(slot));
+                }
+            };
+            makeBtn(0, 'weapon', 'Reforge våpen');
+            makeBtn(260, 'armor', 'Reforge rustning');
+            y += 44;
+        }
+
         // List available alloys the player has
         const alloyInv = hero.alloyInventory || {};
         const available = Object.entries(alloyInv).filter(([, count]) => count > 0);
@@ -815,6 +879,40 @@ class SmelteryScene extends Phaser.Scene {
 
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smidd: ${result.item.name}!`, color: '#ffaa44' });
 
+        Audio.playPickup();
+        this._refresh();
+    }
+
+    /**
+     * Metallurg T4 "Reforge": reroll an equipped weapon's/armor's rarity
+     * for 5 energy. Keeps the item type and base def, reassigns rarity stats.
+     */
+    _doReforge(slot) {
+        const hero = this.heroRef;
+        if (!hero.reforgeUnlocked) return;
+        const eq = hero.inventory && hero.inventory.equipped ? hero.inventory.equipped[slot] : null;
+        if (!eq) return;
+        const fuel = this.smelter.calculateFuelEnergy(hero);
+        if (fuel < 5) return;
+
+        // Find the base item (without rarity multiplier) — rerolling from
+        // the ITEM_DEFS entry keeps the reroll honest.
+        const baseDef = (typeof ITEM_DEFS !== 'undefined' && ITEM_DEFS[eq.id])
+            || (typeof ALLOY_EQUIPMENT !== 'undefined' && ALLOY_EQUIPMENT[eq.id]);
+        if (!baseDef) return;
+
+        this.smelter.consumeFuel(hero, 5);
+
+        // Unequip first so _unapply removes old stats cleanly.
+        hero.inventory._unapply(eq, hero);
+        const worldNum = hero.worldNum || 1;
+        const rolled = (typeof rollRarity === 'function' && typeof makeRarityItem === 'function')
+            ? makeRarityItem(baseDef, rollRarity(worldNum))
+            : { ...baseDef };
+        hero.inventory.equipped[slot] = rolled;
+        hero.inventory._apply(rolled, hero);
+
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Reforged: ${rolled.name}!`, color: '#ffcc44' });
         Audio.playPickup();
         this._refresh();
     }

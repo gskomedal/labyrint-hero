@@ -246,6 +246,7 @@ class Inventory {
         if (item.hearts) {
             hero.maxHearts += item.hearts;
         }
+        if (item.visionBonus) hero.visionRadius += item.visionBonus;
     }
 
     _unapply(item, hero) {
@@ -255,6 +256,7 @@ class Inventory {
             hero.maxHearts  -= item.hearts;
             hero.hearts      = Math.min(hero.hearts, hero.maxHearts);
         }
+        if (item.visionBonus) hero.visionRadius -= item.visionBonus;
     }
 
     // ── Serialisation ─────────────────────────────────────────────────────────

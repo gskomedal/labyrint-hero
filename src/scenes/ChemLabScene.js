@@ -316,6 +316,15 @@ class ChemLabScene extends Phaser.Scene {
 
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.item.name}!`, color: '#33dd88' });
 
+        // Kjemiker T3 "Double Brew": drop an extra copy if the skill triggered.
+        if (result.bonusItem) {
+            const bonusAdded = hero.inventory.addItem(result.bonusItem);
+            if (!bonusAdded) {
+                EventBus.emit('spawnItem', { gx: hero.gridX, gy: hero.gridY, item: result.bonusItem });
+            }
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY - 1, msg: 'Dobbel brygging!', color: '#ffcc44' });
+        }
+
         Audio.playPickup();
         this._refresh();
     }
@@ -325,16 +334,24 @@ class ChemLabScene extends Phaser.Scene {
             fontSize: '14px', color: '#556655', fontFamily: 'monospace', fontStyle: 'bold'
         }));
 
-        const collected = this.heroRef.elementTracker.collected;
+        const hero = this.heroRef;
+        const transmutable = !!hero.transmutationUnlocked;
+        if (transmutable) {
+            this._d(this.add.text(x, y + 18, 'Transmutasjon: klikk ↔ for 5 → 1 nabo', {
+                fontSize: '11px', color: '#ff88cc', fontFamily: 'monospace'
+            }));
+        }
+
+        const collected = hero.elementTracker.collected;
         const entries = Object.entries(collected).filter(([, v]) => v > 0);
         if (entries.length === 0) {
-            this._d(this.add.text(x, y + 18, 'Ingen lagret.', {
+            this._d(this.add.text(x, y + (transmutable ? 34 : 18), 'Ingen lagret.', {
                 fontSize: '14px', color: '#334433', fontFamily: 'monospace'
             }));
             return;
         }
 
-        let bx = x, by = y + 18;
+        let bx = x, by = y + (transmutable ? 36 : 18);
         for (const [symbol, count] of entries) {
             const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
             const col = elem ? elem.color : 0xaaaaaa;
@@ -343,8 +360,36 @@ class ChemLabScene extends Phaser.Scene {
                 fontSize: '14px', color: hexCol, fontFamily: 'monospace',
                 backgroundColor: '#081808', padding: { x: 3, y: 1 }
             }));
-            bx += badge.width + 6;
-            if (bx > x + w - 30) { bx = x; by += 20; }
+            let bwidth = badge.width;
+            // Transmutation button (only clickable when count ≥ 5).
+            if (transmutable) {
+                const canTransmute = count >= 5;
+                const tbtn = this._d(this.add.text(bx + bwidth + 2, by, '↔', {
+                    fontSize: '14px',
+                    color: canTransmute ? '#ff88cc' : '#553344',
+                    fontFamily: 'monospace',
+                    backgroundColor: '#180818',
+                    padding: { x: 3, y: 1 }
+                }));
+                if (canTransmute) {
+                    tbtn.setInteractive({ useHandCursor: true });
+                    tbtn.on('pointerover', () => tbtn.setColor('#ffaadd'));
+                    tbtn.on('pointerout', () => tbtn.setColor('#ff88cc'));
+                    tbtn.on('pointerdown', () => this._doTransmute(symbol));
+                }
+                bwidth += tbtn.width + 4;
+            }
+            bx += bwidth + 6;
+            if (bx > x + w - 30) { bx = x; by += 22; }
         }
+    }
+
+    _doTransmute(symbol) {
+        const hero = this.heroRef;
+        const produced = this.chem.transmute(hero, symbol);
+        if (!produced) return;
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Transmuted: 5 ${symbol} → 1 ${produced}`, color: '#ff88cc' });
+        Audio.playPickup();
+        this._refresh();
     }
 }
