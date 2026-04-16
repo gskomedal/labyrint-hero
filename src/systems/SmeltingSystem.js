@@ -241,6 +241,20 @@ class SmeltingSystem {
                 }
             }
         }
+        // Fission bonus: each U/Th in the element tracker acts as virtual
+        // fuel when the hero has mastered fission (Fysiker T3).
+        if (hero.fissionMastered || hero.fissionUpgraded) {
+            const fMul = hero.fissionEnergyMul || 1.0;
+            const uCount = hero.elementTracker ? hero.elementTracker.getCount('U') : 0;
+            const thCount = hero.elementTracker ? hero.elementTracker.getCount('Th') : 0;
+            total += Math.round((uCount * 50 + thCount * 40) * fMul);
+        }
+        // Fusion bonus: each He acts as massive virtual fuel (Fysiker T4).
+        if (hero.fusionMastered) {
+            const fuMul = hero.fusionEnergyMul || 1.0;
+            const heCount = hero.elementTracker ? hero.elementTracker.getCount('He') : 0;
+            total += Math.round(heCount * 200 * fuMul);
+        }
         return total;
     }
 

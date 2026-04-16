@@ -50,6 +50,18 @@ const HeroCrafting = {
         hero.transmutationUnlocked = false; // Transmutasjon synergy (3-path)
         hero.toxicBladeChance = 0;
 
+        // Physicist mod (Phase 5)
+        hero.acceleratorUnlocked = false;
+        hero.semiconductorUnlocked = false;
+        hero.mineralMagnetRadius = 0;
+        hero.radiationShield = false;
+        hero.lootTierBonus = 0;
+        hero.fissionMastered = false;
+        hero.fissionEnergyMul = 1.0;
+        hero.fusionMastered = false;
+        hero.fusionEnergyMul = 1.0;
+        hero.acceleratorEfficiency = 1.0;
+
         // Zone progression (Phase 4)
         hero.completedZones = [];
 
@@ -112,6 +124,16 @@ const HeroCrafting = {
             chemBombChain:        hero.chemBombChain,
             transmutationUnlocked: hero.transmutationUnlocked,
             toxicBladeChance:     hero.toxicBladeChance,
+            acceleratorUnlocked:  hero.acceleratorUnlocked,
+            semiconductorUnlocked: hero.semiconductorUnlocked,
+            mineralMagnetRadius:  hero.mineralMagnetRadius,
+            radiationShield:      hero.radiationShield,
+            lootTierBonus:        hero.lootTierBonus,
+            fissionMastered:      hero.fissionMastered,
+            fissionEnergyMul:     hero.fissionEnergyMul,
+            fusionMastered:       hero.fusionMastered,
+            fusionEnergyMul:      hero.fusionEnergyMul,
+            acceleratorEfficiency: hero.acceleratorEfficiency,
             completedZones:       [...hero.completedZones],
             appliedElementBonuses: { ...hero.appliedElementBonuses },
             elementGoldMul:       hero.elementGoldMul,
@@ -168,6 +190,16 @@ const HeroCrafting = {
         hero.chemBombChain        = stats.chemBombChain        || false;
         hero.transmutationUnlocked = stats.transmutationUnlocked || false;
         hero.toxicBladeChance     = stats.toxicBladeChance     || 0;
+        hero.acceleratorUnlocked  = stats.acceleratorUnlocked  || false;
+        hero.semiconductorUnlocked = stats.semiconductorUnlocked || false;
+        hero.mineralMagnetRadius  = stats.mineralMagnetRadius  || 0;
+        hero.radiationShield      = stats.radiationShield      || false;
+        hero.lootTierBonus        = stats.lootTierBonus        || 0;
+        hero.fissionMastered      = stats.fissionMastered      || false;
+        hero.fissionEnergyMul     = stats.fissionEnergyMul     || 1.0;
+        hero.fusionMastered       = stats.fusionMastered       || false;
+        hero.fusionEnergyMul      = stats.fusionEnergyMul      || 1.0;
+        hero.acceleratorEfficiency = stats.acceleratorEfficiency || 1.0;
         hero.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
         hero.appliedElementBonuses = stats.appliedElementBonuses ? { ...stats.appliedElementBonuses } : {};
         hero.elementGoldMul       = stats.elementGoldMul       || 0;

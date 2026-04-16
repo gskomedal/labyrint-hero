@@ -24,6 +24,7 @@ class InputHandler {
         scene.elementBookKey = scene.input.keyboard.addKey('B');
         scene.smelteryKey    = scene.input.keyboard.addKey('V');
         scene.chemLabKey     = scene.input.keyboard.addKey('C');
+        scene.acceleratorKey = scene.input.keyboard.addKey('P');
         scene.skillTreeKey   = scene.input.keyboard.addKey('T');
         scene.moveTimer    = 0;
 

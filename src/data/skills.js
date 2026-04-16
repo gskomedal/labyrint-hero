@@ -271,6 +271,62 @@ const SKILL_TREE_PATHS = [
             },
         ]
     },
+    // ── FYSIKER (Physicist – Phase 5: semiconductors, fission, fusion) ─────────
+    {
+        id:    'fysiker',
+        name:  'Fysiker',
+        desc:  'Halvledere, fisjon, fusjon',
+        prerequisitePath: 'kjemiker',
+        color: 0x8866ff,
+        icon:  'F',
+        unlockCondition: 'accelerator_found',
+        tiers: [
+            {
+                id:       'semiconductor_basics',
+                name:     'Halvledergrunnlag',
+                desc:     'Halvleder-crafting\nMineraler tiltrekkes\ni nærliggende rom',
+                category: 'UTIL',
+                maxStack: 3,
+                apply(hero) {
+                    hero.semiconductorUnlocked = true;
+                    hero.mineralMagnetRadius = (hero.mineralMagnetRadius || 0) + 1;
+                }
+            },
+            {
+                id:       'radiation_shield',
+                name:     'Strålingsshield',
+                desc:     'Radioaktivt gir\nikke HP-tap\n+1 min-tier loot',
+                category: 'UTIL',
+                maxStack: 2,
+                apply(hero) {
+                    hero.radiationShield = true;
+                    hero.lootTierBonus = (hero.lootTierBonus || 0) + 1;
+                }
+            },
+            {
+                id:       'fission_mastery',
+                name:     'Fisjonsbeherskelse',
+                desc:     'Reaktor gir 2×\nenergi fra U/Th\nLåser tier 1-3 syntetiske',
+                category: 'UTIL',
+                maxStack: 1,
+                apply(hero) {
+                    hero.fissionMastered = true;
+                    hero.fissionEnergyMul = 2.0;
+                }
+            },
+            {
+                id:       'fusion_pioneer',
+                name:     'Fusjonspioner',
+                desc:     'Fusjon-energi fra\nHe + H. Låser alle\nsyntetiske grunnstoff',
+                category: 'UTIL',
+                maxStack: 1,
+                apply(hero) {
+                    hero.fusionMastered = true;
+                    hero.fusionEnergyMul = 5.0;
+                }
+            },
+        ]
+    },
 ];
 
 // ── Flat list for backward compat (save/load, apply) ──────────────────────────
@@ -297,6 +353,7 @@ function isSkillUnlocked(hero, pathIndex, tierIndex) {
     if (path.unlockCondition === 'mineral_pickup' && !hero.geologistUnlocked) return false;
     if (path.unlockCondition === 'camp_room_found' && !hero.metallurgistUnlocked) return false;
     if (path.unlockCondition === 'chem_lab_found' && !hero.chemistUnlocked) return false;
+    if (path.unlockCondition === 'accelerator_found' && !hero.acceleratorUnlocked) return false;
 
     // Check prerequisite path (e.g. metallurg requires at least 1 geolog skill)
     if (path.prerequisitePath) {
@@ -418,9 +475,6 @@ const SKILL_SYNERGIES = [
         unapply(hero) { hero.chemBombBonus = Math.max(0, (hero.chemBombBonus || 0) - 0.20); hero.critChance = Math.max(0, hero.critChance - 0.10); },
     },
     {
-        // Three-path synergy: requires ≥1 skill from each of Geolog, Metallurg, and Kjemiker.
-        // Unlocks transmutation (convert 5 of any element into 1 of an adjacent element)
-        // via a button in the Chemistry Lab.
         id:    'transmutation',
         name:  'Transmutasjon',
         desc:  '5 av grunnstoff X → 1 av nabo (kjemilab)',
@@ -428,6 +482,24 @@ const SKILL_SYNERGIES = [
         color: 0xff88cc,
         apply(hero) { hero.transmutationUnlocked = true; },
         unapply(hero) { hero.transmutationUnlocked = false; },
+    },
+    {
+        id:    'nuclear_forge',
+        name:  'Atomsmedja',
+        desc:  '+3 ATK, −25% akselerator-energi',
+        paths: ['fysiker', 'metallurg'],
+        color: 0xaa66ff,
+        apply(hero) { hero.attack += 3; hero.acceleratorEfficiency = (hero.acceleratorEfficiency || 1.0) * 0.75; },
+        unapply(hero) { hero.attack -= 3; hero.acceleratorEfficiency = (hero.acceleratorEfficiency || 1.0) / 0.75; },
+    },
+    {
+        id:    'quantum_chemistry',
+        name:  'Kvantekjemi',
+        desc:  '+30% potion-styrke, +20% bombe-radius',
+        paths: ['fysiker', 'kjemiker'],
+        color: 0x8888ff,
+        apply(hero) { hero.potionMagnitudeBonus = (hero.potionMagnitudeBonus || 0) + 0.30; hero.chemRadiusBonus = (hero.chemRadiusBonus || 0) + 0.20; },
+        unapply(hero) { hero.potionMagnitudeBonus = Math.max(0, (hero.potionMagnitudeBonus || 0) - 0.30); hero.chemRadiusBonus = Math.max(0, (hero.chemRadiusBonus || 0) - 0.20); },
     },
 ];
 

@@ -197,6 +197,13 @@ class GameScene extends Phaser.Scene {
                 }
             }
 
+            // Particle accelerator (P key)
+            const touchAccel = this.game.registry.get('touch_accelerator');
+            if (touchAccel) this.game.registry.set('touch_accelerator', false);
+            if ((Phaser.Input.Keyboard.JustDown(this.acceleratorKey) || touchAccel) && !this.scene.isActive('AcceleratorScene') && this._isInAccelerator()) {
+                this.scene.launch('AcceleratorScene', { heroRef: this.hero, worldNum: this.worldNum });
+            }
+
             const touchSkill = this.game.registry.get('touch_skilltree');
             if (touchSkill) this.game.registry.set('touch_skilltree', false);
             if ((Phaser.Input.Keyboard.JustDown(this.skillTreeKey) || touchSkill) && !this.scene.isActive('SkillScene')) {
@@ -206,6 +213,7 @@ class GameScene extends Phaser.Scene {
             // Auto-open prompts for special rooms
             this._checkCampRoom();
             this._checkChemLab();
+            this._checkAccelerator();
 
             this.monsterMgr.tickMonsters(delta);
             this._tickPet(delta);
@@ -262,6 +270,29 @@ class GameScene extends Phaser.Scene {
             }
         } else if (!this._isInChemLab()) {
             this._chemLabShown = false;
+        }
+    }
+
+    // ── Particle Accelerator ─────────────────────────────────────────────────
+
+    _isInAccelerator() {
+        if (!this._gen || !this._gen.specialRooms) return false;
+        const hx = this.hero.gridX, hy = this.hero.gridY;
+        return this._gen.specialRooms.some(room =>
+            room.type === 'accelerator' && room.tiles.some(t => t.x === hx && t.y === hy)
+        );
+    }
+
+    _checkAccelerator() {
+        if (!this._acceleratorShown && this._isInAccelerator()) {
+            this._acceleratorShown = true;
+            if (!this.hero.acceleratorUnlocked) {
+                this.hero.acceleratorUnlocked = true;
+                this._floatingText(this.hero.gridX, this.hero.gridY - 1, 'Fysiker-stien er ulåst!', '#8866ff');
+            }
+            this._showMessage('Partikkelakselerator! Trykk P for å syntetisere grunnstoffer.', '#8866ff');
+        } else if (!this._isInAccelerator()) {
+            this._acceleratorShown = false;
         }
     }
 
