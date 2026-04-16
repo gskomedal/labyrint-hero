@@ -292,13 +292,27 @@ class ItemSpawner {
                     roomMinerals = 3 + Math.floor(Math.random() * 3);
                     mineralFn = () => rollBossMineral(wn); // T5-T6 minerals
                 } else if (room.type === 'gas_pocket') {
-                    // Gas pockets spawn oil/gas in deep zones, coal otherwise
+                    // Gas pockets spawn oil/gas in deep zones, coal otherwise.
+                    // From world 10+ they also yield noble gas elements directly
+                    // into the hero's element tracker when collected (He, Ne, Ar, Kr, Xe).
                     roomMinerals = 0;
                     const fuels = wn >= 15 ? [FUEL_DEFS.natural_gas, FUEL_DEFS.oil] : wn >= 10 ? [FUEL_DEFS.oil, FUEL_DEFS.coal] : [FUEL_DEFS.coal];
+                    const nobleGases = wn >= 10 ? ['Ar', 'Kr', 'Xe', 'Ne', 'He'] : null;
                     for (const tile of room.tiles) {
                         if (!scene.itemObjects.some(o => o.gridX === tile.x && o.gridY === tile.y)) {
                             const fuel = fuels[Math.floor(Math.random() * fuels.length)];
                             this._spawnFuelAt(tile.x, tile.y, fuel);
+                        }
+                    }
+                    // Noble gas collection: each gas pocket awards 1-2 random noble gases
+                    if (nobleGases && scene.hero && scene.hero.elementTracker) {
+                        const count = 1 + Math.floor(Math.random() * 2);
+                        for (let gi = 0; gi < count; gi++) {
+                            const gasIdx = Math.min(Math.floor(Math.random() * nobleGases.length), Math.floor((wn - 10) / 3));
+                            const gas = nobleGases[Math.min(gasIdx, nobleGases.length - 1)];
+                            scene.hero.elementTracker.collect(gas, 1);
+                            scene.hero.elementTracker.discover(gas);
+                            EventBus.emit('floatingText', { gx: room.tiles[0].x, gy: room.tiles[0].y, msg: `Edelgass samlet: ${gas}`, color: '#aaccff' });
                         }
                     }
                 } else {

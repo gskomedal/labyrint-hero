@@ -233,9 +233,9 @@ const MINERAL_DEFS = {
     pgm_ore: {
         id: 'pgm_ore', name: 'PGM-malm', type: 'mineral', subtype: 'ore',
         formula: 'PGM', tier: 5, color: 0xccccaa,
-        yields: [{ symbol: 'Ru', amount: 1, chance: 0.7 }, { symbol: 'Rh', amount: 1, chance: 0.5 }, { symbol: 'Pd', amount: 1, chance: 0.6 }],
+        yields: [{ symbol: 'Ru', amount: 1, chance: 0.7 }, { symbol: 'Rh', amount: 1, chance: 0.5 }, { symbol: 'Pd', amount: 1, chance: 0.6 }, { symbol: 'Pt', amount: 1, chance: 0.4 }, { symbol: 'Ir', amount: 1, chance: 0.3 }, { symbol: 'Os', amount: 1, chance: 0.2 }],
         energyCost: 5, smeltingTime: 6, stackSize: 10,
-        desc: 'Sjelden platinametall-malm. Inneholder ruthenium, rhodium og palladium.'
+        desc: 'Sjelden platinametall-malm. Inneholder alle seks platinametaller.'
     },
     argentite: {
         id: 'argentite', name: 'Argentitt', type: 'mineral', subtype: 'ore',
@@ -280,6 +280,109 @@ const MINERAL_DEFS = {
         yields: [{ symbol: 'Ba', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.5 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Tungt hvitt mineral. Bariumkilde, brukes i fyrverkeri.'
+    },
+
+    // ── Phase 5 minerals: fills orphan element gaps ────────────────────────
+
+    // Critical fixes: V source for titanium alloy
+    vanadinite: {
+        id: 'vanadinite', name: 'Vanadinitt', type: 'mineral', subtype: 'ore',
+        formula: 'Pb\u2085(VO\u2084)\u2083Cl', tier: 3, color: 0xcc6633,
+        yields: [{ symbol: 'V', amount: 2, chance: 1.0 }, { symbol: 'Pb', amount: 1, chance: 0.5 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Oransjrøde krystaller. Viktigste vanadiumkilde.'
+    },
+
+    // Halogens
+    bromargyryte: {
+        id: 'bromargyryte', name: 'Bromargyryt', type: 'mineral', subtype: 'ore',
+        formula: 'AgBr', tier: 4, color: 0xccaa44,
+        yields: [{ symbol: 'Br', amount: 2, chance: 1.0 }, { symbol: 'Ag', amount: 1, chance: 0.4 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Gulaktig sølvhalid. Sjelden bromkilde.'
+    },
+    iodyrite: {
+        id: 'iodyrite', name: 'Jodyritt', type: 'mineral', subtype: 'ore',
+        formula: 'AgI', tier: 4, color: 0x886644,
+        yields: [{ symbol: 'I', amount: 2, chance: 1.0 }, { symbol: 'Ag', amount: 1, chance: 0.3 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Gult sølvjodid. Sjelden jodkilde.'
+    },
+
+    // Semiconductors
+    germanite: {
+        id: 'germanite', name: 'Germanitt', type: 'mineral', subtype: 'ore',
+        formula: 'Cu\u2082\u2086Fe\u2084Ge\u2084S\u2083\u2082', tier: 4, color: 0x998877,
+        yields: [{ symbol: 'Ge', amount: 2, chance: 1.0 }, { symbol: 'Cu', amount: 1, chance: 0.5 }, { symbol: 'S', amount: 1, chance: 0.3 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Sjelden kobber-germanium-sulfid. Halvlederkilde.'
+    },
+    stibnite: {
+        id: 'stibnite', name: 'Stibnitt', type: 'mineral', subtype: 'ore',
+        formula: 'Sb\u2082S\u2083', tier: 3, color: 0x555566,
+        yields: [{ symbol: 'Sb', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Stålgrå nåler. Antimonkilde.'
+    },
+    gallite: {
+        id: 'gallite', name: 'Gallitt', type: 'mineral', subtype: 'ore',
+        formula: 'CuGaS\u2082', tier: 4, color: 0xaabbdd,
+        yields: [{ symbol: 'Ga', amount: 2, chance: 1.0 }, { symbol: 'Cu', amount: 1, chance: 0.4 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Sjelden galliumsulfid. Viktig for halvledere.'
+    },
+
+    // Rare earths & misc metals
+    xenotime: {
+        id: 'xenotime', name: 'Xenotim', type: 'mineral', subtype: 'ore',
+        formula: 'YPO\u2084', tier: 4, color: 0xbbaa88,
+        yields: [{ symbol: 'Y', amount: 2, chance: 1.0 }, { symbol: 'Dy', amount: 1, chance: 0.4 }, { symbol: 'Er', amount: 1, chance: 0.3 }, { symbol: 'Yb', amount: 1, chance: 0.2 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Brun fosfatmineral. Rik på tunge sjeldne jordartsmetaller.'
+    },
+    samarskite: {
+        id: 'samarskite', name: 'Samarskitt', type: 'mineral', subtype: 'ore',
+        formula: '(Y,Ce,U)(Nb,Ta)O\u2084', tier: 5, color: 0x332211,
+        yields: [{ symbol: 'Sm', amount: 1, chance: 0.7 }, { symbol: 'Gd', amount: 1, chance: 0.5 }, { symbol: 'Pr', amount: 1, chance: 0.4 }, { symbol: 'Nb', amount: 1, chance: 0.3 }],
+        energyCost: 5, smeltingTime: 6, stackSize: 10,
+        desc: 'Sort, radioaktivt. Kilde til samarium og gadolinium.'
+    },
+    celestine: {
+        id: 'celestine', name: 'Celestin', type: 'mineral', subtype: 'ore',
+        formula: 'SrSO\u2084', tier: 3, color: 0xaaccee,
+        yields: [{ symbol: 'Sr', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.5 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Himmelblå krystaller. Strontiumkilde.'
+    },
+    pollucite: {
+        id: 'pollucite', name: 'Pollucitt', type: 'mineral', subtype: 'ore',
+        formula: 'CsAlSi\u2082O\u2086', tier: 5, color: 0xeeddcc,
+        yields: [{ symbol: 'Cs', amount: 2, chance: 1.0 }, { symbol: 'Rb', amount: 1, chance: 0.4 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Sjeldent zeolitt-mineral. Eneste kommersielle cesiumkilde.'
+    },
+    calaverite: {
+        id: 'calaverite', name: 'Calaveritt', type: 'mineral', subtype: 'ore',
+        formula: 'AuTe\u2082', tier: 5, color: 0xddcc44,
+        yields: [{ symbol: 'Te', amount: 2, chance: 1.0 }, { symbol: 'Au', amount: 1, chance: 0.5 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Gulltellurid. Sjelden kilde til tellur og gull.'
+    },
+    indite_ore: {
+        id: 'indite_ore', name: 'Inditt', type: 'mineral', subtype: 'ore',
+        formula: 'FeIn\u2082S\u2084', tier: 4, color: 0x7788aa,
+        yields: [{ symbol: 'In', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Sjelden indiumsulfid. Viktig for berøringsskjermer.'
+    },
+
+    // Actinides
+    thorite: {
+        id: 'thorite', name: 'Thoritt', type: 'mineral', subtype: 'ore',
+        formula: 'ThSiO\u2084', tier: 6, color: 0x446644,
+        yields: [{ symbol: 'Th', amount: 2, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.5 }],
+        energyCost: 5, smeltingTime: 7, stackSize: 10,
+        desc: 'Radioaktivt thoriummineral. Alternativ kjernebrensel.'
     },
 
     // ── Crystals / Gemstones (subtype: 'crystal') ───────────────────────────
@@ -362,10 +465,10 @@ const MINERAL_DEFS = {
 const MINERAL_POOL = {
     1: ['quartz', 'hematite', 'magnetite', 'limestone', 'halite', 'bauxite', 'olivine', 'ice_crystal', 'sylvite'],
     2: ['pyrite', 'ilmenite', 'apatite', 'niter', 'borax', 'thortveitite'],
-    3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite', 'zircon', 'pentlandite', 'spodumene', 'cobaltite'],
-    4: ['galena', 'cassiterite', 'cinnabar', 'columbite', 'monazite', 'bastnaesite', 'greenockite', 'wolframite'],
-    5: ['argentite', 'native_gold', 'native_silver', 'pgm_ore'],
-    6: ['uraninite'],
+    3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite', 'zircon', 'pentlandite', 'spodumene', 'cobaltite', 'vanadinite', 'stibnite', 'celestine', 'barite'],
+    4: ['galena', 'cassiterite', 'cinnabar', 'columbite', 'monazite', 'bastnaesite', 'greenockite', 'wolframite', 'molybdenite', 'bromargyryte', 'iodyrite', 'germanite', 'gallite', 'xenotime', 'indite_ore'],
+    5: ['argentite', 'native_gold', 'native_silver', 'pgm_ore', 'samarskite', 'pollucite', 'calaverite'],
+    6: ['uraninite', 'thorite'],
 };
 
 const CRYSTAL_POOL = {
