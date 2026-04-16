@@ -317,7 +317,7 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'fusion_pioneer',
                 name:     'Fusjonspioner',
-                desc:     'Fusjon-energi fra\nHe + H. Låser alle\nsyntetiske grunnstoff',
+                desc:     'D-T fusjon: H + Li\n→ He + energi.\nLåser alle syntetiske',
                 category: 'UTIL',
                 maxStack: 1,
                 apply(hero) {

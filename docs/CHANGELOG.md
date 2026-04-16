@@ -9,7 +9,7 @@
 - **Partikkelakselerator-rom:** Dukker opp fra verden 13 (20% sjanse), garantert fra verden 15. Åpnes med P-tast. Komplett UI med scrollbar, energikostnad og tier-gating
 - **Realistisk transuran syntese:** Hver oppskrift gjenspeiler ekte kjernefysikk – nøytronbombardering for Np/Pu, alfa-bombardering for Cm, tungione-bombardering for transaktinider, Ca-48 varmfusjon for supertunge (Fl-Og). Krever tilhørende input-grunnstoffer som forbrukes
 - **Fysiker-skillsti (6. sti):** T1 Halvledergrunnlag (halvledercrafting + mineraltiltrekning), T2 Strålingsshield (immunitet mot stråling + loot-bonus), T3 Fisjonsbeherskelse (2× energi fra U/Th, låser tier 1-3 syntetiske), T4 Fusjonspioner (5× energi fra He, låser alle syntetiske)
-- **Fisjon/fusjon-energi:** U gir 50 virtuell energi (×2 med Fisjon T3), Th gir 40. He gir 200 (×5 med Fusjon T4). Gjør endgame-syntese gjennomførbar
+- **Fisjon/fusjon-energi:** U gir 50 virtuell energi (×2 med Fisjon T3), Th gir 40. Fusjon bruker D-T-reaksjonen: H (deuterium, 80 energi) + Li (tritiumkilde via Li-6+nøytron, 150 energi), ×5 med Fusjon T4. He er biprodukt, ikke brensel. Gjør endgame-syntese gjennomførbar
 - **15 nye mineraler:** Vanadinitt (V – fikser uraftbar titanleger.), bromargyryt (Br), jodyritt (I), germanitt (Ge), stibnitt (Sb), gallitt (Ga), xenotim (Y+Dy+Er+Yb), samarskitt (Sm+Gd+Pr), celestin (Sr), pollucitt (Cs+Rb), calaveritt (Te+Au), inditt (In), thoritt (Th). PGM-malm gir nå også Pt, Ir og Os
 - **Edelgass-samling:** Gasslommer (verden 10+) gir nå 1-2 tilfeldige edelgasser (Ar/Kr/Xe/Ne/He) direkte i elementtrakeren
 - **Endgame: Guds periodiske system:** Samle alle 118 grunnstoffer gir +10 ATK, +10 DEF, +5 hjerter, +3 syn og tittelen «Guds periodiske system»

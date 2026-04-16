@@ -249,11 +249,13 @@ class SmeltingSystem {
             const thCount = hero.elementTracker ? hero.elementTracker.getCount('Th') : 0;
             total += Math.round((uCount * 50 + thCount * 40) * fMul);
         }
-        // Fusion bonus: each He acts as massive virtual fuel (Fysiker T4).
+        // Fusion bonus: D-T fusion consumes H (deuterium) + Li (tritium bred
+        // from Li-6 + neutron). He is a byproduct, not fuel.
         if (hero.fusionMastered) {
             const fuMul = hero.fusionEnergyMul || 1.0;
-            const heCount = hero.elementTracker ? hero.elementTracker.getCount('He') : 0;
-            total += Math.round(heCount * 200 * fuMul);
+            const hCount = hero.elementTracker ? hero.elementTracker.getCount('H') : 0;
+            const liCount = hero.elementTracker ? hero.elementTracker.getCount('Li') : 0;
+            total += Math.round((hCount * 80 + liCount * 150) * fuMul);
         }
         return total;
     }
