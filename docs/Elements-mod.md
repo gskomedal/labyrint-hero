@@ -1,7 +1,7 @@
 # Labyrint Hero – Elements-modifikasjon
-**Versjon:** 0.4 (fase 1–4 fullført, orphan-oppryddning v0.40)
-**Sist oppdatert:** 2026-04-15
-**Status:** Fase 1–4 implementert. Fase 5 (Fysikk) utsatt.
+**Versjon:** 0.5 (fase 1–5 implementert)
+**Sist oppdatert:** 2026-04-16
+**Status:** Alle 5 faser implementert. 118 grunnstoffer, 28 transuranske synteseoppskrifter, partikkelakselerator, fysiker-skillsti, fisjon/fusjon-energi og «Guds periodiske system»-endgame.
 
 **v0.40-oppdatering:** 2 nye mineraler (molybdenitt, barytt) og 5 nye legeringer + 8 nye molekyler gir praktisk bruk for Mn, Mo, W, Ta, Ba, B, Ce, La, Nd, Zn. Bombeskade er separert fra potionskala og skalerer +60% per verden (mot +40% før) med flat bombgulv; radius +1 fra verden 5 og +2 fra verden 8. Geolog/Metallurg/Kjemiker har fått T4-ferdigheter (Geode-splitter, Reforge, Volatil mestring) og en 3-sti-synergi Transmutasjon (5 → 1 nabo på atomnummer). Se CHANGELOG v0.40 for full diff.
 
@@ -477,14 +477,18 @@ Med en dypere verden trenger spilleren bedre kartlegging:
 - [x] Hurtigreise mellom fullførte soner (v0.37 – knapp på seiersskjerm)
 - [x] Utvidet minikart med Geolog-skills (v0.37 – mineraler vises som fargede prikker)
 
-### Fase 5 – Fysikk og endgame (Issue-prioritet: Lav)
-- [ ] Halvleder-crafting (Si, Ge, GaAs)
-- [ ] Fisjon-reaktor og U-235 beriker
-- [ ] Jordens kjerne-sone (etasje 19–25)
-- [ ] Fusjonsteknologi
-- [ ] Fysiker-sti i skill tree (låses opp via elementbok)
-- [ ] Syntetiske grunnstoffer (Tc, Pm, alle > 92)
-- [ ] Endgame: Alle 92/118 grunnstoffer samlet
+### Fase 5 – Fysikk og transurane grunnstoffer ✅ (v0.42)
+- [x] 28 syntetiske grunnstoffer (Tc, Pm, Np-Og) med `synthetic: true`-flagg
+- [x] TRANSURANIC_RECIPES: 28 oppskrifter som gjenspeiler ekte kjernefysikk (nøytron, alfa, tungioner, Ca-48 varmfusjon)
+- [x] Partikkelakselerator-rom (verden 13+, P-tast) med komplett AcceleratorScene UI
+- [x] Fysiker-skillsti: T1 Halvleder, T2 Strålingsskjold, T3 Fisjon (2× U/Th-energi), T4 Fusjon (5× He-energi)
+- [x] Fisjon/fusjon-energi: U=50, Th=40, He=200 virtuell energi i calculateFuelEnergy()
+- [x] 15 nye mineraler (V, Br, I, Ge, Sb, Ga, Y, Dy, Er, Yb, Sm, Gd, Pr, Sr, Cs, Rb, Te, In, Th) + PGM-malm med Pt/Ir/Os
+- [x] Edelgass-samling fra gasslommer (verden 10+)
+- [x] Endgame «Guds periodiske system»: +10/+10/+5/+3 for alle 118
+- [x] 2 nye synergier (Atomsmedja, Kvantekjemi)
+- [ ] Halvleder-crafting items (Si-wafer, Ge-crystal, GaAs) – fremtidig
+- [ ] Jordens kjerne-sone visuelt tema – fremtidig
 
 ---
 
