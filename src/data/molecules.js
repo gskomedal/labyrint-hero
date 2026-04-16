@@ -199,6 +199,24 @@ const MOLECULE_DEFS = {
         effects: { onUse: 'bomb', damage: 30, radius: 4, chain: 2 },
         desc: 'Plasmakjede. 30 skade, lyner til 2 naboer, radius 4.'
     },
+
+    // ── Pet-specific chemistry items ─────────────────────────────────────────
+    pet_vitality: {
+        id: 'pet_vitality', name: 'Kjæledyr-vitalitet', type: 'molecule', subtype: 'medicine',
+        formula: 'Ca + Fe + Mg', tier: 2, color: 0xffaadd, stackSize: 5,
+        recipe: [{ symbol: 'Ca', amount: 2 }, { symbol: 'Fe', amount: 1 }, { symbol: 'Mg', amount: 1 }],
+        energyCost: 1,
+        effects: { onUse: 'pet_permanent_hp', amount: 3 },
+        desc: 'Gir kjæledyr +3 permanent maks HP.'
+    },
+    pet_growth: {
+        id: 'pet_growth', name: 'Vekst-elixir', type: 'molecule', subtype: 'medicine',
+        formula: 'La + Ca + P', tier: 3, color: 0xddaaff, stackSize: 5,
+        recipe: [{ symbol: 'La', amount: 1 }, { symbol: 'Ca', amount: 1 }, { symbol: 'P', amount: 1 }],
+        energyCost: 2,
+        effects: { onUse: 'pet_permanent_atk', amount: 1 },
+        desc: 'Gir kjæledyr +1 permanent angrep.'
+    },
 };
 
 // ── Tier colors for molecules ────────────────────────────────────────────────

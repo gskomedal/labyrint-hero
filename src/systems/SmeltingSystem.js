@@ -162,13 +162,19 @@ class SmeltingSystem {
     // ── Forging: Alloy → Equipment ───────────────────────────────────────────
 
     /**
-     * Get equipment that can be forged from a given alloy.
+     * Get equipment that can be forged from a given alloy (hero + pet items).
      * @param {string} alloyId
-     * @returns {Array<object>} Array of ALLOY_EQUIPMENT items
+     * @returns {Array<object>} Array of ALLOY_EQUIPMENT + PET_EQUIPMENT items
      */
     getForgeableEquipment(alloyId) {
-        if (typeof ALLOY_EQUIPMENT === 'undefined') return [];
-        return Object.values(ALLOY_EQUIPMENT).filter(e => e.alloyId === alloyId);
+        const items = [];
+        if (typeof ALLOY_EQUIPMENT !== 'undefined') {
+            items.push(...Object.values(ALLOY_EQUIPMENT).filter(e => e.alloyId === alloyId));
+        }
+        if (typeof PET_EQUIPMENT !== 'undefined') {
+            items.push(...Object.values(PET_EQUIPMENT).filter(e => e.alloyId === alloyId));
+        }
+        return items;
     }
 
     /**

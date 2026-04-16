@@ -2,6 +2,26 @@
 
 ---
 
+## v0.41 – 2026-04-16
+
+### Nye funksjoner
+- **Forbedrede kjæledyr (#41):** Kjæledyrene har fått 60-80% mer basis-HP (Rev 8→14, Katt/Ugle 6→12, Drage 10→18) slik at de overlever lengre i kamp. Når kjæledyret dør øker eggsjansen på neste nivå fra 35% til 50% for å gjøre det lettere å få en ny kompanjong
+- **Kjæledyr-utstyr (#41):** Kjæledyrene har nå to utstyrsplasser (klo/våpen + rustning/halsbånd). 8 nye smidde gjenstander fra eksisterende legeringer: bronsekløer, ståltenner, wolframkløer, fosfortenner, bronsehalsbånd, stålsele, skandiumvest og titansele. Forges i Smi-fanen og utstyres automatisk på kjæledyret. Utstyr vises og håndteres i inventoret
+- **Kjæledyr-kjemi (#41):** 2 nye kjemiske oppskrifter for permanente kjæledyr-oppgraderinger: Kjæledyr-vitalitet (Ca+Fe+Mg) gir +3 permanent maks HP, og Vekst-elixir (La+Ca+P) gir +1 permanent angrep. Krever elements-mod-materialer
+- **Kjæledyr-utstyrspanel:** InventoryScene viser nå kjæledyrets utstyrsplasser med klo- og rustningsikon, samt utvidet stat-visning (inkludert DEF fra utstyr). Klikk for å fjerne utstyr tilbake til ryggsekken
+
+### Tekniske endringer
+- Pet.js: Ny `equipped` objekt med `weapon`/`armor` plasser; `effectiveAttack`/`effectiveMaxHp`/`effectiveDef` inkluderer utstyrsbonuser (`petAtk`/`petDef`/`petHp`). Nye `equipItem()`/`unequipItem()`-metoder. Serialisering/deserialisering inkluderer utstyr via PET_EQUIPMENT oppslag
+- alloys.js: Ny `PET_EQUIPMENT` konstant med 8 kjæledyr-gjenstander knyttes til eksisterende legeringer (bronse, stål, wolfram, fosfor, skandium, titan)
+- molecules.js: 2 nye kjæledyr-medisinoppskrifter (`pet_vitality`, `pet_growth`) med nye `onUse`-typer
+- ChemistrySystem: Nye `pet_permanent_hp` og `pet_permanent_atk` effekthandlere i `_createUsableItem()`
+- SmeltingSystem.getForgeableEquipment(): Returnerer nå PET_EQUIPMENT i tillegg til ALLOY_EQUIPMENT
+- SmelteryScene: Ny `_doPetForge()` – smir kjæledyr-utstyr og utstyrer det automatisk. Smi-fanen viser 🐾-merke på kjæledyr-gjenstander
+- InventoryScene: Ny `_makePetEquipSlot()` for utstyrsplasser; panelhøyde utvidet; stat-visning inkluderer DEF
+- ItemSpawner: Eggsjanse ved kjæledyr-død økt fra 35% til 50%
+
+---
+
 ## v0.40 – 2026-04-15
 
 ### Nye funksjoner

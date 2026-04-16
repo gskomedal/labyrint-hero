@@ -27,9 +27,12 @@ class ItemSpawner {
 
         // 3. Pet egg (one per world, if hero has no pet or pet is dead)
         if (!scene.pet || !scene.pet.alive) {
+            // Track whether the hero had a pet that died so we can bump spawn rate.
+            const hadPetDie = !!(scene.pet && !scene.pet.alive);
             // Clear dead pet so a new one can be hatched
             if (scene.pet && !scene.pet.alive) scene.pet = null;
-            const eggChance = scene.worldNum === 1 ? 0.8 : 0.35;
+            // 80% on world 1, 50% if previous pet died, 35% otherwise.
+            const eggChance = scene.worldNum === 1 ? 0.8 : (hadPetDie ? 0.50 : 0.35);
             if (Math.random() < eggChance) {
                 // Find a free floor tile not used by chests or items
                 const eggTile = eligible.find(t =>
