@@ -588,8 +588,8 @@ class ItemSpawner {
             const fuelId = fuelIds[Math.floor(Math.random() * fuelIds.length)];
             const fuel = FUEL_DEFS[fuelId];
             if (fuel) {
-                const fItem = { id: fuelId, name: fuel.name, type: 'fuel', tier: fuel.tier || 1, color: fuel.color, desc: fuel.desc || `Brensel (${fuel.energy} energi)`, count: 3 };
-                stock.push({ item: fItem, price: 5 + fuel.energy * 3 });
+                const fItem = { id: fuelId, name: fuel.name, type: 'fuel', tier: fuel.tier || 1, color: fuel.color, desc: fuel.desc || `Brensel (${fuel.energyValue} energi)`, count: 3 };
+                stock.push({ item: fItem, price: 5 + fuel.energyValue * 3 });
             }
         }
 
