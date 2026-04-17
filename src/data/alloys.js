@@ -246,6 +246,99 @@ const ALLOY_DEFS = {
     },
 };
 
+// ── Semiconductor materials (requires Fysiker T1: semiconductorUnlocked) ────
+// Crafted from pure elements like alloys, but give tech-based bonuses
+// (vision, crit, dodge) instead of raw ATK/DEF. Gate-checked in SmelteryScene.
+
+const SEMICONDUCTOR_DEFS = {
+    silicon_wafer: {
+        id: 'silicon_wafer', name: 'Silisiumskive', type: 'semiconductor',
+        formula: 'Si + C', tier: 2,
+        color: 0x667788,
+        recipe: [
+            { symbol: 'Si', amount: 3 },
+            { symbol: 'C', amount: 1 }
+        ],
+        energyCost: 3,
+        smeltingTime: 3,
+        statBonuses: { vision: 1 },
+        stackSize: 10,
+        desc: 'Rent silisium. Grunnlag for all elektronikk.'
+    },
+    silicon_carbide: {
+        id: 'silicon_carbide', name: 'Silisiumkarbid', type: 'semiconductor',
+        formula: 'Si + C + N', tier: 3,
+        color: 0x778899,
+        recipe: [
+            { symbol: 'Si', amount: 2 },
+            { symbol: 'C', amount: 2 },
+            { symbol: 'N', amount: 1 }
+        ],
+        energyCost: 5,
+        smeltingTime: 4,
+        statBonuses: { attack: 2, defense: 2 },
+        stackSize: 10,
+        desc: 'Hardere enn stål, nesten som diamant. Slipemiddel og keramikk.'
+    },
+    germanium_crystal: {
+        id: 'germanium_crystal', name: 'Germaniumkrystall', type: 'semiconductor',
+        formula: 'Ge + Si', tier: 4,
+        color: 0x889988,
+        recipe: [
+            { symbol: 'Ge', amount: 2 },
+            { symbol: 'Si', amount: 1 }
+        ],
+        energyCost: 5,
+        smeltingTime: 5,
+        statBonuses: { vision: 2, dodge: 0.05 },
+        stackSize: 10,
+        desc: 'Infrarødt-gjennomtrengelig. Gir nattsynsteknologi.'
+    },
+    gallium_arsenide: {
+        id: 'gallium_arsenide', name: 'Galliumarsenid', type: 'semiconductor',
+        formula: 'Ga + As', tier: 4,
+        color: 0x6688aa,
+        recipe: [
+            { symbol: 'Ga', amount: 2 },
+            { symbol: 'As', amount: 1 }
+        ],
+        energyCost: 6,
+        smeltingTime: 5,
+        statBonuses: { attack: 3, crit: 0.10 },
+        stackSize: 10,
+        desc: 'Raskere enn silisium. Brukes i lasere og satellitter.'
+    },
+    indium_tin_oxide: {
+        id: 'indium_tin_oxide', name: 'Indiumtinnoksid', type: 'semiconductor',
+        formula: 'In + Sn + O', tier: 4,
+        color: 0xaabbcc,
+        recipe: [
+            { symbol: 'In', amount: 1 },
+            { symbol: 'Sn', amount: 1 },
+            { symbol: 'O', amount: 2 }
+        ],
+        energyCost: 5,
+        smeltingTime: 4,
+        statBonuses: { defense: 2, dodge: 0.10 },
+        stackSize: 10,
+        desc: 'Gjennomsiktig leder. Brukes i berøringsskjermer.'
+    },
+    cadmium_telluride: {
+        id: 'cadmium_telluride', name: 'Kadmiumtellurid', type: 'semiconductor',
+        formula: 'Cd + Te', tier: 5,
+        color: 0x556655,
+        recipe: [
+            { symbol: 'Cd', amount: 1 },
+            { symbol: 'Te', amount: 1 }
+        ],
+        energyCost: 7,
+        smeltingTime: 6,
+        statBonuses: { hearts: 1, defense: 2, regen: true },
+        stackSize: 10,
+        desc: 'Solcellemateriale. Konverterer lys til energi.'
+    },
+};
+
 // ── Alloy-forged equipment templates ─────────────────────────────────────────
 // These are created when a player forges equipment from an alloy at the Camp Room.
 
@@ -289,6 +382,20 @@ const PET_EQUIPMENT = {
     steel_harness:   { id: 'steel_harness',   name: 'Stålsele',          petSlot: 'armor',  alloyId: 'steel',            color: 0xaabbcc, petDef: 2, petHp: 4,    desc: '+2 DEF, +4 HP (kjæledyr)' },
     scandium_vest:   { id: 'scandium_vest',   name: 'Skandiumvest',      petSlot: 'armor',  alloyId: 'scandium_alloy',   color: 0xbbddcc, petDef: 3, petHp: 6,    desc: '+3 DEF, +6 HP (kjæledyr)' },
     titanium_harness:{ id: 'titanium_harness', name: 'Titansele',        petSlot: 'armor',  alloyId: 'titanium_alloy',   color: 0x99aacc, petDef: 4, petHp: 8,    desc: '+4 DEF, +8 HP (kjæledyr)' },
+};
+
+// ── Semiconductor equipment (tech bonuses: vision, crit, dodge) ─────────────
+// Forged from SEMICONDUCTOR_DEFS. Requires semiconductorUnlocked (Fysiker T1).
+
+const SEMICONDUCTOR_EQUIPMENT = {
+    // Weapons (tech-enhanced, crit/precision focus)
+    sic_blade:     { id: 'sic_blade',     name: 'Karbidklinge',       type: 'weapon', semiId: 'silicon_carbide',    color: 0x778899, atk: 6, def: 1, desc: '+6 ATK, +1 DEF (SiC-keramikk)' },
+    gaas_laser:    { id: 'gaas_laser',    name: 'Lasersverd',         type: 'weapon', semiId: 'gallium_arsenide',   color: 0x6688aa, atk: 5, critBonus: 0.15, desc: '+5 ATK, +15% krit (GaAs-laser)' },
+    // Armor (tech-enhanced, dodge/vision focus)
+    si_visor:      { id: 'si_visor',      name: 'Synsforsterker',     type: 'armor',  semiId: 'silicon_wafer',      color: 0x667788, def: 2, visionBonus: 2, desc: '+2 DEF, +2 syn (Si-brikke)' },
+    ge_visor:      { id: 'ge_visor',      name: 'Infrarødt visir',    type: 'armor',  semiId: 'germanium_crystal',  color: 0x889988, def: 3, visionBonus: 2, dodgeBonus: 0.05, desc: '+3 DEF, +2 syn, +5% unnvik (Ge)' },
+    ito_shield:    { id: 'ito_shield',    name: 'Berøringsskjold',    type: 'armor',  semiId: 'indium_tin_oxide',   color: 0xaabbcc, def: 5, dodgeBonus: 0.10, desc: '+5 DEF, +10% unnvik (ITO)' },
+    cdte_armor:    { id: 'cdte_armor',    name: 'Solcellepanser',     type: 'armor',  semiId: 'cadmium_telluride',  color: 0x556655, def: 4, hearts: 2, regenBonus: true, desc: '+4 DEF, +2 HP, HP-regen (CdTe)' },
 };
 
 // ── Alloy tier colors (for UI) ──────────────────────────────────────────────

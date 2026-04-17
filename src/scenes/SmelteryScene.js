@@ -728,7 +728,8 @@ class SmelteryScene extends Phaser.Scene {
                 }).setInteractive({ useHandCursor: true }));
                 btn.on('pointerover', () => btn.setColor('#ffaa44'));
                 btn.on('pointerout', () => btn.setColor('#ff7722'));
-                btn.on('pointerdown', () => this._doCraftAlloy(a.id));
+                const isSemi = !!entry.isSemiconductor;
+                btn.on('pointerdown', () => this._doCraftAlloy(a.id, isSemi));
             }
         });
 
@@ -741,18 +742,20 @@ class SmelteryScene extends Phaser.Scene {
         this._contentEndY = elemBaseY + 120;
     }
 
-    _doCraftAlloy(alloyId) {
+    _doCraftAlloy(alloyId, isSemiconductor) {
         const hero = this.heroRef;
-        const result = this.smelter.craftAlloy(alloyId, hero);
+        const defs = isSemiconductor ? SEMICONDUCTOR_DEFS : undefined;
+        const result = this.smelter.craftAlloy(alloyId, hero, defs);
         if (!result.success) return;
 
         this.smelter.consumeFuel(hero, result.energyCost);
 
-        // Store alloy in hero's alloy inventory
+        // Store alloy/semiconductor in hero's alloy inventory
         if (!hero.alloyInventory) hero.alloyInventory = {};
         hero.alloyInventory[alloyId] = (hero.alloyInventory[alloyId] || 0) + 1;
 
-        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.alloy.name}!`, color: '#ff7722' });
+        const col = isSemiconductor ? '#8866ff' : '#ff7722';
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.alloy.name}!`, color: col });
 
         Audio.playPickup();
         this._refresh();
@@ -818,18 +821,20 @@ class SmelteryScene extends Phaser.Scene {
 
         let rowY = y;
         for (const [alloyId, count] of available) {
-            const alloy = ALLOY_DEFS[alloyId];
+            const isSemi = typeof SEMICONDUCTOR_DEFS !== 'undefined' && !!SEMICONDUCTOR_DEFS[alloyId];
+            const alloy = isSemi ? SEMICONDUCTOR_DEFS[alloyId] : ALLOY_DEFS[alloyId];
             if (!alloy) continue;
+            const accentCol = isSemi ? '#8866ff' : '#ff7722';
 
             const adjHdr = rowY - scrollOff;
             if (adjHdr >= visTop && adjHdr <= visBot) {
                 this._d(this.add.text(startX, adjHdr, `${alloy.name} (×${count}):`, {
-                    fontSize: '15px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+                    fontSize: '15px', color: accentCol, fontFamily: 'monospace', fontStyle: 'bold'
                 }));
             }
             rowY += 22;
 
-            const equipment = this.smelter.getForgeableEquipment(alloyId);
+            const equipment = this.smelter.getForgeableEquipment(alloyId, isSemi);
             equipment.forEach(equip => {
                 const adjY = rowY - scrollOff;
                 rowY += 44;

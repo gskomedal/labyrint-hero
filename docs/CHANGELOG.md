@@ -2,6 +2,21 @@
 
 ---
 
+## v0.43 – 2026-04-17
+
+### Nye funksjoner
+- **Halvleder-crafting (#105 oppfølging):** 6 halvledermaterialer (silisiumskive, silisiumkarbid, germaniumkrystall, galliumarsenid, indiumtinnoksid, kadmiumtellurid) med realistiske oppskrifter basert på ekte halvlederkjemi. Krever Fysiker T1 (halvledergrunnlag)
+- **6 halvleder-utstyr:** Karbidklinge (+6 ATK, SiC-keramikk), Lasersverd (+5 ATK, +15% krit, GaAs), Synsforsterker (+2 DEF, +2 syn, Si), Infrarødt visir (+3 DEF, +2 syn, +5% unnvik, Ge), Berøringsskjold (+5 DEF, +10% unnvik, ITO), Solcellepanser (+4 DEF, +2 HP, HP-regen, CdTe)
+- **Nye utstyrs-bonuser:** `critBonus` (krit-sjanse), `dodgeBonus` (unnvikelse), `regenBonus` (HP-regenerering) støttes nå i Inventory._apply/_unapply for all utstyr
+
+### Tekniske endringer
+- alloys.js: SEMICONDUCTOR_DEFS (6 materialer) + SEMICONDUCTOR_EQUIPMENT (6 utstyr) som separate konstanter
+- SmeltingSystem: `canCraftAlloy()` og `craftAlloy()` tar nå valgfri `defs`-parameter; `getAvailableAlloys()` inkluderer halvledere når `semiconductorUnlocked`; `getForgeableEquipment()` tar `isSemiconductor`-flagg; `forgeEquipment()` sjekker SEMICONDUCTOR_EQUIPMENT
+- SmelteryScene: Legering- og Smi-faner viser nå halvledermaterialer (lilla aksent) og tilhørende utstyr når `semiconductorUnlocked`
+- Inventory: `_apply`/`_unapply` støtter critBonus, dodgeBonus, regenBonus
+
+---
+
 ## v0.42 – 2026-04-16
 
 ### Nye funksjoner

@@ -92,8 +92,8 @@ class SmeltingSystem {
      * @param {number} fuelEnergy - Available fuel energy
      * @returns {{ canCraft: boolean, energyCost: number, missing: Array }}
      */
-    canCraftAlloy(alloyId, hero, fuelEnergy) {
-        const alloy = ALLOY_DEFS[alloyId];
+    canCraftAlloy(alloyId, hero, fuelEnergy, defs) {
+        const alloy = (defs || ALLOY_DEFS)[alloyId];
         if (!alloy) return { canCraft: false, energyCost: 0, missing: [] };
 
         const energyCost = this._adjustedEnergyCost(alloy.energyCost, hero);
@@ -119,8 +119,8 @@ class SmeltingSystem {
      * @param {object} hero
      * @returns {{ success: boolean, alloy: object, energyCost: number }}
      */
-    craftAlloy(alloyId, hero) {
-        const alloy = ALLOY_DEFS[alloyId];
+    craftAlloy(alloyId, hero, defs) {
+        const alloy = (defs || ALLOY_DEFS)[alloyId];
         if (!alloy) return { success: false };
 
         // Consume elements
@@ -151,6 +151,13 @@ class SmeltingSystem {
             const check = this.canCraftAlloy(id, hero, fuelEnergy);
             results.push({ alloy: ALLOY_DEFS[id], ...check });
         }
+        // Include semiconductor materials if hero has the Fysiker T1 unlock.
+        if (hero.semiconductorUnlocked && typeof SEMICONDUCTOR_DEFS !== 'undefined') {
+            for (const id of Object.keys(SEMICONDUCTOR_DEFS)) {
+                const check = this.canCraftAlloy(id, hero, fuelEnergy, SEMICONDUCTOR_DEFS);
+                results.push({ alloy: SEMICONDUCTOR_DEFS[id], ...check, isSemiconductor: true });
+            }
+        }
         // Sort: craftable first, then by tier
         results.sort((a, b) => {
             if (a.canCraft !== b.canCraft) return a.canCraft ? -1 : 1;
@@ -166,13 +173,17 @@ class SmeltingSystem {
      * @param {string} alloyId
      * @returns {Array<object>} Array of ALLOY_EQUIPMENT + PET_EQUIPMENT items
      */
-    getForgeableEquipment(alloyId) {
+    getForgeableEquipment(alloyId, isSemiconductor) {
         const items = [];
-        if (typeof ALLOY_EQUIPMENT !== 'undefined') {
-            items.push(...Object.values(ALLOY_EQUIPMENT).filter(e => e.alloyId === alloyId));
-        }
-        if (typeof PET_EQUIPMENT !== 'undefined') {
-            items.push(...Object.values(PET_EQUIPMENT).filter(e => e.alloyId === alloyId));
+        if (isSemiconductor && typeof SEMICONDUCTOR_EQUIPMENT !== 'undefined') {
+            items.push(...Object.values(SEMICONDUCTOR_EQUIPMENT).filter(e => e.semiId === alloyId));
+        } else {
+            if (typeof ALLOY_EQUIPMENT !== 'undefined') {
+                items.push(...Object.values(ALLOY_EQUIPMENT).filter(e => e.alloyId === alloyId));
+            }
+            if (typeof PET_EQUIPMENT !== 'undefined') {
+                items.push(...Object.values(PET_EQUIPMENT).filter(e => e.alloyId === alloyId));
+            }
         }
         return items;
     }
@@ -185,7 +196,10 @@ class SmeltingSystem {
      * @returns {{ success: boolean, item: object }}
      */
     forgeEquipment(equipmentId, hero) {
-        const template = ALLOY_EQUIPMENT[equipmentId];
+        let template = ALLOY_EQUIPMENT[equipmentId];
+        if (!template && typeof SEMICONDUCTOR_EQUIPMENT !== 'undefined') {
+            template = SEMICONDUCTOR_EQUIPMENT[equipmentId];
+        }
         if (!template) return { success: false };
 
         // Apply Metallurgist master_smith bonus
