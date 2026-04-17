@@ -576,8 +576,44 @@ Spillet utvides fra 7 verdener til 25 etasjer fordelt på 5 geologiske soner.
 
 **Nye spesialrom:** Malmkammer (5+), Hydrotermalkilde (8+), Gasslomme (10+), Magmakammer (18+).
 
-### Fremtidige faser (ikke implementert)
-- Fase 5: Fysikk og endgame (halvledere, fisjon, fusjon)
+### Fase 5: Fysikk og transurane grunnstoffer (v0.42)
+
+Avansert kjernefysikk, syntetiske grunnstoffer og endgame-mål.
+
+**Alle 118 grunnstoffer:** 90 naturlige finnes via mineraler og gasslommer. 28 syntetiske (Tc, Pm, Np–Og) må produseres i partikkelakseleratoren. Oppskriftene gjenspeiler ekte kjernefysikk.
+
+**Partikkelakselerator:** Spesialrom fra verden 13+ (garantert verden 15+). Åpnes med P-tast. Scrollbart UI med alle 28 transuranske synteseoppskrifter. Forbruker mål-element + prosjektil-element + energi. Tier-gating: tier 1–3 krever Fisjon-skill, tier 4–6 krever Fusjon-skill.
+
+**Transuransk syntese (28 oppskrifter):**
+| Metode | Eksempel | Tier |
+|--------|----------|------|
+| Nøytronbombardering | U + nøytron → Np, Pu | 1 |
+| Alfa-bombardering (He-4) | Pu + He → Cm | 2–3 |
+| Tungione-kollisjoner | Bi + Cr → Bh, Pb + Fe → Hs | 4–5 |
+| Ca-48 varmfusjon | Cf + Ca → Og (2000 energi!) | 6 |
+
+**Fisjon/fusjon-energi:**
+- Fisjon: Hvert U i elementtrakeren gir 50 virtuell energi (×2 med Fysiker T3), Th gir 40.
+- Fusjon (D-T): H (deuterium) gir 80 energi, Li (tritiumkilde via Li-6 + nøytron → tritium) gir 150 energi, ×5 med Fysiker T4. He er biprodukt, ikke brensel.
+
+**Fysiker-skillsti:**
+Låses opp ved første besøk i partikkelakselerator. Krever ≥1 Kjemiker-skill.
+| Tier | Skill | Effekt |
+|------|-------|--------|
+| T1 | Halvledergrunnlag | Halvleder-crafting, +1 mineral-tiltrekningsradius per stack (maks 3) |
+| T2 | Strålingsshield | Radioaktive gir ikke HP-tap, +1 min loot-tier per stack (maks 2) |
+| T3 | Fisjonsbeherskelse | 2× reaktor-energi fra U/Th, låser tier 1–3 syntetiske (maks 1) |
+| T4 | Fusjonspioner | 5× fusjonsenergi fra H+Li, låser ALLE syntetiske inkl. supertunge (maks 1) |
+
+**Nye synergier:**
+| Synergi | Stier | Effekt |
+|---------|-------|--------|
+| Atomsmedja | Fysiker + Metallurg | +3 ATK, −25% akselerator-energi |
+| Kvantekjemi | Fysiker + Kjemiker | +30% potion-styrke, +20% bomberadius |
+
+**Edelgass-samling:** Gasslommer (verden 10+) gir 1–2 tilfeldige edelgasser (Ar, Kr, Xe, Ne, He) direkte i elementtrakeren.
+
+**Endgame:** Samle alle 118 grunnstoffer utløser «Guds periodiske system» – +10 ATK, +10 DEF, +5 hjerter, +3 synsfelt.
 
 Se `docs/Elements-mod.md` for fullstendig designdokument.
 

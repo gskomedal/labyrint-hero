@@ -81,7 +81,7 @@ Ekstremt sjeldne – endgame.
 | U | Uran | 92 | Aktinide | Uraninitt (blendens) | Muliggjør fisjon |
 | Th | Thorium | 90 | Aktinide | Monazitt | Alternativ fisjon |
 | Ra | Radium | 88 | Aktinide | Uranmalm (biprodukt) | Magisk glød, boost |
-| He | Helium | 2 | Edelgass | Gasslommer i berg | Muliggjør fusjon |
+| He | Helium | 2 | Edelgass | Gasslommer i berg | Biprodukt av fusjon. Samles fra gasslommer (v10+) |
 | Ir | Iridium | 77 | PGM | Ekstremt sjelden malm | Hardeste legering |
 
 ---
@@ -234,8 +234,8 @@ Energi er en ressurs som kreves for smelteprosesser og avansert teknologi. Spill
 | Trekull | 1 | 2 | Ingen | Laget av tre i begrenset luft |
 | Olje (råolje) | 2 | 8 | Bore-skill | Finnes i dype lag |
 | Naturgass | 2 | 10 | Bore-skill | Finnes med olje |
-| Fisjon (U-235) | 3 | 1000 | U + reaktor | Uran må berikes |
-| Fusjon (D-T) | 4 | 10000 | He-3 + fusjonsteknologi | Endgame |
+| Fisjon (U/Th) | 3 | 50/40 per enhet | Fysiker T3 | U og Th gir virtuell energi (×2 med skill) |
+| Fusjon (D-T) | 4 | H:80, Li:150 | Fysiker T4 | Deuterium + Li (tritiumkilde), ×5 med skill |
 
 ### 7.2 Energiteknologi-tre
 
