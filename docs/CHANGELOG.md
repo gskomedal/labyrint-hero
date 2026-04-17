@@ -2,6 +2,29 @@
 
 ---
 
+## v0.44 – 2026-04-17
+
+### Nye funksjoner
+- **Alle 6 gameplay-teknologier er nå fullt implementert:**
+  - **Kraftfelt:** Absorberer opptil 15 skade per etasje. Regenererer automatisk ved ny etasje. Visuell indikator i HUD
+  - **EMP-pulsgenerator:** 1 ladning per etasje. Trykk G for å lamme alle monstre i 50 runder. Blå flash-effekt
+  - **Laserturret:** 2 ladninger per etasje. Trykk H for å plassere. Automatisk 4 skade/runde mot monstre innen 5 ruter. Laserstrål-animasjon
+  - **Teleporter-noder:** Trykk J for å plassere noder (maks 5). Stå på en node og trykk J for å teleportere til neste. Sirkulær navigering
+  - **Elementskanner:** Alle mineraler vises automatisk på minikartet (grønne prikker) uavhengig av tåke
+  - **Ruteberegner:** BFS-pathfinding viser optimal rute til exit som grønn sti på minikartet
+
+### Tekniske endringer
+- Hero.takeDamage: Kraftfelt-absorpsjon før HP-tap med flytende tekst
+- CombatManager: Nye `handleEMP`, `handlePlaceTurret`, `handleTeleporter`, `tickLaserTurrets` med laser-beam-animasjon
+- UIScene minimap: BFS pathfinding (`_bfsPath`), elementskanner-overlay, turret/teleporter-noder-visning
+- UIScene HUD: Tech-status-indikatorer (kraftfelt HP, EMP/turret-ladninger, teleporter, rute, skanner)
+- InputHandler: G/H/J hurtigtaster for EMP/turret/teleporter
+- GameScene: Teknologi-effekter initialiseres per etasje (kraftfelt regen, EMP/turret-ladninger)
+- HeroCrafting: `empCharges`, `laserTurretCharges` i init/serialize/applyStats
+- MonsterManager: Laserturret-tick integrert i monster-syklusen
+
+---
+
 ## v0.43 – 2026-04-17
 
 ### Nye funksjoner

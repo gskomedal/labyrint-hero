@@ -145,6 +145,8 @@ class MonsterManager {
 
         if (!regularReady && !bossReady) return;
 
+        if (regularReady) scene.combat.tickLaserTurrets();
+
         for (const m of [...scene.monsters]) {
             if (!m.alive) continue;
             const isBoss = m.type === 'boss';
