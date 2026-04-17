@@ -76,7 +76,11 @@ class SmelteryScene extends Phaser.Scene {
             { id: 'alloy', label: 'Legering' },
             { id: 'forge', label: 'Smi' },
         ];
-        const tabW = 130;
+        if (this.heroRef.semiconductorUnlocked) {
+            tabs.push({ id: 'refine', label: 'Raffiner' });
+            tabs.push({ id: 'tech', label: 'Teknologi' });
+        }
+        const tabW = tabs.length > 4 ? 100 : 130;
         const tabY = this.py + 62;
         tabs.forEach((tab, i) => {
             const tx = this.px + 30 + i * (tabW + 10) + tabW / 2;
@@ -102,8 +106,8 @@ class SmelteryScene extends Phaser.Scene {
 
         // ── Content area ──────────────────────────────────────────────────────
         this.contentY = tabY + 30;
-        this._scrollOffsets = { stash: 0, smelt: 0, alloy: 0, forge: 0 };
-        this._maxScrolls = { stash: 0, smelt: 0, alloy: 0, forge: 0 };
+        this._scrollOffsets = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
+        this._maxScrolls = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
         this._elementFilter = null; // null = show all, or element symbol string
 
         // Mouse wheel scrolling (per-tab offset)
@@ -155,7 +159,9 @@ class SmelteryScene extends Phaser.Scene {
         cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 12, this.panelH - (this.contentY - this.py) - 10, 4);
 
         // Update tab button colors
-        UIHelper.updateTabButtons(this._tabBtns, ['stash', 'smelt', 'alloy', 'forge'], this._tab, '#ff7722', '#554433');
+        const tabIds = ['stash', 'smelt', 'alloy', 'forge'];
+        if (this.heroRef.semiconductorUnlocked) { tabIds.push('refine', 'tech'); }
+        UIHelper.updateTabButtons(this._tabBtns, tabIds, this._tab, '#ff7722', '#554433');
 
         // Update fuel text
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
@@ -178,6 +184,8 @@ class SmelteryScene extends Phaser.Scene {
                     this._drawLockedTab();
                 }
                 break;
+            case 'refine': this._drawRefineTab(); break;
+            case 'tech':   this._drawTechTab();   break;
         }
 
         // Compute max scroll for this tab from the captured end-of-content Y.
@@ -728,8 +736,7 @@ class SmelteryScene extends Phaser.Scene {
                 }).setInteractive({ useHandCursor: true }));
                 btn.on('pointerover', () => btn.setColor('#ffaa44'));
                 btn.on('pointerout', () => btn.setColor('#ff7722'));
-                const isSemi = !!entry.isSemiconductor;
-                btn.on('pointerdown', () => this._doCraftAlloy(a.id, isSemi));
+                btn.on('pointerdown', () => this._doCraftAlloy(a.id));
             }
         });
 
@@ -742,20 +749,17 @@ class SmelteryScene extends Phaser.Scene {
         this._contentEndY = elemBaseY + 120;
     }
 
-    _doCraftAlloy(alloyId, isSemiconductor) {
+    _doCraftAlloy(alloyId) {
         const hero = this.heroRef;
-        const defs = isSemiconductor ? SEMICONDUCTOR_DEFS : undefined;
-        const result = this.smelter.craftAlloy(alloyId, hero, defs);
+        const result = this.smelter.craftAlloy(alloyId, hero);
         if (!result.success) return;
 
         this.smelter.consumeFuel(hero, result.energyCost);
 
-        // Store alloy/semiconductor in hero's alloy inventory
         if (!hero.alloyInventory) hero.alloyInventory = {};
         hero.alloyInventory[alloyId] = (hero.alloyInventory[alloyId] || 0) + 1;
 
-        const col = isSemiconductor ? '#8866ff' : '#ff7722';
-        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.alloy.name}!`, color: col });
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.alloy.name}!`, color: '#ff7722' });
 
         Audio.playPickup();
         this._refresh();
@@ -821,20 +825,18 @@ class SmelteryScene extends Phaser.Scene {
 
         let rowY = y;
         for (const [alloyId, count] of available) {
-            const isSemi = typeof SEMICONDUCTOR_DEFS !== 'undefined' && !!SEMICONDUCTOR_DEFS[alloyId];
-            const alloy = isSemi ? SEMICONDUCTOR_DEFS[alloyId] : ALLOY_DEFS[alloyId];
+            const alloy = ALLOY_DEFS[alloyId];
             if (!alloy) continue;
-            const accentCol = isSemi ? '#8866ff' : '#ff7722';
 
             const adjHdr = rowY - scrollOff;
             if (adjHdr >= visTop && adjHdr <= visBot) {
                 this._d(this.add.text(startX, adjHdr, `${alloy.name} (×${count}):`, {
-                    fontSize: '15px', color: accentCol, fontFamily: 'monospace', fontStyle: 'bold'
+                    fontSize: '15px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }));
             }
             rowY += 22;
 
-            const equipment = this.smelter.getForgeableEquipment(alloyId, isSemi);
+            const equipment = this.smelter.getForgeableEquipment(alloyId);
             equipment.forEach(equip => {
                 const adjY = rowY - scrollOff;
                 rowY += 44;
@@ -956,6 +958,159 @@ class SmelteryScene extends Phaser.Scene {
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Reforged: ${rolled.name}!`, color: '#ffcc44' });
         Audio.playPickup();
         this._refresh();
+    }
+
+    // ── REFINE TAB: Raw elements → Refined semiconductor-grade ────────────────
+
+    _drawRefineTab() {
+        const hero = this.heroRef;
+        const cx = this.px + this.panelW / 2;
+        let y = this.contentY;
+        const scrollOff = this._scrollOffsets.refine || 0;
+        const visBot = this.py + this.panelH - 40;
+        const fuel = this.smelter.calculateFuelEnergy(hero);
+        const colW = Math.min(560, this.panelW - 40);
+        const startX = this.px + 20;
+
+        this._d(this.add.text(cx, y, 'Raffiner grunnstoffer til halvlederkvalitet:', {
+            fontSize: '14px', color: '#8866ff', fontFamily: 'monospace'
+        }).setOrigin(0.5));
+        y += 22;
+
+        // Show current refined inventory
+        const refined = hero.refinedElements || {};
+        const refEntries = Object.entries(refined).filter(([, v]) => v > 0);
+        if (refEntries.length > 0) {
+            let rx = startX;
+            for (const [id, count] of refEntries) {
+                const recipe = REFINING_RECIPES.find(r => r.id === id);
+                const col = recipe ? '#' + recipe.color.toString(16).padStart(6, '0') : '#8866ff';
+                const badge = this._d(this.add.text(rx, y, `${recipe ? recipe.name : id}: ${count}`, {
+                    fontSize: '13px', color: col, fontFamily: 'monospace',
+                    backgroundColor: '#0a0818', padding: { x: 3, y: 1 }
+                }));
+                rx += badge.width + 8;
+                if (rx > startX + colW - 50) { rx = startX; y += 20; }
+            }
+            y += 22;
+        }
+
+        if (typeof REFINING_RECIPES === 'undefined') { this._contentEndY = y; return; }
+        const rowStep = 44;
+
+        REFINING_RECIPES.forEach((recipe, idx) => {
+            const baseY = y + idx * rowStep;
+            const ry = baseY - scrollOff;
+            if (ry > visBot || ry < this.contentY - rowStep) return;
+
+            const check = this.smelter.canRefine(recipe.id, hero, fuel);
+            const col = check.canRefine ? 0x8866ff : 0x332244;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+
+            const bg = this._d(this.add.graphics());
+            bg.fillStyle(col, 0.08);
+            bg.fillRoundedRect(startX, ry, colW, 38, 4);
+            bg.lineStyle(1, col, 0.3);
+            bg.strokeRoundedRect(startX, ry, colW, 38, 4);
+
+            this._d(this.add.text(startX + 8, ry + 4, recipe.name, {
+                fontSize: '15px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+            const inputStr = recipe.input.map(i => {
+                const have = hero.elementTracker.getCount(i.symbol);
+                return `${i.symbol}:${have}/${i.amount}`;
+            }).join('  ');
+            this._d(this.add.text(startX + 8, ry + 22, `${inputStr}  |  ${check.energyCost} energi`, {
+                fontSize: '13px', color: '#665588', fontFamily: 'monospace'
+            }));
+
+            if (check.canRefine) {
+                const btn = this._d(this.add.text(startX + colW - 70, ry + 10, '[ Raffiner ]', {
+                    fontSize: '14px', color: '#8866ff', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setInteractive({ useHandCursor: true }));
+                btn.on('pointerover', () => btn.setColor('#aa88ff'));
+                btn.on('pointerout', () => btn.setColor('#8866ff'));
+                btn.on('pointerdown', () => {
+                    const result = this.smelter.refine(recipe.id, hero);
+                    if (result.success) {
+                        this.smelter.consumeFuel(hero, result.energyCost);
+                        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Raffinert: ${recipe.name}`, color: '#8866ff' });
+                        Audio.playPickup();
+                        this._refresh();
+                    }
+                });
+            }
+        });
+        this._contentEndY = y + REFINING_RECIPES.length * rowStep;
+    }
+
+    // ── TECH TAB: Install permanent technology upgrades ─────────────────────
+
+    _drawTechTab() {
+        const hero = this.heroRef;
+        const cx = this.px + this.panelW / 2;
+        let y = this.contentY;
+        const scrollOff = this._scrollOffsets.tech || 0;
+        const visBot = this.py + this.panelH - 40;
+        const colW = Math.min(560, this.panelW - 40);
+        const startX = this.px + 20;
+
+        this._d(this.add.text(cx, y, 'Installer teknologi fra halvledere:', {
+            fontSize: '14px', color: '#8866ff', fontFamily: 'monospace'
+        }).setOrigin(0.5));
+        y += 22;
+
+        if (typeof TECH_UPGRADES === 'undefined') { this._contentEndY = y; return; }
+        const techs = Object.values(TECH_UPGRADES);
+        const rowStep = 52;
+
+        techs.forEach((tech, idx) => {
+            const baseY = y + idx * rowStep;
+            const ty = baseY - scrollOff;
+            if (ty > visBot || ty < this.contentY - rowStep) return;
+
+            const installed = !!hero[tech.heroFlag];
+            const canInstall = !installed && this.smelter.canInstallTech(tech.id, hero);
+            const col = installed ? 0x336633 : (canInstall ? 0x8866ff : 0x332244);
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+
+            const bg = this._d(this.add.graphics());
+            bg.fillStyle(col, installed ? 0.12 : 0.08);
+            bg.fillRoundedRect(startX, ty, colW, 46, 4);
+            bg.lineStyle(1, col, 0.3);
+            bg.strokeRoundedRect(startX, ty, colW, 46, 4);
+
+            const checkMark = installed ? ' ✓' : '';
+            this._d(this.add.text(startX + 8, ty + 4, `${tech.name}${checkMark}`, {
+                fontSize: '15px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+            this._d(this.add.text(startX + 8, ty + 22, tech.desc, {
+                fontSize: '12px', color: '#665588', fontFamily: 'monospace',
+                wordWrap: { width: colW - 120 }
+            }));
+
+            const semiName = SEMICONDUCTOR_DEFS[tech.semiId] ? SEMICONDUCTOR_DEFS[tech.semiId].name : tech.semiId;
+            const have = (hero.alloyInventory || {})[tech.semiId] || 0;
+            this._d(this.add.text(startX + 8, ty + 34, `Krever: ${semiName} (${have}/${tech.amount})`, {
+                fontSize: '11px', color: '#554477', fontFamily: 'monospace'
+            }));
+
+            if (canInstall) {
+                const btn = this._d(this.add.text(startX + colW - 80, ty + 12, '[ Installer ]', {
+                    fontSize: '14px', color: '#8866ff', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setInteractive({ useHandCursor: true }));
+                btn.on('pointerover', () => btn.setColor('#aa88ff'));
+                btn.on('pointerout', () => btn.setColor('#8866ff'));
+                btn.on('pointerdown', () => {
+                    if (this.smelter.installTech(tech.id, hero)) {
+                        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Installert: ${tech.name}!`, color: '#8866ff' });
+                        Audio.playPickup();
+                        this._refresh();
+                    }
+                });
+            }
+        });
+        this._contentEndY = y + techs.length * rowStep;
     }
 
     // ── Element inventory display ────────────────────────────────────────────

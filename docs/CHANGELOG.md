@@ -5,15 +5,26 @@
 ## v0.43 – 2026-04-17
 
 ### Nye funksjoner
-- **Halvleder-crafting (#105 oppfølging):** 6 halvledermaterialer (silisiumskive, silisiumkarbid, germaniumkrystall, galliumarsenid, indiumtinnoksid, kadmiumtellurid) med realistiske oppskrifter basert på ekte halvlederkjemi. Krever Fysiker T1 (halvledergrunnlag)
-- **6 halvleder-utstyr:** Karbidklinge (+6 ATK, SiC-keramikk), Lasersverd (+5 ATK, +15% krit, GaAs), Synsforsterker (+2 DEF, +2 syn, Si), Infrarødt visir (+3 DEF, +2 syn, +5% unnvik, Ge), Berøringsskjold (+5 DEF, +10% unnvik, ITO), Solcellepanser (+4 DEF, +2 HP, HP-regen, CdTe)
-- **Nye utstyrs-bonuser:** `critBonus` (krit-sjanse), `dodgeBonus` (unnvikelse), `regenBonus` (HP-regenerering) støttes nå i Inventory._apply/_unapply for all utstyr
+- **Halvleder-system med raffinering og teknologi:** Trestegs prosess: (1) Raffiner rå elementer til halvlederkvalitet (6 oppskrifter), (2) Kombiner raffinerte materialer til halvledere (6 typer, Si-wafer bruker Si+B+P-doping), (3) Installer permanente teknologier som låser opp nye mekanikker
+- **Ny «Raffiner»-fane i Smelteovn:** Konverterer rå elementer til ultra-rene varianter (f.eks. 5 Si → 1 Rent Si). Høy energikostnad. Viser raffinert lagerbeholdning
+- **10 permanente teknologi-oppgraderinger** via ny «Teknologi»-fane:
+  - Ruteberegner (Si): optimal rute til exit/boss/chest på minikartet
+  - Elementskanner (Ge): avslører alle elementer på etasjen
+  - Laserturret (GaAs): plasserbar automatisk turret (4 skade/runde)
+  - Teleporter-noder (ITO): plassér og teleportér fritt mellom rom
+  - EMP-puls (SiC): slår ut alle monstre i 50 runder
+  - Kraftfelt (CdTe): 15-skade energibarriere, regenererer mellom etasjer
+  - Solcellepanel (CdTe): +30 gratis energi per verden
+  - Termoelektrisk gen. (Ge): +50 energi i vulkan/magma-soner
+  - Reaktorkontroll (Si): +50% fisjon/fusjon-energieffektivitet
+  - Superleder-kabling (GaAs): -30% energikostnad på all smelting/crafting
 
 ### Tekniske endringer
-- alloys.js: SEMICONDUCTOR_DEFS (6 materialer) + SEMICONDUCTOR_EQUIPMENT (6 utstyr) som separate konstanter
-- SmeltingSystem: `canCraftAlloy()` og `craftAlloy()` tar nå valgfri `defs`-parameter; `getAvailableAlloys()` inkluderer halvledere når `semiconductorUnlocked`; `getForgeableEquipment()` tar `isSemiconductor`-flagg; `forgeEquipment()` sjekker SEMICONDUCTOR_EQUIPMENT
-- SmelteryScene: Legering- og Smi-faner viser nå halvledermaterialer (lilla aksent) og tilhørende utstyr når `semiconductorUnlocked`
-- Inventory: `_apply`/`_unapply` støtter critBonus, dodgeBonus, regenBonus
+- alloys.js: REFINING_RECIPES (6), redesignet SEMICONDUCTOR_DEFS (raffinerte inputs, Si+B+P), TECH_UPGRADES (10 stk). SEMICONDUCTOR_EQUIPMENT fjernet
+- SmeltingSystem: `canRefine/refine`, `canCraftSemiconductor/craftSemiconductor`, `canInstallTech/installTech`. Energiteknologier i `calculateFuelEnergy` og `_adjustedEnergyCost`
+- SmelteryScene: Nye «Raffiner» og «Teknologi»-faner. Halvleder-kode fjernet fra legering/smi
+- HeroCrafting: `refinedElements`, 10 tech-flagg, `teleporterNodes`, `techForceFieldHP`
+- Inventory: critBonus, dodgeBonus, regenBonus i `_apply`/`_unapply`
 
 ---
 
