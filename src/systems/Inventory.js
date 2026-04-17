@@ -247,6 +247,9 @@ class Inventory {
             hero.maxHearts += item.hearts;
         }
         if (item.visionBonus) hero.visionRadius += item.visionBonus;
+        if (item.critBonus) hero.critChance = Math.min(0.75, hero.critChance + item.critBonus);
+        if (item.dodgeBonus) hero.dodgeChance = Math.min(0.6, hero.dodgeChance + item.dodgeBonus);
+        if (item.regenBonus) hero.equipRegenHP = (hero.equipRegenHP || 0) + 1;
     }
 
     _unapply(item, hero) {
@@ -257,6 +260,9 @@ class Inventory {
             hero.hearts      = Math.min(hero.hearts, hero.maxHearts);
         }
         if (item.visionBonus) hero.visionRadius -= item.visionBonus;
+        if (item.critBonus) hero.critChance = Math.max(0, hero.critChance - item.critBonus);
+        if (item.dodgeBonus) hero.dodgeChance = Math.max(0, hero.dodgeChance - item.dodgeBonus);
+        if (item.regenBonus) hero.equipRegenHP = Math.max(0, (hero.equipRegenHP || 0) - 1);
     }
 
     // ── Serialisation ─────────────────────────────────────────────────────────

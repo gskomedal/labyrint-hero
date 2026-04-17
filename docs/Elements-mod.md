@@ -487,7 +487,7 @@ Med en dypere verden trenger spilleren bedre kartlegging:
 - [x] Edelgass-samling fra gasslommer (verden 10+)
 - [x] Endgame «Guds periodiske system»: +10/+10/+5/+3 for alle 118
 - [x] 2 nye synergier (Atomsmedja, Kvantekjemi)
-- [ ] Halvleder-crafting items (Si-wafer, Ge-crystal, GaAs) – fremtidig
+- [x] Halvleder-system: Raffinering (6 oppskrifter: rå→rent) + 6 halvledermaterialer (Si-wafer m/ B/P-doping, SiC, Ge, GaAs, ITO, CdTe) + 10 teknologi-oppgraderinger (ruteberegner, elementskanner, laserturret, teleporter, EMP, kraftfelt, solcelle, termogenerator, reaktorkontroll, superleder) (v0.43)
 - [ ] Jordens kjerne-sone visuelt tema – fremtidig
 
 ---

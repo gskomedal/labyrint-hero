@@ -151,6 +151,8 @@ class SmeltingSystem {
             const check = this.canCraftAlloy(id, hero, fuelEnergy);
             results.push({ alloy: ALLOY_DEFS[id], ...check });
         }
+        // Semiconductors are crafted via dedicated craftSemiconductor() path
+        // in the Raffiner tab, not mixed with alloys.
         // Sort: craftable first, then by tier
         results.sort((a, b) => {
             if (a.canCraft !== b.canCraft) return a.canCraft ? -1 : 1;
@@ -257,6 +259,13 @@ class SmeltingSystem {
             const liCount = hero.elementTracker ? hero.elementTracker.getCount('Li') : 0;
             total += Math.round((hCount * 80 + liCount * 150) * fuMul);
         }
+        // Semiconductor energy techs
+        if (hero.techSolarPanel) total += 30;
+        if (hero.techThermoelectric) {
+            const wn = hero.worldNum || 1;
+            if (wn >= 8) total += 50; // vulkan/magma-soner
+        }
+        if (hero.techReactorControl) total = Math.round(total * 1.5);
         return total;
     }
 
@@ -309,7 +318,100 @@ class SmeltingSystem {
 
     _adjustedEnergyCost(baseCost, hero) {
         const efficiency = hero.smeltingEfficiency || 1.0;
-        return Math.max(1, Math.round(baseCost * efficiency));
+        const superMul = hero.techSuperconductor ? 0.7 : 1.0;
+        return Math.max(1, Math.round(baseCost * efficiency * superMul));
+    }
+
+    // ── Refining: Raw Element → Semiconductor-Grade ─────────────────────────
+
+    canRefine(recipeId, hero, fuelEnergy) {
+        if (typeof REFINING_RECIPES === 'undefined') return { canRefine: false };
+        const recipe = REFINING_RECIPES.find(r => r.id === recipeId);
+        if (!recipe) return { canRefine: false };
+        const cost = this._adjustedEnergyCost(recipe.energyCost, hero);
+        const missing = [];
+        for (const ing of recipe.input) {
+            const have = hero.elementTracker.getCount(ing.symbol);
+            if (have < ing.amount) missing.push({ symbol: ing.symbol, need: ing.amount, have });
+        }
+        return { canRefine: missing.length === 0 && fuelEnergy >= cost, energyCost: cost, missing };
+    }
+
+    refine(recipeId, hero) {
+        if (typeof REFINING_RECIPES === 'undefined') return { success: false };
+        const recipe = REFINING_RECIPES.find(r => r.id === recipeId);
+        if (!recipe) return { success: false };
+        for (const ing of recipe.input) {
+            hero.elementTracker.collected[ing.symbol] -= ing.amount;
+            if (hero.elementTracker.collected[ing.symbol] <= 0) delete hero.elementTracker.collected[ing.symbol];
+        }
+        const cost = this._adjustedEnergyCost(recipe.energyCost, hero);
+        if (!hero.refinedElements) hero.refinedElements = {};
+        hero.refinedElements[recipe.id] = (hero.refinedElements[recipe.id] || 0) + 1;
+        return { success: true, recipe, energyCost: cost };
+    }
+
+    // ── Semiconductor crafting (uses refined elements) ──────────────────────
+
+    canCraftSemiconductor(semiId, hero, fuelEnergy) {
+        if (typeof SEMICONDUCTOR_DEFS === 'undefined') return { canCraft: false };
+        const semi = SEMICONDUCTOR_DEFS[semiId];
+        if (!semi) return { canCraft: false };
+        const cost = this._adjustedEnergyCost(semi.energyCost, hero);
+        const missing = [];
+        for (const ing of semi.recipe) {
+            if (ing.refined) {
+                const have = (hero.refinedElements || {})[ing.refined] || 0;
+                if (have < ing.amount) missing.push({ symbol: ing.refined, need: ing.amount, have });
+            } else {
+                const have = hero.elementTracker.getCount(ing.symbol);
+                if (have < ing.amount) missing.push({ symbol: ing.symbol, need: ing.amount, have });
+            }
+        }
+        return { canCraft: missing.length === 0 && fuelEnergy >= cost, energyCost: cost, missing };
+    }
+
+    craftSemiconductor(semiId, hero) {
+        if (typeof SEMICONDUCTOR_DEFS === 'undefined') return { success: false };
+        const semi = SEMICONDUCTOR_DEFS[semiId];
+        if (!semi) return { success: false };
+        for (const ing of semi.recipe) {
+            if (ing.refined) {
+                hero.refinedElements[ing.refined] = (hero.refinedElements[ing.refined] || 0) - ing.amount;
+                if (hero.refinedElements[ing.refined] <= 0) delete hero.refinedElements[ing.refined];
+            } else {
+                hero.elementTracker.collected[ing.symbol] -= ing.amount;
+                if (hero.elementTracker.collected[ing.symbol] <= 0) delete hero.elementTracker.collected[ing.symbol];
+            }
+        }
+        const cost = this._adjustedEnergyCost(semi.energyCost, hero);
+        if (!hero.alloyInventory) hero.alloyInventory = {};
+        hero.alloyInventory[semiId] = (hero.alloyInventory[semiId] || 0) + 1;
+        return { success: true, semi, energyCost: cost };
+    }
+
+    // ── Technology installation (one-time, from semiconductor inventory) ────
+
+    canInstallTech(techId, hero) {
+        if (typeof TECH_UPGRADES === 'undefined') return false;
+        const tech = TECH_UPGRADES[techId];
+        if (!tech) return false;
+        if (hero[tech.heroFlag]) return false; // already installed
+        const have = (hero.alloyInventory || {})[tech.semiId] || 0;
+        return have >= tech.amount;
+    }
+
+    installTech(techId, hero) {
+        if (typeof TECH_UPGRADES === 'undefined') return false;
+        const tech = TECH_UPGRADES[techId];
+        if (!tech || hero[tech.heroFlag]) return false;
+        const have = (hero.alloyInventory || {})[tech.semiId] || 0;
+        if (have < tech.amount) return false;
+        hero.alloyInventory[tech.semiId] -= tech.amount;
+        if (hero.alloyInventory[tech.semiId] <= 0) delete hero.alloyInventory[tech.semiId];
+        hero[tech.heroFlag] = true;
+        if (tech.heroFlag === 'techForceField') hero.techForceFieldHP = 15;
+        return true;
     }
 
     _adjustedTime(baseTime, hero) {

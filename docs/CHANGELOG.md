@@ -2,6 +2,32 @@
 
 ---
 
+## v0.43 – 2026-04-17
+
+### Nye funksjoner
+- **Halvleder-system med raffinering og teknologi:** Trestegs prosess: (1) Raffiner rå elementer til halvlederkvalitet (6 oppskrifter), (2) Kombiner raffinerte materialer til halvledere (6 typer, Si-wafer bruker Si+B+P-doping), (3) Installer permanente teknologier som låser opp nye mekanikker
+- **Ny «Raffiner»-fane i Smelteovn:** Konverterer rå elementer til ultra-rene varianter (f.eks. 5 Si → 1 Rent Si). Høy energikostnad. Viser raffinert lagerbeholdning
+- **10 permanente teknologi-oppgraderinger** via ny «Teknologi»-fane:
+  - Ruteberegner (Si): optimal rute til exit/boss/chest på minikartet
+  - Elementskanner (Ge): avslører alle elementer på etasjen
+  - Laserturret (GaAs): plasserbar automatisk turret (4 skade/runde)
+  - Teleporter-noder (ITO): plassér og teleportér fritt mellom rom
+  - EMP-puls (SiC): slår ut alle monstre i 50 runder
+  - Kraftfelt (CdTe): 15-skade energibarriere, regenererer mellom etasjer
+  - Solcellepanel (CdTe): +30 gratis energi per verden
+  - Termoelektrisk gen. (Ge): +50 energi i vulkan/magma-soner
+  - Reaktorkontroll (Si): +50% fisjon/fusjon-energieffektivitet
+  - Superleder-kabling (GaAs): -30% energikostnad på all smelting/crafting
+
+### Tekniske endringer
+- alloys.js: REFINING_RECIPES (6), redesignet SEMICONDUCTOR_DEFS (raffinerte inputs, Si+B+P), TECH_UPGRADES (10 stk). SEMICONDUCTOR_EQUIPMENT fjernet
+- SmeltingSystem: `canRefine/refine`, `canCraftSemiconductor/craftSemiconductor`, `canInstallTech/installTech`. Energiteknologier i `calculateFuelEnergy` og `_adjustedEnergyCost`
+- SmelteryScene: Nye «Raffiner» og «Teknologi»-faner. Halvleder-kode fjernet fra legering/smi
+- HeroCrafting: `refinedElements`, 10 tech-flagg, `teleporterNodes`, `techForceFieldHP`
+- Inventory: critBonus, dodgeBonus, regenBonus i `_apply`/`_unapply`
+
+---
+
 ## v0.42 – 2026-04-16
 
 ### Nye funksjoner
