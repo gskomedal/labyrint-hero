@@ -62,6 +62,23 @@ const HeroCrafting = {
         hero.fusionEnergyMul = 1.0;
         hero.acceleratorEfficiency = 1.0;
 
+        // Refined elements (purified for semiconductor production)
+        hero.refinedElements = {};
+
+        // Technology upgrades (permanent flags from TECH_UPGRADES)
+        hero.techRouteCalc = false;
+        hero.techElementScanner = false;
+        hero.techLaserTurret = false;
+        hero.techTeleporter = false;
+        hero.techEMP = false;
+        hero.techForceField = false;
+        hero.techForceFieldHP = 0;
+        hero.techSolarPanel = false;
+        hero.techThermoelectric = false;
+        hero.techReactorControl = false;
+        hero.techSuperconductor = false;
+        hero.teleporterNodes = [];
+
         // Zone progression (Phase 4)
         hero.completedZones = [];
 
@@ -134,6 +151,19 @@ const HeroCrafting = {
             fusionMastered:       hero.fusionMastered,
             fusionEnergyMul:      hero.fusionEnergyMul,
             acceleratorEfficiency: hero.acceleratorEfficiency,
+            refinedElements:      { ...hero.refinedElements },
+            techRouteCalc:        hero.techRouteCalc,
+            techElementScanner:   hero.techElementScanner,
+            techLaserTurret:      hero.techLaserTurret,
+            techTeleporter:       hero.techTeleporter,
+            techEMP:              hero.techEMP,
+            techForceField:       hero.techForceField,
+            techForceFieldHP:     hero.techForceFieldHP,
+            techSolarPanel:       hero.techSolarPanel,
+            techThermoelectric:   hero.techThermoelectric,
+            techReactorControl:   hero.techReactorControl,
+            techSuperconductor:   hero.techSuperconductor,
+            teleporterNodes:      hero.teleporterNodes ? [...hero.teleporterNodes] : [],
             completedZones:       [...hero.completedZones],
             appliedElementBonuses: { ...hero.appliedElementBonuses },
             elementGoldMul:       hero.elementGoldMul,
@@ -200,6 +230,19 @@ const HeroCrafting = {
         hero.fusionMastered       = stats.fusionMastered       || false;
         hero.fusionEnergyMul      = stats.fusionEnergyMul      || 1.0;
         hero.acceleratorEfficiency = stats.acceleratorEfficiency || 1.0;
+        hero.refinedElements      = stats.refinedElements      ? { ...stats.refinedElements } : {};
+        hero.techRouteCalc        = stats.techRouteCalc        || false;
+        hero.techElementScanner   = stats.techElementScanner   || false;
+        hero.techLaserTurret      = stats.techLaserTurret      || false;
+        hero.techTeleporter       = stats.techTeleporter       || false;
+        hero.techEMP              = stats.techEMP              || false;
+        hero.techForceField       = stats.techForceField       || false;
+        hero.techForceFieldHP     = stats.techForceFieldHP     || 0;
+        hero.techSolarPanel       = stats.techSolarPanel       || false;
+        hero.techThermoelectric   = stats.techThermoelectric   || false;
+        hero.techReactorControl   = stats.techReactorControl   || false;
+        hero.techSuperconductor   = stats.techSuperconductor   || false;
+        hero.teleporterNodes      = stats.teleporterNodes      ? [...stats.teleporterNodes] : [];
         hero.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
         hero.appliedElementBonuses = stats.appliedElementBonuses ? { ...stats.appliedElementBonuses } : {};
         hero.elementGoldMul       = stats.elementGoldMul       || 0;
