@@ -246,97 +246,85 @@ const ALLOY_DEFS = {
     },
 };
 
-// ── Semiconductor materials (requires Fysiker T1: semiconductorUnlocked) ────
-// Crafted from pure elements like alloys, but give tech-based bonuses
-// (vision, crit, dodge) instead of raw ATK/DEF. Gate-checked in SmelteryScene.
+// ── Refining recipes (Fysiker T1: purify raw elements → semiconductor-grade) ─
+// Each converts N raw elements into 1 refined unit. High energy cost.
+// Refined units stored in hero.refinedElements { id: count }.
+
+const REFINING_RECIPES = [
+    { id: 'pure_si',   name: 'Rent Si (99.999%)', input: [{ symbol: 'Si', amount: 5 }],                              energyCost: 10, color: 0x667788, desc: 'Ultrarent silisium for halvlederproduksjon.' },
+    { id: 'pure_ge',   name: 'Rent Ge',           input: [{ symbol: 'Ge', amount: 3 }],                              energyCost: 15, color: 0x889988, desc: 'Infrarødkvalitet germanium.' },
+    { id: 'pure_gaas', name: 'Rent GaAs',         input: [{ symbol: 'Ga', amount: 2 }, { symbol: 'As', amount: 2 }], energyCost: 20, color: 0x6688aa, desc: 'Galliumarsenid-krystall for optoelektronikk.' },
+    { id: 'pure_ito',  name: 'Rent ITO',          input: [{ symbol: 'In', amount: 2 }, { symbol: 'Sn', amount: 2 }], energyCost: 15, color: 0xaabbcc, desc: 'Gjennomsiktig ledende oksid.' },
+    { id: 'pure_sic',  name: 'Rent SiC',          input: [{ symbol: 'Si', amount: 3 }, { symbol: 'C', amount: 2 }],  energyCost: 12, color: 0x778899, desc: 'Silisiumkarbid-keramikk.' },
+    { id: 'pure_cdte', name: 'Rent CdTe',         input: [{ symbol: 'Cd', amount: 2 }, { symbol: 'Te', amount: 2 }], energyCost: 20, color: 0x556655, desc: 'Solcellekvalitet kadmiumtellurid.' },
+];
+
+// ── Semiconductor materials (crafted from REFINED elements) ─────────────────
+// Requires Fysiker T1 (semiconductorUnlocked). Recipes use { refined: id }
+// entries that check hero.refinedElements instead of elementTracker.
 
 const SEMICONDUCTOR_DEFS = {
     silicon_wafer: {
         id: 'silicon_wafer', name: 'Silisiumskive', type: 'semiconductor',
-        formula: 'Si + C', tier: 2,
-        color: 0x667788,
-        recipe: [
-            { symbol: 'Si', amount: 3 },
-            { symbol: 'C', amount: 1 }
-        ],
-        energyCost: 3,
-        smeltingTime: 3,
-        statBonuses: { vision: 1 },
-        stackSize: 10,
-        desc: 'Rent silisium. Grunnlag for all elektronikk.'
+        formula: 'Rent Si + B + P', tier: 3, color: 0x667788,
+        recipe: [{ refined: 'pure_si', amount: 1 }, { symbol: 'B', amount: 1 }, { symbol: 'P', amount: 1 }],
+        energyCost: 8, smeltingTime: 4, stackSize: 10,
+        desc: 'Bor/fosfor-dopet Si-wafer. Grunnlag for all elektronikk.'
     },
     silicon_carbide: {
         id: 'silicon_carbide', name: 'Silisiumkarbid', type: 'semiconductor',
-        formula: 'Si + C + N', tier: 3,
-        color: 0x778899,
-        recipe: [
-            { symbol: 'Si', amount: 2 },
-            { symbol: 'C', amount: 2 },
-            { symbol: 'N', amount: 1 }
-        ],
-        energyCost: 5,
-        smeltingTime: 4,
-        statBonuses: { attack: 2, defense: 2 },
-        stackSize: 10,
-        desc: 'Hardere enn stål, nesten som diamant. Slipemiddel og keramikk.'
+        formula: 'Rent SiC ×2', tier: 3, color: 0x778899,
+        recipe: [{ refined: 'pure_sic', amount: 2 }],
+        energyCost: 10, smeltingTime: 5, stackSize: 10,
+        desc: 'Hardere enn stål. Brukes til EMP-pulsdrivere.'
     },
     germanium_crystal: {
         id: 'germanium_crystal', name: 'Germaniumkrystall', type: 'semiconductor',
-        formula: 'Ge + Si', tier: 4,
-        color: 0x889988,
-        recipe: [
-            { symbol: 'Ge', amount: 2 },
-            { symbol: 'Si', amount: 1 }
-        ],
-        energyCost: 5,
-        smeltingTime: 5,
-        statBonuses: { vision: 2, dodge: 0.05 },
-        stackSize: 10,
-        desc: 'Infrarødt-gjennomtrengelig. Gir nattsynsteknologi.'
+        formula: 'Rent Ge + Rent Si', tier: 4, color: 0x889988,
+        recipe: [{ refined: 'pure_ge', amount: 1 }, { refined: 'pure_si', amount: 1 }],
+        energyCost: 12, smeltingTime: 5, stackSize: 10,
+        desc: 'Infrarødt-gjennomtrengelig. For sensorer og detektorer.'
     },
     gallium_arsenide: {
         id: 'gallium_arsenide', name: 'Galliumarsenid', type: 'semiconductor',
-        formula: 'Ga + As', tier: 4,
-        color: 0x6688aa,
-        recipe: [
-            { symbol: 'Ga', amount: 2 },
-            { symbol: 'As', amount: 1 }
-        ],
-        energyCost: 6,
-        smeltingTime: 5,
-        statBonuses: { attack: 3, crit: 0.10 },
-        stackSize: 10,
-        desc: 'Raskere enn silisium. Brukes i lasere og satellitter.'
+        formula: 'Rent GaAs ×2', tier: 4, color: 0x6688aa,
+        recipe: [{ refined: 'pure_gaas', amount: 2 }],
+        energyCost: 15, smeltingTime: 6, stackSize: 10,
+        desc: 'Raskere enn Si. Brukes i lasere og kraftelektronikk.'
     },
     indium_tin_oxide: {
         id: 'indium_tin_oxide', name: 'Indiumtinnoksid', type: 'semiconductor',
-        formula: 'In + Sn + O', tier: 4,
-        color: 0xaabbcc,
-        recipe: [
-            { symbol: 'In', amount: 1 },
-            { symbol: 'Sn', amount: 1 },
-            { symbol: 'O', amount: 2 }
-        ],
-        energyCost: 5,
-        smeltingTime: 4,
-        statBonuses: { defense: 2, dodge: 0.10 },
-        stackSize: 10,
-        desc: 'Gjennomsiktig leder. Brukes i berøringsskjermer.'
+        formula: 'Rent ITO ×2', tier: 4, color: 0xaabbcc,
+        recipe: [{ refined: 'pure_ito', amount: 2 }],
+        energyCost: 12, smeltingTime: 5, stackSize: 10,
+        desc: 'Gjennomsiktig leder. For teleportfelt-teknologi.'
     },
     cadmium_telluride: {
         id: 'cadmium_telluride', name: 'Kadmiumtellurid', type: 'semiconductor',
-        formula: 'Cd + Te', tier: 5,
-        color: 0x556655,
-        recipe: [
-            { symbol: 'Cd', amount: 1 },
-            { symbol: 'Te', amount: 1 }
-        ],
-        energyCost: 7,
-        smeltingTime: 6,
-        statBonuses: { hearts: 1, defense: 2, regen: true },
-        stackSize: 10,
+        formula: 'Rent CdTe ×2', tier: 5, color: 0x556655,
+        recipe: [{ refined: 'pure_cdte', amount: 2 }],
+        energyCost: 18, smeltingTime: 6, stackSize: 10,
         desc: 'Solcellemateriale. Konverterer lys til energi.'
     },
+};
+
+// ── Technology upgrades (permanent, one-time craft from semiconductors) ──────
+// Each tech sets a hero flag. Not equipment — once installed, always active.
+// Unlocks entirely new gameplay mechanics or energy production.
+
+const TECH_UPGRADES = {
+    // Gameplay technologies
+    tech_route_calc:      { id: 'tech_route_calc',      name: 'Ruteberegner',              semiId: 'silicon_wafer',      amount: 1, color: 0x667788, heroFlag: 'techRouteCalc',      desc: 'Viser optimal rute til exit/boss/chest på minikartet.' },
+    tech_element_scanner: { id: 'tech_element_scanner', name: 'Elementskanner',            semiId: 'germanium_crystal',  amount: 1, color: 0x889988, heroFlag: 'techElementScanner', desc: 'Avslører alle elementer på etasjen: type og posisjon.' },
+    tech_laser_turret:    { id: 'tech_laser_turret',    name: 'Laserturret',               semiId: 'gallium_arsenide',   amount: 1, color: 0x6688aa, heroFlag: 'techLaserTurret',    desc: 'Plasserbar turret: 4 skade/runde automatisk mot monstre.' },
+    tech_teleporter:      { id: 'tech_teleporter',      name: 'Teleporter-noder',          semiId: 'indium_tin_oxide',   amount: 1, color: 0xaabbcc, heroFlag: 'techTeleporter',     desc: 'Plassér noder i rom. Teleportér fritt mellom dem.' },
+    tech_emp:             { id: 'tech_emp',             name: 'EMP-pulsgenerator',         semiId: 'silicon_carbide',    amount: 1, color: 0x778899, heroFlag: 'techEMP',            desc: 'Craftbar EMP: slår ut alle monstre i 50 runder.' },
+    tech_force_field:     { id: 'tech_force_field',     name: 'Kraftfelt',                 semiId: 'cadmium_telluride',  amount: 1, color: 0x556655, heroFlag: 'techForceField',     desc: 'Barriere: absorberer 15 skade. Regenererer mellom etasjer.' },
+    // Energy technologies
+    tech_solar_panel:     { id: 'tech_solar_panel',     name: 'Solcellepanel',             semiId: 'cadmium_telluride',  amount: 1, color: 0x44aa44, heroFlag: 'techSolarPanel',     desc: '+30 gratis energi per verden (CdTe-solcelle).' },
+    tech_thermoelectric:  { id: 'tech_thermoelectric',  name: 'Termoelektrisk generator',  semiId: 'germanium_crystal',  amount: 1, color: 0xcc6633, heroFlag: 'techThermoelectric', desc: '+50 energi i vulkan/magma-soner (Ge-termoelement).' },
+    tech_reactor_control: { id: 'tech_reactor_control', name: 'Reaktorkontroll',           semiId: 'silicon_wafer',      amount: 1, color: 0x44cc44, heroFlag: 'techReactorControl', desc: '+50% fisjon/fusjon-energi (Si-kontrollsystem).' },
+    tech_superconductor:  { id: 'tech_superconductor',  name: 'Superleder-kabling',        semiId: 'gallium_arsenide',   amount: 1, color: 0x4488ff, heroFlag: 'techSuperconductor', desc: '-30% energikostnad all smelting/crafting.' },
 };
 
 // ── Alloy-forged equipment templates ─────────────────────────────────────────
@@ -382,20 +370,6 @@ const PET_EQUIPMENT = {
     steel_harness:   { id: 'steel_harness',   name: 'Stålsele',          petSlot: 'armor',  alloyId: 'steel',            color: 0xaabbcc, petDef: 2, petHp: 4,    desc: '+2 DEF, +4 HP (kjæledyr)' },
     scandium_vest:   { id: 'scandium_vest',   name: 'Skandiumvest',      petSlot: 'armor',  alloyId: 'scandium_alloy',   color: 0xbbddcc, petDef: 3, petHp: 6,    desc: '+3 DEF, +6 HP (kjæledyr)' },
     titanium_harness:{ id: 'titanium_harness', name: 'Titansele',        petSlot: 'armor',  alloyId: 'titanium_alloy',   color: 0x99aacc, petDef: 4, petHp: 8,    desc: '+4 DEF, +8 HP (kjæledyr)' },
-};
-
-// ── Semiconductor equipment (tech bonuses: vision, crit, dodge) ─────────────
-// Forged from SEMICONDUCTOR_DEFS. Requires semiconductorUnlocked (Fysiker T1).
-
-const SEMICONDUCTOR_EQUIPMENT = {
-    // Weapons (tech-enhanced, crit/precision focus)
-    sic_blade:     { id: 'sic_blade',     name: 'Karbidklinge',       type: 'weapon', semiId: 'silicon_carbide',    color: 0x778899, atk: 6, def: 1, desc: '+6 ATK, +1 DEF (SiC-keramikk)' },
-    gaas_laser:    { id: 'gaas_laser',    name: 'Lasersverd',         type: 'weapon', semiId: 'gallium_arsenide',   color: 0x6688aa, atk: 5, critBonus: 0.15, desc: '+5 ATK, +15% krit (GaAs-laser)' },
-    // Armor (tech-enhanced, dodge/vision focus)
-    si_visor:      { id: 'si_visor',      name: 'Synsforsterker',     type: 'armor',  semiId: 'silicon_wafer',      color: 0x667788, def: 2, visionBonus: 2, desc: '+2 DEF, +2 syn (Si-brikke)' },
-    ge_visor:      { id: 'ge_visor',      name: 'Infrarødt visir',    type: 'armor',  semiId: 'germanium_crystal',  color: 0x889988, def: 3, visionBonus: 2, dodgeBonus: 0.05, desc: '+3 DEF, +2 syn, +5% unnvik (Ge)' },
-    ito_shield:    { id: 'ito_shield',    name: 'Berøringsskjold',    type: 'armor',  semiId: 'indium_tin_oxide',   color: 0xaabbcc, def: 5, dodgeBonus: 0.10, desc: '+5 DEF, +10% unnvik (ITO)' },
-    cdte_armor:    { id: 'cdte_armor',    name: 'Solcellepanser',     type: 'armor',  semiId: 'cadmium_telluride',  color: 0x556655, def: 4, hearts: 2, regenBonus: true, desc: '+4 DEF, +2 HP, HP-regen (CdTe)' },
 };
 
 // ── Alloy tier colors (for UI) ──────────────────────────────────────────────
