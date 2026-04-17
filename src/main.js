@@ -26,7 +26,8 @@ const config = {
         SettingsScene,
         ElementBookScene,
         SmelteryScene,
-        ChemLabScene
+        ChemLabScene,
+        AcceleratorScene
     ]
 };
 

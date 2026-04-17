@@ -93,6 +93,14 @@ class ElementTracker {
             if (r.magicAoe)         hero.magicAoeUnlocked = true;
             if (r.title)            hero.elementTitle = r.title;
             if (r.legendaryItem)    hero.legendaryItemEarned = true;
+            if (r.godMode) {
+                hero.godModeUnlocked = true;
+                hero.attack += 10;
+                hero.defense += 10;
+                hero.maxHearts += 5;
+                hero.hearts = Math.min(hero.hearts + 5, hero.maxHearts);
+                hero.visionRadius += 3;
+            }
         }
     }
 

@@ -241,6 +241,22 @@ class SmeltingSystem {
                 }
             }
         }
+        // Fission bonus: each U/Th in the element tracker acts as virtual
+        // fuel when the hero has mastered fission (Fysiker T3).
+        if (hero.fissionMastered || hero.fissionUpgraded) {
+            const fMul = hero.fissionEnergyMul || 1.0;
+            const uCount = hero.elementTracker ? hero.elementTracker.getCount('U') : 0;
+            const thCount = hero.elementTracker ? hero.elementTracker.getCount('Th') : 0;
+            total += Math.round((uCount * 50 + thCount * 40) * fMul);
+        }
+        // Fusion bonus: D-T fusion consumes H (deuterium) + Li (tritium bred
+        // from Li-6 + neutron). He is a byproduct, not fuel.
+        if (hero.fusionMastered) {
+            const fuMul = hero.fusionEnergyMul || 1.0;
+            const hCount = hero.elementTracker ? hero.elementTracker.getCount('H') : 0;
+            const liCount = hero.elementTracker ? hero.elementTracker.getCount('Li') : 0;
+            total += Math.round((hCount * 80 + liCount * 150) * fuMul);
+        }
         return total;
     }
 

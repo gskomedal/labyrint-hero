@@ -105,6 +105,36 @@ const ELEMENTS = {
     Er: { symbol: 'Er', name: 'Erbium',     atomicNumber: 68, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xddbbcc, foundNative: false, stackSize: 99, description: 'Rosa lantanide. Brukes i fiberoptikk.' },
     Yb: { symbol: 'Yb', name: 'Ytterbium',  atomicNumber: 70, category: 'lanthanide',  period: 6, group: 3,  tier: 4, color: 0xccccbb, foundNative: false, stackSize: 99, description: 'Sjelden jordart. Brukes i lasere og atomklokker.' },
     Ce: { symbol: 'Ce', name: 'Cerium',     atomicNumber: 58, category: 'lanthanide',  period: 6, group: 3,  tier: 2, color: 0xddddaa, foundNative: false, stackSize: 99, description: 'Vanligste lantanide. Brukes i katalysatorer og lighter-flint.' },
+
+    // ── Synthetic elements (produced in particle accelerator / reactor) ──────
+    Tc: { symbol: 'Tc', name: 'Technetium', atomicNumber: 43, category: 'metal',     period: 5, group: 7,  tier: 6, color: 0x88aacc, foundNative: false, synthetic: true, stackSize: 99, description: 'Første syntetiske grunnstoff. Nøytronbombardering av Mo.' },
+    Pm: { symbol: 'Pm', name: 'Promethium', atomicNumber: 61, category: 'lanthanide', period: 6, group: 3,  tier: 6, color: 0xccddaa, foundNative: false, synthetic: true, stackSize: 99, description: 'Syntetisk lantanide. Brukes i atomdrevne batterier.' },
+    Np: { symbol: 'Np', name: 'Neptunium',  atomicNumber: 93, category: 'actinide',   period: 7, group: 3,  tier: 6, color: 0x44bb88, foundNative: false, synthetic: true, stackSize: 99, description: 'Biprodukt fra uranreaktorer. Nøytronbombardering av U-238.' },
+    Pu: { symbol: 'Pu', name: 'Plutonium',  atomicNumber: 94, category: 'actinide',   period: 7, group: 3,  tier: 6, color: 0x44aa77, foundNative: false, synthetic: true, stackSize: 99, description: 'Fissilt materiale. Nøytronbombardering av U → Np → Pu.' },
+    Am: { symbol: 'Am', name: 'Americium',   atomicNumber: 95, category: 'actinide',   period: 7, group: 3,  tier: 6, color: 0x55bb99, foundNative: false, synthetic: true, stackSize: 99, description: 'Brukes i røykvarslere. Nøytronbombardering av Pu.' },
+    Cm: { symbol: 'Cm', name: 'Curium',      atomicNumber: 96, category: 'actinide',   period: 7, group: 3,  tier: 6, color: 0x66ccaa, foundNative: false, synthetic: true, stackSize: 99, description: 'Oppkalt etter Marie Curie. He + Pu i syklotron.' },
+    Bk: { symbol: 'Bk', name: 'Berkelium',   atomicNumber: 97, category: 'actinide',   period: 7, group: 3,  tier: 6, color: 0x55bb88, foundNative: false, synthetic: true, stackSize: 99, description: 'Ekstremt sjeldent. He-bombardering av Am.' },
+    Cf: { symbol: 'Cf', name: 'Californium', atomicNumber: 98, category: 'actinide',   period: 7, group: 3,  tier: 6, color: 0x66cc99, foundNative: false, synthetic: true, stackSize: 99, description: 'Sterk nøytronkilde. He-bombardering av Cm.' },
+    Es: { symbol: 'Es', name: 'Einsteinium', atomicNumber: 99, category: 'actinide',   period: 7, group: 3,  tier: 6, color: 0x77ddaa, foundNative: false, synthetic: true, stackSize: 99, description: 'Oppdaget i rester fra H-bombe-test. Intensiv nøytronfangst.' },
+    Fm: { symbol: 'Fm', name: 'Fermium',     atomicNumber: 100, category: 'actinide',  period: 7, group: 3,  tier: 6, color: 0x88eebb, foundNative: false, synthetic: true, stackSize: 99, description: 'Oppdaget sammen med einsteinium. Slutt for nøytronmetoden.' },
+    Md: { symbol: 'Md', name: 'Mendelevium', atomicNumber: 101, category: 'actinide',  period: 7, group: 3,  tier: 6, color: 0x77ddbb, foundNative: false, synthetic: true, stackSize: 99, description: 'He-bombardering av Es. Oppkalt etter Mendelejev.' },
+    No: { symbol: 'No', name: 'Nobelium',    atomicNumber: 102, category: 'actinide',  period: 7, group: 3,  tier: 6, color: 0x88eecc, foundNative: false, synthetic: true, stackSize: 99, description: 'C-bombardering av Cm. Oppkalt etter Alfred Nobel.' },
+    Lr: { symbol: 'Lr', name: 'Lawrencium',  atomicNumber: 103, category: 'actinide',  period: 7, group: 3,  tier: 6, color: 0x99ffdd, foundNative: false, synthetic: true, stackSize: 99, description: 'Siste aktinide. B-bombardering av Cf i syklotron.' },
+    Rf: { symbol: 'Rf', name: 'Rutherfordium', atomicNumber: 104, category: 'metal',   period: 7, group: 4,  tier: 6, color: 0xaaddcc, foundNative: false, synthetic: true, stackSize: 99, description: 'Første transaktinide. C-bombardering av Cf.' },
+    Db: { symbol: 'Db', name: 'Dubnium',     atomicNumber: 105, category: 'metal',     period: 7, group: 5,  tier: 6, color: 0xbbddcc, foundNative: false, synthetic: true, stackSize: 99, description: 'N-bombardering av Am. Oppkalt etter Dubna, Russland.' },
+    Sg: { symbol: 'Sg', name: 'Seaborgium',  atomicNumber: 106, category: 'metal',     period: 7, group: 6,  tier: 6, color: 0xccddcc, foundNative: false, synthetic: true, stackSize: 99, description: 'O-bombardering av Cf. Oppkalt etter Glenn Seaborg.' },
+    Bh: { symbol: 'Bh', name: 'Bohrium',     atomicNumber: 107, category: 'metal',     period: 7, group: 7,  tier: 6, color: 0xaaccbb, foundNative: false, synthetic: true, stackSize: 99, description: 'Cr-bombardering av Bi. Lever bare millisekunder.' },
+    Hs: { symbol: 'Hs', name: 'Hassium',     atomicNumber: 108, category: 'metal',     period: 7, group: 8,  tier: 6, color: 0xbbccbb, foundNative: false, synthetic: true, stackSize: 99, description: 'Fe-bombardering av Pb. Oppkalt etter Hessen.' },
+    Mt: { symbol: 'Mt', name: 'Meitnerium',  atomicNumber: 109, category: 'metal',     period: 7, group: 9,  tier: 6, color: 0xccccbb, foundNative: false, synthetic: true, stackSize: 99, description: 'Fe-bombardering av Bi. Oppkalt etter Lise Meitner.' },
+    Ds: { symbol: 'Ds', name: 'Darmstadtium', atomicNumber: 110, category: 'metal',    period: 7, group: 10, tier: 6, color: 0xddccbb, foundNative: false, synthetic: true, stackSize: 99, description: 'Ni-bombardering av Pb. Lever bare mikrosekunder.' },
+    Rg: { symbol: 'Rg', name: 'Roentgenium', atomicNumber: 111, category: 'metal',     period: 7, group: 11, tier: 6, color: 0xeeddcc, foundNative: false, synthetic: true, stackSize: 99, description: 'Ni-bombardering av Bi. Oppkalt etter Röntgen.' },
+    Cn: { symbol: 'Cn', name: 'Copernicium', atomicNumber: 112, category: 'metal',     period: 7, group: 12, tier: 6, color: 0xddddbb, foundNative: false, synthetic: true, stackSize: 99, description: 'Zn-bombardering av Pb. Oppkalt etter Kopernikus.' },
+    Nh: { symbol: 'Nh', name: 'Nihonium',    atomicNumber: 113, category: 'metal',     period: 7, group: 13, tier: 6, color: 0xccddaa, foundNative: false, synthetic: true, stackSize: 99, description: 'Zn-bombardering av Bi. Oppdaget i Japan (Nihon).' },
+    Fl: { symbol: 'Fl', name: 'Flerovium',   atomicNumber: 114, category: 'metal',     period: 7, group: 14, tier: 6, color: 0xbbcc99, foundNative: false, synthetic: true, stackSize: 99, description: 'Ca-bombardering av Pu. Nær «stabilitetsøya».' },
+    Mc: { symbol: 'Mc', name: 'Moscovium',   atomicNumber: 115, category: 'metal',     period: 7, group: 15, tier: 6, color: 0xaabb88, foundNative: false, synthetic: true, stackSize: 99, description: 'Ca-bombardering av Am. Oppkalt etter Moskva.' },
+    Lv: { symbol: 'Lv', name: 'Livermorium', atomicNumber: 116, category: 'metal',     period: 7, group: 16, tier: 6, color: 0x99aa77, foundNative: false, synthetic: true, stackSize: 99, description: 'Ca-bombardering av Cm. Oppkalt etter Livermore-laboratoriet.' },
+    Ts: { symbol: 'Ts', name: 'Tennessine',  atomicNumber: 117, category: 'nonmetal',  period: 7, group: 17, tier: 6, color: 0x88aa88, foundNative: false, synthetic: true, stackSize: 99, description: 'Ca-bombardering av Bk. Nest tyngste grunnstoff.' },
+    Og: { symbol: 'Og', name: 'Oganesson',   atomicNumber: 118, category: 'noble',     period: 7, group: 18, tier: 6, color: 0xddddff, foundNative: false, synthetic: true, stackSize: 99, description: 'Tyngste grunnstoff. Ca-bombardering av Cf. Edelgass?' },
 };
 
 // ── Periodic table layout (standard 18-column, rows 1–7 + lanthanides/actinides) ─
@@ -210,6 +240,37 @@ const PERIODIC_TABLE_LAYOUT = [
     { symbol: 'Th', row: 8, col: 3 },
     { symbol: 'Pa', row: 8, col: 4 },
     { symbol: 'U',  row: 8, col: 5 },
+    // Synthetic actinides (row 8 continued)
+    { symbol: 'Np', row: 8, col: 6 },
+    { symbol: 'Pu', row: 8, col: 7 },
+    { symbol: 'Am', row: 8, col: 8 },
+    { symbol: 'Cm', row: 8, col: 9 },
+    { symbol: 'Bk', row: 8, col: 10 },
+    { symbol: 'Cf', row: 8, col: 11 },
+    { symbol: 'Es', row: 8, col: 12 },
+    { symbol: 'Fm', row: 8, col: 13 },
+    { symbol: 'Md', row: 8, col: 14 },
+    { symbol: 'No', row: 8, col: 15 },
+    { symbol: 'Lr', row: 8, col: 16 },
+    // Tc in period 5, Pm in lanthanide row
+    { symbol: 'Tc', row: 4, col: 6 },
+    { symbol: 'Pm', row: 7, col: 6 },
+    // Period 7 transactinides
+    { symbol: 'Rf', row: 6, col: 3 },
+    { symbol: 'Db', row: 6, col: 4 },
+    { symbol: 'Sg', row: 6, col: 5 },
+    { symbol: 'Bh', row: 6, col: 6 },
+    { symbol: 'Hs', row: 6, col: 7 },
+    { symbol: 'Mt', row: 6, col: 8 },
+    { symbol: 'Ds', row: 6, col: 9 },
+    { symbol: 'Rg', row: 6, col: 10 },
+    { symbol: 'Cn', row: 6, col: 11 },
+    { symbol: 'Nh', row: 6, col: 12 },
+    { symbol: 'Fl', row: 6, col: 13 },
+    { symbol: 'Mc', row: 6, col: 14 },
+    { symbol: 'Lv', row: 6, col: 15 },
+    { symbol: 'Ts', row: 6, col: 16 },
+    { symbol: 'Og', row: 6, col: 17 },
 ];
 
 // ── Collection bonuses (group/period/category completions) ──────────────────
@@ -229,7 +290,8 @@ const ELEMENT_BONUSES = [
     { id: 'period_4',       name: 'Periode 4',       desc: '«Industrialist»-tittel', symbols: ['K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr'], reward: { title: 'Industrialist' } },
     { id: 'all_nonmetals',  name: 'Alle ikke-metaller', desc: '2× potionsstyrke', symbols: ['H', 'C', 'N', 'O', 'F', 'P', 'S', 'Cl', 'Se'], reward: { potionStrengthMul: 2.0 } },
     { id: 'all_lanthanides', name: 'Alle lantanider', desc: 'Magisk AoE-angrep',  symbols: ['La', 'Ce', 'Pr', 'Nd', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu'], reward: { magicAoe: true } },
-    { id: 'all_92_natural', name: 'Elementmester',   desc: 'Legendarisk tittel + unik gjenstand', symbols: Object.keys(typeof ELEMENTS !== 'undefined' ? ELEMENTS : {}), reward: { title: 'Elementmester', legendaryItem: true } },
+    { id: 'all_92_natural', name: 'Elementmester',   desc: 'Legendarisk tittel + unik gjenstand', symbols: Object.keys(typeof ELEMENTS !== 'undefined' ? ELEMENTS : {}).filter(s => !(ELEMENTS[s] || {}).synthetic), reward: { title: 'Elementmester', legendaryItem: true } },
+    { id: 'all_118',       name: 'Guds periodiske system', desc: 'Alle 118 samlet! Skjult ending.', symbols: Object.keys(typeof ELEMENTS !== 'undefined' ? ELEMENTS : {}), reward: { title: 'Guds periodiske system', godMode: true } },
 ];
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -238,5 +300,47 @@ function getElementsByTier(tier) {
     return Object.values(ELEMENTS).filter(e => e.tier === tier);
 }
 
-// Total natural elements we track
-const TOTAL_NATURAL_ELEMENTS = Object.keys(ELEMENTS).length;
+const TOTAL_NATURAL_ELEMENTS = Object.keys(ELEMENTS).filter(s => !ELEMENTS[s].synthetic).length;
+const TOTAL_ALL_ELEMENTS = Object.keys(ELEMENTS).length;
+
+// ── Transuranic synthesis recipes ───────────────────────────────────────────
+// Each recipe: target + projectile (or neutron source) → product.
+// Mirrors real-world nuclear physics. energyCost is consumed from fuel.
+// neutronSource: true = uses reactor neutrons (requires fissionUpgraded).
+
+const TRANSURANIC_RECIPES = [
+    // Sub-92 synthetics
+    { product: 'Tc', target: 'Mo', projectile: null, neutronSource: true,  energyCost: 20,  tier: 1, desc: 'Nøytronbombardering av molybden' },
+    { product: 'Pm', target: 'Nd', projectile: null, neutronSource: true,  energyCost: 25,  tier: 1, desc: 'Nøytronbombardering av neodym' },
+    // Light transuranic (reactor-bred)
+    { product: 'Np', target: 'U',  projectile: null, neutronSource: true,  energyCost: 30,  tier: 1, desc: 'U-238 + nøytron → Np-239' },
+    { product: 'Pu', target: 'U',  projectile: null, neutronSource: true,  energyCost: 40,  tier: 1, desc: 'U-238 → Np-239 → Pu-239' },
+    { product: 'Am', target: 'Pu', projectile: null, neutronSource: true,  energyCost: 60,  tier: 2, desc: 'Pu-239 + nøytroner → Am-241' },
+    { product: 'Cm', target: 'Pu', projectile: 'He', neutronSource: false, energyCost: 80,  tier: 2, desc: 'Pu-239 + He-4 → Cm-242' },
+    // Medium transuranic (cyclotron)
+    { product: 'Bk', target: 'Am', projectile: 'He', neutronSource: false, energyCost: 100, tier: 3, desc: 'Am-243 + He-4 → Bk-245' },
+    { product: 'Cf', target: 'Cm', projectile: 'He', neutronSource: false, energyCost: 120, tier: 3, desc: 'Cm-242 + He-4 → Cf-245' },
+    { product: 'Es', target: 'Cf', projectile: null, neutronSource: true,  energyCost: 150, tier: 3, desc: 'Intensiv nøytronfangst i Cf' },
+    { product: 'Fm', target: 'Es', projectile: null, neutronSource: true,  energyCost: 180, tier: 3, desc: 'Nøytronbombardering av Es-253' },
+    // Heavy transuranic (heavy-ion bombardment)
+    { product: 'Md', target: 'Es', projectile: 'He', neutronSource: false, energyCost: 200, tier: 4, desc: 'Es-253 + He-4 → Md-256' },
+    { product: 'No', target: 'Cm', projectile: 'C',  neutronSource: false, energyCost: 250, tier: 4, desc: 'Cm-246 + C-12 → No-254' },
+    { product: 'Lr', target: 'Cf', projectile: 'B',  neutronSource: false, energyCost: 300, tier: 4, desc: 'Cf-252 + B-11 → Lr-258' },
+    // Transactinides (particle accelerator)
+    { product: 'Rf', target: 'Cf', projectile: 'C',  neutronSource: false, energyCost: 400,  tier: 5, desc: 'Cf-249 + C-12 → Rf-257' },
+    { product: 'Db', target: 'Am', projectile: 'N',  neutronSource: false, energyCost: 450,  tier: 5, desc: 'Am-243 + N-15 → Db-256' },
+    { product: 'Sg', target: 'Cf', projectile: 'O',  neutronSource: false, energyCost: 500,  tier: 5, desc: 'Cf-249 + O-18 → Sg-263' },
+    { product: 'Bh', target: 'Bi', projectile: 'Cr', neutronSource: false, energyCost: 600,  tier: 5, desc: 'Bi-209 + Cr-54 → Bh-262' },
+    { product: 'Hs', target: 'Pb', projectile: 'Fe', neutronSource: false, energyCost: 650,  tier: 5, desc: 'Pb-208 + Fe-58 → Hs-265' },
+    { product: 'Mt', target: 'Bi', projectile: 'Fe', neutronSource: false, energyCost: 700,  tier: 5, desc: 'Bi-209 + Fe-58 → Mt-266' },
+    { product: 'Ds', target: 'Pb', projectile: 'Ni', neutronSource: false, energyCost: 800,  tier: 5, desc: 'Pb-208 + Ni-62 → Ds-269' },
+    { product: 'Rg', target: 'Bi', projectile: 'Ni', neutronSource: false, energyCost: 850,  tier: 5, desc: 'Bi-209 + Ni-64 → Rg-272' },
+    { product: 'Cn', target: 'Pb', projectile: 'Zn', neutronSource: false, energyCost: 900,  tier: 5, desc: 'Pb-208 + Zn-70 → Cn-277' },
+    { product: 'Nh', target: 'Bi', projectile: 'Zn', neutronSource: false, energyCost: 950,  tier: 5, desc: 'Bi-209 + Zn-70 → Nh-278' },
+    // Super-heavy (hot fusion with Ca-48)
+    { product: 'Fl', target: 'Pu', projectile: 'Ca', neutronSource: false, energyCost: 1000, tier: 6, desc: 'Pu-244 + Ca-48 → Fl-289' },
+    { product: 'Mc', target: 'Am', projectile: 'Ca', neutronSource: false, energyCost: 1100, tier: 6, desc: 'Am-243 + Ca-48 → Mc-288' },
+    { product: 'Lv', target: 'Cm', projectile: 'Ca', neutronSource: false, energyCost: 1200, tier: 6, desc: 'Cm-248 + Ca-48 → Lv-293' },
+    { product: 'Ts', target: 'Bk', projectile: 'Ca', neutronSource: false, energyCost: 1500, tier: 6, desc: 'Bk-249 + Ca-48 → Ts-294' },
+    { product: 'Og', target: 'Cf', projectile: 'Ca', neutronSource: false, energyCost: 2000, tier: 6, desc: 'Cf-249 + Ca-48 → Og-294' },
+];
