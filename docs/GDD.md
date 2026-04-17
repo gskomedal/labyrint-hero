@@ -1,5 +1,5 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.43
+**Versjon:** 0.44
 **Sist oppdatert:** 2026-04-17
 
 ---
@@ -646,12 +646,12 @@ Konverterer rå elementer til halvlederkvalitet. Høy energikostnad.
 
 | Teknologi | Halvleder-input | Ny mekanikk |
 |-----------|----------------|-------------|
-| Ruteberegner | Si-wafer | Optimal rute på minikartet |
-| Elementskanner | Ge-krystall | Avslører alle elementer på etasjen |
-| Laserturret | GaAs | Plasserbar automatisk turret (4 skade/runde) |
-| Teleporter-noder | ITO | Plassér og teleportér mellom rom |
-| EMP-puls | SiC | Slår ut alle monstre i 50 runder |
-| Kraftfelt | CdTe | 15-skade barriere, regenererer mellom etasjer |
+| Ruteberegner | Si-wafer | BFS-pathfinding viser optimal rute til exit som grønn sti på minikartet. Alltid aktiv |
+| Elementskanner | Ge-krystall | Alle mineraler vises på minikartet (grønne prikker) uavhengig av tåke |
+| Laserturret | GaAs | 2 ladninger/etasje. [H] plasserer turret. 4 skade/runde automatisk mot monstre innen 5 ruter |
+| Teleporter-noder | ITO | [J] plasserer noder (maks 5). Stå på node + [J] teleporterer til neste node |
+| EMP-puls | SiC | 1 ladning/etasje. [G] lammer ALLE monstre i 50 runder |
+| Kraftfelt | CdTe | Absorberer 15 skade. Regenererer til 15 HP ved ny etasje |
 | Solcellepanel | CdTe | +30 gratis energi per verden |
 | Termoelektrisk gen. | Ge | +50 energi i vulkan/magma-soner |
 | Reaktorkontroll | Si-wafer | +50% fisjon/fusjon-energi |

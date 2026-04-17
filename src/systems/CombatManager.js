@@ -88,6 +88,138 @@ class CombatManager {
         }
     }
 
+    // ── Tech Gadgets ──────────────────────────────────────────────────────────
+
+    handleEMP() {
+        const scene = this.scene;
+        const touchEmp = scene.game.registry.get('touch_emp');
+        if (touchEmp) scene.game.registry.set('touch_emp', false);
+        if (!Phaser.Input.Keyboard.JustDown(scene.empKey) && !touchEmp) return;
+        if (!scene.hero.techEMP) return;
+        if ((scene.hero.empCharges || 0) <= 0) {
+            scene._showMessage('Ingen EMP-ladninger igjen!', '#778899');
+            return;
+        }
+        scene.hero.empCharges--;
+        Audio.playLevelUp();
+        scene.cameras.main.flash(400, 120, 180, 255, false);
+        scene.cameras.main.shake(200, 0.008);
+        let stunned = 0;
+        for (const m of scene.monsters) {
+            if (!m.alive) continue;
+            m.applyStun(50);
+            stunned++;
+        }
+        scene._floatingText(scene.hero.gridX, scene.hero.gridY, `⚡ EMP! ${stunned} monstre lammet`, '#88ccff', true);
+    }
+
+    handlePlaceTurret() {
+        const scene = this.scene;
+        const touchTurret = scene.game.registry.get('touch_turret');
+        if (touchTurret) scene.game.registry.set('touch_turret', false);
+        if (!Phaser.Input.Keyboard.JustDown(scene.turretKey) && !touchTurret) return;
+        if (!scene.hero.techLaserTurret) return;
+        if ((scene.hero.laserTurretCharges || 0) <= 0) {
+            scene._showMessage('Ingen turret-ladninger igjen!', '#6688aa');
+            return;
+        }
+        const gx = scene.hero.gridX, gy = scene.hero.gridY;
+        if (scene.laserTurrets && scene.laserTurrets.some(t => t.gx === gx && t.gy === gy)) {
+            scene._showMessage('Allerede en turret her!', '#6688aa');
+            return;
+        }
+        scene.hero.laserTurretCharges--;
+        const turretGfx = scene.add.graphics();
+        turretGfx.setDepth(4);
+        const px = gx * TILE_SIZE, py = gy * TILE_SIZE, s = TILE_SIZE;
+        turretGfx.fillStyle(0x4466aa, 1);
+        turretGfx.fillRect(px + 6, py + 6, s - 12, s - 12);
+        turretGfx.fillStyle(0x88bbff, 1);
+        turretGfx.fillRect(px + 10, py + 10, s - 20, s - 20);
+        turretGfx.fillStyle(0xff4444, 1);
+        turretGfx.fillCircle(px + s / 2, py + s / 2, 3);
+        scene.laserTurrets.push({ gx, gy, graphic: turretGfx });
+        Audio.playPickup();
+        scene._floatingText(gx, gy, '🔫 Turret plassert!', '#6688ff');
+    }
+
+    handleTeleporter() {
+        const scene = this.scene;
+        const touchTele = scene.game.registry.get('touch_teleporter');
+        if (touchTele) scene.game.registry.set('touch_teleporter', false);
+        if (!Phaser.Input.Keyboard.JustDown(scene.teleporterKey) && !touchTele) return;
+        if (!scene.hero.techTeleporter) return;
+        const gx = scene.hero.gridX, gy = scene.hero.gridY;
+        const nodes = scene.teleporterNodes || [];
+        const atNode = nodes.findIndex(n => n.gx === gx && n.gy === gy);
+        if (atNode !== -1) {
+            if (nodes.length < 2) {
+                scene._showMessage('Plassér minst 2 noder for å teleportere!', '#aabbcc');
+                return;
+            }
+            const next = nodes[(atNode + 1) % nodes.length];
+            scene.hero.moveTo(next.gx, next.gy);
+            scene.hero.gridX = next.gx;
+            scene.hero.gridY = next.gy;
+            scene.mapRenderer.updateFog();
+            Audio.playExit();
+            scene.cameras.main.flash(200, 100, 150, 220, false);
+            scene._floatingText(next.gx, next.gy, '✦ Teleportert!', '#aabbff');
+            return;
+        }
+        if (nodes.length >= 5) {
+            scene._showMessage('Maks 5 teleporter-noder!', '#aabbcc');
+            return;
+        }
+        const nodeGfx = scene.add.graphics();
+        nodeGfx.setDepth(2);
+        const px = gx * TILE_SIZE, py = gy * TILE_SIZE, s = TILE_SIZE;
+        nodeGfx.fillStyle(0x5566aa, 0.5);
+        nodeGfx.fillCircle(px + s / 2, py + s / 2, s / 3);
+        nodeGfx.lineStyle(2, 0xaabbff, 0.8);
+        nodeGfx.strokeCircle(px + s / 2, py + s / 2, s / 3);
+        nodes.push({ gx, gy, graphic: nodeGfx });
+        scene.teleporterNodes = nodes;
+        Audio.playPickup();
+        scene._floatingText(gx, gy, `📡 Node ${nodes.length} plassert`, '#aabbff');
+    }
+
+    // ── Laser turret AI (called from MonsterManager tick) ──────────────────────
+
+    tickLaserTurrets() {
+        const scene = this.scene;
+        if (!scene.laserTurrets || scene.laserTurrets.length === 0) return;
+        for (const turret of scene.laserTurrets) {
+            let closest = null, bestDist = Infinity;
+            for (const m of scene.monsters) {
+                if (!m.alive) continue;
+                const dist = Math.abs(m.gridX - turret.gx) + Math.abs(m.gridY - turret.gy);
+                if (dist <= 5 && dist < bestDist) { bestDist = dist; closest = m; }
+            }
+            if (!closest) continue;
+            const result = closest.takeDamage(4);
+            scene._floatingText(closest.gridX, closest.gridY, '-4 ⚡', '#88bbff');
+            this._drawLaserBeam(turret, closest);
+            if (result === 'enraged') this._onBossEnraged(closest);
+            else if (result === true) this._onMonsterKilled(closest);
+        }
+    }
+
+    _drawLaserBeam(turret, target) {
+        const scene = this.scene;
+        const beam = scene.add.graphics();
+        beam.setDepth(15);
+        beam.lineStyle(2, 0x88bbff, 0.9);
+        beam.lineBetween(
+            turret.gx * TILE_SIZE + TILE_SIZE / 2, turret.gy * TILE_SIZE + TILE_SIZE / 2,
+            target.gridX * TILE_SIZE + TILE_SIZE / 2, target.gridY * TILE_SIZE + TILE_SIZE / 2
+        );
+        scene.tweens.add({
+            targets: beam, alpha: 0, duration: 300,
+            onComplete: () => { if (beam.scene) beam.destroy(); }
+        });
+    }
+
     // ── Damage calculation (pure logic, testable) ──────────────────────────────
 
     /**

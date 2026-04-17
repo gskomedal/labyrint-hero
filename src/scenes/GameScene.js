@@ -82,6 +82,13 @@ class GameScene extends Phaser.Scene {
             this.hero._draw();
         }
 
+        // ── Technology effects on floor start ─────────────────────────────
+        if (this.hero.techForceField) this.hero.techForceFieldHP = 15;
+        if (this.hero.techEMP) this.hero.empCharges = Math.max(this.hero.empCharges || 0, 1);
+        if (this.hero.techLaserTurret) this.hero.laserTurretCharges = Math.max(this.hero.laserTurretCharges || 0, 2);
+        this.laserTurrets = [];
+        this.teleporterNodes = [];
+
         // ── Pet companion ────────────────────────────────────────────────────
         this.pet = null;
         if (this.heroStats && this.heroStats.pet) {
@@ -169,6 +176,9 @@ class GameScene extends Phaser.Scene {
             this.combat.handleAttack();
             this.combat.handleBow();
             this.combat.handleUseItem();
+            this.combat.handleEMP();
+            this.combat.handlePlaceTurret();
+            this.combat.handleTeleporter();
             this.inputHandler.handleZoom();
 
             const touchInv = this.game.registry.get('touch_inventory');

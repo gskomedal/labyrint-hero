@@ -228,7 +228,16 @@ class Hero {
         }
         const armorMul = 1 + (this.elementArmorBonus || 0);
         const totalDef = Math.round((this.defense + cb.defense) * armorMul);
-        const dmg = Math.max(1, amount - totalDef);
+        let dmg = Math.max(1, amount - totalDef);
+        if (this.techForceFieldHP > 0) {
+            const absorbed = Math.min(dmg, this.techForceFieldHP);
+            this.techForceFieldHP -= absorbed;
+            dmg -= absorbed;
+            if (absorbed > 0 && this.scene) {
+                this.scene._floatingText(this.gridX, this.gridY, `🛡 -${absorbed}`, '#55ff88');
+            }
+            if (dmg <= 0) return false;
+        }
         this.hearts -= dmg;
         if (this.hearts <= 0) {
             this.hearts = 0;

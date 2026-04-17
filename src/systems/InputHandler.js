@@ -26,6 +26,9 @@ class InputHandler {
         scene.chemLabKey     = scene.input.keyboard.addKey('C');
         scene.acceleratorKey = scene.input.keyboard.addKey('P');
         scene.skillTreeKey   = scene.input.keyboard.addKey('T');
+        scene.empKey         = scene.input.keyboard.addKey('G');
+        scene.turretKey      = scene.input.keyboard.addKey('H');
+        scene.teleporterKey  = scene.input.keyboard.addKey('J');
         scene.moveTimer    = 0;
 
         // Mouse wheel zoom

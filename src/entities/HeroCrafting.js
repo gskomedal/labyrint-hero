@@ -78,6 +78,8 @@ const HeroCrafting = {
         hero.techReactorControl = false;
         hero.techSuperconductor = false;
         hero.teleporterNodes = [];
+        hero.empCharges = 0;
+        hero.laserTurretCharges = 0;
 
         // Zone progression (Phase 4)
         hero.completedZones = [];
@@ -164,6 +166,8 @@ const HeroCrafting = {
             techReactorControl:   hero.techReactorControl,
             techSuperconductor:   hero.techSuperconductor,
             teleporterNodes:      hero.teleporterNodes ? [...hero.teleporterNodes] : [],
+            empCharges:           hero.empCharges || 0,
+            laserTurretCharges:   hero.laserTurretCharges || 0,
             completedZones:       [...hero.completedZones],
             appliedElementBonuses: { ...hero.appliedElementBonuses },
             elementGoldMul:       hero.elementGoldMul,
@@ -243,6 +247,8 @@ const HeroCrafting = {
         hero.techReactorControl   = stats.techReactorControl   || false;
         hero.techSuperconductor   = stats.techSuperconductor   || false;
         hero.teleporterNodes      = stats.teleporterNodes      ? [...stats.teleporterNodes] : [];
+        hero.empCharges           = stats.empCharges           || 0;
+        hero.laserTurretCharges   = stats.laserTurretCharges   || 0;
         hero.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
         hero.appliedElementBonuses = stats.appliedElementBonuses ? { ...stats.appliedElementBonuses } : {};
         hero.elementGoldMul       = stats.elementGoldMul       || 0;
