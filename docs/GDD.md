@@ -615,6 +615,48 @@ Låses opp ved første besøk i partikkelakselerator. Krever ≥1 Kjemiker-skill
 
 **Endgame:** Samle alle 118 grunnstoffer utløser «Guds periodiske system» – +10 ATK, +10 DEF, +5 hjerter, +3 synsfelt.
 
+### Halvleder-system (v0.43)
+
+Halvledere er teknologiplattformen som låser opp helt nye spillmekanikker i endgame. Tre-stegs prosess:
+
+**Steg 1 – Raffinering** (ny «Raffiner»-fane i Smelteovn, krever Fysiker T1):
+Konverterer rå elementer til halvlederkvalitet. Høy energikostnad.
+
+| Raffinert materiale | Input | Energi |
+|---------------------|-------|--------|
+| Rent Si (99.999%) | 5 Si | 10 |
+| Rent Ge | 3 Ge | 15 |
+| Rent GaAs | 2 Ga + 2 As | 20 |
+| Rent ITO | 2 In + 2 Sn | 15 |
+| Rent SiC | 3 Si + 2 C | 12 |
+| Rent CdTe | 2 Cd + 2 Te | 20 |
+
+**Steg 2 – Halvleder-crafting** (oppskrifter krever raffinerte materialer):
+
+| Halvleder | Oppskrift | Tier |
+|-----------|-----------|------|
+| Silisiumskive | Rent Si + B + P (doping) | 3 |
+| Silisiumkarbid | 2× Rent SiC | 3 |
+| Germaniumkrystall | Rent Ge + Rent Si | 4 |
+| Galliumarsenid | 2× Rent GaAs | 4 |
+| Indiumtinnoksid | 2× Rent ITO | 4 |
+| Kadmiumtellurid | 2× Rent CdTe | 5 |
+
+**Steg 3 – Teknologi-installasjon** (ny «Teknologi»-fane, permanent engangscrafting):
+
+| Teknologi | Halvleder-input | Ny mekanikk |
+|-----------|----------------|-------------|
+| Ruteberegner | Si-wafer | Optimal rute på minikartet |
+| Elementskanner | Ge-krystall | Avslører alle elementer på etasjen |
+| Laserturret | GaAs | Plasserbar automatisk turret (4 skade/runde) |
+| Teleporter-noder | ITO | Plassér og teleportér mellom rom |
+| EMP-puls | SiC | Slår ut alle monstre i 50 runder |
+| Kraftfelt | CdTe | 15-skade barriere, regenererer mellom etasjer |
+| Solcellepanel | CdTe | +30 gratis energi per verden |
+| Termoelektrisk gen. | Ge | +50 energi i vulkan/magma-soner |
+| Reaktorkontroll | Si-wafer | +50% fisjon/fusjon-energi |
+| Superleder-kabling | GaAs | -30% energikostnad all smelting/crafting |
+
 Se `docs/Elements-mod.md` for fullstendig designdokument.
 
 ---

@@ -26,7 +26,7 @@ Et 2D topp-ned labyrint-RPG i nettleseren. Naviger prosedyregenererte labyrinter
 - **6 skill-stier** med 3–4 tiers hver + kryssvei-synergier:
   - Kriger (kamp/forsvar), Villmarksjeger (syn/presisjon/kjæledyr)
   - Geolog (mineralfunn), Metallurg (smelting/smiing), Kjemiker (potions/bomber)
-  - Fysiker (halvledere/fisjon/fusjon – endgame)
+  - Fysiker (raffinering → halvledere → 10 teknologi-oppgraderinger + fisjon/fusjon – endgame)
 - 12 kryssvei-synergier inkludert Transmutasjon (3-sti) og Atomsmedja (fysiker+metallurg)
 
 ### Grafikk og lyd
