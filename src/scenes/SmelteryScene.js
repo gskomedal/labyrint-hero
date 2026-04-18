@@ -105,7 +105,8 @@ class SmelteryScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-V', () => this.scene.stop());
 
         // ── Content area ──────────────────────────────────────────────────────
-        this.contentY = tabY + 30;
+        this._baseContentY = tabY + 30;
+        this.contentY = this._baseContentY;
         this._scrollOffsets = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
         this._maxScrolls = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
         this._elementFilter = null; // null = show all, or element symbol string
@@ -152,6 +153,7 @@ class SmelteryScene extends Phaser.Scene {
 
     _refresh() {
         UIHelper.clearDynamic(this._dyn);
+        this.contentY = this._baseContentY;
 
         // Dark backing behind content for readability
         const cbg = this._d(this.add.graphics());
@@ -177,6 +179,7 @@ class SmelteryScene extends Phaser.Scene {
             case 'alloy':
             case 'forge':
                 if (this._hasMetallurgSkill()) {
+                    this._drawElementFilterRow();
                     if (this._tab === 'smelt') this._drawSmeltTab();
                     else if (this._tab === 'alloy') this._drawAlloyTab();
                     else this._drawForgeTab();
@@ -233,6 +236,63 @@ class SmelteryScene extends Phaser.Scene {
         return (this.heroRef.skills || []).some(s =>
             s === 'mineral_eye' || s === 'efficient_mining' || s === 'master_prospector'
         );
+    }
+
+    _drawElementFilterRow() {
+        const hero = this.heroRef;
+        const collected = hero.elementTracker.collected;
+        const leftX = this.px + 10;
+        const maxW = this.panelW - 40;
+        let y = this.contentY;
+        let bx = leftX;
+
+        // "Alle" reset button
+        const allBtn = this._d(this.add.text(bx, y, 'Alle', {
+            fontSize: '12px',
+            color: this._elementFilter === null ? '#ff7722' : '#554433',
+            fontFamily: 'monospace', fontStyle: this._elementFilter === null ? 'bold' : 'normal',
+            backgroundColor: '#0a0608', padding: { x: 3, y: 1 }
+        }).setInteractive({ useHandCursor: true }));
+        allBtn.on('pointerdown', () => { this._elementFilter = null; this._scrollOffsets[this._tab] = 0; this._refresh(); });
+        bx += allBtn.width + 4;
+
+        // Collect all elements used in recipes for this tab context
+        const recipeElements = new Set();
+        if (typeof ALLOY_DEFS !== 'undefined') {
+            for (const alloy of Object.values(ALLOY_DEFS)) {
+                for (const r of alloy.recipe) recipeElements.add(r.symbol);
+            }
+        }
+        for (const [symbol] of Object.entries(collected)) {
+            recipeElements.add(symbol);
+        }
+
+        for (const symbol of recipeElements) {
+            const count = collected[symbol] || 0;
+            const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
+            const col = elem ? elem.color : 0xaaaaaa;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+            const isActive = this._elementFilter === symbol;
+            const dimmed = count === 0;
+
+            const badge = this._d(this.add.text(bx, y, symbol, {
+                fontSize: '12px',
+                color: isActive ? '#ff7722' : (dimmed ? '#222222' : hexCol),
+                fontFamily: 'monospace',
+                fontStyle: isActive ? 'bold' : 'normal',
+                backgroundColor: isActive ? '#331100' : '#0a0608',
+                padding: { x: 3, y: 1 }
+            }).setInteractive({ useHandCursor: true }));
+            badge.on('pointerdown', () => {
+                this._elementFilter = isActive ? null : symbol;
+                this._scrollOffsets[this._tab] = 0;
+                this._refresh();
+            });
+            bx += badge.width + 3;
+            if (bx > leftX + maxW) { bx = leftX; y += 18; }
+        }
+
+        this.contentY = y + 22;
     }
 
     _drawLockedTab() {
@@ -705,7 +765,10 @@ class SmelteryScene extends Phaser.Scene {
         y += 22;
 
         const fuel = this.smelter.calculateFuelEnergy(hero);
-        const alloys = this.smelter.getAvailableAlloys(hero, fuel);
+        let alloys = this.smelter.getAvailableAlloys(hero, fuel);
+        if (this._elementFilter) {
+            alloys = alloys.filter(e => e.alloy.recipe.some(r => r.symbol === this._elementFilter));
+        }
         const colW = Math.min(560, this.panelW - 40);
         const startX = this.px + 20;
         const rowStep = 60;

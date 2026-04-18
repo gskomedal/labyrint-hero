@@ -251,6 +251,20 @@ class UIScene extends Phaser.Scene {
             }
         }
 
+        // Special rooms (camp=orange, chem=green, accelerator=purple on lit/dim tiles)
+        if (gs._gen && gs._gen.specialRooms) {
+            const roomColors = { camp_room: 0xff7722, chem_lab: 0x33dd88, accelerator: 0x8866ff };
+            for (const room of gs._gen.specialRooms) {
+                const rc = roomColors[room.type];
+                if (!rc) continue;
+                for (const t of room.tiles) {
+                    if (!gs.fog[t.y] || gs.fog[t.y][t.x] === FOG.DARK) continue;
+                    g.fillStyle(rc, 0.6);
+                    g.fillRect(mx + t.x * sc, my + t.y * sc, sc, sc);
+                }
+            }
+        }
+
         // Hero (bright white dot)
         const hpx = mx + gs.hero.gridX * sc;
         const hpy = my + gs.hero.gridY * sc;

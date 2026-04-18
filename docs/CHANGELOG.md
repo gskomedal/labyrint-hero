@@ -37,7 +37,16 @@
 - **Tooltip over mineraler i Lager (#110):** Hover over mineral i Lager-fanen viser tier og hvilke grunnstoffer det gir
 - **Tydelige meldinger ved gruppeprestasjoner (#114):** Element-gruppeprestasjoner og synergier vises nå med stor, tydelig tekst (★-merket) på spillskjermen. Gjelder for smelting, akselerator og mineral-oppsamling
 
+### Forbedringer (oppfølging)
+- **Partikkelakselerator synlig på kart og minikart:** Akselerator-rom har nå distinkt lilla sci-fi-dekorasjon med ringstruktur, energikjerne og partikkelspor. Spesialrom (leirplass, kjemilab, akselerator) vises nå med fargekodede markører på minikartet
+- **Jevnere mineralfordeling i høyere verdener:** Ny vektet fordeling: 15% 3 tier under, 20% 2 under, 20% 1 under, 35% aktuell tier, 10% tier over. Sikrer T1-T3 mineraler selv i verden 13+
+- **Grunnstoff-filtrering i Smelteovn:** Klikkbare grunnstoff-ikoner øverst i Smelt-, Legering- og Smi-faner filtrerer oppskrifter etter ingrediens-element. Samme layout som Kjemilaben
+
 ### Tekniske endringer
+- MapRenderer: Ny `accelerator` case med lilla ringstruktur og metallvegger
+- UIScene: Minimap viser camp_room (oransje), chem_lab (grønn), accelerator (lilla) markører
+- minerals.js: `rollMineralTier()` redesignet med 5-trinn vektet fordeling i stedet for hard base-tier
+- SmelteryScene: Ny `_drawElementFilterRow()` med klikkbare grunnstoff-badges, element-filter på legerings-tab
 - maze.js: Akselerator-plassering flyttet opp i `_placeSpecialRooms()` prioritet
 - minerals.js: `rollMineralTier()` har 20% sjanse for basis-tier (1-2) fra verden 5+
 - ElementBookScene: `yOffset` for rows >= 8 økt til `+1.5`, lantanoid/aktinoid-labels, multi-rad bonuser, raffinert-telling i tooltip
