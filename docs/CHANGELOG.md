@@ -47,6 +47,17 @@
 - SmelteryScene: Mineral-tooltips med tier og yields i Lager-fanen
 - ItemSpawner/SmelteryScene/AcceleratorScene: Bonus-meldinger bruker `big: true` for tydeligere visning
 
+### Nye funksjoner (Sprint 5)
+- **Varierte gjenstandssprites (#124):** Potions (flaskeform), dynamitt (røde pinner med lunte), bomber (rund med lunte), syrer (boblende flaske). Både verdenskart og inventar-ikoner er oppdatert
+- **4 nye monstertyper (#125):** Skjelett (verden 4+, høy ATK), Golem (verden 6+, høy HP/lav ATK), Skygge (verden 8+, lilla, unnvikende), Demon (verden 10+, rød, brann). Hver type har unike prosedyregenererte sprites og tilpassede stats
+
+### Tekniske endringer (Sprint 5)
+- ItemGraphics: Nye `drawWorldIcon`/`drawInventoryIcon`-case for `_chemType` (potion, explosive, acid, medicine)
+- constants.js: 4 nye monster-entries i HP/ATK/COLOR/XP-tabellene
+- MonsterManager: `_monsterPool()` utvides til 11 verdener med gradvis innføring av nye monstre
+- MonsterGraphics: Nye `drawSkeleton`, `drawGolem`, `drawWraith`, `drawDemon` prosedyre-sprites
+- Monster.js: Switch-case og delegat-metoder for de 4 nye typene
+
 ---
 
 ## v0.44 – 2026-04-17

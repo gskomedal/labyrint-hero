@@ -168,6 +168,38 @@ const ItemGraphics = {
             g.fillCircle(cx + 5, py + 12, 5);
             g.fillStyle(0xffffff, 0.3);
             g.fillCircle(cx - 3, py + 11, 2);
+        } else if (item._chemType === 'potion' || item._chemType === 'medicine') {
+            // Flask shape
+            g.fillRoundedRect(cx - 4, cy - 2, 8, 12, 3);
+            g.fillRect(cx - 2, cy - 6, 4, 5);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(cx - 2, cy + 2, 2);
+        } else if (item._chemType === 'explosive' && (item.id === 'dynamite' || item.id === 'potassium_nitrate')) {
+            // Dynamite sticks
+            g.fillRoundedRect(cx - 5, cy - 4, 4, 14, 1);
+            g.fillRoundedRect(cx - 1, cy - 6, 4, 16, 1);
+            g.fillRoundedRect(cx + 3, cy - 3, 4, 13, 1);
+            g.fillStyle(0xffcc00, 0.9);
+            g.fillRect(cx, cy - 10, 1, 5);
+            g.fillCircle(cx, cy - 10, 2);
+        } else if (item._chemType === 'explosive') {
+            // Round bomb
+            g.fillCircle(cx, cy + 2, 8);
+            g.fillStyle(0x222222, 0.6);
+            g.fillCircle(cx, cy + 2, 6);
+            g.fillStyle(col, 0.9);
+            g.fillCircle(cx, cy + 2, 5);
+            g.fillStyle(0xffcc00, 0.9);
+            g.fillRect(cx - 1, cy - 8, 2, 5);
+            g.fillCircle(cx, cy - 9, 2);
+        } else if (item._chemType === 'acid') {
+            // Bubbling vial
+            g.fillRoundedRect(cx - 4, cy - 2, 8, 12, 2);
+            g.fillRect(cx - 2, cy - 6, 4, 5);
+            g.fillStyle(0xffffff, 0.4);
+            g.fillCircle(cx - 2, cy + 1, 2);
+            g.fillCircle(cx + 2, cy - 1, 1.5);
+            g.fillCircle(cx, cy + 4, 1);
         } else if (item.type === 'consumable') {
             g.fillCircle(cx, cy, s / 4.5);
             g.fillStyle(0xffffff, 0.3);
@@ -300,6 +332,22 @@ const ItemGraphics = {
             g.fillStyle(0x664422, 0.7);
             g.fillCircle(x - 7, y, 3);
             g.fillCircle(x + 7, y, 3);
+        } else if (item._chemType === 'potion' || item._chemType === 'medicine') {
+            g.fillRoundedRect(x - 3, y - 1, 6, 9, 2);
+            g.fillRect(x - 1, y - 4, 3, 4);
+            g.fillStyle(0xffffff, 0.3);
+            g.fillCircle(x - 1, y + 2, 1.5);
+        } else if (item._chemType === 'explosive') {
+            g.fillCircle(x, y + 1, 6);
+            g.fillStyle(0xffcc00, 0.9);
+            g.fillRect(x, y - 6, 1, 4);
+            g.fillCircle(x, y - 7, 1.5);
+        } else if (item._chemType === 'acid') {
+            g.fillRoundedRect(x - 3, y - 1, 6, 9, 2);
+            g.fillRect(x - 1, y - 4, 3, 4);
+            g.fillStyle(0xffffff, 0.4);
+            g.fillCircle(x - 1, y + 1, 1.5);
+            g.fillCircle(x + 1, y + 3, 1);
         } else {
             g.fillCircle(x, y, s / 3.5);
             g.fillStyle(0xffffff, 0.35);

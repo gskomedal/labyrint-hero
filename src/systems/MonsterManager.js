@@ -51,8 +51,11 @@ class MonsterManager {
         if (wn <= 1) return ['goblin'];
         if (wn <= 2) return ['goblin', 'orc', 'orc'];
         if (wn <= 3) return ['orc', 'orc', 'troll'];
-        if (wn <= 5) return ['orc', 'troll', 'troll'];
-        return ['troll', 'troll', 'troll'];
+        if (wn <= 4) return ['orc', 'skeleton', 'troll'];
+        if (wn <= 6) return ['skeleton', 'troll', 'golem'];
+        if (wn <= 8) return ['troll', 'golem', 'wraith'];
+        if (wn <= 10) return ['golem', 'wraith', 'demon'];
+        return ['wraith', 'demon', 'demon'];
     }
 
     // ── Monster AI tick ───────────────────────────────────────────────────────
