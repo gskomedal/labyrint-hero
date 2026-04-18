@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.44
-**Sist oppdatert:** 2026-04-17
+**Versjon:** 0.45
+**Sist oppdatert:** 2026-04-18
 
 ---
 
@@ -306,18 +306,18 @@ Livspotte, Stor livspotte, Styrkebrygg (midlertidig +ATK i 60 sek, skalerer med 
 - **Kjemiker** (lås: finn kjemisk lab) – potion-varighet, bombeskade, eksplosjonsradius. **Kreves for å lage kjemikalier.**
 
 ### Synergier
-Aktiveres automatisk når helten har evner fra begge stier i et par:
-| Synergi | Stier | Effekt |
-|---------|-------|--------|
-| Motangrep | Kriger + Villmarksjeger | 20% motangrep |
-| Tornehud | Kriger + Villmarksjeger | 1 tornskade, +1 syn |
-| Jordens kraft | Geolog + Kriger | +1 DEF, +1 mineral-syn |
-| Smiekunst | Metallurg + Kriger | +3 ATK, +20% malmeffekt |
-| Malmkjenne | Metallurg + Geolog | +1 mineral-syn, -10% smeltetid |
-| Giftklinger | Kjemiker + Kriger | +2 ATK, 15% gift |
-| Alkymist | Kjemiker + Metallurg | +20% potens, -15% energi |
-| Naturkjenner | Geolog + Villmarksjeger | +1 mineral-syn, +2 kjæl.-HP |
-| Giftjeger | Kjemiker + Villmarksjeger | +20% kjemibombe, +10% krit |
+Aktiveres automatisk når helten har evner fra begge stier i et par. Noen synergier krever høyere tier (T2) for å aktiveres:
+| Synergi | Stier | Min. tier | Effekt |
+|---------|-------|-----------|--------|
+| Motangrep | Kriger + Villmarksjeger | T1 | 20% motangrep |
+| Tornehud | Kriger + Villmarksjeger | T1 | 1 tornskade, +1 syn |
+| Jordens kraft | Geolog + Kriger | T1 | +1 DEF, +1 mineral-syn |
+| Smiekunst | Metallurg + Kriger | T2 | +3 ATK, +20% malmeffekt |
+| Malmkjenne | Metallurg + Geolog | T1 | +1 mineral-syn, -10% smeltetid |
+| Giftklinger | Kjemiker + Kriger | T1 | +2 ATK, 15% gift |
+| Alkymist | Kjemiker + Metallurg | T2 | +20% potens, -15% energi |
+| Naturkjenner | Geolog + Villmarksjeger | T1 | +1 mineral-syn, +2 kjæl.-HP |
+| Giftjeger | Kjemiker + Villmarksjeger | T2 | +20% kjemibombe, +10% krit |
 
 ---
 

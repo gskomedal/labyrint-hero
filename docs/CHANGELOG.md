@@ -2,6 +2,23 @@
 
 ---
 
+## v0.45 – 2026-04-18
+
+### Feilrettinger
+- **Scroll i menyer påvirket kamerazoom (#123):** Musehjul-scroll i overlay-scener (Smelteovn, Kjemilab, Inventar, Elementbok, Skilltre, Akselerator, Innstillinger) blokkerer nå zoom-endring i GameScene. Også lagt til AcceleratorScene i input-blokkeringen
+- **Skilltre-synergier overlappet med T4-skills (#115):** Synergy-seksjonen beregner nå posisjon dynamisk basert på faktisk antall tiers i stedet for hardkodet 3. T4-badge vises nå korrekt
+
+### Balanseendringer
+- **Skilltre-synergier krever høyere tier (#116):** 6 av 12 synergier krever nå T2-skills fra begge stier i stedet for bare T1. Påvirkede synergier: Smiekunst, Alkymist, Giftjeger, Transmutasjon, Atomsmedja og Kvantekjemi. Tier-krav vises i synergi-oversikten
+
+### Tekniske endringer
+- InputHandler: Wheel-handler sjekker `scene.isActive()` for alle overlay-scener før zoom
+- GameScene: `blocked`-variabel inkluderer nå AcceleratorScene
+- SkillScene: `cardsEndY` beregnes fra `maxTiers` dynamisk, tier-badge bruker `'T' + (tierIndex + 1)`
+- skills.js: `getActiveSynergies()` sjekker `pathMaxTier` mot `syn.minTier` (default 1). 6 synergier har fått `minTier: 2`
+
+---
+
 ## v0.44 – 2026-04-17
 
 ### Nye funksjoner

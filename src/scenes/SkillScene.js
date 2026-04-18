@@ -66,8 +66,8 @@ class SkillScene extends Phaser.Scene {
         });
 
         // ── Synergies display (right below skill cards) ───────────────────────
-        // 3 tiers × (cardH + 10) + header offset = cards end
-        const cardsEndY = py + 50 + 28 + 3 * (140 + 10) - 10;
+        const maxTiers = Math.max(...SKILL_TREE_PATHS.map(p => p.tiers.length));
+        const cardsEndY = py + 50 + 28 + (maxTiers - 1) * (140 + 10) + 108;
         this._drawSynergies(cx, cardsEndY + 12, panelW);
 
         // ── Footer ────────────────────────────────────────────────────────────
@@ -201,7 +201,7 @@ class SkillScene extends Phaser.Scene {
         bg.strokeRoundedRect(cx - w / 2, y, w, h, 5);
 
         // Tier badge (T1/T2/T3)
-        const tierLabel = ['T1','T2','T3'][tierIndex] || '';
+        const tierLabel = 'T' + (tierIndex + 1);
         const tierG = this.add.graphics();
         tierG.fillStyle(locked ? 0x1a1535 : colColor, locked ? 0.3 : 0.25);
         tierG.fillRoundedRect(cx + w / 2 - 24, y + 2, 22, 14, 3);
@@ -298,8 +298,9 @@ class SkillScene extends Phaser.Scene {
                 return path ? path.name[0] : '?';
             }).join('+');
             const icon = isActive ? '✦' : '○';
+            const tierReq = (syn.minTier || 1) > 1 ? ` [T${syn.minTier}]` : '';
 
-            this.add.text(sx, sy + row * rowH, `${icon} ${initials} ${syn.name}`, {
+            this.add.text(sx, sy + row * rowH, `${icon} ${initials}${tierReq} ${syn.name}`, {
                 fontSize: '10px', color: nameCol, fontFamily: 'monospace'
             }).setOrigin(0.5);
             this.add.text(sx, sy + row * rowH + 12, syn.desc, {

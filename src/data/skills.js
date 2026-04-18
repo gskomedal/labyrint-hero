@@ -426,6 +426,7 @@ const SKILL_SYNERGIES = [
         desc:  '+3 Angrep, +20% malmeffekt',
         paths: ['metallurg', 'kriger'],
         color: 0xff6622,
+        minTier: 2,
         apply(hero) { hero.attack += 3; hero.oreEfficiencyChance = (hero.oreEfficiencyChance || 0) + 0.20; },
         unapply(hero) { hero.attack -= 3; hero.oreEfficiencyChance = Math.max(0, (hero.oreEfficiencyChance || 0) - 0.20); },
     },
@@ -453,6 +454,7 @@ const SKILL_SYNERGIES = [
         desc:  '+20% potens, -15% energi',
         paths: ['kjemiker', 'metallurg'],
         color: 0x88aa44,
+        minTier: 2,
         apply(hero) { hero.potionPotencyBonus = (hero.potionPotencyBonus || 0) + 0.20; hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) * 0.85; },
         unapply(hero) { hero.potionPotencyBonus = Math.max(0, (hero.potionPotencyBonus || 0) - 0.20); hero.smeltingEfficiency = (hero.smeltingEfficiency || 1.0) / 0.85; },
     },
@@ -471,6 +473,7 @@ const SKILL_SYNERGIES = [
         desc:  '+20% kjemibombe, +10% crit',
         paths: ['kjemiker', 'villmarksjeger'],
         color: 0x66cc88,
+        minTier: 2,
         apply(hero) { hero.chemBombBonus = (hero.chemBombBonus || 0) + 0.20; hero.critChance = Math.min(0.75, hero.critChance + 0.10); },
         unapply(hero) { hero.chemBombBonus = Math.max(0, (hero.chemBombBonus || 0) - 0.20); hero.critChance = Math.max(0, hero.critChance - 0.10); },
     },
@@ -480,6 +483,7 @@ const SKILL_SYNERGIES = [
         desc:  '5 av grunnstoff X → 1 av nabo (kjemilab)',
         paths: ['geolog', 'metallurg', 'kjemiker'],
         color: 0xff88cc,
+        minTier: 2,
         apply(hero) { hero.transmutationUnlocked = true; },
         unapply(hero) { hero.transmutationUnlocked = false; },
     },
@@ -489,6 +493,7 @@ const SKILL_SYNERGIES = [
         desc:  '+3 ATK, −25% akselerator-energi',
         paths: ['fysiker', 'metallurg'],
         color: 0xaa66ff,
+        minTier: 2,
         apply(hero) { hero.attack += 3; hero.acceleratorEfficiency = (hero.acceleratorEfficiency || 1.0) * 0.75; },
         unapply(hero) { hero.attack -= 3; hero.acceleratorEfficiency = (hero.acceleratorEfficiency || 1.0) / 0.75; },
     },
@@ -498,6 +503,7 @@ const SKILL_SYNERGIES = [
         desc:  '+30% potion-styrke, +20% bombe-radius',
         paths: ['fysiker', 'kjemiker'],
         color: 0x8888ff,
+        minTier: 2,
         apply(hero) { hero.potionMagnitudeBonus = (hero.potionMagnitudeBonus || 0) + 0.30; hero.chemRadiusBonus = (hero.chemRadiusBonus || 0) + 0.20; },
         unapply(hero) { hero.potionMagnitudeBonus = Math.max(0, (hero.potionMagnitudeBonus || 0) - 0.30); hero.chemRadiusBonus = Math.max(0, (hero.chemRadiusBonus || 0) - 0.20); },
     },
@@ -505,16 +511,17 @@ const SKILL_SYNERGIES = [
 
 /** Check which synergies are active for a hero and return their IDs. */
 function getActiveSynergies(hero) {
-    const pathCounts = {};
+    const pathMaxTier = {};
     for (const skillId of (hero.skills || [])) {
         for (const path of SKILL_TREE_PATHS) {
-            if (path.tiers.some(t => t.id === skillId)) {
-                pathCounts[path.id] = (pathCounts[path.id] || 0) + 1;
+            const tierIndex = path.tiers.findIndex(t => t.id === skillId);
+            if (tierIndex >= 0) {
+                pathMaxTier[path.id] = Math.max(pathMaxTier[path.id] || 0, tierIndex + 1);
             }
         }
     }
     return SKILL_SYNERGIES.filter(syn =>
-        syn.paths.every(p => (pathCounts[p] || 0) >= 1)
+        syn.paths.every(p => (pathMaxTier[p] || 0) >= (syn.minTier || 1))
     );
 }
 
