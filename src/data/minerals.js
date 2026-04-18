@@ -488,6 +488,12 @@ const CRYSTAL_POOL = {
  * World 1-2 → mostly T1, World 3-4 → T1-T2, World 5 → T2-T3, etc.
  */
 function rollMineralTier(worldNum) {
+    // 20% chance to roll a base-tier (1-2) mineral regardless of world,
+    // ensuring important elements like Al, Fe, Cu remain accessible.
+    if (worldNum >= 5 && Math.random() < 0.20) {
+        return Math.random() < 0.6 ? 1 : 2;
+    }
+
     // Base tier: 1 for worlds 1-2, 2 for worlds 3-4, 3 for worlds 5-6, etc.
     const baseTier = Math.max(1, Math.ceil(worldNum / 2));
     let tier = baseTier;

@@ -25,6 +25,15 @@
 - ChemistrySystem: `potionScale` redusert (0.15/verden). 25% maxHP-gulv kun for `mol.tier >= 3`
 - Inventory: Deserialisering gjenskaper `_chemItem` via `ChemistrySystem._createUsableItem()` for molekyler i quickUse og backpack
 - ChemLabScene: Tab-system (Oppskrifter/Transmutasjon), grunnstoff-filterrad, større panel
+- **Partikkelakselerator spawner nå fra verden 13+ (#108):** Akselerator-rom plasseres nå før valgfrie rom (malmkammer, hydrotermisk, gasslomme, magmakammer) i prioritering, slik at dead-ends er tilgjengelige
+- **Lettere å finne basis-grunnstoffer i høyere verdener (#119):** 20% sjanse for å rulle tier 1-2 mineral uansett verdensnummer, sikrer tilgang til Al, Fe, Cu og andre viktige elementer
+- **Elementbok: lantanoider/aktinoider flyttet ned (#113):** Økt avstand (1.5 rader) mellom hovedtabellen og lantanoider/aktinoider. Lagt til «Ln»/«An»-etiketter. Gruppebonuser vises nå i flere rader
+- **Elementbok: viser raffinerte grunnstoffer (#120):** Tooltip viser nå antall rene/raffinerte former ved siden av rå-antallet (f.eks. «Lagret: 12 (3 ren)»)
+
+### Tekniske endringer (Sprint 3)
+- maze.js: Akselerator-plassering flyttet opp i `_placeSpecialRooms()` prioritet (etter camp_room/chem_lab, før valgfrie rom)
+- minerals.js: `rollMineralTier()` har 20% sjanse for basis-tier (1-2) fra verden 5+
+- ElementBookScene: `yOffset` for rows >= 8 økt til `+1.5`, lantanoid/aktinoid-labels, multi-rad bonuser, raffinert-telling i tooltip
 
 ---
 
