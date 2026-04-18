@@ -501,7 +501,7 @@ class ItemSpawner {
                         // Check for completion bonuses and apply rewards
                         const newBonuses = scene.hero.elementTracker.checkCompletions();
                         for (const bonus of newBonuses) {
-                            scene._floatingText(hx, hy, `${bonus.name} fullført! ${bonus.desc}`, '#ffcc00');
+                            scene._floatingText(hx, hy, `★ ${bonus.name} fullført! ${bonus.desc}`, '#ffcc00', true);
                         }
                         if (newBonuses.length > 0) {
                             scene.hero.elementTracker.applyBonusRewards(scene.hero);

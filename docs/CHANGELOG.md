@@ -30,10 +30,22 @@
 - **Elementbok: lantanoider/aktinoider flyttet ned (#113):** Økt avstand (1.5 rader) mellom hovedtabellen og lantanoider/aktinoider. Lagt til «Ln»/«An»-etiketter. Gruppebonuser vises nå i flere rader
 - **Elementbok: viser raffinerte grunnstoffer (#120):** Tooltip viser nå antall rene/raffinerte former ved siden av rå-antallet (f.eks. «Lagret: 12 (3 ren)»)
 
-### Tekniske endringer (Sprint 3)
-- maze.js: Akselerator-plassering flyttet opp i `_placeSpecialRooms()` prioritet (etter camp_room/chem_lab, før valgfrie rom)
+### Nye funksjoner (Sprint 4)
+- **Delvis bruk av energikilder (#112):** Ubrukt energi fra brensel lagres nå i en reserve (`fuelReserve`) som brukes ved neste crafting-operasjon. Kull (3 energi) brukt på 1-energi-oppskrift bevarer 2 energi til neste gang
+- **Smi nøkler og hakker (#122):** Nye smi-oppskrifter: Smidd nøkkel (bronse), Smidd hakke (stål). Viktige verktøy kan nå produseres i stedet for å finnes tilfeldig
+- **Forstørrelsesbelte – øk ryggsekk (#118):** Nytt smi-objekt fra skandium som gir +3 ryggsekk-plasser. Kan oppgraderes maks 2 ganger (totalt +6 plasser)
+- **Tooltip over mineraler i Lager (#110):** Hover over mineral i Lager-fanen viser tier og hvilke grunnstoffer det gir
+- **Tydelige meldinger ved gruppeprestasjoner (#114):** Element-gruppeprestasjoner og synergier vises nå med stor, tydelig tekst (★-merket) på spillskjermen. Gjelder for smelting, akselerator og mineral-oppsamling
+
+### Tekniske endringer
+- maze.js: Akselerator-plassering flyttet opp i `_placeSpecialRooms()` prioritet
 - minerals.js: `rollMineralTier()` har 20% sjanse for basis-tier (1-2) fra verden 5+
 - ElementBookScene: `yOffset` for rows >= 8 økt til `+1.5`, lantanoid/aktinoid-labels, multi-rad bonuser, raffinert-telling i tooltip
+- SmeltingSystem: `fuelReserve` deduceres først i `consumeFuel()`, overskudd lagres tilbake. `calculateFuelEnergy()` inkluderer reserve
+- HeroCrafting: Nye felter `fuelReserve`, `_backpackUpgrades` med serialisering
+- alloys.js: Nye smi-oppskrifter `forged_key` (bronse), `forged_pickaxe` (stål), `backpack_upgrade` (skandium)
+- SmelteryScene: Mineral-tooltips med tier og yields i Lager-fanen
+- ItemSpawner/SmelteryScene/AcceleratorScene: Bonus-meldinger bruker `big: true` for tydeligere visning
 
 ---
 

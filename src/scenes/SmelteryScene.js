@@ -295,9 +295,22 @@ class SmelteryScene extends Phaser.Scene {
 
             const stashDepName = (def.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
                 ? getMineralDisplayName(def, hero) : def.name;
-            this._d(this.add.text(leftX + 4, adjY, `${stashDepName} ×${entry.count}`, {
+            const nameText = this._d(this.add.text(leftX + 4, adjY, `${stashDepName} ×${entry.count}`, {
                 fontSize: '14px', color: hexCol, fontFamily: 'monospace'
-            }));
+            }).setInteractive());
+            if (def.type === 'mineral' && def.yields) {
+                const yieldStr = def.yields.map(y => y.symbol).join(', ');
+                nameText.on('pointerover', () => {
+                    if (this._mineralTooltip) this._mineralTooltip.destroy();
+                    this._mineralTooltip = this._d(this.add.text(leftX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
+                        fontSize: '12px', color: '#bbaa88', fontFamily: 'monospace',
+                        backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
+                    }));
+                });
+                nameText.on('pointerout', () => {
+                    if (this._mineralTooltip) { this._mineralTooltip.destroy(); this._mineralTooltip = null; }
+                });
+            }
 
             const btn = this._d(this.add.text(leftX + colW - 10, adjY, '→', {
                 fontSize: '16px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
@@ -352,9 +365,22 @@ class SmelteryScene extends Phaser.Scene {
                 const col = def ? def.color : 0xaaaaaa;
                 const hexCol = '#' + col.toString(16).padStart(6, '0');
 
-                this._d(this.add.text(rightX + 4, adjY, `${stName} ×${stashEntry.count}`, {
+                const stText = this._d(this.add.text(rightX + 4, adjY, `${stName} ×${stashEntry.count}`, {
                     fontSize: '14px', color: hexCol, fontFamily: 'monospace'
-                }));
+                }).setInteractive());
+                if (def && def.type === 'mineral' && def.yields) {
+                    const yieldStr = def.yields.map(y => y.symbol).join(', ');
+                    stText.on('pointerover', () => {
+                        if (this._mineralTooltip) this._mineralTooltip.destroy();
+                        this._mineralTooltip = this._d(this.add.text(rightX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
+                            fontSize: '12px', color: '#bbaa88', fontFamily: 'monospace',
+                            backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
+                        }));
+                    });
+                    stText.on('pointerout', () => {
+                        if (this._mineralTooltip) { this._mineralTooltip.destroy(); this._mineralTooltip = null; }
+                    });
+                }
 
                 const btn = this._d(this.add.text(rightX + colW - 10, adjY, '←', {
                     fontSize: '16px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
@@ -656,7 +682,7 @@ class SmelteryScene extends Phaser.Scene {
         if (newBonuses.length > 0) {
             hero.elementTracker.applyBonusRewards(hero);
             for (const bonus of newBonuses) {
-                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00' });
+                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `★ ${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00', big: true });
             }
         }
         Audio.playPickup();
