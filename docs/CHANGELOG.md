@@ -7,6 +7,12 @@
 ### Feilrettinger
 - **Scroll i menyer påvirket kamerazoom (#123):** Musehjul-scroll i overlay-scener (Smelteovn, Kjemilab, Inventar, Elementbok, Skilltre, Akselerator, Innstillinger) blokkerer nå zoom-endring i GameScene. Også lagt til AcceleratorScene i input-blokkeringen
 - **Skilltre-synergier overlappet med T4-skills (#115):** Synergy-seksjonen beregner nå posisjon dynamisk basert på faktisk antall tiers i stedet for hardkodet 3. T4-badge vises nå korrekt
+- **Potions fra kjemilab healte fullt (#121):** Redusert potionScale fra 0.4 til 0.15 per verden for mykere skalering. 25% maxHP-gulv gjelder nå kun T3+ potions. Fikset serialisering: molekyl-items i ryggsekk og quick-use gjenskaper nå `use()`-funksjonen korrekt ved innlasting
+
+### Nye funksjoner
+- **Grunnstoff-filtrering i Kjemilab (#109):** Klikkbare grunnstoff-ikoner øverst filtrerer oppskrifter etter ingrediens. Grunnstoffer man ikke har vises dimmet
+- **Egen Transmutasjon-tab i Kjemilab (#111):** Ny fane «Transmutasjon» med dedikert visning av alle tilgjengelige transmutasjoner, input → output og knapper. Kun synlig når transmutasjon er låst opp
+- **Større kjemilab-vindu (#117):** Kjemilab-panelet utvidet fra 760×600 til 960×720 for bedre oversikt
 
 ### Balanseendringer
 - **Skilltre-synergier krever høyere tier (#116):** 6 av 12 synergier krever nå T2-skills fra begge stier i stedet for bare T1. Påvirkede synergier: Smiekunst, Alkymist, Giftjeger, Transmutasjon, Atomsmedja og Kvantekjemi. Tier-krav vises i synergi-oversikten
@@ -16,6 +22,9 @@
 - GameScene: `blocked`-variabel inkluderer nå AcceleratorScene
 - SkillScene: `cardsEndY` beregnes fra `maxTiers` dynamisk, tier-badge bruker `'T' + (tierIndex + 1)`
 - skills.js: `getActiveSynergies()` sjekker `pathMaxTier` mot `syn.minTier` (default 1). 6 synergier har fått `minTier: 2`
+- ChemistrySystem: `potionScale` redusert (0.15/verden). 25% maxHP-gulv kun for `mol.tier >= 3`
+- Inventory: Deserialisering gjenskaper `_chemItem` via `ChemistrySystem._createUsableItem()` for molekyler i quickUse og backpack
+- ChemLabScene: Tab-system (Oppskrifter/Transmutasjon), grunnstoff-filterrad, større panel
 
 ---
 
