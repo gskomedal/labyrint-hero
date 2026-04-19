@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.45
-**Sist oppdatert:** 2026-04-18
+**Versjon:** 0.46
+**Sist oppdatert:** 2026-04-19
 
 ---
 
@@ -150,11 +150,16 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 | SPACE / F / Angrepsknapp (touch) | Angrip i sett retning (eller nærmeste monster) |
 | R / Bueknapp (touch) | Skyt pil (krever bue utstyrt) |
 | Q / USE-knapp (touch) | Bruk første consumable i ryggsekken (bombe, drikk, etc.) |
-| E / Inventarknapp (touch) | Åpne/lukk inventory |
-| T | Vis ferdighetstre (kun visning) |
+| E / INV-knapp (touch) | Åpne/lukk inventory |
+| T / SKL-knapp (touch) | Vis ferdighetstre (kun visning) |
 | ESC | Lukk overlay |
-| +/- eller muskjul | Zoom inn/ut |
-| M / Minikartknapp (touch) | Vis/skjul minikart |
+| +/- eller mushjul | Zoom inn/ut |
+| M / trykk på minikart (touch) | Vis/skjul minikart |
+| V | Åpne smelteovn (i leirplass) |
+| C | Åpne kjemilab (i kjemilab) |
+| P | Åpne akselerator (i akselerator) |
+| B | Åpne elementbok |
+| ÅPNE-knapp (touch) | Kontekstsensitiv: åpner smelteovn/kjemilab/akselerator basert på plassering, ellers elementbok |
 | ⚙ (HUD) | Åpne lydinnstillinger |
 | Langt trykk (touch) | Slipp gjenstand i inventory (erstatter høyreklikk) |
 
@@ -426,7 +431,7 @@ Serveren avviser umulige poengsummer:
 | Butikk / handelsmann | ✅ Ferdig | Handelsmann-NPC i hver labyrint |
 | Gull + økonomi | ✅ Ferdig | Gullvaluta fra monstre/kister; handelsmann |
 | Gjenstandssjeldenhet | ✅ Ferdig | 5 sjeldenhetsgrader med stat-boost |
-| Touch/mobil-støtte | ✅ Ferdig | D-pad, handlingsknapper, responsiv skalering, langt-trykk drop |
+| Touch/mobil-støtte | ✅ Ferdig | D-pad, 3 handlingsknapper (ATK/BOW/USE), 3 menyknapper (INV/SKL/kontekstsensitiv ÅPNE), minikart-trykk-toggle, responsiv skalering, langt-trykk drop |
 | Leaderboard | ✅ Ferdig | Lokal + global ledertavle med filtrering, mineraler samlet, elementer oppdaget |
 
 ---

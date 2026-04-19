@@ -186,31 +186,20 @@ class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.eKey) || touchInv) {
                 this.scene.launch('InventoryScene');
             }
-            const touchBook = this.game.registry.get('touch_elementbook');
-            if (touchBook) this.game.registry.set('touch_elementbook', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.elementBookKey) || touchBook) && !this.scene.isActive('ElementBookScene')) {
+            if (Phaser.Input.Keyboard.JustDown(this.elementBookKey) && !this.scene.isActive('ElementBookScene')) {
                 this.scene.launch('ElementBookScene', { heroRef: this.hero });
             }
-            const touchSmelt = this.game.registry.get('touch_smeltery');
-            if (touchSmelt) this.game.registry.set('touch_smeltery', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.smelteryKey) || touchSmelt) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
+            if (Phaser.Input.Keyboard.JustDown(this.smelteryKey) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
                 this.scene.launch('SmelteryScene', { heroRef: this.hero });
             }
-
-            const touchChem = this.game.registry.get('touch_chemlab');
-            if (touchChem) this.game.registry.set('touch_chemlab', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.chemLabKey) || touchChem) && !this.scene.isActive('ChemLabScene') && this._isInChemLab()) {
+            if (Phaser.Input.Keyboard.JustDown(this.chemLabKey) && !this.scene.isActive('ChemLabScene') && this._isInChemLab()) {
                 if (this.hero.chemLabUnlocked) {
                     this.scene.launch('ChemLabScene', { heroRef: this.hero, worldNum: this.worldNum });
                 } else {
                     this._showMessage('Beseir en soneboss for å låse opp laboratoriet!', '#33dd88');
                 }
             }
-
-            // Particle accelerator (P key)
-            const touchAccel = this.game.registry.get('touch_accelerator');
-            if (touchAccel) this.game.registry.set('touch_accelerator', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.acceleratorKey) || touchAccel) && !this.scene.isActive('AcceleratorScene') && this._isInAccelerator()) {
+            if (Phaser.Input.Keyboard.JustDown(this.acceleratorKey) && !this.scene.isActive('AcceleratorScene') && this._isInAccelerator()) {
                 this.scene.launch('AcceleratorScene', { heroRef: this.hero, worldNum: this.worldNum });
             }
 
@@ -218,6 +207,13 @@ class GameScene extends Phaser.Scene {
             if (touchSkill) this.game.registry.set('touch_skilltree', false);
             if ((Phaser.Input.Keyboard.JustDown(this.skillTreeKey) || touchSkill) && !this.scene.isActive('SkillScene')) {
                 this.scene.launch('SkillScene', { heroRef: this.hero, viewOnly: true });
+            }
+
+            // Context-sensitive touch button (opens scene based on hero location)
+            const touchCtx = this.game.registry.get('touch_open_context');
+            if (touchCtx) {
+                this.game.registry.set('touch_open_context', false);
+                this._handleTouchOpenContext();
             }
 
             // Auto-open prompts for special rooms
@@ -303,6 +299,24 @@ class GameScene extends Phaser.Scene {
             this._showMessage('Partikkelakselerator! Trykk P for å syntetisere grunnstoffer.', '#8866ff');
         } else if (!this._isInAccelerator()) {
             this._acceleratorShown = false;
+        }
+    }
+
+    // ── Context-sensitive touch open ────────────────────────────────────────
+
+    _handleTouchOpenContext() {
+        if (this._isInCampRoom() && !this.scene.isActive('SmelteryScene')) {
+            this.scene.launch('SmelteryScene', { heroRef: this.hero });
+        } else if (this._isInChemLab() && !this.scene.isActive('ChemLabScene')) {
+            if (this.hero.chemLabUnlocked) {
+                this.scene.launch('ChemLabScene', { heroRef: this.hero, worldNum: this.worldNum });
+            } else {
+                this._showMessage('Beseir en soneboss for å låse opp laboratoriet!', '#33dd88');
+            }
+        } else if (this._isInAccelerator() && !this.scene.isActive('AcceleratorScene')) {
+            this.scene.launch('AcceleratorScene', { heroRef: this.hero, worldNum: this.worldNum });
+        } else if (!this.scene.isActive('ElementBookScene')) {
+            this.scene.launch('ElementBookScene', { heroRef: this.hero });
         }
     }
 

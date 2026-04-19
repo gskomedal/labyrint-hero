@@ -5,9 +5,10 @@ class TouchControls {
         this.scene = scene;
         this.game  = scene.game;
         this.widgets = [];
-        this._menuWidgets = []; // menu buttons tracked separately for visibility
-        this._domDpad = null;   // DOM-based d-pad container (for off-canvas placement)
+        this._domDpad = null;
         this._dpadButtons = [];
+        this._contextBtn = null; // {bg, txt, zone, x, y, sz} for dynamic updates
+        this._currentContext = 'book';
     }
 
     create() {
@@ -21,10 +22,8 @@ class TouchControls {
         reg.set('touch_inventory', false);
         reg.set('touch_minimap', false);
         reg.set('touch_use', false);
-        reg.set('touch_smeltery', false);
-        reg.set('touch_chemlab', false);
         reg.set('touch_skilltree', false);
-        reg.set('touch_elementbook', false);
+        reg.set('touch_open_context', false);
 
         this._createDpad();
         this._createActionButtons();
@@ -154,7 +153,7 @@ class TouchControls {
         this._createZoomButtons();
     }
 
-    // ── Menu Buttons (above action row, conditional visibility) ──────────────
+    // ── Menu Buttons (single row above action row) ──────────────────────────
 
     _createMenuButtons() {
         const sz   = 48;
@@ -164,25 +163,85 @@ class TouchControls {
         const baseX = W - 24 - sz / 2;
         const baseY = H - 24 - 56 / 2 - 10 - 56 - 10 - sz / 2; // above action row
 
-        const menuDefs = [
-            { label: 'INV', key: 'touch_inventory',   color: 0x335588, unlockKey: null },
-            { label: 'MAP', key: 'touch_minimap',      color: 0x338844, unlockKey: null },
-            { label: 'SKL', key: 'touch_skilltree',    color: 0x8866cc, unlockKey: null },
-            { label: 'BOK', key: 'touch_elementbook',  color: 0x997755, unlockKey: 'geologistUnlocked' },
-            { label: 'SMI', key: 'touch_smeltery',     color: 0xff7722, unlockKey: 'metallurgistUnlocked' },
-            { label: 'LAB', key: 'touch_chemlab',      color: 0x33dd88, unlockKey: 'chemLabUnlocked' },
+        const fixedDefs = [
+            { label: 'INV', key: 'touch_inventory',  color: 0x335588 },
+            { label: 'SKL', key: 'touch_skilltree',  color: 0x8866cc },
         ];
 
-        const cols = 3;
-        for (let i = 0; i < menuDefs.length; i++) {
-            const col = i % cols;
-            const row = Math.floor(i / cols);
-            const x = baseX - col * (sz + gap);
-            const y = baseY - row * (sz + gap);
-            const def = menuDefs[i];
-            const btnWidgets = this._makeMenuButton(x, y, sz, def.label, def.key, def.color);
-            this._menuWidgets.push({ widgets: btnWidgets, unlockKey: def.unlockKey });
+        for (let i = 0; i < fixedDefs.length; i++) {
+            const x = baseX - i * (sz + gap);
+            const y = baseY;
+            const def = fixedDefs[i];
+            this._makeMenuButton(x, y, sz, def.label, def.key, def.color);
         }
+
+        // Context-sensitive button (rightmost position = col 2)
+        const ctxX = baseX - 2 * (sz + gap);
+        const ctxY = baseY;
+        this._createContextButton(ctxX, ctxY, sz);
+    }
+
+    // ── Context-sensitive ÅPNE button ───────────────────────────────────────
+
+    _createContextButton(x, y, sz) {
+        const scene = this.scene;
+        const reg   = this.game.registry;
+        const alpha = 0.35;
+        const pressAlpha = 0.7;
+        const defaultColor = 0x997755;
+
+        const bg = scene.add.graphics();
+        this._drawRoundedBtn(bg, x, y, sz, defaultColor, alpha);
+        bg.setDepth(100);
+
+        const txt = scene.add.text(x, y, 'BOK', {
+            fontSize: '12px', color: '#eeeeff', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(101).setAlpha(0.6);
+
+        const zone = scene.add.zone(x, y, sz, sz).setInteractive().setDepth(102);
+
+        zone.on('pointerdown', () => {
+            reg.set('touch_open_context', true);
+            this._drawRoundedBtn(bg, x, y, sz, this._contextBtn.color, pressAlpha);
+            txt.setAlpha(1);
+        });
+
+        const release = () => {
+            this._drawRoundedBtn(bg, x, y, sz, this._contextBtn.color, alpha);
+            txt.setAlpha(0.6);
+        };
+
+        zone.on('pointerup', release);
+        zone.on('pointerout', release);
+
+        this.widgets.push(bg, txt, zone);
+        this._contextBtn = { bg, txt, zone, x, y, sz, color: defaultColor };
+        this._currentContext = 'book';
+    }
+
+    updateContextButton(gameScene) {
+        if (!this._contextBtn) return;
+
+        let context = 'book';
+        if (gameScene._isInCampRoom())     context = 'smeltery';
+        else if (gameScene._isInChemLab()) context = 'chemlab';
+        else if (gameScene._isInAccelerator()) context = 'accelerator';
+
+        if (context === this._currentContext) return;
+        this._currentContext = context;
+
+        const defs = {
+            book:        { label: 'BOK', color: 0x997755 },
+            smeltery:    { label: 'SMI', color: 0xff7722 },
+            chemlab:     { label: 'LAB', color: 0x33dd88 },
+            accelerator: { label: 'ACE', color: 0x8866ff },
+        };
+
+        const def = defs[context];
+        const btn = this._contextBtn;
+        btn.color = def.color;
+        btn.txt.setText(def.label);
+        this._drawRoundedBtn(btn.bg, btn.x, btn.y, btn.sz, def.color, 0.35);
     }
 
     // ── Zoom & fullscreen (top-right) ────────────────────────────────────────
@@ -316,19 +375,6 @@ class TouchControls {
         zone.on('pointerout', release);
 
         this.widgets.push(bg, txt, zone);
-        return [bg, txt, zone];
-    }
-
-    /** Update menu button visibility based on hero unlock flags */
-    updateVisibility(hero) {
-        if (!hero) return;
-        for (const entry of this._menuWidgets) {
-            if (!entry.unlockKey) continue;
-            const visible = !!hero[entry.unlockKey];
-            for (const w of entry.widgets) {
-                w.setVisible(visible);
-            }
-        }
     }
 
     // ── Shared draw helper ───────────────────────────────────────────────────
@@ -348,7 +394,7 @@ class TouchControls {
     destroy() {
         for (const w of this.widgets) w.destroy();
         this.widgets = [];
-        this._menuWidgets = [];
+        this._contextBtn = null;
         // Clean up DOM d-pad
         if (this._domDpad) {
             this._domDpad.remove();

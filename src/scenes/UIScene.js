@@ -103,11 +103,18 @@ class UIScene extends Phaser.Scene {
         this._minimapY     = H - 8;    // bottom-anchored
         this._minimapThrottle = 0;
 
-        // Toggle minimap with M key or touch button
+        // Toggle minimap with M key or tap on minimap area
         this._minimapVisible = true;
         this.input.keyboard.on('keydown-M', () => {
             this._toggleMinimap();
         });
+
+        if (this.game.registry.get('isTouchDevice')) {
+            const mapZoneSz = 80;
+            const mapZone = this.add.zone(W - 8 - mapZoneSz / 2, H - 8 - mapZoneSz / 2, mapZoneSz, mapZoneSz)
+                .setInteractive().setDepth(99);
+            mapZone.on('pointerdown', () => this._toggleMinimap());
+        }
 
         this.refresh();
     }
@@ -332,7 +339,7 @@ class UIScene extends Phaser.Scene {
             this._minimapThrottle = now;
             this._drawMinimap();
         }
-        // Touch minimap toggle
+        // Legacy touch minimap toggle (from registry)
         if (this.game.registry.get('touch_minimap')) {
             this.game.registry.set('touch_minimap', false);
             this._toggleMinimap();
@@ -459,9 +466,9 @@ class UIScene extends Phaser.Scene {
             this.bossBar.setVisible(false);
         }
 
-        // ── Touch button visibility (unlock-gated) ───────────────────────────
-        if (this.touchControls) {
-            this.touchControls.updateVisibility(hero);
+        // ── Touch context button (update label/color based on hero location)
+        if (this.touchControls && this.gameScene) {
+            this.touchControls.updateContextButton(this.gameScene);
         }
     }
 }

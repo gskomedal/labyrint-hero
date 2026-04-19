@@ -2,6 +2,19 @@
 
 ---
 
+## v0.46 – 2026-04-19
+
+### Forbedringer
+- **Færre touch-knapper, kontekstsensitiv ÅPNE-knapp:** Menyknapper redusert fra 6 til 3 (INV, SKL, ÅPNE). ÅPNE-knappen endrer farge og label dynamisk basert på heltens plassering: BOK (elementbok) → SMI (leirplass) → LAB (kjemilab) → ACE (akselerator). Løser også manglende akselerator-knapp for mobil (#108)
+- **Minikart-toggle via trykk:** På touch-enheter kan minikartet nå toggles ved å trykke direkte på det, i stedet for en egen MAP-knapp
+
+### Tekniske endringer
+- TouchControls: Ny `_createContextButton()` og `updateContextButton(gameScene)` for dynamisk knapp. Fjernet `updateVisibility()` og individuelle menyknapper
+- GameScene: Ny `_handleTouchOpenContext()` erstatter individuelle touch-scene-handlinger. Tastaturkontroller (V, C, P, B) uendret
+- UIScene: Interaktiv sone over minikartet for touch-toggle. Kaller `updateContextButton()` i refresh
+
+---
+
 ## v0.45 – 2026-04-18
 
 ### Feilrettinger
