@@ -2,6 +2,73 @@
 
 ---
 
+## v0.45 – 2026-04-18
+
+### Feilrettinger
+- **Scroll i menyer påvirket kamerazoom (#123):** Musehjul-scroll i overlay-scener (Smelteovn, Kjemilab, Inventar, Elementbok, Skilltre, Akselerator, Innstillinger) blokkerer nå zoom-endring i GameScene. Også lagt til AcceleratorScene i input-blokkeringen
+- **Skilltre-synergier overlappet med T4-skills (#115):** Synergy-seksjonen beregner nå posisjon dynamisk basert på faktisk antall tiers i stedet for hardkodet 3. T4-badge vises nå korrekt
+- **Potions fra kjemilab healte fullt (#121):** Redusert potionScale fra 0.4 til 0.15 per verden for mykere skalering. 25% maxHP-gulv gjelder nå kun T3+ potions. Fikset serialisering: molekyl-items i ryggsekk og quick-use gjenskaper nå `use()`-funksjonen korrekt ved innlasting
+
+### Nye funksjoner
+- **Grunnstoff-filtrering i Kjemilab (#109):** Klikkbare grunnstoff-ikoner øverst filtrerer oppskrifter etter ingrediens. Grunnstoffer man ikke har vises dimmet
+- **Egen Transmutasjon-tab i Kjemilab (#111):** Ny fane «Transmutasjon» med dedikert visning av alle tilgjengelige transmutasjoner, input → output og knapper. Kun synlig når transmutasjon er låst opp
+- **Større kjemilab-vindu (#117):** Kjemilab-panelet utvidet fra 760×600 til 960×720 for bedre oversikt
+
+### Balanseendringer
+- **Skilltre-synergier krever høyere tier (#116):** 6 av 12 synergier krever nå T2-skills fra begge stier i stedet for bare T1. Påvirkede synergier: Smiekunst, Alkymist, Giftjeger, Transmutasjon, Atomsmedja og Kvantekjemi. Tier-krav vises i synergi-oversikten
+
+### Tekniske endringer
+- InputHandler: Wheel-handler sjekker `scene.isActive()` for alle overlay-scener før zoom
+- GameScene: `blocked`-variabel inkluderer nå AcceleratorScene
+- SkillScene: `cardsEndY` beregnes fra `maxTiers` dynamisk, tier-badge bruker `'T' + (tierIndex + 1)`
+- skills.js: `getActiveSynergies()` sjekker `pathMaxTier` mot `syn.minTier` (default 1). 6 synergier har fått `minTier: 2`
+- ChemistrySystem: `potionScale` redusert (0.15/verden). 25% maxHP-gulv kun for `mol.tier >= 3`
+- Inventory: Deserialisering gjenskaper `_chemItem` via `ChemistrySystem._createUsableItem()` for molekyler i quickUse og backpack
+- ChemLabScene: Tab-system (Oppskrifter/Transmutasjon), grunnstoff-filterrad, større panel
+- **Partikkelakselerator spawner nå fra verden 13+ (#108):** Akselerator-rom plasseres nå før valgfrie rom (malmkammer, hydrotermisk, gasslomme, magmakammer) i prioritering, slik at dead-ends er tilgjengelige
+- **Lettere å finne basis-grunnstoffer i høyere verdener (#119):** 20% sjanse for å rulle tier 1-2 mineral uansett verdensnummer, sikrer tilgang til Al, Fe, Cu og andre viktige elementer
+- **Elementbok: lantanoider/aktinoider flyttet ned (#113):** Økt avstand (1.5 rader) mellom hovedtabellen og lantanoider/aktinoider. Lagt til «Ln»/«An»-etiketter. Gruppebonuser vises nå i flere rader
+- **Elementbok: viser raffinerte grunnstoffer (#120):** Tooltip viser nå antall rene/raffinerte former ved siden av rå-antallet (f.eks. «Lagret: 12 (3 ren)»)
+
+### Nye funksjoner (Sprint 4)
+- **Delvis bruk av energikilder (#112):** Ubrukt energi fra brensel lagres nå i en reserve (`fuelReserve`) som brukes ved neste crafting-operasjon. Kull (3 energi) brukt på 1-energi-oppskrift bevarer 2 energi til neste gang
+- **Smi nøkler og hakker (#122):** Nye smi-oppskrifter: Smidd nøkkel (bronse), Smidd hakke (stål). Viktige verktøy kan nå produseres i stedet for å finnes tilfeldig
+- **Forstørrelsesbelte – øk ryggsekk (#118):** Nytt smi-objekt fra skandium som gir +3 ryggsekk-plasser. Kan oppgraderes maks 2 ganger (totalt +6 plasser)
+- **Tooltip over mineraler i Lager (#110):** Hover over mineral i Lager-fanen viser tier og hvilke grunnstoffer det gir
+- **Tydelige meldinger ved gruppeprestasjoner (#114):** Element-gruppeprestasjoner og synergier vises nå med stor, tydelig tekst (★-merket) på spillskjermen. Gjelder for smelting, akselerator og mineral-oppsamling
+
+### Forbedringer (oppfølging)
+- **Partikkelakselerator synlig på kart og minikart:** Akselerator-rom har nå distinkt lilla sci-fi-dekorasjon med ringstruktur, energikjerne og partikkelspor. Spesialrom (leirplass, kjemilab, akselerator) vises nå med fargekodede markører på minikartet
+- **Jevnere mineralfordeling i høyere verdener:** Ny vektet fordeling: 15% 3 tier under, 20% 2 under, 20% 1 under, 35% aktuell tier, 10% tier over. Sikrer T1-T3 mineraler selv i verden 13+
+- **Grunnstoff-filtrering i Smelteovn:** Klikkbare grunnstoff-ikoner øverst i Smelt-, Legering- og Smi-faner filtrerer oppskrifter etter ingrediens-element. Samme layout som Kjemilaben
+
+### Tekniske endringer
+- MapRenderer: Ny `accelerator` case med lilla ringstruktur og metallvegger
+- UIScene: Minimap viser camp_room (oransje), chem_lab (grønn), accelerator (lilla) markører
+- minerals.js: `rollMineralTier()` redesignet med 5-trinn vektet fordeling i stedet for hard base-tier
+- SmelteryScene: Ny `_drawElementFilterRow()` med klikkbare grunnstoff-badges, element-filter på legerings-tab
+- maze.js: Akselerator-plassering flyttet opp i `_placeSpecialRooms()` prioritet
+- minerals.js: `rollMineralTier()` har 20% sjanse for basis-tier (1-2) fra verden 5+
+- ElementBookScene: `yOffset` for rows >= 8 økt til `+1.5`, lantanoid/aktinoid-labels, multi-rad bonuser, raffinert-telling i tooltip
+- SmeltingSystem: `fuelReserve` deduceres først i `consumeFuel()`, overskudd lagres tilbake. `calculateFuelEnergy()` inkluderer reserve
+- HeroCrafting: Nye felter `fuelReserve`, `_backpackUpgrades` med serialisering
+- alloys.js: Nye smi-oppskrifter `forged_key` (bronse), `forged_pickaxe` (stål), `backpack_upgrade` (skandium)
+- SmelteryScene: Mineral-tooltips med tier og yields i Lager-fanen
+- ItemSpawner/SmelteryScene/AcceleratorScene: Bonus-meldinger bruker `big: true` for tydeligere visning
+
+### Nye funksjoner (Sprint 5)
+- **Varierte gjenstandssprites (#124):** Potions (flaskeform), dynamitt (røde pinner med lunte), bomber (rund med lunte), syrer (boblende flaske). Både verdenskart og inventar-ikoner er oppdatert
+- **4 nye monstertyper (#125):** Skjelett (verden 4+, høy ATK), Golem (verden 6+, høy HP/lav ATK), Skygge (verden 8+, lilla, unnvikende), Demon (verden 10+, rød, brann). Hver type har unike prosedyregenererte sprites og tilpassede stats
+
+### Tekniske endringer (Sprint 5)
+- ItemGraphics: Nye `drawWorldIcon`/`drawInventoryIcon`-case for `_chemType` (potion, explosive, acid, medicine)
+- constants.js: 4 nye monster-entries i HP/ATK/COLOR/XP-tabellene
+- MonsterManager: `_monsterPool()` utvides til 11 verdener med gradvis innføring av nye monstre
+- MonsterGraphics: Nye `drawSkeleton`, `drawGolem`, `drawWraith`, `drawDemon` prosedyre-sprites
+- Monster.js: Switch-case og delegat-metoder for de 4 nye typene
+
+---
+
 ## v0.44 – 2026-04-17
 
 ### Nye funksjoner

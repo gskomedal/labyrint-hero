@@ -62,6 +62,10 @@ class Monster {
             case 'boss':      this._drawBoss(g, s);     break;
             case 'orc':       this._drawOrc(g, s);      break;
             case 'troll':     this._drawTroll(g, s);    break;
+            case 'skeleton':  this._drawSkeleton(g, s); break;
+            case 'golem':     this._drawGolem(g, s);    break;
+            case 'wraith':    this._drawWraith(g, s);   break;
+            case 'demon':     this._drawDemon(g, s);    break;
             default:          this._drawGoblin(g, s);   break;
         }
 
@@ -119,10 +123,14 @@ class Monster {
     // ── Goblin ─────────────────────────────────────────────────────────────────
     // Small, green, pointy ears, yellow slit eyes, wide toothy grin
 
-    _drawGoblin(g, s)  { MonsterGraphics.drawGoblin(g, s); }
-    _drawOrc(g, s)     { MonsterGraphics.drawOrc(g, s); }
-    _drawTroll(g, s)   { MonsterGraphics.drawTroll(g, s); }
-    _drawBoss(g, s)    { MonsterGraphics.drawBoss(g, s, this.phase); }
+    _drawGoblin(g, s)   { MonsterGraphics.drawGoblin(g, s); }
+    _drawOrc(g, s)      { MonsterGraphics.drawOrc(g, s); }
+    _drawTroll(g, s)    { MonsterGraphics.drawTroll(g, s); }
+    _drawSkeleton(g, s) { MonsterGraphics.drawSkeleton(g, s); }
+    _drawGolem(g, s)    { MonsterGraphics.drawGolem(g, s); }
+    _drawWraith(g, s)   { MonsterGraphics.drawWraith(g, s); }
+    _drawDemon(g, s)    { MonsterGraphics.drawDemon(g, s); }
+    _drawBoss(g, s)     { MonsterGraphics.drawBoss(g, s, this.phase); }
     _drawZoneBoss(g, s) { MonsterGraphics.drawZoneBoss(g, s, this.phase); }
 
     // ── Combat ────────────────────────────────────────────────────────────────

@@ -225,7 +225,7 @@ class SmeltingSystem {
      * @returns {number} Total energy available
      */
     calculateFuelEnergy(hero) {
-        let total = 0;
+        let total = hero.fuelReserve || 0;
         for (const entry of hero.inventory.backpack) {
             if (!entry) continue;
             const def = this._getFuelDef(entry);
@@ -277,7 +277,14 @@ class SmeltingSystem {
      */
     consumeFuel(hero, energyNeeded) {
         let remaining = energyNeeded;
-        // Consume from backpack first
+        // Deduct from fuel reserve first
+        if (hero.fuelReserve > 0) {
+            const fromReserve = Math.min(hero.fuelReserve, remaining);
+            hero.fuelReserve -= fromReserve;
+            remaining -= fromReserve;
+        }
+        if (remaining <= 0) return true;
+        // Consume from backpack
         for (let i = 0; i < hero.inventory.backpack.length && remaining > 0; i++) {
             const entry = hero.inventory.backpack[i];
             if (!entry) continue;
@@ -304,6 +311,10 @@ class SmeltingSystem {
                 }
                 if (entry.count <= 0) hero.campStash.splice(i, 1);
             }
+        }
+        // Store leftover energy in reserve for next operation
+        if (remaining < 0) {
+            hero.fuelReserve = (hero.fuelReserve || 0) + Math.abs(remaining);
         }
         return remaining <= 0;
     }

@@ -505,6 +505,24 @@ class MapRenderer {
                     g.fillCircle(px + (seed & 7) + 8, py + (seed2 & 5) + 8, 3);
                     g.fillStyle(0xffaa00, 0.15);
                     g.fillCircle(px + (seed >> 2 & 5) + 12, py + (seed2 >> 2 & 5) + 6, 2);
+                } else if (room.type === 'accelerator') {
+                    // Particle accelerator: sci-fi purple glow with ring structure
+                    g.fillStyle(0x8866ff, 0.15);
+                    g.fillCircle(px + S / 2, py + S / 2, S / 2);
+                    // Ring structure
+                    g.lineStyle(2, 0x8866ff, 0.35);
+                    g.strokeCircle(px + S / 2, py + S / 2, 8);
+                    // Energy core
+                    g.fillStyle(0xaa88ff, 0.4);
+                    g.fillCircle(px + S / 2, py + S / 2, 3);
+                    // Particle trails
+                    g.fillStyle(0xcc99ff, 0.25);
+                    g.fillCircle(px + (seed & 7) + 4, py + (seed2 & 5) + 6, 1.5);
+                    g.fillCircle(px + (seed >> 2 & 7) + 14, py + (seed2 >> 2 & 5) + 14, 1);
+                    // Metal walls
+                    g.fillStyle(0x555566, 0.3);
+                    g.fillRect(px + 2, py + 2, 3, S - 4);
+                    g.fillRect(px + S - 5, py + 2, 3, S - 4);
                 }
                 break;
             }

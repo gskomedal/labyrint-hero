@@ -486,18 +486,17 @@ const CRYSTAL_POOL = {
  * Roll a mineral tier based on world number.
  * Zone as floor-tier with random upward spread.
  * World 1-2 → mostly T1, World 3-4 → T1-T2, World 5 → T2-T3, etc.
+ * Higher worlds still produce a spread of tiers so base elements stay accessible.
  */
 function rollMineralTier(worldNum) {
-    // Base tier: 1 for worlds 1-2, 2 for worlds 3-4, 3 for worlds 5-6, etc.
-    const baseTier = Math.max(1, Math.ceil(worldNum / 2));
-    let tier = baseTier;
-
-    // 12% chance to roll one tier higher, 3% for two tiers higher
+    const baseTier = Math.min(6, Math.max(1, Math.ceil(worldNum / 2)));
     const roll = Math.random();
-    if (roll < 0.03)      tier += 2;
-    else if (roll < 0.15) tier += 1;
-
-    return Math.min(tier, 6);
+    // Spread: 15% much lower, 20% lower, 20% slightly lower, 35% current, 10% higher
+    if (roll < 0.15) return Math.max(1, baseTier - 3);
+    if (roll < 0.35) return Math.max(1, baseTier - 2);
+    if (roll < 0.55) return Math.max(1, baseTier - 1);
+    if (roll < 0.90) return baseTier;
+    return Math.min(6, baseTier + 1);
 }
 
 /**

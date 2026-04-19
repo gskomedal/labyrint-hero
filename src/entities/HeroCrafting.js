@@ -99,6 +99,8 @@ const HeroCrafting = {
 
         // Camp stash – persistent storage for minerals, fuel, etc.
         hero.campStash = [];
+        hero.fuelReserve = 0;
+        hero._backpackUpgrades = 0;
     },
 
     /** Return serializable crafting state from a hero instance. */
@@ -131,6 +133,8 @@ const HeroCrafting = {
             reforgeUnlocked:      hero.reforgeUnlocked,
             alloyInventory:       { ...hero.alloyInventory },
             campStash:            hero.campStash.map(e => ({ ...e })),
+            fuelReserve:          hero.fuelReserve || 0,
+            _backpackUpgrades:    hero._backpackUpgrades || 0,
             chemistUnlocked:      hero.chemistUnlocked,
             chemLabUnlocked:      hero.chemLabUnlocked,
             potionDurationBonus:  hero.potionDurationBonus,
@@ -212,6 +216,8 @@ const HeroCrafting = {
         hero.reforgeUnlocked      = stats.reforgeUnlocked      || false;
         hero.alloyInventory       = stats.alloyInventory       ? { ...stats.alloyInventory } : {};
         hero.campStash            = (stats.campStash || []).map(e => ({ ...e }));
+        hero.fuelReserve          = stats.fuelReserve || 0;
+        hero._backpackUpgrades    = stats._backpackUpgrades || 0;
         hero.chemistUnlocked      = stats.chemistUnlocked      || false;
         hero.chemLabUnlocked      = stats.chemLabUnlocked      || false;
         hero.potionDurationBonus  = stats.potionDurationBonus  || 0;

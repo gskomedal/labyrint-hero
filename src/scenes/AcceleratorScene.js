@@ -220,7 +220,7 @@ class AcceleratorScene extends Phaser.Scene {
         if (newBonuses.length > 0) {
             tracker.applyBonusRewards(hero);
             for (const bonus of newBonuses) {
-                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00' });
+                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `★ ${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00', big: true });
             }
         }
 

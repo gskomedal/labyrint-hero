@@ -163,6 +163,19 @@ class MazeGenerator {
             }
         }
 
+        // Particle Accelerator: world 13+, 20% chance (guaranteed world 15+)
+        // Placed before optional rooms to ensure dead-ends are available.
+        if (worldNum >= 13 && deadEnds.length > 0) {
+            const accChance = worldNum >= 15 ? 1.0 : 0.20;
+            if (Math.random() < accChance) {
+                const de = deadEnds.shift();
+                const tiles = this._gatherRoomTiles(de.x, de.y, 3 + Math.floor(Math.random() * 2));
+                if (tiles.length >= 1) {
+                    this.specialRooms.push({ type: 'accelerator', tiles });
+                }
+            }
+        }
+
         // Ore Chamber: world 5+, 25% chance – concentrated T2-T3 ores
         if (worldNum >= 5 && deadEnds.length > 0 && Math.random() < 0.25) {
             const de = deadEnds.shift();
@@ -196,19 +209,6 @@ class MazeGenerator {
             const tiles = this._gatherRoomTiles(de.x, de.y, 2 + Math.floor(Math.random() * 2));
             if (tiles.length >= 1) {
                 this.specialRooms.push({ type: 'magma_chamber', tiles });
-            }
-        }
-
-        // Particle Accelerator: world 13+, 20% chance (guaranteed world 15+)
-        // Used for fission energy and transuranic element synthesis.
-        if (worldNum >= 13 && deadEnds.length > 0) {
-            const accChance = worldNum >= 15 ? 1.0 : 0.20;
-            if (Math.random() < accChance) {
-                const de = deadEnds.shift();
-                const tiles = this._gatherRoomTiles(de.x, de.y, 3 + Math.floor(Math.random() * 2));
-                if (tiles.length >= 1) {
-                    this.specialRooms.push({ type: 'accelerator', tiles });
-                }
             }
         }
     }

@@ -169,7 +169,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene') || this.scene.isActive('ChemLabScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene') || this.scene.isActive('ChemLabScene') || this.scene.isActive('AcceleratorScene');
 
         if (!blocked) {
             this.inputHandler.handleInput(delta);

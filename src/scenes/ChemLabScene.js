@@ -16,16 +16,16 @@ class ChemLabScene extends Phaser.Scene {
         this.chem = new ChemistrySystem();
         this.smelter = new SmeltingSystem();
         this._dyn = [];
-        this._filter = 'all'; // 'all' | 'potion' | 'explosive' | 'medicine'
+        this._filter = 'all';
+        this._elementFilter = null;
+        this._tab = 'recipes'; // 'recipes' | 'transmutation'
 
         // ── Dim overlay ───────────────────────────────────────────────────────
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.82);
 
-        // ── Panel ─────────────────────────────────────────────────────────────
-        // Slightly larger than before to accommodate bumped fonts without
-        // crowding the portrait. Leaves margin around the canvas.
-        this.panelW = Math.min(W - 80, 760);
-        this.panelH = Math.min(H - 80, 600);
+        // ── Panel (larger for better overview) ────────────────────────────────
+        this.panelW = Math.min(W - 40, 960);
+        this.panelH = Math.min(H - 40, 720);
         this.px = cx - this.panelW / 2;
         this.py = cy - this.panelH / 2;
 
@@ -77,7 +77,27 @@ class ChemLabScene extends Phaser.Scene {
 
         this.add.rectangle(cx, this.py + 42, this.panelW - 20, 1, 0x113322);
 
-        // ── Filter buttons ────────────────────────────────────────────────────
+        // ── Tab buttons (Recipes | Transmutation) ─────────────────────────────
+        this._tabBtns = [];
+        const showTransmutation = !!this.heroRef.transmutationUnlocked;
+        const tabs = [{ id: 'recipes', label: 'Oppskrifter' }];
+        if (showTransmutation) tabs.push({ id: 'transmutation', label: 'Transmutasjon' });
+
+        const tabY = this.py + 52;
+        tabs.forEach((t, i) => {
+            const tx = this.px + 30 + i * 140;
+            const active = this._tab === t.id;
+            const btn = this.add.text(tx, tabY, t.label, {
+                fontSize: '15px', color: active ? '#33dd88' : '#335533',
+                fontFamily: 'monospace', fontStyle: active ? 'bold' : 'normal'
+            }).setInteractive({ useHandCursor: true });
+            btn.on('pointerdown', () => { this._tab = t.id; this._scrollOffset = 0; this._refresh(); });
+            this._tabBtns.push(btn);
+        });
+
+        this.add.rectangle(cx, tabY + 16, this.panelW - 20, 1, 0x113322);
+
+        // ── Filter buttons (only for recipes tab) ─────────────────────────────
         this._filterBtns = [];
         const filters = [
             { id: 'all', label: 'Alle' },
@@ -86,20 +106,20 @@ class ChemLabScene extends Phaser.Scene {
             { id: 'medicine', label: 'Medisin' },
             { id: 'acid', label: 'Syrer' },
         ];
-        const filterY = this.py + 62;
-        const filterStep = Math.min(120, (this.panelW - 80) / filters.length);
+        const filterY = tabY + 26;
+        const filterStep = Math.min(100, (this.panelW - 80) / filters.length);
         filters.forEach((f, i) => {
             const fx = this.px + 30 + i * filterStep + filterStep / 2;
             const active = this._filter === f.id;
             const btn = this.add.text(fx, filterY, f.label, {
-                fontSize: '16px', color: active ? '#33dd88' : '#335533',
+                fontSize: '14px', color: active ? '#33dd88' : '#335533',
                 fontFamily: 'monospace', fontStyle: active ? 'bold' : 'normal'
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-            btn.on('pointerdown', () => { this._filter = f.id; this._refresh(); });
+            btn.on('pointerdown', () => { this._filter = f.id; this._scrollOffset = 0; this._refresh(); });
             this._filterBtns.push(btn);
         });
 
-        this.add.rectangle(cx, filterY + 16, this.panelW - 20, 1, 0x113322);
+        this.add.rectangle(cx, filterY + 14, this.panelW - 20, 1, 0x113322);
 
         // Close
         const closeBtn = this.add.text(this.px + this.panelW - 20, this.py + 10, '✕', {
@@ -109,7 +129,7 @@ class ChemLabScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
         this.input.keyboard.on('keydown-C', () => this.scene.stop());
 
-        this.contentY = filterY + 28;
+        this.contentY = filterY + 26;
         this._scrollOffset = 0;
         this._maxScroll = 0;
 
@@ -119,8 +139,7 @@ class ChemLabScene extends Phaser.Scene {
             this._refresh();
         });
 
-        // Touch / mouse-drag scrolling with small movement threshold so that
-        // short taps still trigger interactive [Lag] buttons.
+        // Touch / mouse-drag scrolling
         this._dragState = { active: false, startY: 0, startOffset: 0, engaged: false };
         this.input.on('pointerdown', (pointer) => {
             this._dragState.active = true;
@@ -153,6 +172,13 @@ class ChemLabScene extends Phaser.Scene {
     _refresh() {
         UIHelper.clearDynamic(this._dyn);
 
+        // Update tab styles
+        const tabIds = this._tabBtns.map((_, i) => i === 0 ? 'recipes' : 'transmutation');
+        UIHelper.updateTabButtons(this._tabBtns, tabIds, this._tab, '#33dd88', '#335533');
+
+        // Show/hide filter buttons based on active tab
+        this._filterBtns.forEach(btn => btn.setVisible(this._tab === 'recipes'));
+
         // Dark backing behind content for readability
         const cbg = this._d(this.add.graphics());
         cbg.fillStyle(0x080a10, 0.78);
@@ -163,11 +189,13 @@ class ChemLabScene extends Phaser.Scene {
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
         this._fuelText.setText(`Energi: ${fuel}`);
 
-        if (this._hasKjemikerSkill()) {
-            this._drawRecipes(fuel);
-        } else {
+        if (!this._hasKjemikerSkill()) {
             this._drawLockedMessage();
             this._contentEndY = this.contentY;
+        } else if (this._tab === 'transmutation') {
+            this._drawTransmutationTab();
+        } else {
+            this._drawRecipes(fuel);
         }
 
         // Compute max scroll from last-drawn content, clamp and draw scrollbar.
@@ -210,12 +238,68 @@ class ChemLabScene extends Phaser.Scene {
 
     _d(obj) { this._dyn.push(obj); return obj; }
 
+    // ── Element filter row ───────────────────────────────────────────────────
+
+    _drawElementFilterRow(y) {
+        const hero = this.heroRef;
+        const collected = hero.elementTracker.collected;
+        const allRecipeElements = new Set();
+
+        // Gather all elements used in any recipe
+        for (const mol of Object.values(MOLECULE_DEFS)) {
+            for (const r of mol.recipe) allRecipeElements.add(r.symbol);
+        }
+
+        const leftX = this.px + 10;
+        let bx = leftX;
+        const maxW = this.panelW - 180;
+
+        // "Alle" reset button
+        const allBtn = this._d(this.add.text(bx, y, 'Alle', {
+            fontSize: '12px',
+            color: this._elementFilter === null ? '#33dd88' : '#335533',
+            fontFamily: 'monospace', fontStyle: this._elementFilter === null ? 'bold' : 'normal',
+            backgroundColor: '#081808', padding: { x: 3, y: 1 }
+        }).setInteractive({ useHandCursor: true }));
+        allBtn.on('pointerdown', () => { this._elementFilter = null; this._scrollOffset = 0; this._refresh(); });
+        bx += allBtn.width + 4;
+
+        for (const symbol of allRecipeElements) {
+            const count = collected[symbol] || 0;
+            const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
+            const col = elem ? elem.color : 0xaaaaaa;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+            const isActive = this._elementFilter === symbol;
+            const dimmed = count === 0;
+
+            const badge = this._d(this.add.text(bx, y, symbol, {
+                fontSize: '12px',
+                color: isActive ? '#33dd88' : (dimmed ? '#222222' : hexCol),
+                fontFamily: 'monospace',
+                fontStyle: isActive ? 'bold' : 'normal',
+                backgroundColor: isActive ? '#113311' : '#081808',
+                padding: { x: 3, y: 1 }
+            }).setInteractive({ useHandCursor: true }));
+            badge.on('pointerdown', () => {
+                this._elementFilter = isActive ? null : symbol;
+                this._scrollOffset = 0;
+                this._refresh();
+            });
+            bx += badge.width + 3;
+            if (bx > leftX + maxW) { bx = leftX; y += 18; }
+        }
+
+        return y + 20;
+    }
+
     _drawRecipes(fuel) {
         const hero = this.heroRef;
-        const cx = this.px + this.panelW / 2;
         let y = this.contentY;
-        // Leave room on the right for element inventory column.
-        const colW = Math.min(400, this.panelW - 180);
+
+        // Element filter row
+        y = this._drawElementFilterRow(y);
+
+        const colW = Math.min(500, this.panelW - 180);
         const leftX = this.px + 20;
         const rightX = this.px + this.panelW - 160;
         const rowStep = 62;
@@ -223,9 +307,16 @@ class ChemLabScene extends Phaser.Scene {
         // Left column: recipes
         let allMols = this.chem.getAvailableMolecules(hero, fuel);
 
-        // Apply filter
+        // Apply subtype filter
         if (this._filter !== 'all') {
             allMols = allMols.filter(e => e.mol.subtype === this._filter);
+        }
+
+        // Apply element filter
+        if (this._elementFilter) {
+            allMols = allMols.filter(e =>
+                e.mol.recipe.some(r => r.symbol === this._elementFilter)
+            );
         }
 
         if (allMols.length === 0) {
@@ -256,7 +347,7 @@ class ChemLabScene extends Phaser.Scene {
             const icon = icons[m.subtype] || '⚗';
             this._d(this.add.text(leftX + 6, my + 4, icon, { fontSize: '14px' }));
 
-            // Name + formula – truncate long names to fit slot
+            // Name + formula
             const dispName = m.name.length > 26 ? m.name.slice(0, 25) + '…' : m.name;
             this._d(this.add.text(leftX + 28, my + 5, dispName, {
                 fontSize: '15px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
@@ -335,53 +426,105 @@ class ChemLabScene extends Phaser.Scene {
         }));
 
         const hero = this.heroRef;
-        const transmutable = !!hero.transmutationUnlocked;
-        if (transmutable) {
-            this._d(this.add.text(x, y + 18, 'Transmutasjon: klikk ↔ for 5 → 1 nabo', {
-                fontSize: '11px', color: '#ff88cc', fontFamily: 'monospace'
-            }));
-        }
-
         const collected = hero.elementTracker.collected;
         const entries = Object.entries(collected).filter(([, v]) => v > 0);
         if (entries.length === 0) {
-            this._d(this.add.text(x, y + (transmutable ? 34 : 18), 'Ingen lagret.', {
+            this._d(this.add.text(x, y + 18, 'Ingen lagret.', {
                 fontSize: '14px', color: '#334433', fontFamily: 'monospace'
             }));
             return;
         }
 
-        let bx = x, by = y + (transmutable ? 36 : 18);
+        let bx = x, by = y + 18;
         for (const [symbol, count] of entries) {
             const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
             const col = elem ? elem.color : 0xaaaaaa;
             const hexCol = '#' + col.toString(16).padStart(6, '0');
-            const badge = this._d(this.add.text(bx, by, `${symbol}:${count}`, {
+            this._d(this.add.text(bx, by, `${symbol}:${count}`, {
                 fontSize: '14px', color: hexCol, fontFamily: 'monospace',
                 backgroundColor: '#081808', padding: { x: 3, y: 1 }
             }));
-            let bwidth = badge.width;
-            // Transmutation button (only clickable when count ≥ 5).
-            if (transmutable) {
-                const canTransmute = count >= 5;
-                const tbtn = this._d(this.add.text(bx + bwidth + 2, by, '↔', {
-                    fontSize: '14px',
-                    color: canTransmute ? '#ff88cc' : '#553344',
-                    fontFamily: 'monospace',
-                    backgroundColor: '#180818',
-                    padding: { x: 3, y: 1 }
-                }));
-                if (canTransmute) {
-                    tbtn.setInteractive({ useHandCursor: true });
-                    tbtn.on('pointerover', () => tbtn.setColor('#ffaadd'));
-                    tbtn.on('pointerout', () => tbtn.setColor('#ff88cc'));
-                    tbtn.on('pointerdown', () => this._doTransmute(symbol));
-                }
-                bwidth += tbtn.width + 4;
-            }
-            bx += bwidth + 6;
+            bx += 60;
             if (bx > x + w - 30) { bx = x; by += 22; }
         }
+    }
+
+    // ── Transmutation tab ────────────────────────────────────────────────────
+
+    _drawTransmutationTab() {
+        const hero = this.heroRef;
+        const collected = hero.elementTracker.collected;
+        const entries = Object.entries(collected).filter(([, v]) => v > 0);
+        let y = this.contentY;
+        const leftX = this.px + 20;
+        const colW = Math.min(500, this.panelW - 180);
+
+        this._d(this.add.text(leftX, y, 'Transmutasjon: 5 av et grunnstoff → 1 av nabo i periodesystemet', {
+            fontSize: '13px', color: '#ff88cc', fontFamily: 'monospace'
+        }));
+        y += 24;
+
+        if (entries.length === 0) {
+            this._d(this.add.text(leftX + colW / 2, y + 40, 'Ingen grunnstoffer lagret.', {
+                fontSize: '14px', color: '#334433', fontFamily: 'monospace'
+            }).setOrigin(0.5));
+            this._contentEndY = y + 80;
+            return;
+        }
+
+        const visBot = this.py + this.panelH - 30;
+        const rowStep = 36;
+
+        entries.forEach(([symbol, count], idx) => {
+            const baseY = y + idx * rowStep;
+            const my = baseY - (this._scrollOffset || 0);
+            if (my > visBot || my < y - rowStep) return;
+
+            const canTransmute = count >= 5;
+            const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
+            const col = elem ? elem.color : 0xaaaaaa;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+
+            // Find target element
+            let targetSym = null;
+            if (elem && typeof ELEMENTS !== 'undefined') {
+                const srcZ = elem.atomicNumber;
+                for (const [sym, def] of Object.entries(ELEMENTS)) {
+                    if (def.atomicNumber === srcZ + 1) { targetSym = sym; break; }
+                }
+                if (!targetSym) {
+                    for (const [sym, def] of Object.entries(ELEMENTS)) {
+                        if (def.atomicNumber === srcZ - 1) { targetSym = sym; break; }
+                    }
+                }
+            }
+
+            const bg = this._d(this.add.graphics());
+            bg.fillStyle(canTransmute ? 0xff88cc : 0x221122, 0.08);
+            bg.fillRoundedRect(leftX, my, colW, 30, 4);
+            bg.lineStyle(1, canTransmute ? 0xff88cc : 0x331133, 0.3);
+            bg.strokeRoundedRect(leftX, my, colW, 30, 4);
+
+            this._d(this.add.text(leftX + 10, my + 7, `${symbol} ×${count}`, {
+                fontSize: '14px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+
+            const arrow = targetSym ? `→ 1 ${targetSym}` : '(ingen nabo)';
+            this._d(this.add.text(leftX + 120, my + 7, `5 ${symbol} ${arrow}`, {
+                fontSize: '13px', color: canTransmute ? '#cc88aa' : '#443344', fontFamily: 'monospace'
+            }));
+
+            if (canTransmute && targetSym) {
+                const btn = this._d(this.add.text(leftX + colW - 80, my + 5, '[ Transmuter ]', {
+                    fontSize: '13px', color: '#ff88cc', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setInteractive({ useHandCursor: true }));
+                btn.on('pointerover', () => btn.setColor('#ffaadd'));
+                btn.on('pointerout', () => btn.setColor('#ff88cc'));
+                btn.on('pointerdown', () => this._doTransmute(symbol));
+            }
+        });
+
+        this._contentEndY = y + entries.length * rowStep;
     }
 
     _doTransmute(symbol) {

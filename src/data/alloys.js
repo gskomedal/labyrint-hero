@@ -354,6 +354,18 @@ const ALLOY_EQUIPMENT = {
     phosphor_shield:  { id: 'phosphor_shield',  name: 'Fosfor-skjold',       type: 'armor',  alloyId: 'phosphor_crystal', color: 0xddffcc, def: 5, hearts: 2, visionBonus: 1, desc: '+5 DEF, +2 HP, +1 syn (fosfor)' },
     scandium_rapier:  { id: 'scandium_rapier',  name: 'Skandium-rapir',      type: 'weapon', alloyId: 'scandium_alloy',   color: 0xbbddcc, atk: 6, hearts: 1, desc: '+6 ATK, +1 HP (skandium)' },
     scandium_harness: { id: 'scandium_harness', name: 'Skandium-harnisk',    type: 'armor',  alloyId: 'scandium_alloy',   color: 0xbbddcc, def: 5, hearts: 3, desc: '+5 DEF, +3 HP (lettrustning)' },
+    // ── Craftable tools (keys, pickaxes, backpack upgrades) ─────────────
+    forged_key:      { id: 'key',     name: 'Smidd nøkkel',        type: 'tool', alloyId: 'bronze',         color: 0xffcc00, desc: 'Åpner låste dører', use() { return false; } },
+    forged_pickaxe:  { id: 'pickaxe', name: 'Smidd hakke',         type: 'tool', alloyId: 'steel',          color: 0xaa7744, desc: 'Bryter gjennom sprukne vegger', use() { return false; } },
+    backpack_upgrade:{ id: 'backpack_upgrade', name: 'Forstørrelsesbelte', type: 'consumable', alloyId: 'scandium_alloy', color: 0xbbddcc, desc: '+3 ryggsekk-plasser (maks 2 oppgraderinger)',
+        use(hero) {
+            const upgrades = hero._backpackUpgrades || 0;
+            if (upgrades >= 2) return false;
+            hero._backpackUpgrades = upgrades + 1;
+            hero.inventory.expandBackpack(3);
+            return true;
+        }
+    },
 };
 
 // ── Pet equipment (forged from alloys at the Smeltery) ──────────────────────

@@ -356,5 +356,115 @@ const MonsterGraphics = {
         g.fillTriangle(cx + 5, 11, cx + 6, 16, cx + 7, 11);
         g.fillTriangle(cx - 5, 14, cx - 6, 10, cx - 3, 14);
         g.fillTriangle(cx + 3, 14, cx + 4, 10, cx + 5, 14);
+    },
+
+    // ── Skeleton ──────────────────────────────────────────────────────────────
+    drawSkeleton(g, s) {
+        const cx = s >> 1;
+        g.fillStyle(0x000000, 0.2);
+        g.fillEllipse(cx, 31, 14, 4);
+        // Legs (bone)
+        g.fillStyle(0xddddbb);
+        g.fillRect(cx - 4, 22, 2, 10);
+        g.fillRect(cx + 2, 22, 2, 10);
+        // Ribcage
+        g.fillStyle(0xccccaa);
+        g.fillRect(cx - 5, 14, 10, 9);
+        g.fillStyle(0x111111, 0.3);
+        g.fillRect(cx - 3, 16, 2, 5);
+        g.fillRect(cx + 1, 16, 2, 5);
+        // Skull
+        g.fillStyle(0xeeeedd);
+        g.fillRoundedRect(cx - 6, 3, 12, 12, 4);
+        // Eyes (dark sockets)
+        g.fillStyle(0x111111);
+        g.fillCircle(cx - 3, 8, 2);
+        g.fillCircle(cx + 3, 8, 2);
+        // Jaw
+        g.fillStyle(0xddddcc);
+        g.fillRect(cx - 4, 13, 8, 3);
+    },
+
+    // ── Golem ─────────────────────────────────────────────────────────────────
+    drawGolem(g, s) {
+        const cx = s >> 1;
+        g.fillStyle(0x000000, 0.25);
+        g.fillEllipse(cx, 32, 20, 5);
+        // Legs (thick stone)
+        g.fillStyle(0x666655);
+        g.fillRoundedRect(cx - 8, 24, 6, 8, 2);
+        g.fillRoundedRect(cx + 2, 24, 6, 8, 2);
+        // Body (massive)
+        g.fillStyle(0x888877);
+        g.fillRoundedRect(cx - 10, 10, 20, 16, 3);
+        g.fillStyle(0x777766);
+        g.fillRoundedRect(cx - 8, 12, 16, 12, 2);
+        // Arms
+        g.fillStyle(0x999988);
+        g.fillRoundedRect(cx - 14, 12, 6, 12, 2);
+        g.fillRoundedRect(cx + 8, 12, 6, 12, 2);
+        // Head (small on big body)
+        g.fillStyle(0xaaaa99);
+        g.fillRoundedRect(cx - 5, 3, 10, 9, 3);
+        // Glowing eyes
+        g.fillStyle(0xffaa00);
+        g.fillCircle(cx - 2, 7, 1.5);
+        g.fillCircle(cx + 2, 7, 1.5);
+    },
+
+    // ── Wraith ────────────────────────────────────────────────────────────────
+    drawWraith(g, s) {
+        const cx = s >> 1;
+        // Ghostly body (tattered robe)
+        g.fillStyle(0x4422aa, 0.6);
+        g.fillTriangle(cx - 10, 30, cx + 10, 30, cx, 8);
+        g.fillStyle(0x5533bb, 0.5);
+        g.fillTriangle(cx - 8, 28, cx + 8, 28, cx, 10);
+        // Hood
+        g.fillStyle(0x332266, 0.8);
+        g.fillRoundedRect(cx - 7, 3, 14, 10, 4);
+        // Glowing eyes
+        g.fillStyle(0xcc44ff, 0.9);
+        g.fillCircle(cx - 3, 8, 2);
+        g.fillCircle(cx + 3, 8, 2);
+        g.fillStyle(0xffffff, 0.4);
+        g.fillCircle(cx - 3, 8, 1);
+        g.fillCircle(cx + 3, 8, 1);
+        // Wispy tendrils
+        g.fillStyle(0x5533bb, 0.3);
+        g.fillTriangle(cx - 12, 28, cx - 6, 18, cx - 8, 30);
+        g.fillTriangle(cx + 12, 28, cx + 6, 18, cx + 8, 30);
+    },
+
+    // ── Demon ─────────────────────────────────────────────────────────────────
+    drawDemon(g, s) {
+        const cx = s >> 1;
+        g.fillStyle(0x000000, 0.25);
+        g.fillEllipse(cx, 31, 16, 4);
+        // Legs
+        g.fillStyle(0x881111);
+        g.fillRect(cx - 5, 22, 4, 9);
+        g.fillRect(cx + 1, 22, 4, 9);
+        // Body
+        g.fillStyle(0xcc2222);
+        g.fillRoundedRect(cx - 8, 12, 16, 12, 3);
+        // Arms
+        g.fillStyle(0xaa1111);
+        g.fillRoundedRect(cx - 12, 14, 5, 10, 2);
+        g.fillRoundedRect(cx + 7, 14, 5, 10, 2);
+        // Head
+        g.fillStyle(0xdd3333);
+        g.fillRoundedRect(cx - 6, 3, 12, 11, 3);
+        // Horns
+        g.fillStyle(0x332211);
+        g.fillTriangle(cx - 6, 5, cx - 10, -2, cx - 4, 3);
+        g.fillTriangle(cx + 6, 5, cx + 10, -2, cx + 4, 3);
+        // Eyes (fire)
+        g.fillStyle(0xff6600);
+        g.fillCircle(cx - 3, 8, 2);
+        g.fillCircle(cx + 3, 8, 2);
+        // Mouth
+        g.fillStyle(0xff4400, 0.7);
+        g.fillRect(cx - 3, 11, 6, 2);
     }
 };

@@ -98,7 +98,7 @@ class ChemistrySystem {
         // Separate scaling curves: bombs scale faster than potions so they
         // keep pace with world monster HP; potions keep the older curve so
         // buffs don't become overpowered.
-        const potionScale = 1 + (wn - 1) * 0.4;
+        const potionScale = 1 + (wn - 1) * 0.15;
         const bombScale = 1 + (wn - 1) * 0.6;
         const bombFloor = wn * 2; // flat damage bonus per world
         // Radius auto-upgrade kicks in at world 5 and 8 so high-world bombs
@@ -133,7 +133,7 @@ class ChemistrySystem {
             // From world 4+ healing potions scale with % max HP so they stay
             // meaningful against higher HP pools.
             const flatHP = Math.round(eff.healHP * potencyMul * potionMagnitudeMul * potionScale);
-            const hp = wn >= 4
+            const hp = (wn >= 4 && mol.tier >= 3)
                 ? Math.max(flatHP, Math.round((hero.maxHearts || flatHP) * 0.25 * potencyMul))
                 : flatHP;
             item.desc = `+${hp} HP`;

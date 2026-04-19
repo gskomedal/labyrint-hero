@@ -31,8 +31,13 @@ class InputHandler {
         scene.teleporterKey  = scene.input.keyboard.addKey('J');
         scene.moveTimer    = 0;
 
-        // Mouse wheel zoom
+        // Mouse wheel zoom (blocked when overlay scenes are open)
         scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+            const sm = scene.scene;
+            if (sm.isActive('SkillScene') || sm.isActive('InventoryScene') ||
+                sm.isActive('MerchantScene') || sm.isActive('ElementBookScene') ||
+                sm.isActive('SmelteryScene') || sm.isActive('ChemLabScene') ||
+                sm.isActive('AcceleratorScene') || sm.isActive('SettingsScene')) return;
             const z  = scene.cameras.main.zoom;
             const nz = deltaY < 0
                 ? Math.min(ZOOM_MAX, z + ZOOM_STEP)

@@ -63,10 +63,10 @@ const MOVE_ANIM_MS    = 90;   // ms for hero/monster slide tween
 const HERO_BASE_ATTACK  = 3;
 const HERO_BASE_HEARTS  = 5;
 // v0.7 balance: monsters are significantly tougher
-const MONSTER_BASE_HP   = { goblin: 10, orc: 18,  troll: 30,  boss: 35 };
-const MONSTER_ATTACK    = { goblin: 2,  orc: 4,   troll: 6,   boss: 3  };
-const MONSTER_COLOR     = { goblin: COLORS.MONSTER, orc: COLORS.MONSTER_ORC, troll: COLORS.MONSTER_TRL, boss: COLORS.BOSS, zone_boss: 0xff22ff };
-const MONSTER_XP        = { goblin: 10, orc: 25,  troll: 50,  boss: 150, zone_boss: 300 };
+const MONSTER_BASE_HP   = { goblin: 10, orc: 18, troll: 30, skeleton: 12, golem: 40, wraith: 15, demon: 25, boss: 35 };
+const MONSTER_ATTACK    = { goblin: 2,  orc: 4,  troll: 6,  skeleton: 5,  golem: 3,  wraith: 6,  demon: 7,  boss: 3  };
+const MONSTER_COLOR     = { goblin: COLORS.MONSTER, orc: COLORS.MONSTER_ORC, troll: COLORS.MONSTER_TRL, skeleton: 0xccccaa, golem: 0x888877, wraith: 0x6644aa, demon: 0xcc2222, boss: COLORS.BOSS, zone_boss: 0xff22ff };
+const MONSTER_XP        = { goblin: 10, orc: 25, troll: 50, skeleton: 20, golem: 60, wraith: 40, demon: 55, boss: 150, zone_boss: 300 };
 
 // v0.7 balance: much slower XP curve → less frequent skill picks
 const XP_BASE           = 100;   // XP needed for level 2

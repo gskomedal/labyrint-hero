@@ -60,6 +60,15 @@ class ElementBookScene extends Phaser.Scene {
 
         if (typeof PERIODIC_TABLE_LAYOUT === 'undefined') return;
 
+        // Lanthanide/actinide labels
+        const lantY = tableY + 9.5 * cellH;
+        this.add.text(tableX - 2, lantY, 'Ln', {
+            fontSize: '10px', color: '#556644', fontFamily: 'monospace'
+        });
+        this.add.text(tableX - 2, lantY + cellH, 'An', {
+            fontSize: '10px', color: '#556644', fontFamily: 'monospace'
+        });
+
         // Category colors for discovered elements
         const catColors = {
             metal:       0xccaa88,
@@ -78,10 +87,10 @@ class ElementBookScene extends Phaser.Scene {
 
             const isDiscovered = tracker && tracker.isDiscovered(entry.symbol);
 
-            // Map rows: 0-6 = periods 1-7, 8 = lanthanides/actinides row 1, etc.
-            // Add a small gap before rows 8+ (lanthanides/actinides)
+            // Map rows: 0-6 = periods 1-7, 8-9 = lanthanides/actinides
+            // Add a visible gap before rows 8+ to separate them from the main table
             let yOffset = entry.row;
-            if (entry.row >= 8) yOffset = entry.row + 0.5; // half-row gap
+            if (entry.row >= 8) yOffset = entry.row + 1.5;
 
             const cellX = tableX + entry.col * cellW;
             const cellY = tableY + yOffset * cellH;
@@ -120,7 +129,10 @@ class ElementBookScene extends Phaser.Scene {
                 hitZone.on('pointerover', () => {
                     g.lineStyle(2, 0xffffff, 0.8);
                     g.strokeRoundedRect(cellX, cellY, cellW - 2, cellH - 2, 2);
-                    this.tooltipText.setText(`${elem.symbol} – ${elem.name} (${elem.atomicNumber})\n${elem.description}`);
+                    const rawCount = tracker ? tracker.getCount(entry.symbol) : 0;
+                    const refined = this.heroRef && this.heroRef.refinedElements ? (this.heroRef.refinedElements[entry.symbol] || 0) : 0;
+                    const countStr = refined > 0 ? `  |  Lagret: ${rawCount} (${refined} ren)` : (rawCount > 0 ? `  |  Lagret: ${rawCount}` : '');
+                    this.tooltipText.setText(`${elem.symbol} – ${elem.name} (${elem.atomicNumber})${countStr}\n${elem.description}`);
                 });
                 hitZone.on('pointerout', () => {
                     g.clear();
@@ -145,26 +157,32 @@ class ElementBookScene extends Phaser.Scene {
             }
         }
 
-        // ── Completion bonuses ────────────────────────────────────────────────
+        // ── Completion bonuses (multi-row layout) ─────────────────────────────
         if (typeof ELEMENT_BONUSES !== 'undefined') {
-            const bonusY = tableY + 10.5 * cellH + 10;
-            const bonusW = Math.min(panelW - 20, ELEMENT_BONUSES.length * 130);
-            const startBX = cx - bonusW / 2 + 60;
+            const bonusY = tableY + 11.5 * cellH + 10;
+            const perRow = Math.min(5, ELEMENT_BONUSES.length);
+            const slotW = Math.min(150, (panelW - 40) / perRow);
 
             this.add.text(cx, bonusY - 4, 'GRUPPEPRESTASJONER', {
                 fontSize: '13px', color: '#555544', fontFamily: 'monospace'
             }).setOrigin(0.5);
 
             ELEMENT_BONUSES.forEach((bonus, i) => {
-                const bx = startBX + i * 125;
+                const row = Math.floor(i / perRow);
+                const col = i % perRow;
+                const rowCount = Math.min(perRow, ELEMENT_BONUSES.length - row * perRow);
+                const rowW = rowCount * slotW;
+                const bx = cx - rowW / 2 + col * slotW + slotW / 2;
+                const by = bonusY + 10 + row * 32;
+
                 const completed = tracker && tracker.isBonusCompleted(bonus.id);
-                const col = completed ? '#ffcc44' : '#333344';
+                const bonusCol = completed ? '#ffcc44' : '#333344';
                 const icon = completed ? '★' : '○';
-                this.add.text(bx, bonusY + 10, `${icon} ${bonus.name}`, {
-                    fontSize: '10px', color: col, fontFamily: 'monospace'
+                this.add.text(bx, by, `${icon} ${bonus.name}`, {
+                    fontSize: '10px', color: bonusCol, fontFamily: 'monospace'
                 }).setOrigin(0.5);
-                this.add.text(bx, bonusY + 22, bonus.desc, {
-                    fontSize: '13px', color: completed ? '#887766' : '#222233', fontFamily: 'monospace'
+                this.add.text(bx, by + 12, bonus.desc, {
+                    fontSize: '11px', color: completed ? '#887766' : '#222233', fontFamily: 'monospace'
                 }).setOrigin(0.5);
             });
         }

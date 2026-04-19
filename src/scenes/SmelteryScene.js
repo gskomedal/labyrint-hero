@@ -105,7 +105,8 @@ class SmelteryScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-V', () => this.scene.stop());
 
         // ── Content area ──────────────────────────────────────────────────────
-        this.contentY = tabY + 30;
+        this._baseContentY = tabY + 30;
+        this.contentY = this._baseContentY;
         this._scrollOffsets = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
         this._maxScrolls = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
         this._elementFilter = null; // null = show all, or element symbol string
@@ -152,6 +153,7 @@ class SmelteryScene extends Phaser.Scene {
 
     _refresh() {
         UIHelper.clearDynamic(this._dyn);
+        this.contentY = this._baseContentY;
 
         // Dark backing behind content for readability
         const cbg = this._d(this.add.graphics());
@@ -177,6 +179,7 @@ class SmelteryScene extends Phaser.Scene {
             case 'alloy':
             case 'forge':
                 if (this._hasMetallurgSkill()) {
+                    this._drawElementFilterRow();
                     if (this._tab === 'smelt') this._drawSmeltTab();
                     else if (this._tab === 'alloy') this._drawAlloyTab();
                     else this._drawForgeTab();
@@ -233,6 +236,63 @@ class SmelteryScene extends Phaser.Scene {
         return (this.heroRef.skills || []).some(s =>
             s === 'mineral_eye' || s === 'efficient_mining' || s === 'master_prospector'
         );
+    }
+
+    _drawElementFilterRow() {
+        const hero = this.heroRef;
+        const collected = hero.elementTracker.collected;
+        const leftX = this.px + 10;
+        const maxW = this.panelW - 40;
+        let y = this.contentY;
+        let bx = leftX;
+
+        // "Alle" reset button
+        const allBtn = this._d(this.add.text(bx, y, 'Alle', {
+            fontSize: '12px',
+            color: this._elementFilter === null ? '#ff7722' : '#554433',
+            fontFamily: 'monospace', fontStyle: this._elementFilter === null ? 'bold' : 'normal',
+            backgroundColor: '#0a0608', padding: { x: 3, y: 1 }
+        }).setInteractive({ useHandCursor: true }));
+        allBtn.on('pointerdown', () => { this._elementFilter = null; this._scrollOffsets[this._tab] = 0; this._refresh(); });
+        bx += allBtn.width + 4;
+
+        // Collect all elements used in recipes for this tab context
+        const recipeElements = new Set();
+        if (typeof ALLOY_DEFS !== 'undefined') {
+            for (const alloy of Object.values(ALLOY_DEFS)) {
+                for (const r of alloy.recipe) recipeElements.add(r.symbol);
+            }
+        }
+        for (const [symbol] of Object.entries(collected)) {
+            recipeElements.add(symbol);
+        }
+
+        for (const symbol of recipeElements) {
+            const count = collected[symbol] || 0;
+            const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
+            const col = elem ? elem.color : 0xaaaaaa;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+            const isActive = this._elementFilter === symbol;
+            const dimmed = count === 0;
+
+            const badge = this._d(this.add.text(bx, y, symbol, {
+                fontSize: '12px',
+                color: isActive ? '#ff7722' : (dimmed ? '#222222' : hexCol),
+                fontFamily: 'monospace',
+                fontStyle: isActive ? 'bold' : 'normal',
+                backgroundColor: isActive ? '#331100' : '#0a0608',
+                padding: { x: 3, y: 1 }
+            }).setInteractive({ useHandCursor: true }));
+            badge.on('pointerdown', () => {
+                this._elementFilter = isActive ? null : symbol;
+                this._scrollOffsets[this._tab] = 0;
+                this._refresh();
+            });
+            bx += badge.width + 3;
+            if (bx > leftX + maxW) { bx = leftX; y += 18; }
+        }
+
+        this.contentY = y + 22;
     }
 
     _drawLockedTab() {
@@ -295,9 +355,22 @@ class SmelteryScene extends Phaser.Scene {
 
             const stashDepName = (def.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
                 ? getMineralDisplayName(def, hero) : def.name;
-            this._d(this.add.text(leftX + 4, adjY, `${stashDepName} ×${entry.count}`, {
+            const nameText = this._d(this.add.text(leftX + 4, adjY, `${stashDepName} ×${entry.count}`, {
                 fontSize: '14px', color: hexCol, fontFamily: 'monospace'
-            }));
+            }).setInteractive());
+            if (def.type === 'mineral' && def.yields) {
+                const yieldStr = def.yields.map(y => y.symbol).join(', ');
+                nameText.on('pointerover', () => {
+                    if (this._mineralTooltip) this._mineralTooltip.destroy();
+                    this._mineralTooltip = this._d(this.add.text(leftX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
+                        fontSize: '12px', color: '#bbaa88', fontFamily: 'monospace',
+                        backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
+                    }));
+                });
+                nameText.on('pointerout', () => {
+                    if (this._mineralTooltip) { this._mineralTooltip.destroy(); this._mineralTooltip = null; }
+                });
+            }
 
             const btn = this._d(this.add.text(leftX + colW - 10, adjY, '→', {
                 fontSize: '16px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
@@ -352,9 +425,22 @@ class SmelteryScene extends Phaser.Scene {
                 const col = def ? def.color : 0xaaaaaa;
                 const hexCol = '#' + col.toString(16).padStart(6, '0');
 
-                this._d(this.add.text(rightX + 4, adjY, `${stName} ×${stashEntry.count}`, {
+                const stText = this._d(this.add.text(rightX + 4, adjY, `${stName} ×${stashEntry.count}`, {
                     fontSize: '14px', color: hexCol, fontFamily: 'monospace'
-                }));
+                }).setInteractive());
+                if (def && def.type === 'mineral' && def.yields) {
+                    const yieldStr = def.yields.map(y => y.symbol).join(', ');
+                    stText.on('pointerover', () => {
+                        if (this._mineralTooltip) this._mineralTooltip.destroy();
+                        this._mineralTooltip = this._d(this.add.text(rightX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
+                            fontSize: '12px', color: '#bbaa88', fontFamily: 'monospace',
+                            backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
+                        }));
+                    });
+                    stText.on('pointerout', () => {
+                        if (this._mineralTooltip) { this._mineralTooltip.destroy(); this._mineralTooltip = null; }
+                    });
+                }
 
                 const btn = this._d(this.add.text(rightX + colW - 10, adjY, '←', {
                     fontSize: '16px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
@@ -656,7 +742,7 @@ class SmelteryScene extends Phaser.Scene {
         if (newBonuses.length > 0) {
             hero.elementTracker.applyBonusRewards(hero);
             for (const bonus of newBonuses) {
-                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00' });
+                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `★ ${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00', big: true });
             }
         }
         Audio.playPickup();
@@ -679,7 +765,10 @@ class SmelteryScene extends Phaser.Scene {
         y += 22;
 
         const fuel = this.smelter.calculateFuelEnergy(hero);
-        const alloys = this.smelter.getAvailableAlloys(hero, fuel);
+        let alloys = this.smelter.getAvailableAlloys(hero, fuel);
+        if (this._elementFilter) {
+            alloys = alloys.filter(e => e.alloy.recipe.some(r => r.symbol === this._elementFilter));
+        }
         const colW = Math.min(560, this.panelW - 40);
         const startX = this.px + 20;
         const rowStep = 60;
