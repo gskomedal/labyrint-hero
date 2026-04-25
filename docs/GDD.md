@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.46
-**Sist oppdatert:** 2026-04-19
+**Versjon:** 0.47
+**Sist oppdatert:** 2026-04-25
 
 ---
 
@@ -618,7 +618,7 @@ Låses opp ved første besøk i partikkelakselerator. Krever ≥1 Kjemiker-skill
 
 **Edelgass-samling:** Gasslommer (verden 10+) gir 1–2 tilfeldige edelgasser (Ar, Kr, Xe, Ne, He) direkte i elementtrakeren.
 
-**Endgame:** Samle alle 118 grunnstoffer utløser «Guds periodiske system» – +10 ATK, +10 DEF, +5 hjerter, +3 synsfelt.
+**Endgame:** Samle alle 118 grunnstoffer utløser «Guds periodiske system» – +10 ATK, +10 DEF, +5 hjerter, +3 synsfelt. Ved fullføring vises en episk victory-scene med fanfare, gullpartikler og mini periodisk tabell. Spilleren tilbys **New Game+** som nullstiller elementsamlingen men beholder nivå, skills og gull. Monstre skaleres +40% HP / +25% ATK per NG+-syklus. Elementbok viser fremgang mot 118 (ikke 90).
 
 ### Halvleder-system (v0.43)
 

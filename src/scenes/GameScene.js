@@ -149,6 +149,9 @@ class GameScene extends Phaser.Scene {
         EventBus.on('floatingText', (d) => this._floatingText(d.gx, d.gy, d.msg, d.color, d.big));
         EventBus.on('showMessage', (d) => this._showMessage(d.text, d.color));
         EventBus.on('spawnItem', (d) => this.itemSpawner.spawnItemAt(d.gx, d.gy, d.item));
+        EventBus.on('elementBonusComplete', (bonus) => {
+            if (bonus.id === 'all_118') this._triggerElementVictory();
+        });
 
         // ── HUD overlay ───────────────────────────────────────────────────────
         this.scene.launch('UIScene', { gameScene: this });
@@ -401,10 +404,37 @@ class GameScene extends Phaser.Scene {
 
         const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
         this.hero.totalPlayTime = (this.hero.totalPlayTime || 0) + worldTime;
+
+        const hasAll118 = this.hero.elementTracker && this.hero.elementTracker.discoveredCount >= 118;
+        const isGameComplete = hasAll118 && !this.hero.victoryAchieved;
+
+        if (isGameComplete) {
+            this.hero.victoryAchieved = true;
+        }
+
         SaveManager.save(this.worldNum + 1, this._getFullStats());
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
-                type: 'worldComplete', worldNum: this.worldNum,
+                type: isGameComplete ? 'gameComplete' : 'worldComplete',
+                worldNum: this.worldNum,
+                heroStats: this._getFullStats(), difficulty: this.difficulty,
+                monstersKilled: this.monstersKilled,
+                timeSeconds: worldTime
+            });
+        });
+    }
+
+    _triggerElementVictory() {
+        if (this.hero.victoryAchieved) return;
+        this.hero.victoryAchieved = true;
+        this._floatingText(this.hero.gridX, this.hero.gridY, '✦ ALLE 118 GRUNNSTOFFER SAMLET! ✦', '#f5e642', true);
+        Audio.playVictory();
+        SaveManager.save(this.worldNum, this._getFullStats());
+        const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
+        this.time.delayedCall(2500, () => {
+            this._stopOverlayScenes();
+            this.scene.start('GameOverScene', {
+                type: 'gameComplete', worldNum: this.worldNum,
                 heroStats: this._getFullStats(), difficulty: this.difficulty,
                 monstersKilled: this.monstersKilled,
                 timeSeconds: worldTime

@@ -53,6 +53,9 @@ class ElementTracker {
             if (allDiscovered) {
                 this.completedBonuses[bonus.id] = true;
                 newlyCompleted.push(bonus);
+                if (typeof EventBus !== 'undefined') {
+                    EventBus.emit('elementBonusComplete', bonus);
+                }
             }
         }
         return newlyCompleted;

@@ -375,12 +375,14 @@ class UIScene extends Phaser.Scene {
 
         // ── Labels ────────────────────────────────────────────────────────────
         const wn = this.gameScene.worldNum;
+        const ngPlus = hero.ngPlusLevel || 0;
+        const ngTag = ngPlus > 0 ? ` NG+${ngPlus}` : '';
         if (typeof getZone !== 'undefined') {
             const zone = getZone(wn);
             const floor = getZoneFloor(wn);
-            this.worldText.setText(`${zone.name} ${floor}/${zone.worlds.length}`);
+            this.worldText.setText(`${zone.name} ${floor}/${zone.worlds.length}${ngTag}`);
         } else {
-            this.worldText.setText(`Verden ${wn}`);
+            this.worldText.setText(`Verden ${wn}${ngTag}`);
         }
         this.levelText.setText(`Nivå ${hero.level}  XP ${hero.xp}/${hero.xpToNext}`);
         this.atkText.setText(`ATK ${hero.attack}  DEF ${hero.defense}  Syn ${hero.visionRadius}`);

@@ -32,7 +32,7 @@ class ElementBookScene extends Phaser.Scene {
 
         // Title
         const discovered = tracker ? tracker.discoveredCount : 0;
-        const total = typeof TOTAL_NATURAL_ELEMENTS !== 'undefined' ? TOTAL_NATURAL_ELEMENTS : '?';
+        const total = typeof TOTAL_ALL_ELEMENTS !== 'undefined' ? TOTAL_ALL_ELEMENTS : '?';
         this.add.text(cx, py + 18, `ELEMENTBOK  –  Det periodiske system`, {
             fontSize: '14px', color: '#997755', fontFamily: 'monospace', fontStyle: 'bold',
             stroke: '#4a3a22', strokeThickness: 1

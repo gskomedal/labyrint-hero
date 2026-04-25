@@ -33,7 +33,8 @@ class GameOverScene extends Phaser.Scene {
                 goldEarned:         this.heroStats.gold || 0,
                 mineralsCollected:  this.heroStats.mineralsCollected || 0,
                 elementsDiscovered: elementsDiscovered,
-                result:             'worldComplete',
+                result:             this.type,
+                ngPlusLevel:        this.heroStats.ngPlusLevel || 0,
                 timeSeconds:        this.heroStats.totalPlayTime || this.timeSeconds
             };
             Leaderboard.record(entry);
@@ -46,6 +47,8 @@ class GameOverScene extends Phaser.Scene {
 
         if (this.type === 'death') {
             this._deathScreen(cx, cy, W, H);
+        } else if (this.type === 'gameComplete') {
+            this._gameCompleteScreen(cx, cy, W, H);
         } else {
             this._victoryScreen(cx, cy, W, H);
         }
@@ -177,6 +180,154 @@ class GameOverScene extends Phaser.Scene {
                 });
             }
             yOff += 24;
+        }
+    }
+
+    // ── Game complete screen (all 118 elements collected) ───────────────────
+
+    _gameCompleteScreen(cx, cy, W, H) {
+        Audio.stopMusic();
+        Audio.playVictory();
+
+        const g = this.add.graphics();
+        g.fillStyle(0x1a1400, 0.7);
+        g.fillRect(0, 0, W, H);
+
+        this._spawnCelebrationParticles(W, H);
+
+        const ngPlus = this.heroStats.ngPlusLevel || 0;
+        const ngLabel = ngPlus > 0 ? `  NG+${ngPlus}` : '';
+
+        this.add.text(cx, cy - 180, '✦ ✦ ✦', {
+            fontSize: '32px', color: '#ffcc00', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        const titleText = this.add.text(cx, cy - 145, 'GUDS PERIODISKE SYSTEM', {
+            fontSize: '36px', color: '#f5e642', fontFamily: 'monospace',
+            fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 6
+        }).setOrigin(0.5);
+        this.tweens.add({
+            targets: titleText, alpha: 0.7, duration: 800,
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+        });
+
+        this.add.text(cx, cy - 100, `Du har samlet alle 118 grunnstoffer!${ngLabel}`, {
+            fontSize: '18px', color: '#ffffff', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        this.add.text(cx, cy - 76, 'Universets hemmeligheter er avslørt. Du er en sann mester!', {
+            fontSize: '12px', color: '#ccaa66', fontFamily: 'monospace'
+        }).setOrigin(0.5);
+
+        this._drawMiniPeriodicTable(cx, cy - 30);
+
+        this._fullStatsPanel(cx, cy + 40);
+
+        const ngBtn = this._button(cx, cy + 120, '[ NY REISE+ ]', '#ffcc00', 22);
+        ngBtn.on('pointerdown', () => this._startNewGamePlus());
+        this.tweens.add({ targets: ngBtn, alpha: 0.5, duration: 600, yoyo: true, repeat: -1 });
+
+        const freshBtn = this._button(cx, cy + 155, '[ NYTT SPILL ]', '#ff8844', 16);
+        freshBtn.on('pointerdown', () => {
+            SaveManager.clear();
+            this.scene.start('MenuScene');
+        });
+
+        const menuBtn = this._button(cx, cy + 185, '[ HOVED MENY ]', '#666688', 14);
+        menuBtn.on('pointerdown', () => this.scene.start('MenuScene'));
+    }
+
+    _drawMiniPeriodicTable(cx, cy) {
+        if (typeof PERIODIC_TABLE_LAYOUT === 'undefined' || typeof ELEMENTS === 'undefined') return;
+        const cellSize = 4;
+        const gap = 1;
+        const cols = 18, rows = 10;
+        const tableW = cols * (cellSize + gap);
+        const tableH = rows * (cellSize + gap);
+        const ox = cx - tableW / 2;
+        const oy = cy - tableH / 2;
+        const gfx = this.add.graphics();
+        for (const entry of PERIODIC_TABLE_LAYOUT) {
+            const elem = ELEMENTS[entry.symbol];
+            if (!elem) continue;
+            const x = ox + entry.col * (cellSize + gap);
+            const y = oy + entry.row * (cellSize + gap);
+            gfx.fillStyle(elem.color, 0.9);
+            gfx.fillRect(x, y, cellSize, cellSize);
+        }
+    }
+
+    _fullStatsPanel(cx, cy) {
+        const s = this.heroStats;
+        const et = s.elementTracker || {};
+        const discovered = et.discovered ? Object.keys(et.discovered).length : 0;
+        const completedZones = s.completedZones || [];
+        const ngPlus = s.ngPlusLevel || 0;
+        const totalTime = s.totalPlayTime || this.timeSeconds;
+
+        const lines = [
+            `Nivå: ${s.level}   Gull: ${s.gold}g`,
+            `Hjerter: ${s.hearts}/${s.maxHearts}  Angrep: ${s.attack}  Forsvar: ${s.defense}`,
+            `Grunnstoffer: ${discovered}/118   Soner: ${completedZones.length}/5`,
+            `Total spilltid: ${this._formatTime(totalTime)}`,
+        ];
+        if (ngPlus > 0) lines.push(`New Game+ syklus: ${ngPlus}`);
+        lines.forEach((line, i) => {
+            this.add.text(cx, cy + i * 18, line, {
+                fontSize: '13px', color: '#aabb99', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+        });
+    }
+
+    _startNewGamePlus() {
+        const stats = { ...this.heroStats };
+        stats.ngPlusLevel = (stats.ngPlusLevel || 0) + 1;
+        stats.victoryAchieved = true;
+        // Reset element collection — the core challenge for NG+
+        stats.elementTracker = { discovered: {}, collected: {}, completedBonuses: {} };
+        stats.appliedElementBonuses = {};
+        stats.godModeUnlocked = false;
+        stats.cosmicPower = false;
+        stats.fusionUnlocked = false;
+        stats.fissionUpgraded = false;
+        stats.elementGoldMul = 0;
+        stats.elementPoisonResist = 0;
+        stats.elementArmorBonus = 0;
+        stats.merchantMineralsUnlocked = false;
+        stats.magicAoeUnlocked = false;
+        stats.elementTitle = null;
+        stats.legendaryItemEarned = false;
+        SaveManager.save(1, stats);
+        this.scene.start('GameScene', {
+            worldNum: 1,
+            heroStats: stats,
+            difficulty: this.difficulty
+        });
+    }
+
+    _spawnCelebrationParticles(W, H) {
+        const colors = [0xf5e642, 0xffcc00, 0xff8844, 0x88ddff, 0xffffff];
+        for (let i = 0; i < 30; i++) {
+            this.time.delayedCall(i * 120, () => {
+                const px = Math.random() * W;
+                const py = Math.random() * H;
+                const spark = this.add.graphics();
+                const col = colors[Math.floor(Math.random() * colors.length)];
+                spark.fillStyle(col, 0.8);
+                const size = 2 + Math.random() * 4;
+                spark.fillRect(-size / 2, -size / 2, size, size);
+                spark.x = px;
+                spark.y = py;
+                spark.setDepth(15);
+                this.tweens.add({
+                    targets: spark,
+                    y: py - 40 - Math.random() * 60,
+                    alpha: 0, scaleX: 0.1, scaleY: 0.1,
+                    duration: 1500 + Math.random() * 1000,
+                    ease: 'Sine.easeOut',
+                    onComplete: () => { if (spark.scene) spark.destroy(); }
+                });
+            });
         }
     }
 

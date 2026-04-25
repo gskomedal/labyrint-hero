@@ -532,6 +532,15 @@ class ChemLabScene extends Phaser.Scene {
         const produced = this.chem.transmute(hero, symbol);
         if (!produced) return;
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Transmuted: 5 ${symbol} → 1 ${produced}`, color: '#ff88cc' });
+
+        const newBonuses = hero.elementTracker.checkCompletions();
+        if (newBonuses.length > 0) {
+            hero.elementTracker.applyBonusRewards(hero);
+            for (const bonus of newBonuses) {
+                EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `★ ${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00', big: true });
+            }
+        }
+
         Audio.playPickup();
         this._refresh();
     }

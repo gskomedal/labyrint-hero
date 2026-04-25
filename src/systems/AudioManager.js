@@ -296,6 +296,20 @@ const Audio = (function () {
             );
         },
 
+        /** Game complete fanfare */
+        playVictory() {
+            if (!ctx || !sfxEnabled) return;
+            const fanfare = [0, 4, 7, 12, 16, 19, 24];
+            fanfare.forEach((s, i) =>
+                _note(_freq(s + 12), 0.30, sfxGain, 'triangle', 0.30, i * 0.12)
+            );
+            const chordTime = fanfare.length * 0.12 + 0.1;
+            [0, 7, 12, 16, 24].forEach(s =>
+                _note(_freq(s + 12), 0.8, sfxGain, 'sine', 0.18, chordTime)
+            );
+            _noise(0.6, sfxGain, 0.08, chordTime + 0.3, 2000);
+        },
+
         /** Boss nearby sting */
         playBossStrike() {
             if (!ctx || !sfxEnabled) return;
