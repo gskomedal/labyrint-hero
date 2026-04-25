@@ -12,29 +12,41 @@ class Monster {
         const worldMul = scene.worldNum || 1;
         const hpScale  = 1 + (worldMul - 1) * 0.35 + Math.max(0, worldMul - 8) * 0.15;
         const atkScale = 1 + (worldMul - 1) * 0.20 + Math.max(0, worldMul - 8) * 0.08;
+        // XP scales steeply so skill unlocks keep up with the exponential XP_GROWTH curve
+        const xpScale  = 1 + (worldMul - 1) * 0.30 + Math.max(0, worldMul - 8) * 0.20;
 
         this.maxHp    = Math.round((MONSTER_BASE_HP[type]  || 4) * hpScale);
         this.hp       = this.maxHp;
         this.attack   = Math.round((MONSTER_ATTACK[type]  || 1) * atkScale);
         this.color    = MONSTER_COLOR[type]   || COLORS.MONSTER;
-        this.xpReward = MONSTER_XP[type]      || 10;
+        this.xpReward = Math.round((MONSTER_XP[type] || 10) * xpScale);
 
         // Bosses scale aggressively – always a significant threat
         if (type === 'boss') {
-            this.maxHp  = 50 + worldMul * 35;
-            this.hp     = this.maxHp;
-            this.attack = 3 + worldMul * 2;
+            this.maxHp    = 50 + worldMul * 35;
+            this.hp       = this.maxHp;
+            this.attack   = 3 + worldMul * 2;
+            this.xpReward = Math.round((MONSTER_XP[type] || 150) * xpScale);
         }
 
         // Zone boss – tougher boss that guards zone transitions
         if (type === 'zone_boss') {
-            this.maxHp  = 80 + worldMul * 50;
-            this.hp     = this.maxHp;
-            this.attack = 5 + worldMul * 3;
-            this.color  = 0xff22ff;
-            this.xpReward = 300 + worldMul * 50;
-            this.defense = Math.floor(worldMul * 0.5);
+            this.maxHp    = 80 + worldMul * 50;
+            this.hp       = this.maxHp;
+            this.attack   = 5 + worldMul * 3;
+            this.color    = 0xff22ff;
+            this.xpReward = Math.round((300 + worldMul * 50) * xpScale);
+            this.defense  = Math.floor(worldMul * 0.5);
         }
+
+        // Behavior tags – give each monster a distinct movement/attack pattern
+        // moveCadence: 1 = every tick, 2 = every other, 3 = every third (heavy/slow)
+        this.moveCadence = (type === 'troll' || type === 'golem') ? 2 : 1;
+        this.canPhase    = (type === 'wraith');                    // moves through walls
+        this.isArcher    = (type === 'skeleton');                  // ranged attack
+        this.isErratic   = (type === 'goblin');                    // sometimes hesitates
+        this.burnsOnHit  = (type === 'demon');                     // applies burn on melee hit
+        this.tickCount   = 0;
 
         // Boss phase tracking (1 = normal, 2 = enraged at ≤50% HP)
         this.phase   = 1;

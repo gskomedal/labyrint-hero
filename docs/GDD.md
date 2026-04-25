@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
 **Versjon:** 0.47
-**Sist oppdatert:** 2026-04-25
+**Sist oppdatert:** 2026-04-25 (v0.48)
 
 ---
 
@@ -168,15 +168,29 @@ Heltens grunnstats gjør at verden 1 er farlig uten noe utstyr. Utstyr og evner 
 - **Monsterangrep:** `attack + 30% sjanse: +1`
 - **Forsvar:** trekkes fra innkommende skade, minimum 1
 
-### Monstere (v0.35 balanse)
-| Type | Base-HP | Base-ATK | XP | HP-skala | ATK-skala |
-|------|---------|----------|-----|----------|-----------|
-| Goblin | 10 | 2 | 10 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) |
-| Orc | 18 | 4 | 25 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) |
-| Troll | 30 | 6 | 50 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) |
-| Boss | 50 + V×35 | 3 + V×2 | 150 | – (eget uttrykk) | – (570ms tick) |
+### Monstere (v0.48 balanse)
+| Type | Base-HP | Base-ATK | XP | HP-skala | ATK-skala | Spesialoppførsel |
+|------|---------|----------|-----|----------|-----------|------------------|
+| Goblin | 10 | 2 | 10 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) | Erratisk: ~18% sjanse for å nøle |
+| Orc | 18 | 4 | 25 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) | Gift-bett: 20% gift på treff |
+| Troll | 30 | 6 | 50 | +35% per verden (+15% ekstra etter V8) | +20% per verden (+8% ekstra etter V8) | Treg: handler hver 2. tick · 30% gift |
+| Skjelett | 12 | 5 | 20 | +35%/V (+15% etter V8) | +20%/V (+8% etter V8) | Bueskytter: skyter pil (½ skade) på avstand 2–4 med fri sikt |
+| Golem | 40 | 3 | 60 | +35%/V (+15% etter V8) | +20%/V (+8% etter V8) | Treg: handler hver 2. tick |
+| Wraith | 15 | 6 | 40 | +35%/V (+15% etter V8) | +20%/V (+8% etter V8) | Fasende: kan bevege seg gjennom vegger |
+| Demon | 25 | 7 | 55 | +35%/V (+15% etter V8) | +20%/V (+8% etter V8) | 30% sjanse for å påføre brann (3 runder) på treff |
+| Boss | 50 + V×35 | 3 + V×2 | 150 × xpScale | – (eget uttrykk) | – (570ms tick) | Fase 2 ved ≤50% HP, 15% lamming i fase 2 |
+| Sone-boss | 80 + V×50 | 5 + V×3 | (300 + V×50) × xpScale | – (eget uttrykk) | – | Fase 2 + forsvar V×0.5 |
 
 Helten starter med 3 base-angrep. Verdensnummer V brukes til å skalere både HP og skade. Skalering er mykere tidlig og hardere sent for å bevare utfordringen.
+
+### XP-skalering per verden (v0.48)
+For å holde tritt med den eksponentielle XP-kurven (`XP_BASE = 100`, `XP_GROWTH = 1.55`) skaleres alle monsters XP-belønning etter verden:
+
+```
+xpScale = 1 + 0.30·(V−1) + 0.20·max(0, V−8)
+```
+
+Dette gir ~2.2× i V5, ~4.0× i V10, ~6.8× i V15, ~9.0× i V20 og ~11.6× i V25 — slik at ferdighetsopplåsning føles meningsfull også i sene verdener. Bossens XP skaleres nå også med xpScale (tidligere flat 150 XP uavhengig av verden).
 
 ### Vanskelighetsgrader (v0.35)
 | Innstilling | Monster HP | Monster ATK | XP-bonus | Felle-skade |
@@ -192,7 +206,7 @@ Bevegelse inn i monster-rute: helten setter facing uten å angripe (visuell flas
 | Effekt | Ikon | Varighet | Skade | Kilde | Kur |
 |--------|------|----------|-------|-------|-----|
 | Gift | ☠ | 4 runder | 1/2.5s | Orc (20%), Troll (30%) | Motgift, Krystallresistans |
-| Brann | 🔥 | 3 runder | 2/2.0s | Vulkandungeon-monstre (20%) | Brannsalve, Motgift, Krystallresistans |
+| Brann | 🔥 | 3 runder | 2/2.0s | Vulkandungeon-monstre (20%), Demon (30%) | Brannsalve, Motgift, Krystallresistans |
 | Frostbitt | ❄ | 4 runder | Ingen (halv fart) | Iskrystall-monstre (25%) | Frostsalve, Motgift |
 | Lammet | ⚡ | 1 runde | Ingen (skip turn) | Boss fase 2 (15%) | Venter ut |
 

@@ -414,6 +414,12 @@ class CombatManager {
             }
         }
 
+        // Demon burn chance – fiery melee leaves a lingering burn DoT
+        if (!died && monster.type === 'demon' && Math.random() < 0.30) {
+            scene.hero.applyBurn(3);
+            scene._floatingText(scene.hero.gridX, scene.hero.gridY, '🔥 Brent!', '#ff6600');
+        }
+
         // Theme-based status effects
         if (!died) {
             const deco = scene._theme.DECO;

@@ -60,8 +60,8 @@ class ElementBookScene extends Phaser.Scene {
 
         if (typeof PERIODIC_TABLE_LAYOUT === 'undefined') return;
 
-        // Lanthanide/actinide labels
-        const lantY = tableY + 9.5 * cellH;
+        // Lanthanide/actinide labels (grouped just below the main table with a small gap)
+        const lantY = tableY + 8.5 * cellH;
         this.add.text(tableX - 2, lantY, 'Ln', {
             fontSize: '10px', color: '#556644', fontFamily: 'monospace'
         });
@@ -87,10 +87,10 @@ class ElementBookScene extends Phaser.Scene {
 
             const isDiscovered = tracker && tracker.isDiscovered(entry.symbol);
 
-            // Map rows: 0-6 = periods 1-7, 8-9 = lanthanides/actinides
-            // Add a visible gap before rows 8+ to separate them from the main table
+            // Map rows: 0-6 = periods 1-7, 7 = lanthanides, 8 = actinides.
+            // Lanthanides and actinides sit together below the main table with a small gap.
             let yOffset = entry.row;
-            if (entry.row >= 8) yOffset = entry.row + 1.5;
+            if (entry.row >= 7) yOffset = entry.row + 1.5;
 
             const cellX = tableX + entry.col * cellW;
             const cellY = tableY + yOffset * cellH;

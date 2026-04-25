@@ -161,6 +161,11 @@ class MonsterManager {
             // Tick monster status effects (acid burn, stun)
             if (m.tickStatusEffects) m.tickStatusEffects();
             if (m.stunTurns > 0) continue; // stunned – skip turn
+            // Heavy/slow monsters (troll, golem) act on every Nth tick
+            if (!isBoss && (m.moveCadence || 1) > 1) {
+                m.tickCount = (m.tickCount || 0) + 1;
+                if (m.tickCount % m.moveCadence !== 0) continue;
+            }
             this._moveMonster(m);
         }
     }
@@ -174,6 +179,17 @@ class MonsterManager {
         if (dist === 1) {
             scene.combat.monsterAttack(m);
             return;
+        }
+
+        // Erratic (goblin) – occasionally hesitates instead of advancing
+        if (m.isErratic && Math.random() < 0.18) return;
+
+        // Skeleton archer – fire an arrow if hero is on the same row/column with clear line
+        if (m.isArcher && (m.gridX === hx || m.gridY === hy) && dist >= 2 && dist <= 4) {
+            if (this._hasClearShot(m.gridX, m.gridY, hx, hy)) {
+                this._fireArrow(m);
+                return;
+            }
         }
 
         // Attack pet if adjacent and can't reach hero
@@ -194,12 +210,38 @@ class MonsterManager {
             const nx = m.gridX + dx, ny = m.gridY + dy;
             if (nx < 0 || nx >= scene.tileW || ny < 0 || ny >= scene.tileH) continue;
             const t = scene.maze[ny][nx];
-            if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) continue;
+            // Wraiths phase through walls; everyone else is blocked
+            if (!m.canPhase && (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR)) continue;
             if (nx === hx && ny === hy) continue;
             if (this.monsterAt(nx, ny)) continue;
             if (scene.merchant && nx === scene.merchant.gridX && ny === scene.merchant.gridY) continue;
             m.moveTo(nx, ny); break;
         }
+    }
+
+    /** True if the straight line between (x1,y1) and (x2,y2) is unobstructed.
+     *  Assumes same row or same column. */
+    _hasClearShot(x1, y1, x2, y2) {
+        const scene = this.scene;
+        const dx = Math.sign(x2 - x1), dy = Math.sign(y2 - y1);
+        let x = x1 + dx, y = y1 + dy;
+        while (x !== x2 || y !== y2) {
+            const t = scene.maze[y][x];
+            if (t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.DOOR) return false;
+            x += dx; y += dy;
+        }
+        return true;
+    }
+
+    _fireArrow(m) {
+        const scene = this.scene;
+        const dmg = Math.max(1, Math.floor(m.attack * 0.5));
+        const died = scene.hero.takeDamage(dmg);
+        if (typeof Audio !== 'undefined' && Audio.playHurt) Audio.playHurt();
+        scene._floatingText(scene.hero.gridX, scene.hero.gridY, `→ -${dmg}`, '#ddccaa');
+        scene.hero._drawSprite();
+        scene.cameras.main.shake(80, 0.004);
+        if (died) scene._heroDied();
     }
 
     monsterAt(gx, gy) {
