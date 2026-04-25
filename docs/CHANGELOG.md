@@ -2,6 +2,43 @@
 
 ---
 
+## v0.47 – 2026-04-25
+
+### Nye funksjoner
+- **Victory-scene ved 118 grunnstoffer:** Når spilleren samler alle 118 grunnstoffer trigges en episk victory-scene med fanfare, gullpartikler, mini periodisk tabell, og tittelen «Guds periodiske system». Victory kan trigges umiddelbart (i spill-scenen) eller ved verdensavslutning
+- **New Game+ (NG+):** Etter victory kan spilleren starte en ny reise med beholdte levels/skills/gull, men nullstilt elementsamling. Monstre skaleres +40% HP og +25% angrep per NG+-syklus
+- **Victory-badge i meny:** Spillere som har fullført spillet ser gull-badge «✦ Guds periodiske system» med NG+-nivå i hovedmenyen
+- **NG+-indikator i HUD:** Sonenavn viser NG+-syklus (f.eks. «Overflatelag 1/3 NG+1»)
+- **Victory-fanfare:** Ny prosedyregenerert lyd med stigende arpeggio og vedvarende akkord
+
+### Feilrettinger
+- **Transmutasjon trigget ikke elementbonuser (#bug):** ChemLabScene._doTransmute() manglet checkCompletions() etter transmutasjon — grunnstoffer oppdaget via transmutasjon kunne ikke trigge bonuser som «Guds periodiske system»
+- **Elementbok viste feil mål:** Endret fra «X/90» (kun naturlige) til «X/118» (alle grunnstoffer) for å reflektere spillets faktiske mål
+
+### Tekniske endringer
+- constants.js: Ny `FINAL_WORLD = 25` konstant
+- HeroCrafting: Nye felt `ngPlusLevel` og `victoryAchieved` med serialisering/deserialisering
+- ElementTracker: Emitter `elementBonusComplete` via EventBus ved bonus-fullføring
+- GameScene: Lytter på `elementBonusComplete` for umiddelbar victory-trigger; `_checkExit()` sjekker alle 118 samlet
+- GameOverScene: Ny `_gameCompleteScreen()` med sparkle-partikler, mini periodisk tabell, NG+-start
+- MonsterManager: NG+-skalering stacker med vanskelighetsgrad-multiplikatorer
+- AudioManager: Ny `playVictory()` metode
+
+---
+
+## v0.46 – 2026-04-19
+
+### Forbedringer
+- **Færre touch-knapper, kontekstsensitiv ÅPNE-knapp:** Menyknapper redusert fra 6 til 3 (INV, SKL, ÅPNE). ÅPNE-knappen endrer farge og label dynamisk basert på heltens plassering: BOK (elementbok) → SMI (leirplass) → LAB (kjemilab) → ACE (akselerator). Løser også manglende akselerator-knapp for mobil (#108)
+- **Minikart-toggle via trykk:** På touch-enheter kan minikartet nå toggles ved å trykke direkte på det, i stedet for en egen MAP-knapp
+
+### Tekniske endringer
+- TouchControls: Ny `_createContextButton()` og `updateContextButton(gameScene)` for dynamisk knapp. Fjernet `updateVisibility()` og individuelle menyknapper
+- GameScene: Ny `_handleTouchOpenContext()` erstatter individuelle touch-scene-handlinger. Tastaturkontroller (V, C, P, B) uendret
+- UIScene: Interaktiv sone over minikartet for touch-toggle. Kaller `updateContextButton()` i refresh
+
+---
+
 ## v0.45 – 2026-04-18
 
 ### Feilrettinger

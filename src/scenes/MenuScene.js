@@ -50,8 +50,13 @@ class MenuScene extends Phaser.Scene {
             const name = (saved.heroStats?.heroName) || 'Helten';
             const race = (saved.heroStats?.race)    || 'human';
             const lvl  = saved.heroStats?.level || 1;
-            this.add.text(cx, cy + 28, `${name}  ·  Verden ${saved.worldNum}  ·  Nivå ${lvl}`, {
-                fontSize: '15px', color: '#667788', fontFamily: 'monospace'
+            const victoryDone = saved.heroStats?.victoryAchieved;
+            const ngPlus = saved.heroStats?.ngPlusLevel || 0;
+            const badge = victoryDone
+                ? (ngPlus > 0 ? `✦ Guds periodiske system NG+${ngPlus}  ·  ` : '✦ Guds periodiske system  ·  ')
+                : '';
+            this.add.text(cx, cy + 28, `${badge}${name}  ·  Verden ${saved.worldNum}  ·  Nivå ${lvl}`, {
+                fontSize: '15px', color: victoryDone ? '#f5e642' : '#667788', fontFamily: 'monospace'
             }).setOrigin(0.5);
 
             const cont = this._btn(cx, cy + 58, '[ FORTSETT ]', '#00e87a', 22);

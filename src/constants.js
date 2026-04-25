@@ -72,6 +72,8 @@ const MONSTER_XP        = { goblin: 10, orc: 25, troll: 50, skeleton: 20, golem:
 const XP_BASE           = 100;   // XP needed for level 2
 const XP_GROWTH         = 1.55;  // multiplier per level
 
+const FINAL_WORLD = 25;
+
 // ── Zone system (Phase 4) ────────────────────────────────────────────────────
 // Zones group worlds into geological regions. Zone boss at last world of each.
 const ZONES = [

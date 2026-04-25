@@ -36,12 +36,15 @@ class MonsterManager {
             scene.monsters.push(new Monster(scene, x, y, types[Math.floor(Math.random() * types.length)]));
         }
 
-        // Apply difficulty HP/ATK multipliers
+        // Apply difficulty + NG+ HP/ATK multipliers
         const mods = scene._diffMods();
+        const ngPlus = scene.hero?.ngPlusLevel || 0;
+        const ngHpMul  = 1 + ngPlus * 0.40;
+        const ngAtkMul = 1 + ngPlus * 0.25;
         for (const m of scene.monsters) {
-            m.maxHp  = Math.max(1, Math.round(m.maxHp  * mods.hpMul));
+            m.maxHp  = Math.max(1, Math.round(m.maxHp  * mods.hpMul * ngHpMul));
             m.hp     = m.maxHp;
-            m.attack = Math.max(1, Math.round(m.attack * mods.atkMul));
+            m.attack = Math.max(1, Math.round(m.attack * mods.atkMul * ngAtkMul));
             m._draw();
         }
     }

@@ -83,6 +83,8 @@ const HeroCrafting = {
 
         // Zone progression (Phase 4)
         hero.completedZones = [];
+        hero.ngPlusLevel = 0;
+        hero.victoryAchieved = false;
 
         // Element bonus rewards
         hero.appliedElementBonuses = {};
@@ -173,6 +175,8 @@ const HeroCrafting = {
             empCharges:           hero.empCharges || 0,
             laserTurretCharges:   hero.laserTurretCharges || 0,
             completedZones:       [...hero.completedZones],
+            ngPlusLevel:          hero.ngPlusLevel,
+            victoryAchieved:      hero.victoryAchieved,
             appliedElementBonuses: { ...hero.appliedElementBonuses },
             elementGoldMul:       hero.elementGoldMul,
             elementPoisonResist:  hero.elementPoisonResist,
@@ -256,6 +260,8 @@ const HeroCrafting = {
         hero.empCharges           = stats.empCharges           || 0;
         hero.laserTurretCharges   = stats.laserTurretCharges   || 0;
         hero.completedZones       = stats.completedZones       ? [...stats.completedZones] : [];
+        hero.ngPlusLevel          = stats.ngPlusLevel          || 0;
+        hero.victoryAchieved      = stats.victoryAchieved      || false;
         hero.appliedElementBonuses = stats.appliedElementBonuses ? { ...stats.appliedElementBonuses } : {};
         hero.elementGoldMul       = stats.elementGoldMul       || 0;
         hero.elementPoisonResist  = stats.elementPoisonResist  || 0;

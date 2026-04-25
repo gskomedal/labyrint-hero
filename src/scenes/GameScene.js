@@ -149,6 +149,9 @@ class GameScene extends Phaser.Scene {
         EventBus.on('floatingText', (d) => this._floatingText(d.gx, d.gy, d.msg, d.color, d.big));
         EventBus.on('showMessage', (d) => this._showMessage(d.text, d.color));
         EventBus.on('spawnItem', (d) => this.itemSpawner.spawnItemAt(d.gx, d.gy, d.item));
+        EventBus.on('elementBonusComplete', (bonus) => {
+            if (bonus.id === 'all_118') this._triggerElementVictory();
+        });
 
         // ── HUD overlay ───────────────────────────────────────────────────────
         this.scene.launch('UIScene', { gameScene: this });
@@ -186,31 +189,20 @@ class GameScene extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.eKey) || touchInv) {
                 this.scene.launch('InventoryScene');
             }
-            const touchBook = this.game.registry.get('touch_elementbook');
-            if (touchBook) this.game.registry.set('touch_elementbook', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.elementBookKey) || touchBook) && !this.scene.isActive('ElementBookScene')) {
+            if (Phaser.Input.Keyboard.JustDown(this.elementBookKey) && !this.scene.isActive('ElementBookScene')) {
                 this.scene.launch('ElementBookScene', { heroRef: this.hero });
             }
-            const touchSmelt = this.game.registry.get('touch_smeltery');
-            if (touchSmelt) this.game.registry.set('touch_smeltery', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.smelteryKey) || touchSmelt) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
+            if (Phaser.Input.Keyboard.JustDown(this.smelteryKey) && !this.scene.isActive('SmelteryScene') && this._isInCampRoom()) {
                 this.scene.launch('SmelteryScene', { heroRef: this.hero });
             }
-
-            const touchChem = this.game.registry.get('touch_chemlab');
-            if (touchChem) this.game.registry.set('touch_chemlab', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.chemLabKey) || touchChem) && !this.scene.isActive('ChemLabScene') && this._isInChemLab()) {
+            if (Phaser.Input.Keyboard.JustDown(this.chemLabKey) && !this.scene.isActive('ChemLabScene') && this._isInChemLab()) {
                 if (this.hero.chemLabUnlocked) {
                     this.scene.launch('ChemLabScene', { heroRef: this.hero, worldNum: this.worldNum });
                 } else {
                     this._showMessage('Beseir en soneboss for å låse opp laboratoriet!', '#33dd88');
                 }
             }
-
-            // Particle accelerator (P key)
-            const touchAccel = this.game.registry.get('touch_accelerator');
-            if (touchAccel) this.game.registry.set('touch_accelerator', false);
-            if ((Phaser.Input.Keyboard.JustDown(this.acceleratorKey) || touchAccel) && !this.scene.isActive('AcceleratorScene') && this._isInAccelerator()) {
+            if (Phaser.Input.Keyboard.JustDown(this.acceleratorKey) && !this.scene.isActive('AcceleratorScene') && this._isInAccelerator()) {
                 this.scene.launch('AcceleratorScene', { heroRef: this.hero, worldNum: this.worldNum });
             }
 
@@ -218,6 +210,13 @@ class GameScene extends Phaser.Scene {
             if (touchSkill) this.game.registry.set('touch_skilltree', false);
             if ((Phaser.Input.Keyboard.JustDown(this.skillTreeKey) || touchSkill) && !this.scene.isActive('SkillScene')) {
                 this.scene.launch('SkillScene', { heroRef: this.hero, viewOnly: true });
+            }
+
+            // Context-sensitive touch button (opens scene based on hero location)
+            const touchCtx = this.game.registry.get('touch_open_context');
+            if (touchCtx) {
+                this.game.registry.set('touch_open_context', false);
+                this._handleTouchOpenContext();
             }
 
             // Auto-open prompts for special rooms
@@ -306,6 +305,24 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    // ── Context-sensitive touch open ────────────────────────────────────────
+
+    _handleTouchOpenContext() {
+        if (this._isInCampRoom() && !this.scene.isActive('SmelteryScene')) {
+            this.scene.launch('SmelteryScene', { heroRef: this.hero });
+        } else if (this._isInChemLab() && !this.scene.isActive('ChemLabScene')) {
+            if (this.hero.chemLabUnlocked) {
+                this.scene.launch('ChemLabScene', { heroRef: this.hero, worldNum: this.worldNum });
+            } else {
+                this._showMessage('Beseir en soneboss for å låse opp laboratoriet!', '#33dd88');
+            }
+        } else if (this._isInAccelerator() && !this.scene.isActive('AcceleratorScene')) {
+            this.scene.launch('AcceleratorScene', { heroRef: this.hero, worldNum: this.worldNum });
+        } else if (!this.scene.isActive('ElementBookScene')) {
+            this.scene.launch('ElementBookScene', { heroRef: this.hero });
+        }
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     _findItemInBackpack(id) {
@@ -387,10 +404,37 @@ class GameScene extends Phaser.Scene {
 
         const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
         this.hero.totalPlayTime = (this.hero.totalPlayTime || 0) + worldTime;
+
+        const hasAll118 = this.hero.elementTracker && this.hero.elementTracker.discoveredCount >= 118;
+        const isGameComplete = hasAll118 && !this.hero.victoryAchieved;
+
+        if (isGameComplete) {
+            this.hero.victoryAchieved = true;
+        }
+
         SaveManager.save(this.worldNum + 1, this._getFullStats());
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
-                type: 'worldComplete', worldNum: this.worldNum,
+                type: isGameComplete ? 'gameComplete' : 'worldComplete',
+                worldNum: this.worldNum,
+                heroStats: this._getFullStats(), difficulty: this.difficulty,
+                monstersKilled: this.monstersKilled,
+                timeSeconds: worldTime
+            });
+        });
+    }
+
+    _triggerElementVictory() {
+        if (this.hero.victoryAchieved) return;
+        this.hero.victoryAchieved = true;
+        this._floatingText(this.hero.gridX, this.hero.gridY, '✦ ALLE 118 GRUNNSTOFFER SAMLET! ✦', '#f5e642', true);
+        Audio.playVictory();
+        SaveManager.save(this.worldNum, this._getFullStats());
+        const worldTime = Math.round((Date.now() - this._worldStartTime) / 1000);
+        this.time.delayedCall(2500, () => {
+            this._stopOverlayScenes();
+            this.scene.start('GameOverScene', {
+                type: 'gameComplete', worldNum: this.worldNum,
                 heroStats: this._getFullStats(), difficulty: this.difficulty,
                 monstersKilled: this.monstersKilled,
                 timeSeconds: worldTime
