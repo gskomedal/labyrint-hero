@@ -2,6 +2,32 @@
 
 ---
 
+## v0.48 – 2026-04-25
+
+### Nye funksjoner
+- **Mer variasjon mellom monstertyper (#128):** Hver monstertype har nå et eget oppførselsmønster i tillegg til ulike statistikker:
+  - **Goblin (erratisk):** Nøler tilfeldig (~18%) før den angriper – uforutsigbar bevegelse
+  - **Skjelett (bueskytter):** Skyter pil for halv skade når helten er på samme rad/kolonne (avstand 2–4) med fri sikt – angriper uten å bevege seg
+  - **Troll og Golem (treg):** Beveger seg kun annenhver tick – tunge motstandere som spilleren kan kite
+  - **Wraith (fasende):** Beveger seg gjennom vegger – kan ikke sperres inne i labyrintkorridorer
+  - **Demon (brennende):** 30% sjanse for å påføre 3-turns brann ved nærkampangrep
+  - Orker beholder sin gift-sjanse, bosser sine fase-2-mekanikker
+
+### Balanseendringer
+- **Bedre XP-skalering for høyere verdener (#128):** Monster-XP skaleres nå med `1 + 0.30·(verden−1) + 0.20·max(0, verden−8)`. Et monster i verden 25 gir ~11.6× XP sammenlignet med verden 1, slik at ferdighetsopplåsning følger den eksponentielle XP-kurven (`XP_GROWTH = 1.55`)
+- **Bosser skalerer nå XP med verden:** Vanlige bosser fikk tidligere flat 150 XP uavhengig av verden. Både `boss` og `zone_boss` ganges nå også med xpScale
+
+### Feilrettinger
+- **Elementbok: lantanoider plassert for langt fra aktinoider (#127):** Lantanoid-raden satt rett under hovedtabellen mens aktinoid-raden lå betydelig lenger ned. Begge radene er nå gruppert sammen med en liten luft til hovedtabellen, slik en standard periodisk tabell skal være. «Ln»/«An»-etiketter justert tilsvarende
+
+### Tekniske endringer
+- Monster.js: Nye oppførselsflagg `moveCadence`, `canPhase`, `isArcher`, `isErratic`, `burnsOnHit` og `tickCount`. Ny `xpScale`-formel anvendt på alle monstertyper inkludert bosser
+- MonsterManager.js: Tick-loopen respekterer `moveCadence` for trege monstre. `_moveMonster()` har egne grener for goblin-nøling, skjelett-bueskyting og wraith-faseflytting. Nye hjelpere `_hasClearShot()` og `_fireArrow()`
+- CombatManager.js: `monsterAttack()` påfører `applyBurn(3)` ved demonangrep
+- ElementBookScene.js: Lantanoid-/aktinoid-radoffset endret fra `row >= 8` til `row >= 7`, slik at lantanoidene (rad 7) også flyttes ned til 8.5 og aktinoidene (rad 8) til 9.5. «Ln»-etiketten flyttet fra y=9.5 til y=8.5
+
+---
+
 ## v0.47 – 2026-04-25
 
 ### Nye funksjoner
