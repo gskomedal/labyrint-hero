@@ -15,6 +15,7 @@ const config = {
     },
     scene: [
         MenuScene,
+        WelcomeScene,
         CharacterCreatorScene,
         GameScene,
         UIScene,
@@ -25,6 +26,7 @@ const config = {
         GameOverScene,
         SettingsScene,
         ElementBookScene,
+        MineralWikiScene,
         SmelteryScene,
         ChemLabScene,
         AcceleratorScene

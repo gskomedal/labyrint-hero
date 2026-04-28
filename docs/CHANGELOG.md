@@ -2,6 +2,22 @@
 
 ---
 
+## v0.49 – 2026-04-28
+
+### Nye funksjoner
+- **Velkomst-popup ved første besøk:** Ny `WelcomeScene` åpnes automatisk første gang en spiller besøker hovedmenyen, og kan gjenåpnes med `[ INTRO ]`-knappen. Popup-en har fire stemnings­ladde sider — `LABYRINT HERO` (premiss og atmosfære), `HELTEN` (raser, startbonuser og ferdighetstre), `LABYRINTEN` (verdens­struktur, spesialrom og smelter/lab/akselerator) og `SLIK SPILLER DU` (detaljerte kontroller og spilltips). Lukkes med `[ START EVENTYRET ]`, `[×]`, ESC, eller ved klikk utenfor panelet — og «sett»-tilstanden lagres i `localStorage` slik at popup-en ikke dukker opp igjen automatisk
+- **Mineral-wiki:** Ny scene `MineralWikiScene` som lister alle 60+ mineraler og krystaller med formel, tier, hvilke grunnstoffer de gir og hvor de spawner. Faner for `ALLE` / `T1`–`T6` / `KRYSTALLER` og en `MANGLENDE`-fane som viser hvilke grunnstoffer helten ennå ikke har oppdaget – og hvilke mineraler som er kjente kilder. Tilgjengelig fra ny `[ MINERAL-WIKI ]`-knapp i hovedmenyen og som overlay-knapp i inventaret
+
+### Tekniske endringer
+- WelcomeScene.js: Ny scene med `_pages`-array og `_renderPage()`-løkke. Naviger med Pil/SPACE/Klikk; ESC eller klikk utenfor lukker. Skip-hint vises kun ved første-gangs auto-åpning
+- SaveManager.js: Nye metoder `hasSeenIntro()` og `markIntroSeen()` (separat `INTRO_KEY` slik at intro-flagget overlever `clear()`)
+- MenuScene.js: Fjernet det gamle innebygde info-panelet. Auto-launcher `WelcomeScene` når `!SaveManager.hasSeenIntro()`. Bunnknapp-raden utvidet til tre: `[ INTRO ]` / `[ LEDERTAVLE ]` / `[ MINERAL-WIKI ]`
+- MineralWikiScene.js: Ny scene som leser `MINERAL_DEFS`, `MINERAL_TIER_COLORS` og `ELEMENTS` direkte. Spawn-lokasjoner avledes ved å transkribere reglene fra `ItemSpawner.js` i en lokal `_getMineralLocations()` – ingen endringer i mineraldata kreves
+- InventoryScene.js: Ny `Mineral-wiki`-knapp ved siden av `Elementbok [B]`
+- main.js + index.html: Registrerer `WelcomeScene` og `MineralWikiScene`
+
+---
+
 ## v0.48 – 2026-04-25
 
 ### Nye funksjoner

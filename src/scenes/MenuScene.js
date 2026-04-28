@@ -82,9 +82,17 @@ class MenuScene extends Phaser.Scene {
             this.tweens.add({ targets: start, alpha: 0.45, duration: 750, yoyo: true, repeat: -1 });
         }
 
-        // ── Leaderboard button ────────────────────────────────────────────────
+        // ── Bottom navigation row: Intro / Ledertavle / Mineral-wiki ──────────
+        const introBtn = this._btn(cx - 180, cy + 175, '[ INTRO ]', '#f5e642', 14);
+        introBtn.on('pointerdown', () => this.scene.launch('WelcomeScene'));
+
         const lbBtn = this._btn(cx, cy + 175, '[ LEDERTAVLE ]', '#8899bb', 14);
         lbBtn.on('pointerdown', () => this.scene.start('LeaderboardScene'));
+
+        const wikiBtn = this._btn(cx + 180, cy + 175, '[ MINERAL-WIKI ]', '#ccaa77', 14);
+        wikiBtn.on('pointerdown', () =>
+            this.scene.start('MineralWikiScene', { fromMenu: true })
+        );
 
         // ── Footer tips ───────────────────────────────────────────────────────
         const ts = { fontSize: '13px', color: '#445566', fontFamily: 'monospace' };
@@ -93,6 +101,11 @@ class MenuScene extends Phaser.Scene {
 
         // Version
         this.add.text(8, H - 16, 'v0.9', { fontSize: '12px', color: '#222244', fontFamily: 'monospace' });
+
+        // ── Auto-show intro on first visit ────────────────────────────────────
+        if (!SaveManager.hasSeenIntro()) {
+            this.scene.launch('WelcomeScene');
+        }
     }
 
     // ── Difficulty panel ──────────────────────────────────────────────────────

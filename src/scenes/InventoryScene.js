@@ -70,6 +70,18 @@ class InventoryScene extends Phaser.Scene {
             }
         });
 
+        // Mineral wiki button
+        const mwBtn = this.add.text(cx - panelW / 2 + 20 + ebBtn.width + 16,
+            cy - panelH / 2 + 18, 'Mineral-wiki', {
+            fontSize: '12px', color: '#997755', fontFamily: 'monospace'
+        }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
+        mwBtn.on('pointerover', () => mwBtn.setColor('#ccaa77'));
+        mwBtn.on('pointerout',  () => mwBtn.setColor('#997755'));
+        mwBtn.on('pointerdown', () => {
+            const gs = this.scene.get('GameScene');
+            this.scene.launch('MineralWikiScene', { heroRef: gs?.hero || null });
+        });
+
         // Close button (touch-friendly)
         const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
             fontSize: '20px', color: '#667788', fontFamily: 'monospace'

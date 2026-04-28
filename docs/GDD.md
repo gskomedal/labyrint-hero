@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.47
-**Sist oppdatert:** 2026-04-25 (v0.48)
+**Versjon:** 0.49
+**Sist oppdatert:** 2026-04-28 (v0.49)
 
 ---
 
@@ -24,6 +24,9 @@ Et top-down 2D labyrint-RPG i nettleser. Spilleren navigerer en prosedyre-genere
 - **Lyd:** Web Audio API – prosedyremusikk og SFX, ingen lydfiler
 - **Lagring:** localStorage via SaveManager
 - **Multi-scene pattern:** GameScene + UIScene parallelt; SkillScene, InventoryScene og SettingsScene som overlays. UIScene har HUD-knapper for Elementbok, Skilltre og Inventar øverst til høyre
+- **Velkomstskjerm (MenuScene, v0.49):** Ren meny med tittel, vanskelighetsvalg, fortsett/nytt spill, og bunnrad med `[ INTRO ]` / `[ LEDERTAVLE ]` / `[ MINERAL-WIKI ]`. Den utfyllende introduksjonen ligger i en egen popup (`WelcomeScene`)
+- **Velkomst-popup (WelcomeScene, v0.49):** Fire-siders popup som åpnes automatisk første gang en spiller besøker menyen, og kan gjenåpnes via `[ INTRO ]`. Sider: `LABYRINT HERO` (lore/atmosfære), `HELTEN` (rasevalg, startbonuser, ferdighetstre), `LABYRINTEN` (verdens­struktur, spesialrom, smelter/lab/akselerator), `SLIK SPILLER DU` (kontroller og tips). Skip via klikk-utenfor / ESC / `[×]`. «Sett»-flagg lagres i `localStorage` med egen nøkkel slik at det overlever `SaveManager.clear()`
+- **Mineral-wiki (MineralWikiScene, v0.49):** Browseable katalog over alle mineraler/krystaller med formel, tier, yields og spawn-lokasjoner. `MANGLENDE`-fanen kobler udekkede grunnstoffer til mineraler som inneholder dem. Tilgjengelig fra menyen og fra inventarscenen
 
 ### Filstruktur
 ```
