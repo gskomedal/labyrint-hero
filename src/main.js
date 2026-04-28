@@ -15,6 +15,7 @@ const config = {
     },
     scene: [
         MenuScene,
+        WelcomeScene,
         CharacterCreatorScene,
         GameScene,
         UIScene,
