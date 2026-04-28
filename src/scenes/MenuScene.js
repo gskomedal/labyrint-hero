@@ -40,6 +40,9 @@ class MenuScene extends Phaser.Scene {
 
         this.add.rectangle(cx, cy - 67, 320, 1, 0x333355);
 
+        // ── Lore / tutorial info panel (left side) ────────────────────────────
+        this._buildLorePanel(190, cy + 30);
+
         // ── Difficulty selector (main menu – prominent) ────────────────────────
         this._buildDifficultyPanel(cx, cy);
 
@@ -82,9 +85,14 @@ class MenuScene extends Phaser.Scene {
             this.tweens.add({ targets: start, alpha: 0.45, duration: 750, yoyo: true, repeat: -1 });
         }
 
-        // ── Leaderboard button ────────────────────────────────────────────────
-        const lbBtn = this._btn(cx, cy + 175, '[ LEDERTAVLE ]', '#8899bb', 14);
+        // ── Leaderboard + Mineral-wiki buttons ────────────────────────────────
+        const lbBtn = this._btn(cx - 90, cy + 175, '[ LEDERTAVLE ]', '#8899bb', 14);
         lbBtn.on('pointerdown', () => this.scene.start('LeaderboardScene'));
+
+        const wikiBtn = this._btn(cx + 90, cy + 175, '[ MINERAL-WIKI ]', '#ccaa77', 14);
+        wikiBtn.on('pointerdown', () =>
+            this.scene.start('MineralWikiScene', { fromMenu: true })
+        );
 
         // ── Footer tips ───────────────────────────────────────────────────────
         const ts = { fontSize: '13px', color: '#445566', fontFamily: 'monospace' };
@@ -93,6 +101,95 @@ class MenuScene extends Phaser.Scene {
 
         // Version
         this.add.text(8, H - 16, 'v0.9', { fontSize: '12px', color: '#222244', fontFamily: 'monospace' });
+    }
+
+    // ── Lore / tutorial panel ─────────────────────────────────────────────────
+
+    _buildLorePanel(panelX, panelY) {
+        const panelW = 360, panelH = 340;
+
+        this.add.rectangle(panelX, panelY, panelW, panelH, 0x110f22, 0.7)
+            .setStrokeStyle(1, 0x2a1a4a);
+
+        // Header
+        this.add.text(panelX, panelY - panelH / 2 + 14, 'INFO', {
+            fontSize: '12px', color: '#997755', fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5);
+        this.add.rectangle(panelX, panelY - panelH / 2 + 26, panelW - 30, 1, 0x2a1a4a);
+
+        // Tab definitions
+        const TABS = [
+            { id: 'bakgrunn', label: 'BAKGRUNN' },
+            { id: 'mal',      label: 'MÅL' },
+            { id: 'tutorial', label: 'SLIK SPILLER DU' },
+        ];
+        const INFO_TABS = {
+            bakgrunn:
+                'Du er en geolog-helt sendt ned i de eldgamle labyrintene under verden.\n\n' +
+                'Fem geologiske soner — skog, grunnfjell, dyplag, underverden og kjernen — ' +
+                'skjuler 25 verdener fulle av monstre, feller og mineraler.\n\n' +
+                'Hver bergart inneholder ett eller flere av de 118 grunnstoffene fra det ' +
+                'periodiske system.',
+            mal:
+                'Mål:\n\n' +
+                '• Beseir bossen i hver verden for å gå videre.\n' +
+                '• Beseir sone-bossene for å låse opp Smelter, Kjemilab og Akselerator.\n' +
+                '• Samle, smelt og syntetiser alle 118 grunnstoffene.\n\n' +
+                'Endelig prestasjon: «Guds periodiske system» — samle alle 118.',
+            tutorial:
+                'WASD / Piltaster : Beveg\n' +
+                'SPACE / F        : Angrep\n' +
+                'R                : Skyt pil\n' +
+                'E                : Inventar (åpner mineral-wiki)\n' +
+                'M                : Kart\n' +
+                'B                : Elementbok\n' +
+                'T                : Ferdighetstre\n\n' +
+                'Plukk opp mineraler ved å gå over dem. Lær Geolog-skill for å ' +
+                'identifisere dem. Leir-rom (telt-ikon) lar deg smelte og hvile.',
+        };
+
+        // Tab buttons
+        const tabH = 22, tabGap = 4;
+        const tabW = (panelW - 30 - tabGap * (TABS.length - 1)) / TABS.length;
+        const tabY = panelY - panelH / 2 + 46;
+        this._infoTabs = {};
+        TABS.forEach(({ id, label }, i) => {
+            const tx = panelX - panelW / 2 + 15 + i * (tabW + tabGap) + tabW / 2;
+            const bg = this.add.rectangle(tx, tabY, tabW, tabH, 0x111122)
+                .setStrokeStyle(1, 0x334466)
+                .setInteractive({ useHandCursor: true });
+            const txt = this.add.text(tx, tabY, label, {
+                fontSize: '10px', color: '#aaaacc', fontFamily: 'monospace', fontStyle: 'bold'
+            }).setOrigin(0.5);
+            bg.on('pointerdown', () => this._selectInfoTab(id));
+            bg.on('pointerover', () => { if (this._activeInfoTab !== id) bg.setFillStyle(0x1a1a33); });
+            bg.on('pointerout',  () => { if (this._activeInfoTab !== id) bg.setFillStyle(0x111122); });
+            this._infoTabs[id] = { bg, txt };
+        });
+
+        // Body text
+        this._infoBody = this.add.text(
+            panelX - panelW / 2 + 15,
+            tabY + tabH / 2 + 12,
+            '',
+            {
+                fontSize: '12px', color: '#bbaa99', fontFamily: 'monospace',
+                wordWrap: { width: panelW - 30 }, lineSpacing: 2
+            }
+        );
+        this._infoTabContent = INFO_TABS;
+        this._selectInfoTab('bakgrunn');
+    }
+
+    _selectInfoTab(id) {
+        this._activeInfoTab = id;
+        for (const [tid, { bg, txt }] of Object.entries(this._infoTabs)) {
+            const sel = tid === id;
+            bg.setFillStyle(sel ? 0x2a1a4a : 0x111122);
+            bg.setStrokeStyle(sel ? 2 : 1, sel ? 0xccaa77 : 0x334466);
+            txt.setColor(sel ? '#ccaa77' : '#778899');
+        }
+        this._infoBody?.setText(this._infoTabContent[id] || '');
     }
 
     // ── Difficulty panel ──────────────────────────────────────────────────────

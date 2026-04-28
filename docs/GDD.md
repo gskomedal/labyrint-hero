@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.47
-**Sist oppdatert:** 2026-04-25 (v0.48)
+**Versjon:** 0.49
+**Sist oppdatert:** 2026-04-28 (v0.49)
 
 ---
 
@@ -24,6 +24,8 @@ Et top-down 2D labyrint-RPG i nettleser. Spilleren navigerer en prosedyre-genere
 - **Lyd:** Web Audio API – prosedyremusikk og SFX, ingen lydfiler
 - **Lagring:** localStorage via SaveManager
 - **Multi-scene pattern:** GameScene + UIScene parallelt; SkillScene, InventoryScene og SettingsScene som overlays. UIScene har HUD-knapper for Elementbok, Skilltre og Inventar øverst til høyre
+- **Velkomstskjerm (MenuScene, v0.49):** Hovedmenyen viser et info-panel til venstre med tre faner – `BAKGRUNN`, `MÅL` og `SLIK SPILLER DU` – pluss vanskelighetsvalg, fortsett/nytt spill og knapper for `[ LEDERTAVLE ]` og `[ MINERAL-WIKI ]`
+- **Mineral-wiki (MineralWikiScene, v0.49):** Browseable katalog over alle mineraler/krystaller med formel, tier, yields og spawn-lokasjoner. `MANGLENDE`-fanen kobler udekkede grunnstoffer til mineraler som inneholder dem. Tilgjengelig fra menyen og fra inventarscenen
 
 ### Filstruktur
 ```

@@ -2,6 +2,20 @@
 
 ---
 
+## v0.49 – 2026-04-28
+
+### Nye funksjoner
+- **Utvidet velkomstskjerm:** Hovedmenyen viser nå et info-panel med tre faner – `BAKGRUNN` (spillets premiss og soner), `MÅL` (boss-progresjon og 118-grunnstoffsamling) og `SLIK SPILLER DU` (kontroller og kjernemekanikk) – slik at nye spillere får en kort introduksjon før eventyret starter
+- **Mineral-wiki:** Ny scene `MineralWikiScene` som lister alle 60+ mineraler og krystaller med formel, tier, hvilke grunnstoffer de gir og hvor de spawner. Faner for `ALLE` / `T1`–`T6` / `KRYSTALLER` og en `MANGLENDE`-fane som viser hvilke grunnstoffer helten ennå ikke har oppdaget – og hvilke mineraler som er kjente kilder. Tilgjengelig fra ny `[ MINERAL-WIKI ]`-knapp i hovedmenyen og som overlay-knapp i inventaret
+
+### Tekniske endringer
+- MenuScene.js: Nye metoder `_buildLorePanel()` og `_selectInfoTab()`. `[ LEDERTAVLE ]`-knappen flyttes til venstre og deler rad med ny `[ MINERAL-WIKI ]`-knapp
+- MineralWikiScene.js: Ny scene som leser `MINERAL_DEFS`, `MINERAL_TIER_COLORS` og `ELEMENTS` direkte. Spawn-lokasjoner avledes ved å transkribere reglene fra `ItemSpawner.js` i en lokal `_getMineralLocations()` – ingen endringer i mineraldata kreves
+- InventoryScene.js: Ny `Mineral-wiki`-knapp ved siden av `Elementbok [B]`
+- main.js + index.html: Registrerer `MineralWikiScene`
+
+---
+
 ## v0.48 – 2026-04-25
 
 ### Nye funksjoner

@@ -25,6 +25,7 @@ const config = {
         GameOverScene,
         SettingsScene,
         ElementBookScene,
+        MineralWikiScene,
         SmelteryScene,
         ChemLabScene,
         AcceleratorScene
