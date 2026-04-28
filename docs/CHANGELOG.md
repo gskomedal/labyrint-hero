@@ -2,6 +2,23 @@
 
 ---
 
+## v0.50 – 2026-04-28
+
+### Feilrettinger
+- **Halvleder-crafting var utilgjengelig:** Datamodellen for halvledere har tre lag — raffinering (`pure_si`/`pure_ge`/…), halvledermateriale (`silicon_wafer`, `germanium_crystal`, …) og teknologiinstallasjon — men Smeltery-UIet hadde bare faner for første og siste lag. Mellomsteget i `craftSemiconductor()` hadde null callsites, så `hero.alloyInventory[semiId]` vokste aldri og alle teknologi-installasjoner stod permanent på `(0/1)`. Lagt til ny **Halvleder**-fane som bygger bro mellom raffinerte deler og teknologi-fanen
+- **Helium uoppnåelig før verden 22:** Gasslomme-spawneren brukte `Math.min(rand, (wn-10)/3)` til å bestemme indeks i edelgass-listen, noe som gjorde He effektivt ulåselig før verden 22. Akselerator-oppskriftene Cm/Bk/Cf/Md krever He som projektil og åpner i verden 13 — clampen blokkerte hele synteseprogresjonen mellom Pu og tunge transurane. Indeksvalget er nå uniformt over tilgjengelige edelgasser
+- **Fusjons-energi var additiv, ikke kombinatorisk:** `calculateFuelEnergy()` la H- og Li-energi sammen uavhengig (`hCount * 80 + liCount * 150`), så en spiller med null hydrogen og bare litium fikk fortsatt fusjons-energi. Endret til `min(H, Li)` per par à 230 base-energi — i tråd med skill-teksten *"D-T fusjon: H + Li → He + energi"*
+- **Virtuelt drivstoff ble aldri brukt opp:** U/Th/H/Li gav energi-headroom uten å bli trukket fra `elementTracker`, så én enkelt U-atom ga uendelig +50 energi til alltid. `consumeFuel()` trekker nå fra virtuelt drivstoff etter at fysisk drivstoff (tre/kull/olje/gass) er tomt: Th først, så U for fisjon, og H+Li-par til slutt for fusjon
+- **`fusionUnlocked` var en død flag:** Edelgass-fullføringsbonusen satte `hero.fusionUnlocked = true` men ingenting brukte flagget. `calculateFuelEnergy()` og `consumeFuel()` aksepterer den nå som en alternativ vei til D-T fusjons-energi (uten ×5-multiplikatoren fra Fysiker T4 — flagget gir base-rate)
+
+### Tekniske endringer
+- SmeltingSystem.js: Nye statiske konstanter `FISSION_U_ENERGY`, `FISSION_TH_ENERGY`, `FUSION_PAIR_ENERGY`. Ny privat metode `_consumeVirtualFuel()`. Fusjon i `calculateFuelEnergy()` aksepterer nå både `fusionMastered` og `fusionUnlocked` (sistnevnte med multiplikator 1.0). Fusjon produserer He som biprodukt — i tråd med tidligere kommentar i koden
+- SmelteryScene.js: Ny `_drawSemiTab()` som lister alle 6 SEMICONDUCTOR_DEFS, viser raffinerte og rå-element-ingredienser hver for seg, og trigger `craftSemiconductor()` + `consumeFuel()`. Tab-bredde justert fra 100 til 92 piksler for å rommer 7 faner
+- ItemSpawner.js: Fjernet `Math.min((wn-10)/3)` clamp fra gasslomme-edelgassvalg
+- tests/test-smelting.js: 6 nye tester for fusjon-min, virtuelt brensel-forbruk, He-biprodukt, fusionUnlocked-vei, og halvleder-crafting (totalt 96 tester, alle grønne)
+
+---
+
 ## v0.49 – 2026-04-28
 
 ### Nye funksjoner

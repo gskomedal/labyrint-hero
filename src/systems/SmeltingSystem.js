@@ -5,6 +5,14 @@
 class SmeltingSystem {
     constructor() {}
 
+    // Virtual fuel energy values (per unit, before multipliers).
+    // Single source of truth for both calculateFuelEnergy and consumeFuel.
+    static FISSION_U_ENERGY  = 50;
+    static FISSION_TH_ENERGY = 40;
+    // D-T fusion consumes 1 H + 1 Li per pair. Sum of the previous additive
+    // values (80 + 150 = 230) preserves the rough total when both are stocked.
+    static FUSION_PAIR_ENERGY = 230;
+
     // ── Smelting: Mineral → Pure Elements ────────────────────────────────────
 
     /**
@@ -249,15 +257,20 @@ class SmeltingSystem {
             const fMul = hero.fissionEnergyMul || 1.0;
             const uCount = hero.elementTracker ? hero.elementTracker.getCount('U') : 0;
             const thCount = hero.elementTracker ? hero.elementTracker.getCount('Th') : 0;
-            total += Math.round((uCount * 50 + thCount * 40) * fMul);
+            total += Math.round((uCount * SmeltingSystem.FISSION_U_ENERGY + thCount * SmeltingSystem.FISSION_TH_ENERGY) * fMul);
         }
         // Fusion bonus: D-T fusion consumes H (deuterium) + Li (tritium bred
-        // from Li-6 + neutron). He is a byproduct, not fuel.
-        if (hero.fusionMastered) {
-            const fuMul = hero.fusionEnergyMul || 1.0;
+        // from Li-6 + neutron). Both are required per fusion event, so the
+        // available fuel is bounded by min(H, Li). He is a byproduct, not fuel.
+        // Granted via Fysiker T4 (full ×5) or via Edelgass-completion (×1 base).
+        if (hero.fusionMastered || hero.fusionUnlocked) {
+            const fuMul = hero.fusionMastered
+                ? (hero.fusionEnergyMul || 1.0)
+                : 1.0;
             const hCount = hero.elementTracker ? hero.elementTracker.getCount('H') : 0;
             const liCount = hero.elementTracker ? hero.elementTracker.getCount('Li') : 0;
-            total += Math.round((hCount * 80 + liCount * 150) * fuMul);
+            const pairs = Math.min(hCount, liCount);
+            total += Math.round(pairs * SmeltingSystem.FUSION_PAIR_ENERGY * fuMul);
         }
         // Semiconductor energy techs
         if (hero.techSolarPanel) total += 30;
@@ -312,11 +325,58 @@ class SmeltingSystem {
                 if (entry.count <= 0) hero.campStash.splice(i, 1);
             }
         }
+        // Virtual reactor fuel: U/Th (fission) and H+Li pairs (fusion) are
+        // consumed last, after physical fuel is exhausted. Mirrors the
+        // generation logic in calculateFuelEnergy so totals stay in sync.
+        if (remaining > 0) {
+            remaining = this._consumeVirtualFuel(hero, remaining);
+        }
         // Store leftover energy in reserve for next operation
         if (remaining < 0) {
             hero.fuelReserve = (hero.fuelReserve || 0) + Math.abs(remaining);
         }
         return remaining <= 0;
+    }
+
+    _consumeVirtualFuel(hero, remaining) {
+        if (!hero.elementTracker) return remaining;
+
+        // Fission first (cheaper per unit) — Th before U so U is preserved
+        // for high-tier transuranic recipes that target U directly.
+        if (hero.fissionMastered || hero.fissionUpgraded) {
+            const fMul = hero.fissionEnergyMul || 1.0;
+            const thYield = SmeltingSystem.FISSION_TH_ENERGY * fMul;
+            const uYield  = SmeltingSystem.FISSION_U_ENERGY  * fMul;
+            while (remaining > 0 && hero.elementTracker.getCount('Th') > 0) {
+                hero.elementTracker.collected.Th -= 1;
+                if (hero.elementTracker.collected.Th <= 0) delete hero.elementTracker.collected.Th;
+                remaining -= thYield;
+            }
+            while (remaining > 0 && hero.elementTracker.getCount('U') > 0) {
+                hero.elementTracker.collected.U -= 1;
+                if (hero.elementTracker.collected.U <= 0) delete hero.elementTracker.collected.U;
+                remaining -= uYield;
+            }
+        }
+        // Fusion last (highest yield) — consumes 1 H + 1 Li per pair.
+        if ((hero.fusionMastered || hero.fusionUnlocked) && remaining > 0) {
+            const fuMul = hero.fusionMastered ? (hero.fusionEnergyMul || 1.0) : 1.0;
+            const pairYield = SmeltingSystem.FUSION_PAIR_ENERGY * fuMul;
+            while (remaining > 0
+                   && hero.elementTracker.getCount('H') > 0
+                   && hero.elementTracker.getCount('Li') > 0) {
+                hero.elementTracker.collected.H -= 1;
+                if (hero.elementTracker.collected.H <= 0) delete hero.elementTracker.collected.H;
+                hero.elementTracker.collected.Li -= 1;
+                if (hero.elementTracker.collected.Li <= 0) delete hero.elementTracker.collected.Li;
+                remaining -= pairYield;
+                // Fusion produces He as a byproduct (matches the design doc
+                // and the in-game skill description "H + Li → He + energi").
+                hero.elementTracker.collect('He', 1);
+                hero.elementTracker.discover('He');
+            }
+        }
+        return remaining;
     }
 
     _getFuelDef(entry) {

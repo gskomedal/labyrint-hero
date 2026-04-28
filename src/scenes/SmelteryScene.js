@@ -78,9 +78,10 @@ class SmelteryScene extends Phaser.Scene {
         ];
         if (this.heroRef.semiconductorUnlocked) {
             tabs.push({ id: 'refine', label: 'Raffiner' });
-            tabs.push({ id: 'tech', label: 'Teknologi' });
+            tabs.push({ id: 'semi',   label: 'Halvleder' });
+            tabs.push({ id: 'tech',   label: 'Teknologi' });
         }
-        const tabW = tabs.length > 4 ? 100 : 130;
+        const tabW = tabs.length > 4 ? 92 : 130;
         const tabY = this.py + 62;
         tabs.forEach((tab, i) => {
             const tx = this.px + 30 + i * (tabW + 10) + tabW / 2;
@@ -107,8 +108,8 @@ class SmelteryScene extends Phaser.Scene {
         // ── Content area ──────────────────────────────────────────────────────
         this._baseContentY = tabY + 30;
         this.contentY = this._baseContentY;
-        this._scrollOffsets = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
-        this._maxScrolls = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, tech: 0 };
+        this._scrollOffsets = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, semi: 0, tech: 0 };
+        this._maxScrolls = { stash: 0, smelt: 0, alloy: 0, forge: 0, refine: 0, semi: 0, tech: 0 };
         this._elementFilter = null; // null = show all, or element symbol string
 
         // Mouse wheel scrolling (per-tab offset)
@@ -162,7 +163,7 @@ class SmelteryScene extends Phaser.Scene {
 
         // Update tab button colors
         const tabIds = ['stash', 'smelt', 'alloy', 'forge'];
-        if (this.heroRef.semiconductorUnlocked) { tabIds.push('refine', 'tech'); }
+        if (this.heroRef.semiconductorUnlocked) { tabIds.push('refine', 'semi', 'tech'); }
         UIHelper.updateTabButtons(this._tabBtns, tabIds, this._tab, '#ff7722', '#554433');
 
         // Update fuel text
@@ -188,6 +189,7 @@ class SmelteryScene extends Phaser.Scene {
                 }
                 break;
             case 'refine': this._drawRefineTab(); break;
+            case 'semi':   this._drawSemiTab();   break;
             case 'tech':   this._drawTechTab();   break;
         }
 
@@ -1131,6 +1133,108 @@ class SmelteryScene extends Phaser.Scene {
             }
         });
         this._contentEndY = y + REFINING_RECIPES.length * rowStep;
+    }
+
+    // ── SEMI TAB: Refined elements + raw → Semiconductor materials ──────────
+    // Bridges the refining step (REFINING_RECIPES) and the technology step
+    // (TECH_UPGRADES). Without this, hero.alloyInventory[semiId] never grows
+    // and tech installs are unreachable.
+
+    _drawSemiTab() {
+        const hero = this.heroRef;
+        const cx = this.px + this.panelW / 2;
+        let y = this.contentY;
+        const scrollOff = this._scrollOffsets.semi || 0;
+        const visBot = this.py + this.panelH - 40;
+        const fuel = this.smelter.calculateFuelEnergy(hero);
+        const colW = Math.min(560, this.panelW - 40);
+        const startX = this.px + 20;
+
+        this._d(this.add.text(cx, y, 'Lag halvledermateriale fra raffinerte deler:', {
+            fontSize: '14px', color: '#8866ff', fontFamily: 'monospace'
+        }).setOrigin(0.5));
+        y += 22;
+
+        // Show current semiconductor inventory
+        const semiInv = hero.alloyInventory || {};
+        const semiEntries = Object.entries(semiInv).filter(([id, v]) =>
+            v > 0 && SEMICONDUCTOR_DEFS && SEMICONDUCTOR_DEFS[id]
+        );
+        if (semiEntries.length > 0) {
+            let rx = startX;
+            for (const [id, count] of semiEntries) {
+                const def = SEMICONDUCTOR_DEFS[id];
+                const col = '#' + (def.color || 0x8866ff).toString(16).padStart(6, '0');
+                const badge = this._d(this.add.text(rx, y, `${def.name}: ${count}`, {
+                    fontSize: '13px', color: col, fontFamily: 'monospace',
+                    backgroundColor: '#0a0818', padding: { x: 3, y: 1 }
+                }));
+                rx += badge.width + 8;
+                if (rx > startX + colW - 50) { rx = startX; y += 20; }
+            }
+            y += 22;
+        }
+
+        if (typeof SEMICONDUCTOR_DEFS === 'undefined') { this._contentEndY = y; return; }
+        const semis = Object.values(SEMICONDUCTOR_DEFS);
+        const rowStep = 56;
+
+        semis.forEach((semi, idx) => {
+            const baseY = y + idx * rowStep;
+            const ry = baseY - scrollOff;
+            if (ry > visBot || ry < this.contentY - rowStep) return;
+
+            const check = this.smelter.canCraftSemiconductor(semi.id, hero, fuel);
+            const col = check.canCraft ? 0x8866ff : 0x332244;
+            const hexCol = '#' + col.toString(16).padStart(6, '0');
+
+            const bg = this._d(this.add.graphics());
+            bg.fillStyle(col, 0.08);
+            bg.fillRoundedRect(startX, ry, colW, 50, 4);
+            bg.lineStyle(1, col, 0.3);
+            bg.strokeRoundedRect(startX, ry, colW, 50, 4);
+
+            this._d(this.add.text(startX + 8, ry + 4, `${semi.name} (T${semi.tier})`, {
+                fontSize: '15px', color: hexCol, fontFamily: 'monospace', fontStyle: 'bold'
+            }));
+
+            // Recipe display: refined ingredients show their refined name + count,
+            // raw element ingredients show the element symbol + collected count.
+            const inputStr = semi.recipe.map(ing => {
+                if (ing.refined) {
+                    const r = REFINING_RECIPES.find(rec => rec.id === ing.refined);
+                    const have = (hero.refinedElements || {})[ing.refined] || 0;
+                    return `${r ? r.name : ing.refined}:${have}/${ing.amount}`;
+                }
+                const have = hero.elementTracker.getCount(ing.symbol);
+                return `${ing.symbol}:${have}/${ing.amount}`;
+            }).join('  ');
+            this._d(this.add.text(startX + 8, ry + 22, inputStr, {
+                fontSize: '12px', color: '#665588', fontFamily: 'monospace',
+                wordWrap: { width: colW - 100 }
+            }));
+            this._d(this.add.text(startX + 8, ry + 36, `${check.energyCost} energi`, {
+                fontSize: '12px', color: '#554477', fontFamily: 'monospace'
+            }));
+
+            if (check.canCraft) {
+                const btn = this._d(this.add.text(startX + colW - 70, ry + 16, '[ Lag ]', {
+                    fontSize: '14px', color: '#8866ff', fontFamily: 'monospace', fontStyle: 'bold'
+                }).setInteractive({ useHandCursor: true }));
+                btn.on('pointerover', () => btn.setColor('#aa88ff'));
+                btn.on('pointerout', () => btn.setColor('#8866ff'));
+                btn.on('pointerdown', () => {
+                    const result = this.smelter.craftSemiconductor(semi.id, hero);
+                    if (result.success) {
+                        this.smelter.consumeFuel(hero, result.energyCost);
+                        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${semi.name}`, color: '#8866ff' });
+                        Audio.playPickup();
+                        this._refresh();
+                    }
+                });
+            }
+        });
+        this._contentEndY = y + semis.length * rowStep;
     }
 
     // ── TECH TAB: Install permanent technology upgrades ─────────────────────

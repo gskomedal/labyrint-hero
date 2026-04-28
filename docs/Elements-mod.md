@@ -1,7 +1,9 @@
 # Labyrint Hero – Elements-modifikasjon
-**Versjon:** 0.5 (fase 1–5 implementert)
-**Sist oppdatert:** 2026-04-16
+**Versjon:** 0.51 (fase 1–5 implementert + energi-/halvleder-fixes)
+**Sist oppdatert:** 2026-04-28
 **Status:** Alle 5 faser implementert. 118 grunnstoffer, 28 transuranske synteseoppskrifter, partikkelakselerator, fysiker-skillsti, fisjon/fusjon-energi og «Guds periodiske system»-endgame.
+
+**v0.50-oppdatering:** Halvleder-fane lagt til i Smeltery (bygger bro mellom raffinerte deler og teknologi-installasjon — tidligere var hele tech-sporet låst). He kan nå faktisk samles fra gasslommer fra verden 10 (uniform fordeling). D-T fusjon krever nå både H og Li samtidig (`min(H, Li)` per par à 230 energi) og produserer He som biprodukt. Virtuelt brensel (U/Th/H/Li) blir faktisk forbrukt fra elementtelleren ved bruk. Edelgass-fullføring gir nå reell fusjons-energi (base-rate, uten Fysiker T4-multiplikator).
 
 **v0.40-oppdatering:** 2 nye mineraler (molybdenitt, barytt) og 5 nye legeringer + 8 nye molekyler gir praktisk bruk for Mn, Mo, W, Ta, Ba, B, Ce, La, Nd, Zn. Bombeskade er separert fra potionskala og skalerer +60% per verden (mot +40% før) med flat bombgulv; radius +1 fra verden 5 og +2 fra verden 8. Geolog/Metallurg/Kjemiker har fått T4-ferdigheter (Geode-splitter, Reforge, Volatil mestring) og en 3-sti-synergi Transmutasjon (5 → 1 nabo på atomnummer). Se CHANGELOG v0.40 for full diff.
 
@@ -234,8 +236,8 @@ Energi er en ressurs som kreves for smelteprosesser og avansert teknologi. Spill
 | Trekull | 1 | 2 | Ingen | Laget av tre i begrenset luft |
 | Olje (råolje) | 2 | 8 | Bore-skill | Finnes i dype lag |
 | Naturgass | 2 | 10 | Bore-skill | Finnes med olje |
-| Fisjon (U/Th) | 3 | 50/40 per enhet | Fysiker T3 | U og Th gir virtuell energi (×2 med skill) |
-| Fusjon (D-T) | 4 | H:80, Li:150 | Fysiker T4 | Deuterium + Li (tritiumkilde), ×5 med skill |
+| Fisjon (U/Th) | 3 | 50/40 per enhet | Fysiker T3 | U og Th gir virtuell energi (×2 med skill). Forbrukes fra elementtelleren når brukt |
+| Fusjon (D-T) | 4 | 230 per (H+Li)-par | Fysiker T4 / Edelgasser | Krever 1 H + 1 Li per par (`min(H, Li)`). Produserer 1 He som biprodukt. ×5 med Fysiker T4-skill, ×1 via edelgass-fullføring |
 
 ### 7.2 Energiteknologi-tre
 
