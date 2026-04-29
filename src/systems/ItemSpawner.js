@@ -304,12 +304,15 @@ class ItemSpawner {
                             this._spawnFuelAt(tile.x, tile.y, fuel);
                         }
                     }
-                    // Noble gas collection: each gas pocket awards 1-2 random noble gases
+                    // Noble gas collection: each gas pocket awards 1-2 random noble gases.
+                    // Distribution is uniform over the available list. Previously a
+                    // Math.min((wn-10)/3) clamp on the index made He effectively
+                    // unreachable until world 22, blocking accelerator recipes
+                    // (Cm/Bk/Cf/Md all require He as projectile).
                     if (nobleGases && scene.hero && scene.hero.elementTracker) {
                         const count = 1 + Math.floor(Math.random() * 2);
                         for (let gi = 0; gi < count; gi++) {
-                            const gasIdx = Math.min(Math.floor(Math.random() * nobleGases.length), Math.floor((wn - 10) / 3));
-                            const gas = nobleGases[Math.min(gasIdx, nobleGases.length - 1)];
+                            const gas = nobleGases[Math.floor(Math.random() * nobleGases.length)];
                             scene.hero.elementTracker.collect(gas, 1);
                             scene.hero.elementTracker.discover(gas);
                             EventBus.emit('floatingText', { gx: room.tiles[0].x, gy: room.tiles[0].y, msg: `Edelgass samlet: ${gas}`, color: '#aaccff' });
