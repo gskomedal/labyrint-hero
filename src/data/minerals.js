@@ -8,49 +8,49 @@ const MINERAL_DEFS = {
     quartz: {
         id: 'quartz', name: 'Kvarts', type: 'mineral', subtype: 'ore',
         formula: 'SiO\u2082', tier: 1, color: 0xeeeeff,
-        yields: [{ symbol: 'Si', amount: 1, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.5 }],
+        yields: [{ symbol: 'Si', amount: 1, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 1.0 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
         desc: 'Vanlig mineral. Gir silisium og oksygen.'
     },
     hematite: {
         id: 'hematite', name: 'Hematitt', type: 'mineral', subtype: 'ore',
         formula: 'Fe\u2082O\u2083', tier: 1, color: 0x8b3a3a,
-        yields: [{ symbol: 'Fe', amount: 5, chance: 1.0 }, { symbol: 'O', amount: 3, chance: 0.3 }],
+        yields: [{ symbol: 'Fe', amount: 5, chance: 1.0 }, { symbol: 'O', amount: 3, chance: 0.85 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'R\u00f8dlig jernmalm. Rik jernkilde.'
     },
     magnetite: {
         id: 'magnetite', name: 'Magnetitt', type: 'mineral', subtype: 'ore',
         formula: 'Fe\u2083O\u2084', tier: 1, color: 0x333344,
-        yields: [{ symbol: 'Fe', amount: 6, chance: 1.0 }],
+        yields: [{ symbol: 'Fe', amount: 6, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.85 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Sort jernmalm. Magnetisk! Rikeste jernkilden.'
     },
     limestone: {
         id: 'limestone', name: 'Kalkstein', type: 'mineral', subtype: 'ore',
         formula: 'CaCO\u2083', tier: 1, color: 0xccccbb,
-        yields: [{ symbol: 'Ca', amount: 2, chance: 1.0 }, { symbol: 'C', amount: 3, chance: 0.8 }],
+        yields: [{ symbol: 'Ca', amount: 2, chance: 1.0 }, { symbol: 'C', amount: 3, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.7 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
-        desc: 'Hvitlig stein. Gir kalsium og karbon.'
+        desc: 'Hvitlig stein. Gir kalsium, karbon og oksygen.'
     },
     halite: {
         id: 'halite', name: 'Halit', type: 'mineral', subtype: 'ore',
         formula: 'NaCl', tier: 1, color: 0xeeeedd,
-        yields: [{ symbol: 'Na', amount: 1, chance: 1.0 }, { symbol: 'Cl', amount: 1, chance: 0.7 }],
+        yields: [{ symbol: 'Na', amount: 1, chance: 1.0 }, { symbol: 'Cl', amount: 1, chance: 1.0 }],
         energyCost: 1, smeltingTime: 1, stackSize: 10,
         desc: 'Steinsalt. Kubiske krystaller.'
     },
     bauxite: {
         id: 'bauxite', name: 'Bauxitt', type: 'mineral', subtype: 'ore',
         formula: 'Al\u2082O\u2083', tier: 1, color: 0x995533,
-        yields: [{ symbol: 'Al', amount: 5, chance: 1.0 }],
+        yields: [{ symbol: 'Al', amount: 5, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.85 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'R\u00f8dbrun jord. Rik aluminiumskilde.'
     },
     olivine: {
         id: 'olivine', name: 'Olivin', type: 'mineral', subtype: 'ore',
         formula: '(Mg,Fe)\u2082SiO\u2084', tier: 1, color: 0x88aa44,
-        yields: [{ symbol: 'Mg', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.5 }, { symbol: 'Si', amount: 2, chance: 0.3 }],
+        yields: [{ symbol: 'Mg', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.85 }, { symbol: 'Si', amount: 2, chance: 0.7 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Gr\u00f8nt silikatmineral fra dypet.'
     },
@@ -64,14 +64,14 @@ const MINERAL_DEFS = {
     sylvite: {
         id: 'sylvite', name: 'Sylvitt', type: 'mineral', subtype: 'ore',
         formula: 'KCl', tier: 1, color: 0xddaa88,
-        yields: [{ symbol: 'K', amount: 4, chance: 1.0 }, { symbol: 'Cl', amount: 3, chance: 0.8 }],
+        yields: [{ symbol: 'K', amount: 4, chance: 1.0 }, { symbol: 'Cl', amount: 3, chance: 1.0 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
         desc: 'Kaliumklorid. Viktig for krutt og kjemi.'
     },
     niter: {
         id: 'niter', name: 'Salpeter', type: 'mineral', subtype: 'ore',
         formula: 'KNO\u2083', tier: 2, color: 0xccccbb,
-        yields: [{ symbol: 'K', amount: 3, chance: 1.0 }, { symbol: 'N', amount: 3, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.5 }],
+        yields: [{ symbol: 'K', amount: 3, chance: 1.0 }, { symbol: 'N', amount: 3, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.85 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
         desc: 'Naturlig salpeter. Gir kalium og nitrogen.'
     },
@@ -80,35 +80,35 @@ const MINERAL_DEFS = {
     borax: {
         id: 'borax', name: 'Boraks', type: 'mineral', subtype: 'ore',
         formula: 'Na₂B₄O₇', tier: 2, color: 0xddddcc,
-        yields: [{ symbol: 'B', amount: 4, chance: 1.0 }, { symbol: 'Na', amount: 2, chance: 0.5 }],
+        yields: [{ symbol: 'B', amount: 4, chance: 1.0 }, { symbol: 'Na', amount: 2, chance: 0.85 }, { symbol: 'O', amount: 3, chance: 0.6 }],
         energyCost: 1, smeltingTime: 2, stackSize: 10,
         desc: 'Hvitt bor-mineral. Viktig kilde til bor.'
     },
     thortveitite: {
         id: 'thortveitite', name: 'Thortveititt', type: 'mineral', subtype: 'ore',
         formula: 'Sc₂Si₂O₇', tier: 2, color: 0xaabb99,
-        yields: [{ symbol: 'Sc', amount: 2, chance: 1.0 }, { symbol: 'Si', amount: 2, chance: 0.5 }],
+        yields: [{ symbol: 'Sc', amount: 2, chance: 1.0 }, { symbol: 'Si', amount: 2, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Sjelden skandiumkilde. Oppkalt etter norsk mineralog.'
     },
     pyrite: {
         id: 'pyrite', name: 'Pyritt', type: 'mineral', subtype: 'ore',
         formula: 'FeS\u2082', tier: 2, color: 0xccbb44,
-        yields: [{ symbol: 'Fe', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 4, chance: 0.8 }],
+        yields: [{ symbol: 'Fe', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 4, chance: 1.0 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Narregull! Gulaktig, men gir mye jern og svovel.'
     },
     ilmenite: {
         id: 'ilmenite', name: 'Ilmenitt', type: 'mineral', subtype: 'ore',
         formula: 'FeTiO\u2083', tier: 2, color: 0x222233,
-        yields: [{ symbol: 'Fe', amount: 2, chance: 0.7 }, { symbol: 'Ti', amount: 3, chance: 1.0 }],
+        yields: [{ symbol: 'Fe', amount: 2, chance: 1.0 }, { symbol: 'Ti', amount: 3, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Sort mineral. Titankilde.'
     },
     apatite: {
         id: 'apatite', name: 'Apatitt', type: 'mineral', subtype: 'ore',
         formula: 'Ca\u2085(PO\u2084)\u2083(OH)', tier: 2, color: 0x44aa88,
-        yields: [{ symbol: 'Ca', amount: 1, chance: 0.5 }, { symbol: 'P', amount: 1, chance: 1.0 }],
+        yields: [{ symbol: 'Ca', amount: 1, chance: 1.0 }, { symbol: 'P', amount: 1, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.7 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Gr\u00f8nn/bl\u00e5 mineral. Fosforkilde.'
     },
@@ -117,56 +117,56 @@ const MINERAL_DEFS = {
     zircon: {
         id: 'zircon', name: 'Zirkon', type: 'mineral', subtype: 'ore',
         formula: 'ZrSiO₄', tier: 3, color: 0xccaa77,
-        yields: [{ symbol: 'Zr', amount: 3, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'Zr', amount: 3, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Robust silikatmineral. Rik zirkoniumkilde.'
     },
     pentlandite: {
         id: 'pentlandite', name: 'Pentlanditt', type: 'mineral', subtype: 'ore',
         formula: '(Fe,Ni)₉S₈', tier: 3, color: 0x998844,
-        yields: [{ symbol: 'Ni', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.6 }, { symbol: 'S', amount: 2, chance: 0.4 }],
+        yields: [{ symbol: 'Ni', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.85 }, { symbol: 'S', amount: 2, chance: 0.7 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Viktigste nikkelmalm. Gyllen metallisk glans.'
     },
     spodumene: {
         id: 'spodumene', name: 'Spodumen', type: 'mineral', subtype: 'ore',
         formula: 'LiAlSi₂O₆', tier: 3, color: 0xddccee,
-        yields: [{ symbol: 'Li', amount: 3, chance: 1.0 }, { symbol: 'Al', amount: 1, chance: 0.4 }],
+        yields: [{ symbol: 'Li', amount: 3, chance: 1.0 }, { symbol: 'Al', amount: 1, chance: 0.7 }, { symbol: 'Si', amount: 2, chance: 0.5 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Viktigste litiumkilde. Brukes i batteriproduksjon.'
     },
     cobaltite: {
         id: 'cobaltite', name: 'Kobaltitt', type: 'mineral', subtype: 'ore',
         formula: 'CoAsS', tier: 3, color: 0x5566aa,
-        yields: [{ symbol: 'Co', amount: 3, chance: 1.0 }, { symbol: 'As', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'Co', amount: 3, chance: 1.0 }, { symbol: 'As', amount: 1, chance: 0.8 }, { symbol: 'S', amount: 1, chance: 0.7 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Sølvgrå koboltmalm. Gir intens blåfarge.'
     },
     chalcopyrite: {
         id: 'chalcopyrite', name: 'Kalkopyritt', type: 'mineral', subtype: 'ore',
         formula: 'CuFeS\u2082', tier: 3, color: 0xbb9933,
-        yields: [{ symbol: 'Cu', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.5 }, { symbol: 'S', amount: 2, chance: 0.3 }],
+        yields: [{ symbol: 'Cu', amount: 3, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.85 }, { symbol: 'S', amount: 2, chance: 0.7 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Messinggul. Rik kobberkilde.'
     },
     malachite: {
         id: 'malachite', name: 'Malakit', type: 'mineral', subtype: 'ore',
         formula: 'Cu\u2082CO\u2083(OH)\u2082', tier: 3, color: 0x22bb66,
-        yields: [{ symbol: 'Cu', amount: 5, chance: 1.0 }],
+        yields: [{ symbol: 'Cu', amount: 5, chance: 1.0 }, { symbol: 'C', amount: 2, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Vakker klargr\u00f8nn. Svært rik kobberkilde.'
     },
     sphalerite: {
         id: 'sphalerite', name: 'Sfaleritt', type: 'mineral', subtype: 'ore',
         formula: 'ZnS', tier: 3, color: 0x554433,
-        yields: [{ symbol: 'Zn', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.6 }],
+        yields: [{ symbol: 'Zn', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 1.0 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Sort/brun. Viktigste sinkkilde.'
     },
     chromite: {
         id: 'chromite', name: 'Kromitt', type: 'mineral', subtype: 'ore',
         formula: 'FeCr\u2082O\u2084', tier: 3, color: 0x334433,
-        yields: [{ symbol: 'Cr', amount: 4, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.4 }],
+        yields: [{ symbol: 'Cr', amount: 4, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'M\u00f8rk malmstein. Eneste kromkilde.'
     },
@@ -175,56 +175,56 @@ const MINERAL_DEFS = {
     columbite: {
         id: 'columbite', name: 'Kolumbitt', type: 'mineral', subtype: 'ore',
         formula: '(Fe,Mn)(Nb,Ta)₂O₆', tier: 4, color: 0x443322,
-        yields: [{ symbol: 'Nb', amount: 2, chance: 1.0 }, { symbol: 'Ta', amount: 1, chance: 0.4 }, { symbol: 'Fe', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'Nb', amount: 2, chance: 1.0 }, { symbol: 'Ta', amount: 1, chance: 0.65 }, { symbol: 'Fe', amount: 1, chance: 0.55 }, { symbol: 'Mn', amount: 1, chance: 0.45 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'Sort niob-tantal-malm. Viktig for elektronikk.'
     },
     monazite: {
         id: 'monazite', name: 'Monazitt', type: 'mineral', subtype: 'ore',
         formula: '(Ce,La,Nd)PO₄', tier: 4, color: 0xcc8855,
-        yields: [{ symbol: 'Ce', amount: 2, chance: 1.0 }, { symbol: 'La', amount: 1, chance: 0.6 }, { symbol: 'Nd', amount: 1, chance: 0.4 }],
+        yields: [{ symbol: 'Ce', amount: 2, chance: 1.0 }, { symbol: 'La', amount: 1, chance: 0.8 }, { symbol: 'Nd', amount: 1, chance: 0.65 }, { symbol: 'P', amount: 1, chance: 0.5 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Brun fosfatmalm. Hovedkilde til sjeldne jordarter.'
     },
     bastnaesite: {
         id: 'bastnaesite', name: 'Bastnäsitt', type: 'mineral', subtype: 'ore',
         formula: '(Ce,La)(CO₃)F', tier: 4, color: 0xddaa66,
-        yields: [{ symbol: 'Ce', amount: 2, chance: 1.0 }, { symbol: 'La', amount: 1, chance: 0.5 }, { symbol: 'F', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'Ce', amount: 2, chance: 1.0 }, { symbol: 'La', amount: 1, chance: 0.75 }, { symbol: 'F', amount: 1, chance: 0.6 }, { symbol: 'C', amount: 1, chance: 0.5 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Gulbrun lantanide-malm. Oppkalt etter Bastnäs i Sverige.'
     },
     greenockite: {
         id: 'greenockite', name: 'Greenockitt', type: 'mineral', subtype: 'ore',
         formula: 'CdS', tier: 4, color: 0xddcc22,
-        yields: [{ symbol: 'Cd', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        yields: [{ symbol: 'Cd', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 1.0 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Gul kadmiummalm. Giftig – håndter med forsiktighet!'
     },
     wolframite: {
         id: 'wolframite', name: 'Wolframitt', type: 'mineral', subtype: 'ore',
         formula: '(Fe,Mn)WO₄', tier: 4, color: 0x443344,
-        yields: [{ symbol: 'W', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }, { symbol: 'Mn', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'W', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.75 }, { symbol: 'Mn', amount: 1, chance: 0.55 }, { symbol: 'O', amount: 2, chance: 0.5 }],
         energyCost: 5, smeltingTime: 6, stackSize: 10,
         desc: 'Mørk tungsteinmalm. Gir wolfram – hardeste metallet.'
     },
     galena: {
         id: 'galena', name: 'Galena', type: 'mineral', subtype: 'ore',
         formula: 'PbS', tier: 4, color: 0x667788,
-        yields: [{ symbol: 'Pb', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.5 }, { symbol: 'Ag', amount: 1, chance: 0.15 }],
+        yields: [{ symbol: 'Pb', amount: 3, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.85 }, { symbol: 'Ag', amount: 1, chance: 0.15 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Gr\u00e5 metallisk. Bly-kilde, noen ganger med s\u00f8lv.'
     },
     cassiterite: {
         id: 'cassiterite', name: 'Kassiteritt', type: 'mineral', subtype: 'ore',
         formula: 'SnO\u2082', tier: 4, color: 0x554422,
-        yields: [{ symbol: 'Sn', amount: 3, chance: 1.0 }],
+        yields: [{ symbol: 'Sn', amount: 3, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.85 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Brun/sort. Rik tinnkilde – n\u00f8dvendig for bronse.'
     },
     cinnabar: {
         id: 'cinnabar', name: 'Sinnobar', type: 'mineral', subtype: 'ore',
         formula: 'HgS', tier: 4, color: 0xcc2222,
-        yields: [{ symbol: 'Hg', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.7 }],
+        yields: [{ symbol: 'Hg', amount: 1, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 1.0 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Knallr\u00f8d. Kvikks\u00f8lvkilde. Giftig!'
     },
@@ -263,21 +263,21 @@ const MINERAL_DEFS = {
     uraninite: {
         id: 'uraninite', name: 'Uraninitt', type: 'mineral', subtype: 'ore',
         formula: 'UO\u2082', tier: 6, color: 0x224422,
-        yields: [{ symbol: 'U', amount: 1, chance: 1.0 }],
+        yields: [{ symbol: 'U', amount: 1, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.85 }],
         energyCost: 5, smeltingTime: 8, stackSize: 10,
         desc: 'Sort og tung. Radioaktivt! Urankilde.'
     },
     molybdenite: {
         id: 'molybdenite', name: 'Molybdenitt', type: 'mineral', subtype: 'ore',
         formula: 'MoS\u2082', tier: 4, color: 0x667788,
-        yields: [{ symbol: 'Mo', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        yields: [{ symbol: 'Mo', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 1.0 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'Sølvgrå, flisete krystaller. Molybdenkilde.'
     },
     barite: {
         id: 'barite', name: 'Barytt', type: 'mineral', subtype: 'ore',
         formula: 'BaSO\u2084', tier: 3, color: 0xccbb99,
-        yields: [{ symbol: 'Ba', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'Ba', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Tungt hvitt mineral. Bariumkilde, brukes i fyrverkeri.'
     },
@@ -288,7 +288,7 @@ const MINERAL_DEFS = {
     vanadinite: {
         id: 'vanadinite', name: 'Vanadinitt', type: 'mineral', subtype: 'ore',
         formula: 'Pb\u2085(VO\u2084)\u2083Cl', tier: 3, color: 0xcc6633,
-        yields: [{ symbol: 'V', amount: 2, chance: 1.0 }, { symbol: 'Pb', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'V', amount: 2, chance: 1.0 }, { symbol: 'Pb', amount: 1, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.5 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Oransjrøde krystaller. Viktigste vanadiumkilde.'
     },
@@ -297,14 +297,14 @@ const MINERAL_DEFS = {
     bromargyryte: {
         id: 'bromargyryte', name: 'Bromargyryt', type: 'mineral', subtype: 'ore',
         formula: 'AgBr', tier: 4, color: 0xccaa44,
-        yields: [{ symbol: 'Br', amount: 2, chance: 1.0 }, { symbol: 'Ag', amount: 1, chance: 0.4 }],
+        yields: [{ symbol: 'Br', amount: 2, chance: 1.0 }, { symbol: 'Ag', amount: 1, chance: 0.7 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Gulaktig sølvhalid. Sjelden bromkilde.'
     },
     iodyrite: {
         id: 'iodyrite', name: 'Jodyritt', type: 'mineral', subtype: 'ore',
         formula: 'AgI', tier: 4, color: 0x886644,
-        yields: [{ symbol: 'I', amount: 2, chance: 1.0 }, { symbol: 'Ag', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'I', amount: 2, chance: 1.0 }, { symbol: 'Ag', amount: 1, chance: 0.65 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Gult sølvjodid. Sjelden jodkilde.'
     },
@@ -313,21 +313,21 @@ const MINERAL_DEFS = {
     germanite: {
         id: 'germanite', name: 'Germanitt', type: 'mineral', subtype: 'ore',
         formula: 'Cu\u2082\u2086Fe\u2084Ge\u2084S\u2083\u2082', tier: 4, color: 0x998877,
-        yields: [{ symbol: 'Ge', amount: 2, chance: 1.0 }, { symbol: 'Cu', amount: 1, chance: 0.5 }, { symbol: 'S', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'Ge', amount: 2, chance: 1.0 }, { symbol: 'Cu', amount: 1, chance: 0.75 }, { symbol: 'S', amount: 1, chance: 0.6 }, { symbol: 'Fe', amount: 1, chance: 0.3 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'Sjelden kobber-germanium-sulfid. Halvlederkilde.'
     },
     stibnite: {
         id: 'stibnite', name: 'Stibnitt', type: 'mineral', subtype: 'ore',
         formula: 'Sb\u2082S\u2083', tier: 3, color: 0x555566,
-        yields: [{ symbol: 'Sb', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.6 }],
+        yields: [{ symbol: 'Sb', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 1.0 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Stålgrå nåler. Antimonkilde.'
     },
     gallite: {
         id: 'gallite', name: 'Gallitt', type: 'mineral', subtype: 'ore',
         formula: 'CuGaS\u2082', tier: 4, color: 0xaabbdd,
-        yields: [{ symbol: 'Ga', amount: 2, chance: 1.0 }, { symbol: 'Cu', amount: 1, chance: 0.4 }],
+        yields: [{ symbol: 'Ga', amount: 2, chance: 1.0 }, { symbol: 'Cu', amount: 1, chance: 0.7 }, { symbol: 'S', amount: 2, chance: 0.6 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Sjelden galliumsulfid. Viktig for halvledere.'
     },
@@ -336,42 +336,42 @@ const MINERAL_DEFS = {
     xenotime: {
         id: 'xenotime', name: 'Xenotim', type: 'mineral', subtype: 'ore',
         formula: 'YPO\u2084', tier: 4, color: 0xbbaa88,
-        yields: [{ symbol: 'Y', amount: 2, chance: 1.0 }, { symbol: 'Dy', amount: 1, chance: 0.4 }, { symbol: 'Er', amount: 1, chance: 0.3 }, { symbol: 'Yb', amount: 1, chance: 0.2 }],
+        yields: [{ symbol: 'Y', amount: 2, chance: 1.0 }, { symbol: 'Dy', amount: 1, chance: 0.6 }, { symbol: 'Er', amount: 1, chance: 0.5 }, { symbol: 'Yb', amount: 1, chance: 0.4 }, { symbol: 'P', amount: 1, chance: 0.4 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'Brun fosfatmineral. Rik på tunge sjeldne jordartsmetaller.'
     },
     samarskite: {
         id: 'samarskite', name: 'Samarskitt', type: 'mineral', subtype: 'ore',
         formula: '(Y,Ce,U)(Nb,Ta)O\u2084', tier: 5, color: 0x332211,
-        yields: [{ symbol: 'Sm', amount: 1, chance: 0.7 }, { symbol: 'Gd', amount: 1, chance: 0.5 }, { symbol: 'Pr', amount: 1, chance: 0.4 }, { symbol: 'Nb', amount: 1, chance: 0.3 }],
+        yields: [{ symbol: 'Sm', amount: 1, chance: 0.85 }, { symbol: 'Gd', amount: 1, chance: 0.7 }, { symbol: 'Pr', amount: 1, chance: 0.55 }, { symbol: 'Nb', amount: 1, chance: 0.5 }, { symbol: 'Y', amount: 1, chance: 0.4 }],
         energyCost: 5, smeltingTime: 6, stackSize: 10,
         desc: 'Sort, radioaktivt. Kilde til samarium og gadolinium.'
     },
     celestine: {
         id: 'celestine', name: 'Celestin', type: 'mineral', subtype: 'ore',
         formula: 'SrSO\u2084', tier: 3, color: 0xaaccee,
-        yields: [{ symbol: 'Sr', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'Sr', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 2, smeltingTime: 3, stackSize: 10,
         desc: 'Himmelblå krystaller. Strontiumkilde.'
     },
     pollucite: {
         id: 'pollucite', name: 'Pollucitt', type: 'mineral', subtype: 'ore',
         formula: 'CsAlSi\u2082O\u2086', tier: 5, color: 0xeeddcc,
-        yields: [{ symbol: 'Cs', amount: 2, chance: 1.0 }, { symbol: 'Rb', amount: 1, chance: 0.4 }],
+        yields: [{ symbol: 'Cs', amount: 2, chance: 1.0 }, { symbol: 'Rb', amount: 1, chance: 0.7 }, { symbol: 'Al', amount: 1, chance: 0.55 }, { symbol: 'Si', amount: 1, chance: 0.4 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'Sjeldent zeolitt-mineral. Eneste kommersielle cesiumkilde.'
     },
     calaverite: {
         id: 'calaverite', name: 'Calaveritt', type: 'mineral', subtype: 'ore',
         formula: 'AuTe\u2082', tier: 5, color: 0xddcc44,
-        yields: [{ symbol: 'Te', amount: 2, chance: 1.0 }, { symbol: 'Au', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'Te', amount: 2, chance: 1.0 }, { symbol: 'Au', amount: 1, chance: 0.8 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
         desc: 'Gulltellurid. Sjelden kilde til tellur og gull.'
     },
     indite_ore: {
         id: 'indite_ore', name: 'Inditt', type: 'mineral', subtype: 'ore',
         formula: 'FeIn\u2082S\u2084', tier: 4, color: 0x7788aa,
-        yields: [{ symbol: 'In', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'In', amount: 2, chance: 1.0 }, { symbol: 'Fe', amount: 1, chance: 0.85 }, { symbol: 'S', amount: 2, chance: 0.7 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
         desc: 'Sjelden indiumsulfid. Viktig for berøringsskjermer.'
     },
@@ -380,7 +380,7 @@ const MINERAL_DEFS = {
     thorite: {
         id: 'thorite', name: 'Thoritt', type: 'mineral', subtype: 'ore',
         formula: 'ThSiO\u2084', tier: 6, color: 0x446644,
-        yields: [{ symbol: 'Th', amount: 2, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.5 }],
+        yields: [{ symbol: 'Th', amount: 2, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
         energyCost: 5, smeltingTime: 7, stackSize: 10,
         desc: 'Radioaktivt thoriummineral. Alternativ kjernebrensel.'
     },

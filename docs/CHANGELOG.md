@@ -2,6 +2,27 @@
 
 ---
 
+## v0.51 – 2026-05-02
+
+### Feilrettinger
+- **Smelting av mineraler ga ikke alle forventede grunnstoffer (#138):** Sekundære yields i `MINERAL_DEFS` hadde for lave sjanser (0.3–0.5), slik at viktige grunnstoffer som C fra kalkstein, Fe fra ilmenitt og S fra pyritt uteble ved de fleste smeltinger. Alle ore-mineraler er gjennomgått: sjanser for elementer som er tydelig representert i mineralformelen er hevet til 0.7–1.0, mens rene sporstoff-yields (Ag i galena, alle PGM-yields) beholdes lave som tiltenkt "lotteri-belønning". Eksempler på nøkkelendringer:
+  - Kalkstein (CaCO₃): C-sjanse 0.8 → **1.0**, lagt til O (0.7)
+  - Olivin (Mg,Fe)₂SiO₄: Fe-sjanse 0.5 → **0.85**, Si-sjanse 0.3 → **0.7**, lagt til O (0.6)
+  - Ilmenitt (FeTiO₃): Fe-sjanse 0.7 → **1.0**, lagt til O (0.6)
+  - Pyritt (FeS₂): S-sjanse 0.8 → **1.0**
+  - Magnetitt (Fe₃O₄): lagt til O (0.85)
+  - Bauxitt (Al₂O₃): lagt til O (0.85)
+  - Malakit (Cu₂CO₃(OH)₂): lagt til C (0.85) og O (0.6)
+  - Kalkopyritt (CuFeS₂): Fe-sjanse 0.5 → **0.85**, S-sjanse 0.3 → **0.7**
+  - Kassiteritt (SnO₂): lagt til O (0.85)
+  - Apatitt: Ca-sjanse 0.5 → **1.0**, lagt til O (0.7)
+  - 30+ øvrige mineraler: tilsvarende oppjusteringer av secondary yields
+
+### Tekniske endringer
+- minerals.js: Secondary yield-sjanser revidert for samtlige 45 ore-mineraler. Krystaller uendret (lave element-sjanser er tilsiktet da effektbonusen er primærverdien). PGM-ore og sporstoff-yields som Ag i galena beholdes uendret
+
+---
+
 ## v0.50 – 2026-04-28
 
 ### Feilrettinger
