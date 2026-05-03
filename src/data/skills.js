@@ -1,7 +1,7 @@
 // ─── Labyrint Hero – Skill Tree ───────────────────────────────────────────────
 // Consolidated specialization paths, each with 3 tiers.
-// Tier 1 is always unlocked. Tier 2 requires T1 maxed from same path.
-// Tier 3 requires T2 maxed from same path.
+// Tier 1 is always unlocked. Tier 2 requires ≥1 stack in T1 from same path.
+// Tier 3 requires ≥1 stack in T2 from same path.
 // Each skill can generally be stacked 2–3× (maxStack), T3 skills only 1×.
 
 // ── Legacy skill migration ───────────────────────────────────────────────────
@@ -342,8 +342,8 @@ function _countSkill(hero, id) {
 /**
  * Check whether a skill slot in the tree is available to pick.
  *   tier 0 (T1) – always available (if not maxed)
- *   tier 1 (T2) – need T1 maxed from same path
- *   tier 2 (T3) – need T2 maxed from same path
+ *   tier 1 (T2) – need ≥1 stack in T1 from same path
+ *   tier 2 (T3) – need ≥1 stack in T2 from same path
  */
 function isSkillUnlocked(hero, pathIndex, tierIndex) {
     const path  = SKILL_TREE_PATHS[pathIndex];
@@ -369,9 +369,9 @@ function isSkillUnlocked(hero, pathIndex, tierIndex) {
 
     if (tierIndex === 0) return true;   // T1 always unlocked
 
-    // Needs previous tier to be fully maxed before advancing
+    // Needs at least 1 stack in the previous tier before advancing
     const prevSkill = path.tiers[tierIndex - 1];
-    return _countSkill(hero, prevSkill.id) >= prevSkill.maxStack;
+    return _countSkill(hero, prevSkill.id) >= 1;
 }
 
 /**
