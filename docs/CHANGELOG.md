@@ -2,9 +2,10 @@
 
 ---
 
-## v0.51 – 2026-05-02
+## v0.51 – 2026-05-03
 
 ### Feilrettinger
+- **Ferdighetstreet krevde maks stack i forrige tier for å gå videre (#135):** `isSkillUnlocked()` i `src/data/skills.js` krevde `_countSkill(hero, prevSkill.id) >= prevSkill.maxStack`, noe som med f.eks. Geolog T1 "Malmøye" (maxStack 3) tvang spilleren til å bruke tre ferdighetspunkter på samme ferdighet før T2 ble tilgjengelig. Betingelsen er endret til `>= 1`: ett punkt i forrige tier er nå nok til å låse opp neste tier, men man kan fortsatt stable for de ekstra bonusene
 - **Smelting av mineraler ga ikke alle forventede grunnstoffer (#138):** Sekundære yields i `MINERAL_DEFS` hadde for lave sjanser (0.3–0.5), slik at viktige grunnstoffer som C fra kalkstein, Fe fra ilmenitt og S fra pyritt uteble ved de fleste smeltinger. Alle ore-mineraler er gjennomgått: sjanser for elementer som er tydelig representert i mineralformelen er hevet til 0.7–1.0, mens rene sporstoff-yields (Ag i galena, alle PGM-yields) beholdes lave som tiltenkt "lotteri-belønning". Eksempler på nøkkelendringer:
   - Kalkstein (CaCO₃): C-sjanse 0.8 → **1.0**, lagt til O (0.7)
   - Olivin (Mg,Fe)₂SiO₄: Fe-sjanse 0.5 → **0.85**, Si-sjanse 0.3 → **0.7**, lagt til O (0.6)
@@ -19,6 +20,7 @@
   - 30+ øvrige mineraler: tilsvarende oppjusteringer av secondary yields
 
 ### Tekniske endringer
+- skills.js: `isSkillUnlocked()` — betingelse for tier-fremdrift endret fra `>= prevSkill.maxStack` til `>= 1`. Fil- og funksjonskommentarer oppdatert tilsvarende
 - minerals.js: Secondary yield-sjanser revidert for samtlige 45 ore-mineraler. Krystaller uendret (lave element-sjanser er tilsiktet da effektbonusen er primærverdien). PGM-ore og sporstoff-yields som Ag i galena beholdes uendret
 
 ---
