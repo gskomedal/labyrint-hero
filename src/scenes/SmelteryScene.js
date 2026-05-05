@@ -245,7 +245,8 @@ class SmelteryScene extends Phaser.Scene {
         const collected = hero.elementTracker.collected;
         const leftX = this.px + 10;
         const maxW = this.panelW - 40;
-        let y = this.contentY;
+        const filterStartY = this.contentY;
+        let y = filterStartY;
         let bx = leftX;
 
         // "Alle" reset button
@@ -269,7 +270,15 @@ class SmelteryScene extends Phaser.Scene {
             recipeElements.add(symbol);
         }
 
-        for (const symbol of recipeElements) {
+        // Sort by atomic number so the filter row follows periodic-table order
+        const sortedSymbols = Array.from(recipeElements).sort((a, b) => {
+            const an = (typeof ELEMENTS !== 'undefined' && ELEMENTS[a]) ? ELEMENTS[a].atomicNumber : 999;
+            const bn = (typeof ELEMENTS !== 'undefined' && ELEMENTS[b]) ? ELEMENTS[b].atomicNumber : 999;
+            return an - bn;
+        });
+
+        const badges = [];
+        for (const symbol of sortedSymbols) {
             const count = collected[symbol] || 0;
             const elem = typeof ELEMENTS !== 'undefined' ? ELEMENTS[symbol] : null;
             const col = elem ? elem.color : 0xaaaaaa;
@@ -290,11 +299,28 @@ class SmelteryScene extends Phaser.Scene {
                 this._scrollOffsets[this._tab] = 0;
                 this._refresh();
             });
+            badges.push(badge);
             bx += badge.width + 3;
             if (bx > leftX + maxW) { bx = leftX; y += 18; }
         }
 
         this.contentY = y + 22;
+
+        // Draw an opaque cover behind the filter row so scrolled content cannot
+        // bleed through it. The cover is drawn AFTER tab content in z-order
+        // because _drawElementFilterRow() is called last in _refresh() for
+        // smelt/alloy/forge tabs — keeping the filter always on top.
+        const coverH = this.contentY - filterStartY;
+        const cover = this._d(this.add.graphics());
+        cover.fillStyle(0x0a0608, 1.0);
+        cover.fillRect(this.px + 6, filterStartY, this.panelW - 12, coverH);
+        cover.lineStyle(1, 0x221100, 1.0);
+        cover.lineBetween(this.px + 6, filterStartY + coverH - 2, this.px + this.panelW - 6, filterStartY + coverH - 2);
+
+        // Raise all filter objects above the cover and above scrolled content
+        allBtn.setDepth(10);
+        for (const b of badges) b.setDepth(10);
+        cover.setDepth(9);
     }
 
     _drawLockedTab() {
