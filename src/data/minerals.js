@@ -491,8 +491,8 @@ const CRYSTAL_POOL = {
 function rollMineralTier(worldNum) {
     const baseTier = Math.min(6, Math.max(1, Math.ceil(worldNum / 2)));
     const roll = Math.random();
-    // Spread: 15% much lower, 20% lower, 20% slightly lower, 35% current, 10% higher
-    if (roll < 0.15) return Math.max(1, baseTier - 3);
+    // Spread: 20% much lower (T1 still reachable at high worlds), 15% lower, 20% slightly lower, 35% current, 10% higher
+    if (roll < 0.20) return Math.max(1, baseTier - 4);
     if (roll < 0.35) return Math.max(1, baseTier - 2);
     if (roll < 0.55) return Math.max(1, baseTier - 1);
     if (roll < 0.90) return baseTier;

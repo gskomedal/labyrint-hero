@@ -195,7 +195,9 @@ class SmeltingSystem {
      * @returns {{ success: boolean, item: object }}
      */
     forgeEquipment(equipmentId, hero) {
-        const template = ALLOY_EQUIPMENT[equipmentId];
+        // Direct key lookup first; fall back to searching by id field (tools use id:'key' but key is 'forged_key')
+        let template = ALLOY_EQUIPMENT[equipmentId];
+        if (!template) template = Object.values(ALLOY_EQUIPMENT).find(e => e.id === equipmentId);
         if (!template) return { success: false };
 
         // Apply Metallurgist master_smith bonus
@@ -223,6 +225,33 @@ class SmeltingSystem {
         }
 
         return { success: true, item };
+    }
+
+    // ── Pyrolysis: Fuels → Elements ──────────────────────────────────────────
+
+    /**
+     * Pyrolyse a fuel item to extract C/H elements.
+     * Consumes one fuel unit and spends pyrolysisCost energy.
+     * @param {string} fuelId
+     * @param {object} hero
+     * @returns {{ elements: Array<{symbol,amount}>, energyCost: number } | null}
+     */
+    pyrolyseFuel(fuelId, hero) {
+        const fuelDef = typeof FUEL_DEFS !== 'undefined' ? FUEL_DEFS[fuelId] : null;
+        if (!fuelDef || !fuelDef.pyrolysisYields) return null;
+        const energyCost = this._adjustedEnergyCost(fuelDef.pyrolysisCost || 2, hero);
+        const fuelEnergy = this.calculateFuelEnergy(hero);
+        if (fuelEnergy < energyCost) return null;
+        this.consumeFuel(hero, energyCost);
+        const elements = [];
+        for (const y of fuelDef.pyrolysisYields) {
+            if (Math.random() < (y.chance ?? 1)) {
+                const amt = y.amount + (hero.smeltBonusElement || 0);
+                elements.push({ symbol: y.symbol, amount: amt });
+                if (hero.elementTracker) hero.elementTracker.collect(y.symbol, amt);
+            }
+        }
+        return { elements, energyCost };
     }
 
     // ── Fuel management ──────────────────────────────────────────────────────

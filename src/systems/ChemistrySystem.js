@@ -194,6 +194,24 @@ class ChemistrySystem {
                     else break;
                 }
                 scene.monsters = scene.monsters.filter(m => m.alive);
+                // Wall breaking: cracked walls within radius collapse
+                if (eff.wallBreak && scene.maze) {
+                    let wallsBroken = 0;
+                    for (let wy = 0; wy < scene.tileH; wy++) {
+                        for (let wx = 0; wx < scene.tileW; wx++) {
+                            if (scene.maze[wy][wx] !== TILE.CRACKED_WALL) continue;
+                            const d = Math.abs(wx - hero.gridX) + Math.abs(wy - hero.gridY);
+                            if (d <= rad) {
+                                scene.maze[wy][wx] = TILE.FLOOR;
+                                wallsBroken++;
+                            }
+                        }
+                    }
+                    if (wallsBroken > 0) {
+                        scene.mapRenderer.drawMap();
+                        scene.mapRenderer.updateFog();
+                    }
+                }
                 return true;
             };
         } else if (eff.onUse === 'acid_bomb') {

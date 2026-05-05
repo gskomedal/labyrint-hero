@@ -8,32 +8,42 @@ const FUEL_DEFS = {
     wood: {
         id: 'wood', name: 'Tre', type: 'fuel',
         color: 0x886633, tier: 1, stackSize: 10,
-        energyValue: 1,
-        desc: 'Grunnleggende brensel. Gir 1 energi.'
+        energyValue: 3,
+        desc: 'Grunnleggende brensel. Gir 3 energi.',
+        pyrolysisYields: [{ symbol: 'C', amount: 1, chance: 0.8 }],
+        pyrolysisCost: 2
     },
     charcoal: {
         id: 'charcoal', name: 'Trekull', type: 'fuel',
         color: 0x333333, tier: 1, stackSize: 10,
-        energyValue: 2,
-        desc: 'Laget av tre. Gir 2 energi.'
+        energyValue: 5,
+        desc: 'Laget av tre. Gir 5 energi.',
+        pyrolysisYields: [{ symbol: 'C', amount: 2, chance: 1.0 }],
+        pyrolysisCost: 2
     },
     coal: {
         id: 'coal', name: 'Kull', type: 'fuel',
         color: 0x222222, tier: 1, stackSize: 10,
-        energyValue: 3,
-        desc: 'Finnes i gruver. Gir 3 energi.'
+        energyValue: 8,
+        desc: 'Finnes i gruver. Gir 8 energi.',
+        pyrolysisYields: [{ symbol: 'C', amount: 3, chance: 1.0 }],
+        pyrolysisCost: 2
     },
     oil: {
         id: 'oil', name: 'Råolje', type: 'fuel',
         color: 0x111100, tier: 2, stackSize: 10,
-        energyValue: 8,
-        desc: 'Flytende brensel fra dypet. Gir 8 energi.'
+        energyValue: 18,
+        desc: 'Flytende brensel fra dypet. Gir 18 energi.',
+        pyrolysisYields: [{ symbol: 'C', amount: 2, chance: 1.0 }, { symbol: 'H', amount: 1, chance: 0.9 }],
+        pyrolysisCost: 3
     },
     natural_gas: {
         id: 'natural_gas', name: 'Naturgass', type: 'fuel',
         color: 0x88ccff, tier: 2, stackSize: 10,
-        energyValue: 10,
-        desc: 'Ren brennbar gass. Gir 10 energi.'
+        energyValue: 25,
+        desc: 'Ren brennbar gass. Gir 25 energi.',
+        pyrolysisYields: [{ symbol: 'C', amount: 1, chance: 0.9 }, { symbol: 'H', amount: 2, chance: 1.0 }],
+        pyrolysisCost: 3
     },
 };
 

@@ -720,7 +720,94 @@ class SmelteryScene extends Phaser.Scene {
         if (elemY <= visBot) {
             this._drawElementInventory(startX, Math.max(elemY, visTop), colW);
         }
-        this._contentEndY = elemBaseY + 120;
+
+        // Pyrolysis section – extract C/H from organic fuels
+        const pyroBaseY = elemBaseY + 130;
+        const pyroHeaderY = pyroBaseY - scrollOff;
+        if (pyroHeaderY <= visBot) {
+            this._d(this.add.text(cx, pyroHeaderY, 'Pyrolyse brensel → grunnstoffer:', {
+                fontSize: '14px', color: '#887766', fontFamily: 'monospace'
+            }).setOrigin(0.5));
+        }
+
+        const pyroFuels = [];
+        for (let i = 0; i < hero.inventory.backpack.length; i++) {
+            const entry = hero.inventory.backpack[i];
+            if (!entry) continue;
+            const def = typeof FUEL_DEFS !== 'undefined' ? FUEL_DEFS[entry.id] : null;
+            if (def && def.pyrolysisYields) pyroFuels.push({ source: 'backpack', slot: i, def, count: entry.count || 1 });
+        }
+        if (hero.campStash) {
+            for (let i = 0; i < hero.campStash.length; i++) {
+                const entry = hero.campStash[i];
+                if (!entry || entry.count <= 0) continue;
+                const def = typeof FUEL_DEFS !== 'undefined' ? FUEL_DEFS[entry.id] : null;
+                if (def && def.pyrolysisYields) pyroFuels.push({ source: 'stash', slot: i, def, count: entry.count });
+            }
+        }
+
+        let pyroRowY = pyroBaseY + 22;
+        if (pyroFuels.length === 0) {
+            const noFuelY = pyroRowY - scrollOff;
+            if (noFuelY >= visTop && noFuelY <= visBot) {
+                this._d(this.add.text(cx, noFuelY, 'Ingen organisk brensel å pyrolysere.', {
+                    fontSize: '13px', color: '#443322', fontFamily: 'monospace'
+                }).setOrigin(0.5));
+            }
+            pyroRowY += 20;
+        } else {
+            for (const pf of pyroFuels) {
+                const adjY = pyroRowY - scrollOff;
+                pyroRowY += 44;
+                if (adjY > visBot) continue;
+                if (adjY < visTop - 44) continue;
+                const pyroCheck = this.smelter.pyrolyseFuel ? { canPyro: this.smelter.calculateFuelEnergy(hero) >= (pf.def.pyrolysisCost || 2) } : { canPyro: false };
+                const pCol = pyroCheck.canPyro ? 0x44aacc : 0x443322;
+                const pHex = '#' + pCol.toString(16).padStart(6, '0');
+                const bg = this._d(this.add.graphics());
+                bg.fillStyle(pCol, 0.08);
+                bg.fillRoundedRect(startX, adjY, colW, 40, 4);
+                const srcLabel = pf.source === 'stash' ? ' [lager]' : '';
+                this._d(this.add.text(startX + 8, adjY + 4, `${pf.def.name} (×${pf.count})${srcLabel}`, {
+                    fontSize: '14px', color: pHex, fontFamily: 'monospace', fontStyle: 'bold'
+                }));
+                const yieldStr = pf.def.pyrolysisYields.map(yld => `${yld.symbol}×${yld.amount}`).join(', ');
+                this._d(this.add.text(startX + 8, adjY + 22, `→ ${yieldStr}  |  Energi: ${pf.def.pyrolysisCost || 2}`, {
+                    fontSize: '13px', color: '#776655', fontFamily: 'monospace'
+                }));
+                if (pyroCheck.canPyro) {
+                    const btn = this._d(this.add.text(startX + colW - 100, adjY + 10, '[ Pyrolyse ]', {
+                        fontSize: '13px', color: '#44aacc', fontFamily: 'monospace', fontStyle: 'bold'
+                    }).setInteractive({ useHandCursor: true }));
+                    btn.on('pointerover', () => btn.setColor('#88ccee'));
+                    btn.on('pointerout', () => btn.setColor('#44aacc'));
+                    btn.on('pointerdown', () => this._doPyrolysis(pf));
+                }
+            }
+        }
+        this._contentEndY = pyroRowY;
+    }
+
+    _doPyrolysis(pyroFuel) {
+        const hero = this.heroRef;
+        const result = this.smelter.pyrolyseFuel(pyroFuel.def.id, hero);
+        if (!result) return;
+
+        // Remove one fuel unit from source
+        if (pyroFuel.source === 'stash') {
+            const entry = hero.campStash[pyroFuel.slot];
+            if (entry) { entry.count--; if (entry.count <= 0) hero.campStash.splice(pyroFuel.slot, 1); }
+        } else {
+            const entry = hero.inventory.backpack[pyroFuel.slot];
+            if (entry) hero.inventory.dropSlot(pyroFuel.slot);
+        }
+
+        const msgParts = result.elements.map(e => `+${e.amount} ${e.symbol}`).join(', ');
+        if (typeof EventBus !== 'undefined') {
+            EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: msgParts || 'Ingen utbytte', color: '#44aacc' });
+        }
+        Audio.playPickup();
+        this._refresh();
     }
 
     _doSmelt(slotIndex, mineralDef) {
@@ -964,7 +1051,7 @@ class SmelteryScene extends Phaser.Scene {
                 const hexCol = '#' + (equip.color || 0xaabbcc).toString(16).padStart(6, '0');
                 const typeLabel = isPet
                     ? (equip.petSlot === 'weapon' ? '🐾 Kjæledyr-klo' : '🐾 Kjæledyr-rust')
-                    : (equip.type === 'weapon' ? 'Våpen' : 'Rustning');
+                    : (equip.type === 'weapon' ? 'Våpen' : equip.type === 'tool' ? 'Verktøy' : 'Rustning');
 
                 const bg = this._d(this.add.graphics());
                 bg.fillStyle(equip.color || 0xaabbcc, 0.08);
