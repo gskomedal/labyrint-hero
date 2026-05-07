@@ -2,6 +2,13 @@
 
 ---
 
+## v0.53 – 2026-05-07
+
+### Tekniske endringer
+- **ItemSpawner-oppryddelse (#150):** Felles plasseringslogikk samlet i to private hjelpere: `_isTileFree(gx, gy)` (sjekker at ingen kiste eller gjenstand står på ruten) og `_placeRandomly(eligible, count, spawn)` (itererer kandidatlister og kaller spawn-callback ved ledige ruter til kvoten er nådd). Brukes nå av felle-plassering, brensel-spredning, mineral-spredning, garantert sjelden-mineral, gas pocket-brensel, kjæledyr-egg og kjøpmann-filter. ItemSpawner.js 638 → 625 linjer
+
+---
+
 ## v0.52 – 2026-05-05
 
 ### Balanse
