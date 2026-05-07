@@ -7,7 +7,9 @@
 ### Tekniske endringer
 - **UIHelper-utvidelse (#147):** Lagt til `UIHelper.attachHover()` og `UIHelper.makeHoverButton()` for å samle den gjentatte `pointerover`/`pointerout`/`pointerdown`-mønsteret som var duplisert 50+ ganger på tvers av scener. SmelteryScene (12 sites) og InventoryScene (3 sites) er migrert som første demonstrasjon. Resterende scener migreres inkrementelt
 - **UITheme-modul (#148):** Ny `src/utils/UITheme.js` med navngitte konstanter for `UI_COLORS`, `UI_TEXT` og `UI_FONTS`. Eksisterende kode bruker fremdeles inline hex-verdier; modulen er klar for inkrementell adopsjon i senere PR-er
-- Tester for `attachHover` lagt til i `tests/test-uihelper.js`
+- **TooltipManager (#151):** Ny `src/utils/TooltipManager.js` som eier én tooltip per scene, automatisk avbryter forrige tooltip ved ny `show()` og rydder opp på `scene.shutdown`. Fjerner risikoen for foreldreløse Phaser.Text-objekter etter rask hover eller scene-lukking. InventoryScene og SmelteryScene migrert
+- **Inventar-slot dedup (#146):** `InventoryScene._makeEquipSlot`/`_makeQuickUseSlot`/`_makeBackpackSlot`/`_makePetBackpackSlot` brukte tilnærmet identisk long-press- og pointer-håndtering. Felles helper `_attachSlotInteraction(bg, opts)` introdusert; ~80 linjer duplisering fjernet (InventoryScene 781 → 736 linjer)
+- Tester for `attachHover` og `TooltipManager` lagt til i `tests/`
 
 ---
 

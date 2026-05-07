@@ -15,6 +15,7 @@ class SmelteryScene extends Phaser.Scene {
         const cx = W / 2, cy = H / 2;
         this.smelter = new SmeltingSystem();
         this._dyn = [];
+        this.tooltips = new TooltipManager(this);
         this._tab = 'stash'; // 'stash' | 'smelt' | 'alloy' | 'forge'
 
         // ── Dim overlay ───────────────────────────────────────────────────────
@@ -389,15 +390,12 @@ class SmelteryScene extends Phaser.Scene {
             if (def.type === 'mineral' && def.yields) {
                 const yieldStr = def.yields.map(y => y.symbol).join(', ');
                 nameText.on('pointerover', () => {
-                    if (this._mineralTooltip) this._mineralTooltip.destroy();
-                    this._mineralTooltip = this._d(this.add.text(leftX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
-                        fontSize: '12px', color: '#bbaa88', fontFamily: 'monospace',
-                        backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
-                    }));
+                    this.tooltips.show(leftX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
+                        color: '#bbaa88', backgroundColor: '#0a0608',
+                        padding: { x: 4, y: 2 }, stroke: '', strokeThickness: 0,
+                    }, { origin: { x: 0, y: 1 }, clampToCamera: false });
                 });
-                nameText.on('pointerout', () => {
-                    if (this._mineralTooltip) { this._mineralTooltip.destroy(); this._mineralTooltip = null; }
-                });
+                nameText.on('pointerout', () => this.tooltips.hide());
             }
 
             const btn = this._d(this.add.text(leftX + colW - 10, adjY, '→', {
@@ -460,15 +458,12 @@ class SmelteryScene extends Phaser.Scene {
                 if (def && def.type === 'mineral' && def.yields) {
                     const yieldStr = def.yields.map(y => y.symbol).join(', ');
                     stText.on('pointerover', () => {
-                        if (this._mineralTooltip) this._mineralTooltip.destroy();
-                        this._mineralTooltip = this._d(this.add.text(rightX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
-                            fontSize: '12px', color: '#bbaa88', fontFamily: 'monospace',
-                            backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
-                        }));
+                        this.tooltips.show(rightX + 4, adjY - 18, `T${def.tier} → ${yieldStr}`, {
+                            color: '#bbaa88', backgroundColor: '#0a0608',
+                            padding: { x: 4, y: 2 }, stroke: '', strokeThickness: 0,
+                        }, { origin: { x: 0, y: 1 }, clampToCamera: false });
                     });
-                    stText.on('pointerout', () => {
-                        if (this._mineralTooltip) { this._mineralTooltip.destroy(); this._mineralTooltip = null; }
-                    });
+                    stText.on('pointerout', () => this.tooltips.hide());
                 }
 
                 const btn = this._d(this.add.text(rightX + colW - 10, adjY, '←', {
@@ -1471,21 +1466,17 @@ class SmelteryScene extends Phaser.Scene {
             const sym = symbol;
             badge.on('pointerover', () => {
                 badge.setBackgroundColor('#221100');
-                // Show mineral sources as tooltip-style text
                 const srcList = sources[sym];
                 if (srcList && srcList.length > 0) {
-                    this._tooltipText = this._d(this.add.text(startX, by + 24, `${sym} ← ${srcList.join(', ')}`, {
-                        fontSize: '12px', color: '#998877', fontFamily: 'monospace',
-                        backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
-                    }));
+                    this.tooltips.show(startX, by + 24, `${sym} ← ${srcList.join(', ')}`, {
+                        color: '#998877', backgroundColor: '#0a0608',
+                        padding: { x: 4, y: 2 }, stroke: '', strokeThickness: 0,
+                    }, { origin: { x: 0, y: 0 }, clampToCamera: false });
                 }
             });
             badge.on('pointerout', () => {
                 badge.setBackgroundColor(isActive ? '#442200' : '#0a0818');
-                if (this._tooltipText) {
-                    this._tooltipText.destroy();
-                    this._tooltipText = null;
-                }
+                this.tooltips.hide();
             });
             badge.on('pointerdown', () => {
                 this._elementFilter = this._elementFilter === sym ? null : sym;
