@@ -20,7 +20,7 @@ class GameScene extends Phaser.Scene {
         switch (this.difficulty) {
             case 'easy': return { hpMul: 0.50, atkMul: 0.60, trapCount: 0, xpMul: 1.30, trapDmgMul: 0.3 };
             case 'hard': return { hpMul: 1.40, atkMul: 1.25, trapCount: 3, xpMul: 0.80, trapDmgMul: 1.6 };
-            default:     return { hpMul: 1.00, atkMul: 1.00, trapCount: 0, xpMul: 1.00, trapDmgMul: 1.0 };
+            default:     return { hpMul: 1.00, atkMul: 1.00, trapCount: 0, xpMul: 1.10, trapDmgMul: 1.0 };
         }
     }
 

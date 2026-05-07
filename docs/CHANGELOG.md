@@ -2,7 +2,33 @@
 
 ---
 
-## v0.51 – 2026-05-05
+## v0.52 – 2026-05-05
+
+### Balanse
+- **Normal vanskelighetsgrad for tøff på høye verdener (#133):** Monster-HP-skaleringen per verden er redusert fra ×0.35/verden til ×0.25/verden, og den ekstra knekkpunktsøkningen etter verden 8 er kuttet fra ×0.15 til ×0.06. Tilsvarende er angrep-skaleringen redusert fra ×0.20/×0.08 til ×0.15/×0.04. Normal modus gir nå +10 % XP-bonus for å hjelpe heltens progresjon på høye verdener
+- **For lite energi i midtspillet (#134):** Alle brensel-energiverdier er hevet betraktelig: tre 1→3, trekull 2→5, kull 3→8, råolje 8→18, naturgass 10→25. Dette gjør det realistisk å smelte og lage legeringer gjennom en hel verden uten å gå tom for brensel
+
+### Nye funksjoner
+- **Pyrolyse: Ekstraher C og H fra organisk brensel (#139):** Ny seksjon i Smelte-fanen lar spilleren pyrolysere brensel (tre/trekull/kull/råolje/naturgass) for å ekstrahere karbon (C) og/eller hydrogen (H). Kull og trekull gir pålitelig C; råolje og naturgass gir C + H. Koster litt energi per enhet
+- **Bomber sprenger sprukne vegger (#137):** Krutt, Dynamitt og Thermittladning har nå `wallBreak`-flagg. Når de detonerer, fjernes alle sprukne vegger innenfor radius (CRACKED_WALL → FLOOR). Kartet tegnes om automatisk
+- **Smidd nøkkel og smidd hakke synlig i Smi-fanen (#136):** Smi-fanen viser nå verktøy (nøkkel fra bronse, hakke fra stål) med korrekt etikett «Verktøy». Manglende ID-oppslag i `forgeEquipment()` er fikset
+
+### Feilrettinger
+- **Mineralspawn: Tier-1 mineraler utilgjengelige på høye verdener (#139):** Spredningen i `rollMineralTier()` er justert slik at tier-1 mineraler (bauxitt/aluminium, olivin/magnesium, kalkstein/karbon) fremdeles kan dukke opp fra verden 10 og oppover
+
+### Tekniske endringer
+- Monster.js: Reduserte HP- og ATK-skaleringskoeffisienter for normal/hard modus (hard modus beholder sine hpMul/atkMul-multiplikatorer)
+- GameScene.js: Normal modus xpMul hevet fra 1.0 til 1.1
+- alloys.js: Økte energyValue for alle FUEL_DEFS; lagt til `pyrolysisYields` og `pyrolysisCost` på alle brenseltyper
+- molecules.js: Lagt til `wallBreak: 'cracked'` på black_powder, dynamite og thermite_charge
+- ChemistrySystem.js: Bombebruk-handler itererer nå over maze-tiles og gjør CRACKED_WALL → FLOOR innenfor radius når `wallBreak`-flagget er satt
+- SmeltingSystem.js: Ny metode `pyrolyseFuel()` og fikset `forgeEquipment()` til å falle tilbake til id-søk for verktøy
+- SmelteryScene.js: Ny pyrolyse-seksjon i Smelte-fanen; Smi-fanen viser «Verktøy» for tool-type items
+- minerals.js: `rollMineralTier()` bruker nå `baseTier - 4` (fra `baseTier - 3`) og 20 % sjanse (fra 15 %) for laveste tier, slik at T1-mineraler fremdeles spawner på høye verdener
+
+---
+
+## v0.51 – 2026-05-02
 
 ### Feilrettinger
 - **Smelting av mineraler ga ikke alle forventede grunnstoffer (#138):** Sekundære yields i `MINERAL_DEFS` hadde for lave sjanser (0.3–0.5), slik at viktige grunnstoffer som C fra kalkstein, Fe fra ilmenitt og S fra pyritt uteble ved de fleste smeltinger. Alle ore-mineraler er gjennomgått: sjanser for elementer som er tydelig representert i mineralformelen er hevet til 0.7–1.0, mens rene sporstoff-yields (Ag i galena, alle PGM-yields) beholdes lave som tiltenkt "lotteri-belønning". Eksempler på nøkkelendringer:

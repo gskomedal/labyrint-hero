@@ -10,8 +10,8 @@ class Monster {
 
         // Stats from lookup tables in constants.js
         const worldMul = scene.worldNum || 1;
-        const hpScale  = 1 + (worldMul - 1) * 0.35 + Math.max(0, worldMul - 8) * 0.15;
-        const atkScale = 1 + (worldMul - 1) * 0.20 + Math.max(0, worldMul - 8) * 0.08;
+        const hpScale  = 1 + (worldMul - 1) * 0.25 + Math.max(0, worldMul - 8) * 0.06;
+        const atkScale = 1 + (worldMul - 1) * 0.15 + Math.max(0, worldMul - 8) * 0.04;
         // XP scales steeply so skill unlocks keep up with the exponential XP_GROWTH curve
         const xpScale  = 1 + (worldMul - 1) * 0.30 + Math.max(0, worldMul - 8) * 0.20;
 

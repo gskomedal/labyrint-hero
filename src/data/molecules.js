@@ -106,8 +106,8 @@ const MOLECULE_DEFS = {
         formula: 'K + S + C', tier: 2, color: 0x333333, stackSize: 10,
         recipe: [{ symbol: 'K', amount: 1 }, { symbol: 'S', amount: 1 }, { symbol: 'C', amount: 1 }],
         energyCost: 1,
-        effects: { onUse: 'bomb', damage: 12, radius: 3 },
-        desc: 'Klassisk krutt. 12 skade i radius 3.'
+        effects: { onUse: 'bomb', damage: 12, radius: 3, wallBreak: 'cracked' },
+        desc: 'Klassisk krutt. 12 skade i radius 3. Sprenger sprukne vegger.'
     },
     smoke_bomb: {
         id: 'smoke_bomb', name: 'Røykbombe', type: 'molecule', subtype: 'explosive',
@@ -130,8 +130,8 @@ const MOLECULE_DEFS = {
         formula: 'C + N', tier: 4, color: 0xff4422, stackSize: 5,
         recipe: [{ symbol: 'C', amount: 2 }, { symbol: 'N', amount: 2 }],
         energyCost: 3,
-        effects: { onUse: 'bomb', damage: 20, radius: 4 },
-        desc: 'Massiv eksplosjon! 20 skade i radius 4.'
+        effects: { onUse: 'bomb', damage: 20, radius: 4, wallBreak: 'cracked' },
+        desc: 'Massiv eksplosjon! 20 skade i radius 4. Sprenger sprukne vegger.'
     },
 
     // ── New molecules (v0.40): expanded element usage + stronger bombs ───────
@@ -164,8 +164,8 @@ const MOLECULE_DEFS = {
         formula: 'Fe + Al + S', tier: 3, color: 0xff8844, stackSize: 5,
         recipe: [{ symbol: 'Fe', amount: 2 }, { symbol: 'Al', amount: 2 }, { symbol: 'S', amount: 1 }],
         energyCost: 2,
-        effects: { onUse: 'bomb', damage: 25, radius: 3, defPierce: 4 },
-        desc: 'Gjennom-brennende. 25 skade, ignorer 4 Forsvar, radius 3.'
+        effects: { onUse: 'bomb', damage: 25, radius: 3, defPierce: 4, wallBreak: 'cracked' },
+        desc: 'Gjennom-brennende. 25 skade, ignorer 4 Forsvar, radius 3. Sprenger sprukne vegger.'
     },
     neodym_magnetbomb: {
         id: 'neodym_magnetbomb', name: 'Neodym-magnetbombe', type: 'molecule', subtype: 'explosive',
