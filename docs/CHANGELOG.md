@@ -2,6 +2,15 @@
 
 ---
 
+## v0.53 – 2026-05-07
+
+### Tekniske endringer
+- **UIHelper-utvidelse (#147):** Lagt til `UIHelper.attachHover()` og `UIHelper.makeHoverButton()` for å samle den gjentatte `pointerover`/`pointerout`/`pointerdown`-mønsteret som var duplisert 50+ ganger på tvers av scener. SmelteryScene (12 sites) og InventoryScene (3 sites) er migrert som første demonstrasjon. Resterende scener migreres inkrementelt
+- **UITheme-modul (#148):** Ny `src/utils/UITheme.js` med navngitte konstanter for `UI_COLORS`, `UI_TEXT` og `UI_FONTS`. Eksisterende kode bruker fremdeles inline hex-verdier; modulen er klar for inkrementell adopsjon i senere PR-er
+- Tester for `attachHover` lagt til i `tests/test-uihelper.js`
+
+---
+
 ## v0.52 – 2026-05-05
 
 ### Balanse
