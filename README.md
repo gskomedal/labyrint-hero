@@ -103,7 +103,9 @@ src/
     SkillScene.js             – ferdighetstreet
     InventoryScene.js         – inventar + kjæledyr-utstyr
     MerchantScene.js          – kjøpmann-overlay
-    SmelteryScene.js          – smelteovn / leirplass (4 faner)
+    SmelteryScene.js          – smelteovn / leirplass (7 faner: lager, smelt, legering, smi, raffiner, halvleder, teknologi)
+    WelcomeScene.js           – velkomst-popup (4 sider, første besøk)
+    MineralWikiScene.js       – browseable mineralkatalog (tilgjengelig fra meny og inventar)
     ChemLabScene.js           – kjemisk laboratorium
     AcceleratorScene.js       – partikkelakselerator (transuransk syntese)
     ElementBookScene.js       – periodisk system / elementbok
