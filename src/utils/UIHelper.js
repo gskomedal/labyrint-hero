@@ -31,5 +31,38 @@ const UIHelper = {
      */
     colorToHex(col) {
         return '#' + (col || 0).toString(16).padStart(6, '0');
+    },
+
+    /**
+     * Attach hover/out/click handlers to an existing interactive game object.
+     * Idempotent re. interactive flag. Returns the target for chaining.
+     * @param {Phaser.GameObjects.GameObject} target
+     * @param {object} opts - { hoverColor, normalColor, onClick }
+     */
+    attachHover(target, { hoverColor, normalColor, onClick } = {}) {
+        if (!target.input) target.setInteractive({ useHandCursor: true });
+        if (hoverColor && target.setColor) {
+            target.on('pointerover', () => target.setColor(hoverColor));
+        }
+        if (normalColor && target.setColor) {
+            target.on('pointerout', () => target.setColor(normalColor));
+        }
+        if (typeof onClick === 'function') {
+            target.on('pointerdown', onClick);
+        }
+        return target;
+    },
+
+    /**
+     * Create a Phaser Text button with hover/out/click handlers wired up.
+     * @param {Phaser.Scene} scene
+     * @param {object} opts - { x, y, text, style, hoverColor, normalColor, onClick, origin }
+     * @returns {Phaser.GameObjects.Text}
+     */
+    makeHoverButton(scene, { x, y, text, style = {}, hoverColor, normalColor, onClick, origin }) {
+        const txt = scene.add.text(x, y, text, style);
+        if (origin) txt.setOrigin(origin.x ?? origin, origin.y ?? origin);
+        const normal = normalColor || style.color;
+        return UIHelper.attachHover(txt, { hoverColor, normalColor: normal, onClick });
     }
 };

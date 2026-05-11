@@ -38,6 +38,42 @@ describe('UIHelper – colorToHex', () => {
     });
 });
 
+describe('UIHelper – attachHover', () => {
+    function fakeText(initialColor) {
+        return {
+            input: null,
+            _color: initialColor,
+            _handlers: {},
+            setInteractive() { this.input = {}; return this; },
+            setColor(c) { this._color = c; return this; },
+            on(evt, fn) { this._handlers[evt] = fn; return this; },
+            fire(evt) { if (this._handlers[evt]) this._handlers[evt](); }
+        };
+    }
+
+    it('makes target interactive and wires hover/out/click', () => {
+        const t = fakeText('#ff7722');
+        let clicks = 0;
+        UIHelper.attachHover(t, {
+            hoverColor: '#ffaa44',
+            normalColor: '#ff7722',
+            onClick: () => clicks++,
+        });
+        expect(t.input !== null).toBe(true);
+        t.fire('pointerover'); expect(t._color).toBe('#ffaa44');
+        t.fire('pointerout');  expect(t._color).toBe('#ff7722');
+        t.fire('pointerdown'); expect(clicks).toBe(1);
+    });
+
+    it('skips hover handlers when colors not provided', () => {
+        const t = fakeText('#ff7722');
+        UIHelper.attachHover(t, { onClick: () => {} });
+        expect(t._handlers.pointerover).toBe(undefined);
+        expect(t._handlers.pointerout).toBe(undefined);
+        expect(typeof t._handlers.pointerdown).toBe('function');
+    });
+});
+
 describe('UIHelper – updateTabButtons', () => {
     it('sets active button color and bold style', () => {
         const buttons = [

@@ -61,13 +61,14 @@ class InventoryScene extends Phaser.Scene {
         const ebBtn = this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 18, 'Elementbok [B]', {
             fontSize: '12px', color: '#997755', fontFamily: 'monospace'
         }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
-        ebBtn.on('pointerover', () => ebBtn.setColor('#ccaa77'));
-        ebBtn.on('pointerout',  () => ebBtn.setColor('#997755'));
-        ebBtn.on('pointerdown', () => {
-            const gs = this.scene.get('GameScene');
-            if (gs && gs.hero) {
-                this.scene.launch('ElementBookScene', { heroRef: gs.hero });
-            }
+        UIHelper.attachHover(ebBtn, {
+            hoverColor: '#ccaa77', normalColor: '#997755',
+            onClick: () => {
+                const gs = this.scene.get('GameScene');
+                if (gs && gs.hero) {
+                    this.scene.launch('ElementBookScene', { heroRef: gs.hero });
+                }
+            },
         });
 
         // Mineral wiki button
@@ -75,20 +76,22 @@ class InventoryScene extends Phaser.Scene {
             cy - panelH / 2 + 18, 'Mineral-wiki', {
             fontSize: '12px', color: '#997755', fontFamily: 'monospace'
         }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
-        mwBtn.on('pointerover', () => mwBtn.setColor('#ccaa77'));
-        mwBtn.on('pointerout',  () => mwBtn.setColor('#997755'));
-        mwBtn.on('pointerdown', () => {
-            const gs = this.scene.get('GameScene');
-            this.scene.launch('MineralWikiScene', { heroRef: gs?.hero || null });
+        UIHelper.attachHover(mwBtn, {
+            hoverColor: '#ccaa77', normalColor: '#997755',
+            onClick: () => {
+                const gs = this.scene.get('GameScene');
+                this.scene.launch('MineralWikiScene', { heroRef: gs?.hero || null });
+            },
         });
 
         // Close button (touch-friendly)
         const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
             fontSize: '20px', color: '#667788', fontFamily: 'monospace'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
-        closeBtn.on('pointerdown', () => this._tryClose());
+        UIHelper.attachHover(closeBtn, {
+            hoverColor: '#ff6666', normalColor: '#667788',
+            onClick: () => this._tryClose(),
+        });
 
         // ── Build dynamic slot UI ──────────────────────────────────────────────
         this._refresh();

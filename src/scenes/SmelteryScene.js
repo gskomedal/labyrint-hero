@@ -404,9 +404,10 @@ class SmelteryScene extends Phaser.Scene {
                 fontSize: '16px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
             }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
             const slotIdx = i;
-            btn.on('pointerover', () => btn.setColor('#ffaa44'));
-            btn.on('pointerout', () => btn.setColor('#ff7722'));
-            btn.on('pointerdown', () => this._depositItem(slotIdx));
+            UIHelper.attachHover(btn, {
+                hoverColor: '#ffaa44', normalColor: '#ff7722',
+                onClick: () => this._depositItem(slotIdx),
+            });
         }
         if (!hasDepositable) {
             const adjY = y - scrollOff;
@@ -474,9 +475,10 @@ class SmelteryScene extends Phaser.Scene {
                     fontSize: '16px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setOrigin(1, 0).setInteractive({ useHandCursor: true }));
                 const idx = si;
-                btn.on('pointerover', () => btn.setColor('#ffaa44'));
-                btn.on('pointerout', () => btn.setColor('#ff7722'));
-                btn.on('pointerdown', () => this._withdrawItem(idx));
+                UIHelper.attachHover(btn, {
+                    hoverColor: '#ffaa44', normalColor: '#ff7722',
+                    onClick: () => this._withdrawItem(idx),
+                });
             }
         }
 
@@ -565,9 +567,10 @@ class SmelteryScene extends Phaser.Scene {
             const clearBtn = this._d(this.add.text(this.px + 110, y, '✕ Fjern filter', {
                 fontSize: '14px', color: '#886644', fontFamily: 'monospace'
             }).setInteractive({ useHandCursor: true }));
-            clearBtn.on('pointerover', () => clearBtn.setColor('#ffaa44'));
-            clearBtn.on('pointerout', () => clearBtn.setColor('#886644'));
-            clearBtn.on('pointerdown', () => { this._elementFilter = null; this._scrollOffsets.smelt = 0; this._refresh(); });
+            UIHelper.attachHover(clearBtn, {
+                hoverColor: '#ffaa44', normalColor: '#886644',
+                onClick: () => { this._elementFilter = null; this._scrollOffsets.smelt = 0; this._refresh(); },
+            });
             y += 20;
         }
 
@@ -675,13 +678,12 @@ class SmelteryScene extends Phaser.Scene {
                 const btn = this._d(this.add.text(startX + colW - 70, my + 14, '[ Smelt ]', {
                     fontSize: '15px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
-                btn.on('pointerover', () => btn.setColor('#ffaa44'));
-                btn.on('pointerout', () => btn.setColor('#ff7722'));
-                if (m.source === 'stash') {
-                    btn.on('pointerdown', () => this._doSmeltFromStash(m.slot, m.def));
-                } else {
-                    btn.on('pointerdown', () => this._doSmelt(m.slot, m.def));
-                }
+                UIHelper.attachHover(btn, {
+                    hoverColor: '#ffaa44', normalColor: '#ff7722',
+                    onClick: () => (m.source === 'stash')
+                        ? this._doSmeltFromStash(m.slot, m.def)
+                        : this._doSmelt(m.slot, m.def),
+                });
                 // Metallurg T1 max-stack: batch smelt button that processes up to batchSmeltSize
                 // at once. Only shown when hero has the batch capability and mineral count>1.
                 const batchN = hero.batchSmeltSize || 1;
@@ -690,8 +692,7 @@ class SmelteryScene extends Phaser.Scene {
                     const bbtn = this._d(this.add.text(startX + colW - 140, my + 14, label, {
                         fontSize: '14px', color: '#ffcc44', fontFamily: 'monospace', fontStyle: 'bold'
                     }).setInteractive({ useHandCursor: true }));
-                    bbtn.on('pointerover', () => bbtn.setColor('#ffee88'));
-                    bbtn.on('pointerout', () => bbtn.setColor('#ffcc44'));
+                    UIHelper.attachHover(bbtn, { hoverColor: '#ffee88', normalColor: '#ffcc44' });
                     bbtn.on('pointerdown', () => {
                         for (let i = 0; i < batchN; i++) {
                             // Re-read current count each iteration; stop if empty or out of fuel.
@@ -779,9 +780,10 @@ class SmelteryScene extends Phaser.Scene {
                     const btn = this._d(this.add.text(startX + colW - 100, adjY + 10, '[ Pyrolyse ]', {
                         fontSize: '13px', color: '#44aacc', fontFamily: 'monospace', fontStyle: 'bold'
                     }).setInteractive({ useHandCursor: true }));
-                    btn.on('pointerover', () => btn.setColor('#88ccee'));
-                    btn.on('pointerout', () => btn.setColor('#44aacc'));
-                    btn.on('pointerdown', () => this._doPyrolysis(pf));
+                    UIHelper.attachHover(btn, {
+                        hoverColor: '#88ccee', normalColor: '#44aacc',
+                        onClick: () => this._doPyrolysis(pf),
+                    });
                 }
             }
         }
@@ -938,9 +940,10 @@ class SmelteryScene extends Phaser.Scene {
                 const btn = this._d(this.add.text(startX + colW - 60, ay + 16, '[ Lag ]', {
                     fontSize: '15px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
-                btn.on('pointerover', () => btn.setColor('#ffaa44'));
-                btn.on('pointerout', () => btn.setColor('#ff7722'));
-                btn.on('pointerdown', () => this._doCraftAlloy(a.id));
+                UIHelper.attachHover(btn, {
+                    hoverColor: '#ffaa44', normalColor: '#ff7722',
+                    onClick: () => this._doCraftAlloy(a.id),
+                });
             }
         });
 
@@ -1003,9 +1006,10 @@ class SmelteryScene extends Phaser.Scene {
                 }));
                 if (eq && fuel >= 5) {
                     t.setInteractive({ useHandCursor: true });
-                    t.on('pointerover', () => t.setColor('#ffee88'));
-                    t.on('pointerout', () => t.setColor('#ffcc44'));
-                    t.on('pointerdown', () => this._doReforge(slot));
+                    UIHelper.attachHover(t, {
+                        hoverColor: '#ffee88', normalColor: '#ffcc44',
+                        onClick: () => this._doReforge(slot),
+                    });
                 }
             };
             makeBtn(0, 'weapon', 'Reforge våpen');
@@ -1068,9 +1072,11 @@ class SmelteryScene extends Phaser.Scene {
                 const btn = this._d(this.add.text(startX + colW - 70, adjY + 12, '[ Smi ]', {
                     fontSize: '14px', color: isPet ? '#ffaadd' : '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
-                btn.on('pointerover', () => btn.setColor(isPet ? '#ffccee' : '#ffaa44'));
-                btn.on('pointerout', () => btn.setColor(isPet ? '#ffaadd' : '#ff7722'));
-                btn.on('pointerdown', () => isPet ? this._doPetForge(alloyId, equip) : this._doForge(alloyId, equip.id));
+                UIHelper.attachHover(btn, {
+                    hoverColor:  isPet ? '#ffccee' : '#ffaa44',
+                    normalColor: isPet ? '#ffaadd' : '#ff7722',
+                    onClick: () => isPet ? this._doPetForge(alloyId, equip) : this._doForge(alloyId, equip.id),
+                });
             });
             rowY += 8;
         }
@@ -1232,8 +1238,7 @@ class SmelteryScene extends Phaser.Scene {
                 const btn = this._d(this.add.text(startX + colW - 70, ry + 10, '[ Raffiner ]', {
                     fontSize: '14px', color: '#8866ff', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
-                btn.on('pointerover', () => btn.setColor('#aa88ff'));
-                btn.on('pointerout', () => btn.setColor('#8866ff'));
+                UIHelper.attachHover(btn, { hoverColor: '#aa88ff', normalColor: '#8866ff' });
                 btn.on('pointerdown', () => {
                     const result = this.smelter.refine(recipe.id, hero);
                     if (result.success) {
@@ -1334,8 +1339,7 @@ class SmelteryScene extends Phaser.Scene {
                 const btn = this._d(this.add.text(startX + colW - 70, ry + 16, '[ Lag ]', {
                     fontSize: '14px', color: '#8866ff', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
-                btn.on('pointerover', () => btn.setColor('#aa88ff'));
-                btn.on('pointerout', () => btn.setColor('#8866ff'));
+                UIHelper.attachHover(btn, { hoverColor: '#aa88ff', normalColor: '#8866ff' });
                 btn.on('pointerdown', () => {
                     const result = this.smelter.craftSemiconductor(semi.id, hero);
                     if (result.success) {
@@ -1405,8 +1409,7 @@ class SmelteryScene extends Phaser.Scene {
                 const btn = this._d(this.add.text(startX + colW - 80, ty + 12, '[ Installer ]', {
                     fontSize: '14px', color: '#8866ff', fontFamily: 'monospace', fontStyle: 'bold'
                 }).setInteractive({ useHandCursor: true }));
-                btn.on('pointerover', () => btn.setColor('#aa88ff'));
-                btn.on('pointerout', () => btn.setColor('#8866ff'));
+                UIHelper.attachHover(btn, { hoverColor: '#aa88ff', normalColor: '#8866ff' });
                 btn.on('pointerdown', () => {
                     if (this.smelter.installTech(tech.id, hero)) {
                         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Installert: ${tech.name}!`, color: '#8866ff' });
