@@ -348,107 +348,55 @@ class CharacterCreatorScene extends Phaser.Scene {
         const rowGap = 36;
 
         // ── Gender ───────────────────────────────────────────────────────────
-        add(this.add.text(lx, rowY, 'Kj\u00f8nn:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
-        GENDERS.forEach((gid, i) => {
-            const bx = lx + 70 + i * 80;
-            const sel = this.appearance.gender === gid;
-            const bg = this.add.rectangle(bx + 28, rowY + 6, 68, 22, sel ? 0x2a2060 : 0x111122)
-                .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx + 28, rowY + 6, GENDER_LABELS[gid], {
-                fontSize: '12px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
-            }).setOrigin(0.5);
-            bg.on('pointerdown', () => {
+        this._renderToggleRow(lx, rowY, 'Kj\u00f8nn:', GENDERS, this.appearance.gender, {
+            labels: GENDER_LABELS, startX: 70, step: 80, btnW: 68,
+            onPick: (gid) => {
                 this._customOverrides.gender = gid;
                 this.appearance.gender = gid;
                 if (gid === 'female' && this.appearance.beardStyle !== 'none') {
                     this._customOverrides.beardStyle = 'none';
                     this.appearance.beardStyle = 'none';
                 }
-                this._rebuildPreview();
-                this._rebuildAppearancePickers();
-            });
-            add(bg); add(txt);
+            },
         });
 
         // ── Skin tone ────────────────────────────────────────────────────────
         rowY += rowGap;
-        add(this.add.text(lx, rowY, 'Hud:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
-        SKIN_TONES.forEach((col, i) => {
-            const btn = this._colorDot(lx + 52 + i * 30, rowY + 7, col, this.appearance.skinColor === col);
-            btn.on('pointerdown', () => { this._customOverrides.skinColor = col; this.appearance.skinColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
-            add(btn);
-        });
+        this._renderColorRow(lx, rowY, 'Hud:', SKIN_TONES, this.appearance.skinColor, 'skinColor', { startX: 52, step: 30 });
 
         // ── Hair color ───────────────────────────────────────────────────────
         rowY += rowGap;
-        add(this.add.text(lx, rowY, 'H\u00e5r:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
-        HAIR_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(lx + 52 + i * 28, rowY + 7, col, this.appearance.hairColor === col);
-            btn.on('pointerdown', () => { this._customOverrides.hairColor = col; this.appearance.hairColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
-            add(btn);
-        });
+        this._renderColorRow(lx, rowY, 'H\u00e5r:', HAIR_COLORS, this.appearance.hairColor, 'hairColor', { startX: 52, step: 28 });
 
         // ── Eye color ────────────────────────────────────────────────────────
         rowY += rowGap;
-        add(this.add.text(lx, rowY, '\u00d8yne:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
-        EYE_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(lx + 60 + i * 30, rowY + 7, col, this.appearance.eyeColor === col);
-            btn.on('pointerdown', () => { this._customOverrides.eyeColor = col; this.appearance.eyeColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
-            add(btn);
-        });
+        this._renderColorRow(lx, rowY, '\u00d8yne:', EYE_COLORS, this.appearance.eyeColor, 'eyeColor', { startX: 60, step: 30 });
 
         // ── Cloth color ──────────────────────────────────────────────────────
         rowY += rowGap;
-        add(this.add.text(lx, rowY, 'Farge:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
-        CLOTH_COLORS.forEach((col, i) => {
-            const btn = this._colorDot(lx + 60 + i * 26, rowY + 7, col, this.appearance.clothColor === col);
-            btn.on('pointerdown', () => { this._customOverrides.clothColor = col; this.appearance.clothColor = col; this._rebuildPreview(); this._rebuildAppearancePickers(); });
-            add(btn);
-        });
+        this._renderColorRow(lx, rowY, 'Farge:', CLOTH_COLORS, this.appearance.clothColor, 'clothColor', { startX: 60, step: 26 });
 
         // ── Clothing style ───────────────────────────────────────────────────
         rowY += rowGap;
-        add(this.add.text(lx, rowY, 'Drakt:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
-        CLOTH_STYLES.forEach((style, i) => {
-            const bx = lx + 60 + i * 68;
-            const sel = this.appearance.clothStyle === style;
-            const bg = this.add.rectangle(bx + 26, rowY + 6, 60, 22, sel ? 0x2a2060 : 0x111122)
-                .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-            const txt = this.add.text(bx + 26, rowY + 6, CLOTH_STYLE_LABELS[style], {
-                fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
-            }).setOrigin(0.5);
-            bg.on('pointerdown', () => {
+        this._renderToggleRow(lx, rowY, 'Drakt:', CLOTH_STYLES, this.appearance.clothStyle, {
+            labels: CLOTH_STYLE_LABELS, startX: 60, step: 68, btnW: 60, fontSize: '11px',
+            onPick: (style) => {
                 this._customOverrides.clothStyle = style;
                 this.appearance.clothStyle = style;
-                this._rebuildPreview();
-                this._rebuildAppearancePickers();
-            });
-            add(bg); add(txt);
+            },
         });
 
         // ── Hair style (not for dwarf) ───────────────────────────────────────
         if (this.selectedRace !== 'dwarf') {
             rowY += rowGap;
-            add(this.add.text(lx, rowY, 'Frisyre:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
             const stylesPerRow = 5;
-            HAIR_STYLES.forEach((style, i) => {
-                const row = Math.floor(i / stylesPerRow);
-                const col = i % stylesPerRow;
-                const bx = lx + 70 + col * 62;
-                const by = rowY + 6 + row * 28;
-                const sel = this.appearance.hairStyle === style;
-                const bg = this.add.rectangle(bx + 24, by, 56, 22, sel ? 0x2a2060 : 0x111122)
-                    .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 24, by, HAIR_STYLE_LABELS[style], {
-                    fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
-                }).setOrigin(0.5);
-                bg.on('pointerdown', () => {
+            this._renderToggleRow(lx, rowY, 'Frisyre:', HAIR_STYLES, this.appearance.hairStyle, {
+                labels: HAIR_STYLE_LABELS, startX: 70, step: 62, btnW: 56, fontSize: '11px',
+                wrapAt: stylesPerRow, rowStep: 28,
+                onPick: (style) => {
                     this._customOverrides.hairStyle = style;
                     this.appearance.hairStyle = style;
-                    this._rebuildPreview();
-                    this._rebuildAppearancePickers();
-                });
-                add(bg); add(txt);
+                },
             });
             rowY += Math.ceil(HAIR_STYLES.length / stylesPerRow) * 28;
         }
@@ -458,24 +406,58 @@ class CharacterCreatorScene extends Phaser.Scene {
                           this.appearance.gender !== 'female';
         if (showBeard) {
             rowY += 6;
-            add(this.add.text(lx, rowY, 'Skjegg:', { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
-            BEARD_STYLES.forEach((style, i) => {
-                const bx = lx + 70 + i * 70;
-                const sel = this.appearance.beardStyle === style;
-                const bg = this.add.rectangle(bx + 24, rowY + 6, 62, 22, sel ? 0x2a2060 : 0x111122)
-                    .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
-                const txt = this.add.text(bx + 24, rowY + 6, BEARD_STYLE_LABELS[style], {
-                    fontSize: '11px', color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
-                }).setOrigin(0.5);
-                bg.on('pointerdown', () => {
+            this._renderToggleRow(lx, rowY, 'Skjegg:', BEARD_STYLES, this.appearance.beardStyle, {
+                labels: BEARD_STYLE_LABELS, startX: 70, step: 70, btnW: 62, fontSize: '11px',
+                onPick: (style) => {
                     this._customOverrides.beardStyle = style;
                     this.appearance.beardStyle = style;
-                    this._rebuildPreview();
-                    this._rebuildAppearancePickers();
-                });
-                add(bg); add(txt);
+                },
             });
         }
+    }
+
+    /** Horizontal row of color-dot pickers with a leading label. */
+    _renderColorRow(lx, rowY, label, colors, currentValue, field, { startX, step }) {
+        const add = o => this._appearObjs.push(o);
+        add(this.add.text(lx, rowY, label, { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
+        colors.forEach((col, i) => {
+            const btn = this._colorDot(lx + startX + i * step, rowY + 7, col, currentValue === col);
+            btn.on('pointerdown', () => {
+                this._customOverrides[field] = col;
+                this.appearance[field] = col;
+                this._rebuildPreview();
+                this._rebuildAppearancePickers();
+            });
+            add(btn);
+        });
+    }
+
+    /** Horizontal (or wrap-grid) row of toggle buttons with a leading label. */
+    _renderToggleRow(lx, rowY, label, options, currentValue, opts) {
+        const {
+            labels, startX, step, btnW, fontSize = '12px',
+            wrapAt = Infinity, rowStep = 0, onPick,
+        } = opts;
+        const add = o => this._appearObjs.push(o);
+        add(this.add.text(lx, rowY, label, { fontSize: '12px', color: '#667788', fontFamily: 'monospace' }));
+        options.forEach((id, i) => {
+            const row = wrapAt === Infinity ? 0 : Math.floor(i / wrapAt);
+            const colIdx = wrapAt === Infinity ? i : i % wrapAt;
+            const bx = lx + startX + colIdx * step + btnW / 2;
+            const by = rowY + 6 + row * rowStep;
+            const sel = currentValue === id;
+            const bg = this.add.rectangle(bx, by, btnW, 22, sel ? 0x2a2060 : 0x111122)
+                .setStrokeStyle(1, sel ? 0xf5e642 : 0x334455).setInteractive({ useHandCursor: true });
+            const txt = this.add.text(bx, by, labels[id], {
+                fontSize, color: sel ? '#f5e642' : '#778899', fontFamily: 'monospace'
+            }).setOrigin(0.5);
+            bg.on('pointerdown', () => {
+                onPick(id);
+                this._rebuildPreview();
+                this._rebuildAppearancePickers();
+            });
+            add(bg); add(txt);
+        });
     }
 
     _colorDot(x, y, color, selected) {

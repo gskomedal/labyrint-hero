@@ -2,6 +2,13 @@
 
 ---
 
+## v0.53 – 2026-05-07
+
+### Tekniske endringer
+- **Karakterskaper-oppryddelse (#149):** `_rebuildAppearancePickers()` (146 linjer med tre nestede palett-løkker og fire knapperad-løkker) er splittet i to gjenbrukbare hjelpere: `_renderColorRow()` for prikk-paletter (hud/hår/øyne/farge) og `_renderToggleRow()` for tekstknapp-rader (kjønn/drakt/frisyre/skjegg). Funksjonsuttrykket er nå deklarativt: én linje per rad. CharacterCreatorScene 607 → 589 linjer
+
+---
+
 ## v0.52 – 2026-05-05
 
 ### Balanse
