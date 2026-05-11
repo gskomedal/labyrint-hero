@@ -59,7 +59,7 @@ describe('UIHelper – attachHover', () => {
             normalColor: '#ff7722',
             onClick: () => clicks++,
         });
-        expect(t.input).not.toBe(null);
+        expect(t.input !== null).toBe(true);
         t.fire('pointerover'); expect(t._color).toBe('#ffaa44');
         t.fire('pointerout');  expect(t._color).toBe('#ff7722');
         t.fire('pointerdown'); expect(clicks).toBe(1);
