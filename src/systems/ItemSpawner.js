@@ -6,6 +6,29 @@ class ItemSpawner {
         this.scene = scene;
     }
 
+    /** True when no chest or item currently occupies tile (gx, gy). */
+    _isTileFree(gx, gy) {
+        const scene = this.scene;
+        return !scene.chests.some(c => c.gridX === gx && c.gridY === gy)
+            && !scene.itemObjects.some(o => o.gridX === gx && o.gridY === gy);
+    }
+
+    /**
+     * Walk `eligible` tiles in order; on each free tile (no chest/item)
+     * invoke spawn(tile) until `count` placements have happened or the
+     * list is exhausted. Returns the number actually placed.
+     */
+    _placeRandomly(eligible, count, spawn) {
+        let placed = 0;
+        for (const t of eligible) {
+            if (placed >= count) break;
+            if (!this._isTileFree(t.x, t.y)) continue;
+            spawn(t);
+            placed++;
+        }
+        return placed;
+    }
+
     // ── Item placement: chests + tools only (loot comes from monster kills) ────
 
     placeItems() {
@@ -34,11 +57,7 @@ class ItemSpawner {
             // 80% on world 1, 50% if previous pet died, 35% otherwise.
             const eggChance = scene.worldNum === 1 ? 0.8 : (hadPetDie ? 0.50 : 0.35);
             if (Math.random() < eggChance) {
-                // Find a free floor tile not used by chests or items
-                const eggTile = eligible.find(t =>
-                    !scene.chests.some(c => c.gridX === t.x && c.gridY === t.y) &&
-                    !scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)
-                );
+                const eggTile = eligible.find(t => this._isTileFree(t.x, t.y));
                 if (eggTile) this.spawnPetEgg(eggTile.x, eggTile.y);
             }
         }
@@ -55,14 +74,8 @@ class ItemSpawner {
             ? 0
             : Math.min(3 + Math.floor(scene.worldNum * 0.8), 8);
         const trapCount = baseTrapCount + mods.trapCount;
-        let trapPlaced  = 0;
-        for (const t of eligible) {
-            if (trapPlaced >= trapCount) break;
-            if (scene.chests.some(c => c.gridX === t.x && c.gridY === t.y)) continue;
-            if (scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)) continue;
-            scene.maze[t.y][t.x] = TILE.TRAP;
-            trapPlaced++;
-        }
+        const trapPlaced = this._placeRandomly(eligible, trapCount,
+            (t) => { scene.maze[t.y][t.x] = TILE.TRAP; });
         if (trapPlaced) scene.mapRenderer.drawMap();
     }
 
@@ -211,23 +224,14 @@ class ItemSpawner {
 
     placeFuel(eligible) {
         if (typeof FUEL_DEFS === 'undefined') return;
-        const scene = this.scene;
-        const wn = scene.worldNum;
+        const wn = this.scene.worldNum;
         // 1-3 fuel per level, more in later worlds
         const fuelCount = 1 + Math.floor(Math.random() * 2) + (wn >= 3 ? 1 : 0);
-        let placed = 0;
-
-        for (const t of eligible) {
-            if (placed >= fuelCount) break;
-            if (scene.chests.some(c => c.gridX === t.x && c.gridY === t.y)) continue;
-            if (scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)) continue;
-
+        this._placeRandomly(eligible, fuelCount, (t) => {
             // Wood in all worlds, coal from world 3+
             const fuelId = (wn >= 3 && Math.random() < 0.5) ? 'coal' : 'wood';
-            const fuelDef = FUEL_DEFS[fuelId];
-            this._spawnFuelAt(t.x, t.y, fuelDef);
-            placed++;
-        }
+            this._spawnFuelAt(t.x, t.y, FUEL_DEFS[fuelId]);
+        });
     }
 
     _spawnFuelAt(gx, gy, fuelDef) {
@@ -299,7 +303,7 @@ class ItemSpawner {
                     const fuels = wn >= 15 ? [FUEL_DEFS.natural_gas, FUEL_DEFS.oil] : wn >= 10 ? [FUEL_DEFS.oil, FUEL_DEFS.coal] : [FUEL_DEFS.coal];
                     const nobleGases = wn >= 10 ? ['Ar', 'Kr', 'Xe', 'Ne', 'He'] : null;
                     for (const tile of room.tiles) {
-                        if (!scene.itemObjects.some(o => o.gridX === tile.x && o.gridY === tile.y)) {
+                        if (this._isTileFree(tile.x, tile.y)) {
                             const fuel = fuels[Math.floor(Math.random() * fuels.length)];
                             this._spawnFuelAt(tile.x, tile.y, fuel);
                         }
@@ -322,25 +326,16 @@ class ItemSpawner {
                     continue; // camp_room and chem_lab don't spawn minerals
                 }
                 for (let i = 0; i < roomMinerals && room.tiles.length > 0; i++) {
-                    const tIdx = Math.floor(Math.random() * room.tiles.length);
-                    const tile = room.tiles[tIdx];
-                    if (scene.itemObjects.some(o => o.gridX === tile.x && o.gridY === tile.y)) continue;
-                    if (scene.chests.some(c => c.gridX === tile.x && c.gridY === tile.y)) continue;
+                    const tile = room.tiles[Math.floor(Math.random() * room.tiles.length)];
+                    if (!this._isTileFree(tile.x, tile.y)) continue;
                     this.spawnMineralAt(tile.x, tile.y, mineralFn());
                 }
             }
         }
 
         // Scatter minerals on regular floor tiles
-        let placed = 0;
-        for (const t of eligible) {
-            if (placed >= mineralCount) break;
-            if (scene.chests.some(c => c.gridX === t.x && c.gridY === t.y)) continue;
-            if (scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)) continue;
-            const mineralDef = rollMineralForWorld(wn);
-            this.spawnMineralAt(t.x, t.y, mineralDef);
-            placed++;
-        }
+        const placed = this._placeRandomly(eligible, mineralCount,
+            (t) => this.spawnMineralAt(t.x, t.y, rollMineralForWorld(wn)));
 
         // Guaranteed rare mineral if hero has master_prospector skill
         if (scene.hero && scene.hero.guaranteedRareMineral && placed > 0) {
@@ -348,13 +343,7 @@ class ItemSpawner {
             const pool = MINERAL_POOL[Math.min(rareTier, 6)] || MINERAL_POOL[4];
             const rareId = pool[Math.floor(Math.random() * pool.length)];
             const rareDef = MINERAL_DEFS[rareId];
-            // Place on a random remaining eligible tile
-            for (const t of eligible) {
-                if (scene.itemObjects.some(o => o.gridX === t.x && o.gridY === t.y)) continue;
-                if (scene.chests.some(c => c.gridX === t.x && c.gridY === t.y)) continue;
-                this.spawnMineralAt(t.x, t.y, rareDef);
-                break;
-            }
+            this._placeRandomly(eligible, 1, (t) => this.spawnMineralAt(t.x, t.y, rareDef));
         }
     }
 
@@ -536,9 +525,7 @@ class ItemSpawner {
         const eligible = gen.getFloorTiles().filter(({ x, y }) => {
             if (Math.abs(x - 1) + Math.abs(y - 1) < 8) return false;
             if (x === scene.exitX && y === scene.exitY) return false;
-            if (scene.chests.some(c => c.gridX === x && c.gridY === y)) return false;
-            if (scene.itemObjects.some(o => o.gridX === x && o.gridY === y)) return false;
-            return true;
+            return this._isTileFree(x, y);
         });
         if (eligible.length === 0) return;
 
