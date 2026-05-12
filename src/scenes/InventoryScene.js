@@ -14,6 +14,7 @@ class InventoryScene extends Phaser.Scene {
         this.pet  = gs.pet;
 
         this._dyn = [];  // dynamic objects – destroyed on _refresh()
+        this.tooltips = new TooltipManager(this);
 
         // ── Static background & title ──────────────────────────────────────────
         const cx = W / 2, cy = H / 2;
@@ -61,13 +62,14 @@ class InventoryScene extends Phaser.Scene {
         const ebBtn = this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 18, 'Elementbok [B]', {
             fontSize: '12px', color: '#997755', fontFamily: 'monospace'
         }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
-        ebBtn.on('pointerover', () => ebBtn.setColor('#ccaa77'));
-        ebBtn.on('pointerout',  () => ebBtn.setColor('#997755'));
-        ebBtn.on('pointerdown', () => {
-            const gs = this.scene.get('GameScene');
-            if (gs && gs.hero) {
-                this.scene.launch('ElementBookScene', { heroRef: gs.hero });
-            }
+        UIHelper.attachHover(ebBtn, {
+            hoverColor: '#ccaa77', normalColor: '#997755',
+            onClick: () => {
+                const gs = this.scene.get('GameScene');
+                if (gs && gs.hero) {
+                    this.scene.launch('ElementBookScene', { heroRef: gs.hero });
+                }
+            },
         });
 
         // Mineral wiki button
@@ -75,20 +77,22 @@ class InventoryScene extends Phaser.Scene {
             cy - panelH / 2 + 18, 'Mineral-wiki', {
             fontSize: '12px', color: '#997755', fontFamily: 'monospace'
         }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
-        mwBtn.on('pointerover', () => mwBtn.setColor('#ccaa77'));
-        mwBtn.on('pointerout',  () => mwBtn.setColor('#997755'));
-        mwBtn.on('pointerdown', () => {
-            const gs = this.scene.get('GameScene');
-            this.scene.launch('MineralWikiScene', { heroRef: gs?.hero || null });
+        UIHelper.attachHover(mwBtn, {
+            hoverColor: '#ccaa77', normalColor: '#997755',
+            onClick: () => {
+                const gs = this.scene.get('GameScene');
+                this.scene.launch('MineralWikiScene', { heroRef: gs?.hero || null });
+            },
         });
 
         // Close button (touch-friendly)
         const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
             fontSize: '20px', color: '#667788', fontFamily: 'monospace'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
-        closeBtn.on('pointerdown', () => this._tryClose());
+        UIHelper.attachHover(closeBtn, {
+            hoverColor: '#ff6666', normalColor: '#667788',
+            onClick: () => this._tryClose(),
+        });
 
         // ── Build dynamic slot UI ──────────────────────────────────────────────
         this._refresh();
@@ -231,34 +235,17 @@ class InventoryScene extends Phaser.Scene {
                 fontSize: '11px', color: this._rarityTextColor(item), fontFamily: 'monospace'
             }).setOrigin(0.5));
 
-            bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerdown', (pointer) => {
-                if (pointer.rightButtonDown()) {
-                    const dropped = this.inv.dropEquipped(slot, this.hero);
-                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    this._refresh();
-                    return;
-                }
-                // Long-press (touch) = drop, short tap = unequip
-                bg._lpTimer = this.time.delayedCall(500, () => {
-                    bg._lpTimer = null;
-                    const dropped = this.inv.dropEquipped(slot, this.hero);
-                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    this._refresh();
-                });
-            });
-            bg.on('pointerup', () => {
-                if (bg._lpTimer) {
-                    bg._lpTimer.remove();
-                    bg._lpTimer = null;
-                    this.inv.unequip(slot, this.hero);
-                    this._refresh();
-                }
-            });
-            bg.on('pointerover', () => { bg.setFillStyle(0x1a1830); this._showTooltip(x, y - size/2 - 20, item); });
-            bg.on('pointerout',  () => {
-                bg.setFillStyle(0x0a0918); this._hideTooltip();
-                if (bg._lpTimer) { bg._lpTimer.remove(); bg._lpTimer = null; }
+            const dropEquipped = () => {
+                const dropped = this.inv.dropEquipped(slot, this.hero);
+                if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
+                this._refresh();
+            };
+            this._attachSlotInteraction(bg, {
+                hoverFill: 0x1a1830, normalFill: 0x0a0918,
+                tooltipItem: item, tooltipPos: { x, y: y - size/2 - 20 },
+                onTap: () => { this.inv.unequip(slot, this.hero); this._refresh(); },
+                onLongPress: dropEquipped,
+                onRightClick: dropEquipped,
             });
         } else {
             this._d(this.add.text(x, y, 'Tom', {
@@ -297,34 +284,17 @@ class InventoryScene extends Phaser.Scene {
                 fontSize: '11px', color: '#ccddff', fontFamily: 'monospace'
             }).setOrigin(0.5));
 
-            bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerdown', (pointer) => {
-                if (pointer.rightButtonDown()) {
-                    const dropped = this.inv.dropQuickUse();
-                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    this._refresh();
-                    return;
-                }
-                bg._lpTimer = this.time.delayedCall(500, () => {
-                    bg._lpTimer = null;
-                    const dropped = this.inv.dropQuickUse();
-                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    this._refresh();
-                });
-            });
-            bg.on('pointerup', () => {
-                if (bg._lpTimer) {
-                    bg._lpTimer.remove();
-                    bg._lpTimer = null;
-                    // Tap: unequip back to backpack
-                    this.inv.unequipQuickUse();
-                    this._refresh();
-                }
-            });
-            bg.on('pointerover', () => { bg.setFillStyle(0x1a1830); this._showTooltip(x, y - size/2 - 20, itemDef); });
-            bg.on('pointerout',  () => {
-                bg.setFillStyle(0x0a0918); this._hideTooltip();
-                if (bg._lpTimer) { bg._lpTimer.remove(); bg._lpTimer = null; }
+            const dropQuick = () => {
+                const dropped = this.inv.dropQuickUse();
+                if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
+                this._refresh();
+            };
+            this._attachSlotInteraction(bg, {
+                hoverFill: 0x1a1830, normalFill: 0x0a0918,
+                tooltipItem: itemDef, tooltipPos: { x, y: y - size/2 - 20 },
+                onTap: () => { this.inv.unequipQuickUse(); this._refresh(); },
+                onLongPress: dropQuick,
+                onRightClick: dropQuick,
             });
         } else {
             this._d(this.add.text(x, y, 'Tom', {
@@ -372,50 +342,23 @@ class InventoryScene extends Phaser.Scene {
                 }).setOrigin(1, 0));
             }
 
-            bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerover', () => {
-                bg.setFillStyle(0x1a2030);
-                const tip = count > 1 ? { ...itemDef, name: `${itemDef.name} ×${count}` } : itemDef;
-                this._showTooltip(x, y - size / 2 - 4, tip);
-            });
-            bg.on('pointerout', () => {
-                bg.setFillStyle(0x0a0918);
-                this._hideTooltip();
-            });
-            bg.on('pointerdown', (pointer) => {
-                this._hideTooltip();
-                if (pointer.rightButtonDown()) {
-                    // Right-click: move to pet if possible, otherwise drop
-                    const item = this.inv._getItemDef(this.inv.backpack[index]);
-                    if (item && this.pet && this.pet.alive && this.pet.addItem(item)) {
-                        this.inv.dropSlot(index);
-                    } else {
-                        const dropped = this.inv.dropSlot(index);
-                        if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    }
-                    this._refresh();
-                    return;
+            const moveToPetOrDrop = () => {
+                const item = this.inv._getItemDef(this.inv.backpack[index]);
+                if (item && this.pet && this.pet.alive && this.pet.addItem(item)) {
+                    this.inv.dropSlot(index);
+                } else {
+                    const dropped = this.inv.dropSlot(index);
+                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
                 }
-                bg._lpTimer = this.time.delayedCall(500, () => {
-                    bg._lpTimer = null;
-                    // Long press: move to pet if possible, otherwise drop
-                    const item = this.inv._getItemDef(this.inv.backpack[index]);
-                    if (item && this.pet && this.pet.alive && this.pet.addItem(item)) {
-                        this.inv.dropSlot(index);
-                    } else {
-                        const dropped = this.inv.dropSlot(index);
-                        if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    }
-                    this._refresh();
-                });
-            });
-            bg.on('pointerup', () => {
-                if (bg._lpTimer) {
-                    bg._lpTimer.remove();
-                    bg._lpTimer = null;
-                    this.inv.useSlot(index, this.hero);
-                    this._refresh();
-                }
+                this._refresh();
+            };
+            const tipItem = count > 1 ? { ...itemDef, name: `${itemDef.name} ×${count}` } : itemDef;
+            this._attachSlotInteraction(bg, {
+                hoverFill: 0x1a2030, normalFill: 0x0a0918,
+                tooltipItem: tipItem, tooltipPos: { x, y: y - size / 2 - 4 },
+                onTap: () => { this.inv.useSlot(index, this.hero); this._refresh(); },
+                onLongPress: moveToPetOrDrop,
+                onRightClick: moveToPetOrDrop,
             });
         }
     }
@@ -508,43 +451,22 @@ class InventoryScene extends Phaser.Scene {
                 }).setOrigin(1, 0));
             }
 
-            bg.setInteractive({ useHandCursor: true });
-            bg.on('pointerover', () => {
-                bg.setFillStyle(0x1a1830);
-                const tip = count > 1 ? { ...itemDef, name: `${itemDef.name} ×${count}` } : itemDef;
-                this._showTooltip(x, y - size / 2 - 4, tip);
-            });
-            bg.on('pointerout', () => {
-                bg.setFillStyle(0x120a18);
-                this._hideTooltip();
-            });
-            bg.on('pointerdown', (pointer) => {
-                this._hideTooltip();
-                if (pointer.rightButtonDown()) {
-                    // Drop from pet backpack to ground
-                    const dropped = pet.dropSlot(index);
-                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    this._refresh();
-                    return;
-                }
-                bg._lpTimer = this.time.delayedCall(500, () => {
-                    bg._lpTimer = null;
-                    const dropped = pet.dropSlot(index);
-                    if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
-                    this._refresh();
-                });
-            });
-            bg.on('pointerup', () => {
-                if (bg._lpTimer) {
-                    bg._lpTimer.remove();
-                    bg._lpTimer = null;
-                    // Tap: move item from pet to hero backpack
+            const dropPetSlot = () => {
+                const dropped = pet.dropSlot(index);
+                if (dropped) EventBus.emit('spawnItem', { gx: this.hero.gridX, gy: this.hero.gridY, item: dropped });
+                this._refresh();
+            };
+            const tipItem = count > 1 ? { ...itemDef, name: `${itemDef.name} ×${count}` } : itemDef;
+            this._attachSlotInteraction(bg, {
+                hoverFill: 0x1a1830, normalFill: 0x120a18,
+                tooltipItem: tipItem, tooltipPos: { x, y: y - size / 2 - 4 },
+                onTap: () => {
                     const item = pet.getItemDef(pet.backpack[index]);
-                    if (item && this.inv.addItem(item)) {
-                        pet.dropSlot(index);
-                    }
+                    if (item && this.inv.addItem(item)) pet.dropSlot(index);
                     this._refresh();
-                }
+                },
+                onLongPress: dropPetSlot,
+                onRightClick: dropPetSlot,
             });
         } else {
             // Empty slot: allow moving from hero to pet by checking if hero inventory is the source
@@ -737,32 +659,65 @@ class InventoryScene extends Phaser.Scene {
     }
 
     _showTooltip(x, y, item) {
-        this._hideTooltip();
-        const { width: W, height: H } = this.cameras.main;
         const rarDef = item.rarity ? RARITY_BY_ID[item.rarity] : null;
         const rarTag = (rarDef && item.rarity !== 'common') ? `[${rarDef.label}]  ` : '';
         const dispName = (item.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
             ? getMineralDisplayName(item, this.hero) : item.name;
         const dispDesc = (item.type === 'mineral' && (this.hero.mineralIdentifyLevel || 0) <= 0)
             ? '' : (item.desc || '');
-        const lines = [rarTag + dispName, dispDesc];
-        const txtCol = this._rarityTextColor(item);
-        this._tooltip = this.add.text(x, y, lines.join('\n'), {
-            fontSize: '12px', color: txtCol, fontFamily: 'monospace',
-            backgroundColor: '#0a0918', padding: { x: 6, y: 4 },
-            stroke: '#334466', strokeThickness: 1,
-            wordWrap: { width: 300 }
-        }).setOrigin(0.5, 1).setDepth(30);
-
-        // Clamp tooltip within viewport
-        const b = this._tooltip.getBounds();
-        if (b.left < 4) this._tooltip.setX(x + (4 - b.left));
-        if (b.right > W - 4) this._tooltip.setX(x - (b.right - W + 4));
-        if (b.top < 4) this._tooltip.setOrigin(0.5, 0).setY(y + 8);
+        const text = [rarTag + dispName, dispDesc].join('\n');
+        this.tooltips.show(x, y, text, { color: this._rarityTextColor(item) });
     }
 
     _hideTooltip() {
-        if (this._tooltip) { this._tooltip.destroy(); this._tooltip = null; }
+        this.tooltips.hide();
+    }
+
+    /**
+     * Shared interactive slot handler. Wires up:
+     *  - hover/out (with tooltip if `tooltipItem` provided)
+     *  - long-press (500ms) → onLongPress
+     *  - tap (pointerup before timer) → onTap
+     *  - right-click (immediate) → onRightClick
+     * Caller passes the bg rectangle and color callbacks/handlers.
+     */
+    _attachSlotInteraction(bg, opts) {
+        const {
+            hoverFill, normalFill,
+            tooltipItem, tooltipPos,
+            onTap, onLongPress, onRightClick,
+        } = opts;
+        bg.setInteractive({ useHandCursor: true });
+
+        bg.on('pointerover', () => {
+            if (hoverFill !== undefined) bg.setFillStyle(hoverFill);
+            if (tooltipItem) this._showTooltip(tooltipPos.x, tooltipPos.y, tooltipItem);
+        });
+        bg.on('pointerout', () => {
+            if (normalFill !== undefined) bg.setFillStyle(normalFill);
+            if (tooltipItem) this._hideTooltip();
+            if (bg._lpTimer) { bg._lpTimer.remove(); bg._lpTimer = null; }
+        });
+        bg.on('pointerdown', (pointer) => {
+            this._hideTooltip();
+            if (pointer.rightButtonDown && pointer.rightButtonDown()) {
+                if (onRightClick) onRightClick();
+                return;
+            }
+            if (onLongPress) {
+                bg._lpTimer = this.time.delayedCall(500, () => {
+                    bg._lpTimer = null;
+                    onLongPress();
+                });
+            }
+        });
+        bg.on('pointerup', () => {
+            if (bg._lpTimer) {
+                bg._lpTimer.remove();
+                bg._lpTimer = null;
+                if (onTap) onTap();
+            }
+        });
     }
 
     _shortName(name) {
