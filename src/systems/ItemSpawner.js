@@ -466,23 +466,6 @@ class ItemSpawner {
                     // Track mineral pickups for leaderboard
                     if (obj.isMineral) scene.hero.mineralsCollected++;
 
-                    // First-time mineral discovery popup (no skill required)
-                    if (obj.isMineral && scene.hero.discoveredMinerals
-                            && !scene.hero.discoveredMinerals[obj.item.id]) {
-                        scene.hero.discoveredMinerals[obj.item.id] = true;
-                        const tierCol = (typeof MINERAL_TIER_COLORS !== 'undefined')
-                            ? MINERAL_TIER_COLORS[obj.item.tier] : null;
-                        EventBus.emit('discovery', {
-                            type:      'mineral',
-                            name:      obj.item.name,
-                            iconColor: tierCol || obj.item.color || 0xaaaaaa,
-                            iconText:  obj.item.name ? obj.item.name[0] : '?',
-                            subtitle:  [obj.item.formula, obj.item.tier ? `Tier ${obj.item.tier}` : null]
-                                           .filter(Boolean).join(' · '),
-                            desc:      obj.item.desc || '',
-                        });
-                    }
-
                     // Can hero identify minerals? (requires Geolog skill)
                     const canIdentify = obj.isMineral && (scene.hero.mineralIdentifyLevel || 0) > 0;
 
@@ -494,6 +477,22 @@ class ItemSpawner {
                             scene._floatingText(hx, hy - 1, 'Geolog-stien er ulåst!', '#997755');
                         }
                         if (canIdentify) {
+                            // First-time mineral discovery popup (requires Geolog)
+                            if (scene.hero.discoveredMinerals
+                                    && !scene.hero.discoveredMinerals[obj.item.id]) {
+                                scene.hero.discoveredMinerals[obj.item.id] = true;
+                                const tierCol = (typeof MINERAL_TIER_COLORS !== 'undefined')
+                                    ? MINERAL_TIER_COLORS[obj.item.tier] : null;
+                                EventBus.emit('discovery', {
+                                    type:      'mineral',
+                                    name:      obj.item.name,
+                                    iconColor: tierCol || obj.item.color || 0xaaaaaa,
+                                    iconText:  obj.item.name ? obj.item.name[0] : '?',
+                                    subtitle:  [obj.item.formula, obj.item.tier ? `Tier ${obj.item.tier}` : null]
+                                                   .filter(Boolean).join(' · '),
+                                    desc:      obj.item.desc || '',
+                                });
+                            }
                             for (const y of obj.item.yields) {
                                 const isNew = scene.hero.elementTracker.discover(y.symbol);
                                 if (isNew && typeof ELEMENTS !== 'undefined') {
