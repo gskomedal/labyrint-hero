@@ -154,6 +154,12 @@ class DiscoveryPopupScene extends Phaser.Scene {
             ease:     'Back.easeOut',
         });
 
+        if (data.type === 'elementBonus') {
+            Audio.playGroupBonus();
+        } else {
+            Audio.playDiscovery();
+        }
+
         this._container = container;
         this._autoTimer = this.time.delayedCall(3500, () => this._dismiss());
     }

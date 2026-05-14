@@ -82,6 +82,12 @@ class GameScene extends Phaser.Scene {
             this.hero._draw();
         }
 
+        // Snapshot discovery counts for world summary card (#162)
+        this._worldStartElementCount = this.hero.elementTracker
+            ? this.hero.elementTracker.discoveredCount : 0;
+        this._worldStartMineralCount = this.hero.discoveredMinerals
+            ? Object.keys(this.hero.discoveredMinerals).length : 0;
+
         // ── Technology effects on floor start ─────────────────────────────
         if (this.hero.techForceField) this.hero.techForceFieldHP = 15;
         if (this.hero.techEMP) this.hero.empCharges = Math.max(this.hero.empCharges || 0, 1);
@@ -494,6 +500,21 @@ class GameScene extends Phaser.Scene {
             this.hero.victoryAchieved = true;
         }
 
+        const newElements = Math.max(0,
+            (this.hero.elementTracker ? this.hero.elementTracker.discoveredCount : 0)
+            - this._worldStartElementCount);
+        const newMinerals = Math.max(0,
+            (this.hero.discoveredMinerals ? Object.keys(this.hero.discoveredMinerals).length : 0)
+            - this._worldStartMineralCount);
+        const summaryStats = {
+            monstersKilled:    this.monstersKilled,
+            mineralsCollected: this.hero.mineralsCollected || 0,
+            newElements,
+            newMinerals,
+            gold:        this.hero.gold || 0,
+            timeSeconds: worldTime,
+        };
+
         SaveManager.save(this.worldNum + 1, this._getFullStats());
         this.time.delayedCall(300, () => {
             this.scene.start('GameOverScene', {
@@ -501,7 +522,8 @@ class GameScene extends Phaser.Scene {
                 worldNum: this.worldNum,
                 heroStats: this._getFullStats(), difficulty: this.difficulty,
                 monstersKilled: this.monstersKilled,
-                timeSeconds: worldTime
+                timeSeconds: worldTime,
+                summaryStats: isGameComplete ? null : summaryStats,
             });
         });
     }

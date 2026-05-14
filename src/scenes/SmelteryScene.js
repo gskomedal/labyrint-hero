@@ -30,7 +30,7 @@ class SmelteryScene extends Phaser.Scene {
 
         // ── Camp background art (behind everything) ──────────────────────────
         const panel = this.add.graphics();
-        panel.fillStyle(0x0a0608, 0.97);
+        panel.fillStyle(UI_COLORS.panelBgDark, 0.97);
         panel.fillRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
         if (SceneBackgrounds.addCampBackground) {
             SceneBackgrounds.addCampBackground(this, this.px, this.py, this.panelW, this.panelH);
@@ -42,29 +42,29 @@ class SmelteryScene extends Phaser.Scene {
         const contentW = this.panelW - 12;
         const contentH = 60;
         const uiGfx = this.add.graphics();
-        uiGfx.fillStyle(0x0a0608, 0.82);
+        uiGfx.fillStyle(UI_COLORS.panelBgDark, 0.82);
         uiGfx.fillRoundedRect(contentLeft, contentTop, contentW, contentH, 6);
 
         // Panel border
-        panel.lineStyle(2, 0xff7722);
+        panel.lineStyle(2, UI_COLORS.accentOrange);
         panel.strokeRoundedRect(this.px, this.py, this.panelW, this.panelH, 8);
 
         // Title
         this.add.text(cx, this.py + 22, 'SMELTEOVN  –  Leirplass', {
-            fontSize: '18px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: UI_FONTS.heading, color: UI_TEXT.primary, fontFamily: UI_FONTS.family, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         // Fuel indicator
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
         this._fuelText = this.add.text(this.px + this.panelW - 20, this.py + 22, `Brensel: ${fuel} energi`, {
-            fontSize: '14px', color: '#886633', fontFamily: 'monospace'
+            fontSize: UI_FONTS.label, color: '#886633', fontFamily: UI_FONTS.family
         }).setOrigin(1, 0.5);
 
         // Element counts summary
         const tracker = this.heroRef.elementTracker;
         const elemCount = Object.keys(tracker.collected).length;
         this._elemText = this.add.text(this.px + 20, this.py + 22, `Grunnstoffer: ${elemCount}`, {
-            fontSize: '14px', color: '#887766', fontFamily: 'monospace'
+            fontSize: UI_FONTS.label, color: '#887766', fontFamily: UI_FONTS.family
         }).setOrigin(0, 0.5);
 
         this.add.rectangle(cx, this.py + 42, this.panelW - 20, 1, 0x332200);
@@ -88,8 +88,8 @@ class SmelteryScene extends Phaser.Scene {
             const tx = this.px + 30 + i * (tabW + 10) + tabW / 2;
             const active = this._tab === tab.id;
             const btn = this.add.text(tx, tabY, tab.label, {
-                fontSize: '16px', color: active ? '#ff7722' : '#554433',
-                fontFamily: 'monospace', fontStyle: active ? 'bold' : 'normal'
+                fontSize: '16px', color: active ? UI_TEXT.primary : '#554433',
+                fontFamily: UI_FONTS.family, fontStyle: active ? 'bold' : 'normal'
             }).setOrigin(0.5).setInteractive({ useHandCursor: true });
             btn.on('pointerdown', () => { this._tab = tab.id; this._refresh(); });
             this._tabBtns.push(btn);
@@ -99,7 +99,7 @@ class SmelteryScene extends Phaser.Scene {
 
         // ── Close button ──────────────────────────────────────────────────────
         const closeBtn = this.add.text(this.px + this.panelW - 20, this.py + 10, '✕', {
-            fontSize: '22px', color: '#886644', fontFamily: 'monospace'
+            fontSize: '22px', color: '#886644', fontFamily: UI_FONTS.family
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         closeBtn.on('pointerdown', () => this.scene.stop());
 
@@ -159,13 +159,13 @@ class SmelteryScene extends Phaser.Scene {
 
         // Dark backing behind content for readability
         const cbg = this._d(this.add.graphics());
-        cbg.fillStyle(0x0a0608, 0.78);
+        cbg.fillStyle(UI_COLORS.panelBgDark, 0.78);
         cbg.fillRoundedRect(this.px + 6, this.contentY - 4, this.panelW - 12, this.panelH - (this.contentY - this.py) - 10, 4);
 
         // Update tab button colors
         const tabIds = ['stash', 'smelt', 'alloy', 'forge'];
         if (this.heroRef.semiconductorUnlocked) { tabIds.push('refine', 'semi', 'tech'); }
-        UIHelper.updateTabButtons(this._tabBtns, tabIds, this._tab, '#ff7722', '#554433');
+        UIHelper.updateTabButtons(this._tabBtns, tabIds, this._tab, UI_TEXT.primary, '#554433');
 
         // Update fuel text
         const fuel = this.smelter.calculateFuelEnergy(this.heroRef);
@@ -206,12 +206,12 @@ class SmelteryScene extends Phaser.Scene {
         const maxScroll = this._maxScrolls[this._tab] || 0;
         if (scrollOff > 0) {
             this._d(this.add.text(this.px + this.panelW / 2, this.contentY - 2, '▲ mer ▲', {
-                fontSize: '12px', color: '#665544', fontFamily: 'monospace'
+                fontSize: UI_FONTS.small, color: '#665544', fontFamily: UI_FONTS.family
             }).setOrigin(0.5, 1));
         }
         if (maxScroll > 0 && scrollOff < maxScroll - 1) {
             this._d(this.add.text(this.px + this.panelW / 2, this.py + this.panelH - 14, '▼ mer ▼', {
-                fontSize: '12px', color: '#665544', fontFamily: 'monospace'
+                fontSize: UI_FONTS.small, color: '#665544', fontFamily: UI_FONTS.family
             }).setOrigin(0.5));
         }
         // Scrollbar thumb on right edge
@@ -224,7 +224,7 @@ class SmelteryScene extends Phaser.Scene {
             const bar = this._d(this.add.graphics());
             bar.fillStyle(0x332200, 0.6);
             bar.fillRoundedRect(trackX, trackY, 4, trackH, 2);
-            bar.fillStyle(0xff7722, 0.7);
+            bar.fillStyle(UI_COLORS.accentOrange, 0.7);
             bar.fillRoundedRect(trackX, thumbY, 4, thumbH, 2);
         }
     }
@@ -252,9 +252,9 @@ class SmelteryScene extends Phaser.Scene {
 
         // "Alle" reset button
         const allBtn = this._d(this.add.text(bx, y, 'Alle', {
-            fontSize: '12px',
-            color: this._elementFilter === null ? '#ff7722' : '#554433',
-            fontFamily: 'monospace', fontStyle: this._elementFilter === null ? 'bold' : 'normal',
+            fontSize: UI_FONTS.small,
+            color: this._elementFilter === null ? UI_TEXT.primary : '#554433',
+            fontFamily: UI_FONTS.family, fontStyle: this._elementFilter === null ? 'bold' : 'normal',
             backgroundColor: '#0a0608', padding: { x: 3, y: 1 }
         }).setInteractive({ useHandCursor: true }));
         allBtn.on('pointerdown', () => { this._elementFilter = null; this._scrollOffsets[this._tab] = 0; this._refresh(); });
@@ -288,9 +288,9 @@ class SmelteryScene extends Phaser.Scene {
             const dimmed = count === 0;
 
             const badge = this._d(this.add.text(bx, y, symbol, {
-                fontSize: '12px',
-                color: isActive ? '#ff7722' : (dimmed ? '#222222' : hexCol),
-                fontFamily: 'monospace',
+                fontSize: UI_FONTS.small,
+                color: isActive ? UI_TEXT.primary : (dimmed ? '#222222' : hexCol),
+                fontFamily: UI_FONTS.family,
                 fontStyle: isActive ? 'bold' : 'normal',
                 backgroundColor: isActive ? '#331100' : '#0a0608',
                 padding: { x: 3, y: 1 }
@@ -313,7 +313,7 @@ class SmelteryScene extends Phaser.Scene {
         // smelt/alloy/forge tabs — keeping the filter always on top.
         const coverH = this.contentY - filterStartY;
         const cover = this._d(this.add.graphics());
-        cover.fillStyle(0x0a0608, 1.0);
+        cover.fillStyle(UI_COLORS.panelBgDark, 1.0);
         cover.fillRect(this.px + 6, filterStartY, this.panelW - 12, coverH);
         cover.lineStyle(1, 0x221100, 1.0);
         cover.lineBetween(this.px + 6, filterStartY + coverH - 2, this.px + this.panelW - 6, filterStartY + coverH - 2);
@@ -329,13 +329,13 @@ class SmelteryScene extends Phaser.Scene {
         const cy = this.contentY + (this.panelH - (this.contentY - this.py)) / 2 - 40;
         this._d(this.add.text(cx, cy, '🔒', { fontSize: '36px' }).setOrigin(0.5));
         this._d(this.add.text(cx, cy + 34, 'Krever Metallurg-skill!', {
-            fontSize: '16px', color: '#ff7722', fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '16px', color: UI_TEXT.primary, fontFamily: UI_FONTS.family, fontStyle: 'bold'
         }).setOrigin(0.5));
         const hint = this._hasGeologSkill()
             ? 'Lær Rask smelting i skilltreet\nfor å bruke smelteovnen.'
             : 'Du trenger Geolog-skill først,\nderetter Metallurg-skill.';
         this._d(this.add.text(cx, cy + 58, hint, {
-            fontSize: '14px', color: '#665544', fontFamily: 'monospace', align: 'center'
+            fontSize: UI_FONTS.label, color: '#665544', fontFamily: UI_FONTS.family, align: 'center'
         }).setOrigin(0.5));
         this._contentEndY = this.contentY;
     }
@@ -451,7 +451,7 @@ class SmelteryScene extends Phaser.Scene {
         }
 
         const elemStr = result.elements.map(e => `${e.symbol}×${e.amount}`).join(', ');
-        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smeltet: ${elemStr}`, color: '#ff7722' });
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Smeltet: ${elemStr}`, color: UI_TEXT.primary });
 
         // Geolog T2 visible feedback when double-yield triggered.
         if (result.doubled) {
@@ -487,7 +487,7 @@ class SmelteryScene extends Phaser.Scene {
         if (!hero.alloyInventory) hero.alloyInventory = {};
         hero.alloyInventory[alloyId] = (hero.alloyInventory[alloyId] || 0) + 1;
 
-        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.alloy.name}!`, color: '#ff7722' });
+        EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Laget: ${result.alloy.name}!`, color: UI_TEXT.primary });
 
         Audio.playPickup();
         this._refresh();
@@ -621,7 +621,7 @@ class SmelteryScene extends Phaser.Scene {
         if (entries.length === 0) return;
 
         this._d(this.add.text(startX, y, 'Lagrede grunnstoffer (klikk for å filtrere):', {
-            fontSize: '14px', color: '#665544', fontFamily: 'monospace'
+            fontSize: UI_FONTS.label, color: '#665544', fontFamily: UI_FONTS.family
         }));
         y += 20;
 
@@ -636,7 +636,7 @@ class SmelteryScene extends Phaser.Scene {
             const isActive = this._elementFilter === symbol;
 
             const badge = this._d(this.add.text(bx, by, `${symbol}:${count}`, {
-                fontSize: '14px', color: isActive ? '#ffffff' : hexCol, fontFamily: 'monospace',
+                fontSize: UI_FONTS.label, color: isActive ? '#ffffff' : hexCol, fontFamily: UI_FONTS.family,
                 backgroundColor: isActive ? '#442200' : '#0a0818',
                 padding: { x: 4, y: 2 }
             }).setInteractive({ useHandCursor: true }));
@@ -648,7 +648,7 @@ class SmelteryScene extends Phaser.Scene {
                 const srcList = sources[sym];
                 if (srcList && srcList.length > 0) {
                     this._tooltipText = this._d(this.add.text(startX, by + 24, `${sym} ← ${srcList.join(', ')}`, {
-                        fontSize: '12px', color: '#998877', fontFamily: 'monospace',
+                        fontSize: UI_FONTS.small, color: '#998877', fontFamily: UI_FONTS.family,
                         backgroundColor: '#0a0608', padding: { x: 4, y: 2 }
                     }));
                 }

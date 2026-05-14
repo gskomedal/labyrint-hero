@@ -10,6 +10,7 @@ class GameOverScene extends Phaser.Scene {
         this.difficulty     = data.difficulty || 'normal';
         this.monstersKilled = data.monstersKilled || 0;
         this.timeSeconds    = data.timeSeconds || 0;
+        this.summaryStats   = data.summaryStats || null;
     }
 
     create() {
@@ -63,16 +64,16 @@ class GameOverScene extends Phaser.Scene {
         g.fillRect(0, 0, W, H);
 
         this.add.text(cx, cy - 110, 'DU FALT', {
-            fontSize: '56px', color: '#ff2244', fontFamily: 'monospace',
+            fontSize: '56px', color: '#ff2244', fontFamily: UI_FONTS.family,
             fontStyle: 'bold', stroke: '#660011', strokeThickness: 5
         }).setOrigin(0.5);
 
         this.add.text(cx, cy - 48, `Verden ${this.worldNum}  ·  Nivå ${this.heroStats.level}`, {
-            fontSize: '18px', color: '#ccaaaa', fontFamily: 'monospace'
+            fontSize: UI_FONTS.heading, color: '#ccaaaa', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         this.add.text(cx, cy - 18, 'Du beholder nivå og stats. Verden genereres på nytt.', {
-            fontSize: '12px', color: '#664444', fontFamily: 'monospace'
+            fontSize: UI_FONTS.small, color: '#664444', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         this._statsPanel(cx, cy + 18);
@@ -101,24 +102,30 @@ class GameOverScene extends Phaser.Scene {
         g.fillRect(0, 0, W, H);
 
         this.add.text(cx, cy - 110, '✦ VERDEN KLAR ✦', {
-            fontSize: '40px', color: '#f5e642', fontFamily: 'monospace',
+            fontSize: '40px', color: '#f5e642', fontFamily: UI_FONTS.family,
             fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 4
         }).setOrigin(0.5);
 
         this.add.text(cx, cy - 60, `Du fullførte Verden ${this.worldNum}!`, {
-            fontSize: '20px', color: '#ffffff', fontFamily: 'monospace'
+            fontSize: '20px', color: '#ffffff', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
-        this._statsPanel(cx, cy - 10);
+        let yOff = 0;
+        if (this.summaryStats) {
+            this._summaryCard(cx, cy - 10);
+            yOff = 100;
+        }
+
+        this._statsPanel(cx, cy - 10 + yOff);
 
         const nextW = this.worldNum + 1;
         const DIFF_LABEL = { easy: 'LETT', normal: 'NORMAL', hard: 'VANSKELIG' };
         const DIFF_COL   = { easy: '#44bb44', normal: '#4488ff', hard: '#ff4444' };
-        this.add.text(cx, cy + 56, `Vanskelighetsgrad: ${DIFF_LABEL[this.difficulty] || 'NORMAL'}`, {
-            fontSize: '12px', color: DIFF_COL[this.difficulty] || '#4488ff', fontFamily: 'monospace'
+        this.add.text(cx, cy + 56 + yOff, `Vanskelighetsgrad: ${DIFF_LABEL[this.difficulty] || 'NORMAL'}`, {
+            fontSize: UI_FONTS.small, color: DIFF_COL[this.difficulty] || '#4488ff', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
-        const next  = this._button(cx, cy + 86, `[ VERDEN ${nextW} ]`, '#00e87a', 26);
+        const next  = this._button(cx, cy + 86 + yOff, `[ VERDEN ${nextW} ]`, '#00e87a', 26);
         next.on('pointerdown', () => {
             this.scene.start('GameScene', {
                 worldNum:   nextW,
@@ -130,15 +137,41 @@ class GameOverScene extends Phaser.Scene {
         // Fast travel (if player has completed multiple zones)
         const completedZones = this.heroStats.completedZones || [];
         if (completedZones.length > 0 && typeof ZONES !== 'undefined') {
-            const travelBtn = this._button(cx, cy + 126, '[ HURTIGREISE ]', '#44aadd', 14);
+            const travelBtn = this._button(cx, cy + 126 + yOff, '[ HURTIGREISE ]', '#44aadd', 14);
             travelBtn.on('pointerdown', () => this._showFastTravel(cx, cy));
         }
 
-        const menuY = completedZones.length > 0 ? cy + 160 : cy + 136;
+        const menuY = completedZones.length > 0 ? cy + 160 + yOff : cy + 136 + yOff;
         const menu = this._button(cx, menuY, '[ HOVED MENY ]', '#666688', 14);
         menu.on('pointerdown', () => this.scene.start('MenuScene'));
 
         this.tweens.add({ targets: next, alpha: 0.5, duration: 600, yoyo: true, repeat: -1 });
+    }
+
+    _summaryCard(cx, cy) {
+        const ss = this.summaryStats;
+        if (!ss) return;
+        const CW = 400, CH = 86;
+        const bg = this.add.graphics();
+        bg.fillStyle(UI_COLORS.panelBgDark, UI_COLORS.panelBgAlpha);
+        bg.fillRoundedRect(cx - CW / 2, cy - CH / 2, CW, CH, 8);
+        bg.lineStyle(1, 0x554433, 1);
+        bg.strokeRoundedRect(cx - CW / 2, cy - CH / 2, CW, CH, 8);
+
+        const fmt = s => s < 60 ? `${s}s` : `${Math.floor(s / 60)}m${s % 60}s`;
+        const rows = [
+            ['Monstre drept',    ss.monstersKilled,    'Mineraler plukket', ss.mineralsCollected],
+            ['Nye grunnstoffer', ss.newElements,        'Nye mineraler',     ss.newMinerals],
+            ['Gull samlet',      ss.gold + 'g',         'Tid brukt',         fmt(ss.timeSeconds)],
+        ];
+        const lx = cx - 185, lv = cx - 5, rx = cx + 15, rv = cx + 185;
+        rows.forEach((row, i) => {
+            const ry = cy - CH / 2 + 14 + i * 24;
+            this.add.text(lx, ry, row[0], { fontSize: '11px', color: '#887766', fontFamily: UI_FONTS.family }).setOrigin(0, 0);
+            this.add.text(lv, ry, String(row[1]), { fontSize: '11px', color: '#ffdd88', fontFamily: UI_FONTS.family, fontStyle: 'bold' }).setOrigin(1, 0);
+            this.add.text(rx, ry, row[2], { fontSize: '11px', color: '#887766', fontFamily: UI_FONTS.family }).setOrigin(0, 0);
+            this.add.text(rv, ry, String(row[3]), { fontSize: '11px', color: '#ffdd88', fontFamily: UI_FONTS.family, fontStyle: 'bold' }).setOrigin(1, 0);
+        });
     }
 
     _showFastTravel(cx, cy) {
@@ -154,7 +187,7 @@ class GameOverScene extends Phaser.Scene {
         this._ftPanel = panel;
 
         this.add.text(cx, cy - 80, 'Velg sone:', {
-            fontSize: '16px', color: '#44aadd', fontFamily: 'monospace'
+            fontSize: '16px', color: '#44aadd', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         const completedZones = this.heroStats.completedZones || [];
@@ -164,7 +197,7 @@ class GameOverScene extends Phaser.Scene {
             const col = completed ? '#44ff88' : '#555566';
             const label = completed ? `▸ ${zone.name} (Verden ${zone.worlds[0]})` : `  ${zone.name} (låst)`;
             const btn = this.add.text(cx, yOff, label, {
-                fontSize: '13px', color: col, fontFamily: 'monospace'
+                fontSize: UI_FONTS.body, color: col, fontFamily: UI_FONTS.family
             }).setOrigin(0.5);
             if (completed) {
                 btn.setInteractive({ useHandCursor: true });
@@ -199,11 +232,11 @@ class GameOverScene extends Phaser.Scene {
         const ngLabel = ngPlus > 0 ? `  NG+${ngPlus}` : '';
 
         this.add.text(cx, cy - 180, '✦ ✦ ✦', {
-            fontSize: '32px', color: '#ffcc00', fontFamily: 'monospace'
+            fontSize: '32px', color: '#ffcc00', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         const titleText = this.add.text(cx, cy - 145, 'GUDS PERIODISKE SYSTEM', {
-            fontSize: '36px', color: '#f5e642', fontFamily: 'monospace',
+            fontSize: '36px', color: '#f5e642', fontFamily: UI_FONTS.family,
             fontStyle: 'bold', stroke: '#7a6a00', strokeThickness: 6
         }).setOrigin(0.5);
         this.tweens.add({
@@ -212,11 +245,11 @@ class GameOverScene extends Phaser.Scene {
         });
 
         this.add.text(cx, cy - 100, `Du har samlet alle 118 grunnstoffer!${ngLabel}`, {
-            fontSize: '18px', color: '#ffffff', fontFamily: 'monospace'
+            fontSize: UI_FONTS.heading, color: '#ffffff', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         this.add.text(cx, cy - 76, 'Universets hemmeligheter er avslørt. Du er en sann mester!', {
-            fontSize: '12px', color: '#ccaa66', fontFamily: 'monospace'
+            fontSize: UI_FONTS.small, color: '#ccaa66', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         this._drawMiniPeriodicTable(cx, cy - 30);
@@ -274,7 +307,7 @@ class GameOverScene extends Phaser.Scene {
         if (ngPlus > 0) lines.push(`New Game+ syklus: ${ngPlus}`);
         lines.forEach((line, i) => {
             this.add.text(cx, cy + i * 18, line, {
-                fontSize: '13px', color: '#aabb99', fontFamily: 'monospace'
+                fontSize: UI_FONTS.body, color: '#aabb99', fontFamily: UI_FONTS.family
             }).setOrigin(0.5);
         });
     }
@@ -349,14 +382,14 @@ class GameOverScene extends Phaser.Scene {
         ];
         lines.forEach((line, i) => {
             this.add.text(cx, cy + i * 18, line, {
-                fontSize: '13px', color: '#8899bb', fontFamily: 'monospace'
+                fontSize: UI_FONTS.body, color: '#8899bb', fontFamily: UI_FONTS.family
             }).setOrigin(0.5);
         });
     }
 
     _button(x, y, label, color, size) {
         const btn = this.add.text(x, y, label, {
-            fontSize: `${size}px`, color, fontFamily: 'monospace'
+            fontSize: `${size}px`, color, fontFamily: UI_FONTS.family
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         btn.on('pointerover', () => btn.setAlpha(0.7));
         btn.on('pointerout',  () => btn.setAlpha(1));

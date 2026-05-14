@@ -32,22 +32,22 @@ class InventoryScene extends Phaser.Scene {
         // Title shifted right to make room for portrait
         const contentCX = cx + 100;
         this.add.text(contentCX, panelY - panelH / 2 + 18, 'INVENTAR', {
-            fontSize: '22px', color: '#ccddff', fontFamily: 'monospace', fontStyle: 'bold'
+            fontSize: '22px', color: '#ccddff', fontFamily: UI_FONTS.family, fontStyle: 'bold'
         }).setOrigin(0.5);
 
         this.add.rectangle(contentCX, panelY - panelH / 2 + 54, panelW - 250, 1, 0x223344);
 
         // Stats line – dynamic so it refreshes
         this._statsText = this.add.text(contentCX, panelY - panelH / 2 + 40, '', {
-            fontSize: '13px', color: '#667788', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#667788', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         // Section labels (static) - shifted right
         this.add.text(contentCX - 220, panelY - panelH / 2 + 62, 'UTSTYR', {
-            fontSize: '13px', color: '#445566', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#445566', fontFamily: UI_FONTS.family
         });
         this.add.text(contentCX, panelY - panelH / 2 + 168, 'EVNER', {
-            fontSize: '13px', color: '#445566', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#445566', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
         // RYGGSEKK label is drawn dynamically in _refresh() to show slot count
 
@@ -55,12 +55,12 @@ class InventoryScene extends Phaser.Scene {
             ? '[Trykk] Bruk/utstyr  ·  [Hold] → Kjæledyr/Slipp  ·  [E/ESC] Lukk'
             : '[Trykk] Bruk/utstyr  ·  [Hold] Slipp  ·  [E/ESC] Lukk';
         this.add.text(cx, panelY + panelH / 2 - 14, helpText, {
-            fontSize: '13px', color: '#334455', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#334455', fontFamily: UI_FONTS.family
         }).setOrigin(0.5);
 
         // Element Book button
         const ebBtn = this.add.text(cx - panelW / 2 + 20, cy - panelH / 2 + 18, 'Elementbok [B]', {
-            fontSize: '12px', color: '#997755', fontFamily: 'monospace'
+            fontSize: UI_FONTS.small, color: '#997755', fontFamily: UI_FONTS.family
         }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
         UIHelper.attachHover(ebBtn, {
             hoverColor: '#ccaa77', normalColor: '#997755',
@@ -75,7 +75,7 @@ class InventoryScene extends Phaser.Scene {
         // Mineral wiki button
         const mwBtn = this.add.text(cx - panelW / 2 + 20 + ebBtn.width + 16,
             cy - panelH / 2 + 18, 'Mineral-wiki', {
-            fontSize: '12px', color: '#997755', fontFamily: 'monospace'
+            fontSize: UI_FONTS.small, color: '#997755', fontFamily: UI_FONTS.family
         }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
         UIHelper.attachHover(mwBtn, {
             hoverColor: '#ccaa77', normalColor: '#997755',
@@ -87,7 +87,7 @@ class InventoryScene extends Phaser.Scene {
 
         // Close button (touch-friendly)
         const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
-            fontSize: '20px', color: '#667788', fontFamily: 'monospace'
+            fontSize: '20px', color: '#667788', fontFamily: UI_FONTS.family
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
         UIHelper.attachHover(closeBtn, {
             hoverColor: '#ff6666', normalColor: '#667788',
@@ -150,7 +150,7 @@ class InventoryScene extends Phaser.Scene {
         // Pet portrait is drawn inline with pet inventory section (see _drawPetInventory)
         // Hero name under portrait
         this._d(this.add.text(portraitX + portraitSize / 2, portraitY + portraitSize + 10, h.heroName || 'Helten', {
-            fontSize: '13px', color: '#8899bb', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#8899bb', fontFamily: UI_FONTS.family
         }).setOrigin(0.5));
 
         // Equipment slots (shifted right to leave room for portrait)
@@ -165,7 +165,7 @@ class InventoryScene extends Phaser.Scene {
         // Backpack label with count
         this._d(this.add.text(contentCX + 80, panelY - panelH / 2 + 220,
             `(${this.inv.itemCount}/10)`, {
-            fontSize: '13px', color: '#334455', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#334455', fontFamily: UI_FONTS.family
         }));
 
         // Backpack slots (dynamic size – base 10 + skill expansions)
@@ -177,7 +177,7 @@ class InventoryScene extends Phaser.Scene {
 
         const bpLabel = `RYGGSEKK (${this.inv.itemCount}/${bpCount})`;
         this._d(this.add.text(contentCX - 220, bpY - 22, bpLabel, {
-            fontSize: '13px', color: '#445566', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#445566', fontFamily: UI_FONTS.family
         }));
 
         for (let i = 0; i < bpCount; i++) {
@@ -224,7 +224,7 @@ class InventoryScene extends Phaser.Scene {
         ));
 
         this._d(this.add.text(x, y + size / 2 + 10, label, {
-            fontSize: '12px', color: '#445566', fontFamily: 'monospace'
+            fontSize: UI_FONTS.small, color: '#445566', fontFamily: UI_FONTS.family
         }).setOrigin(0.5));
 
         if (item) {
@@ -232,7 +232,7 @@ class InventoryScene extends Phaser.Scene {
             const eqDispName = (item.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
                 ? getMineralDisplayName(item, this.hero) : item.name;
             this._d(this.add.text(x, y - size / 2 - 10, this._shortName(eqDispName), {
-                fontSize: '11px', color: this._rarityTextColor(item), fontFamily: 'monospace'
+                fontSize: '11px', color: this._rarityTextColor(item), fontFamily: UI_FONTS.family
             }).setOrigin(0.5));
 
             const dropEquipped = () => {
@@ -249,7 +249,7 @@ class InventoryScene extends Phaser.Scene {
             });
         } else {
             this._d(this.add.text(x, y, 'Tom', {
-                fontSize: '13px', color: '#223344', fontFamily: 'monospace'
+                fontSize: UI_FONTS.body, color: '#223344', fontFamily: UI_FONTS.family
             }).setOrigin(0.5));
         }
     }
@@ -271,7 +271,7 @@ class InventoryScene extends Phaser.Scene {
         ));
 
         this._d(this.add.text(x, y + size / 2 + 10, 'Hurtig (Q)', {
-            fontSize: '12px', color: '#33aa88', fontFamily: 'monospace'
+            fontSize: UI_FONTS.small, color: '#33aa88', fontFamily: UI_FONTS.family
         }).setOrigin(0.5));
 
         if (itemDef) {
@@ -281,7 +281,7 @@ class InventoryScene extends Phaser.Scene {
             const sn = this._shortName(quDispName);
             const label = qu.count > 1 ? `${sn} ×${qu.count}` : sn;
             this._d(this.add.text(x, y - size / 2 - 10, label, {
-                fontSize: '11px', color: '#ccddff', fontFamily: 'monospace'
+                fontSize: '11px', color: '#ccddff', fontFamily: UI_FONTS.family
             }).setOrigin(0.5));
 
             const dropQuick = () => {
@@ -298,7 +298,7 @@ class InventoryScene extends Phaser.Scene {
             });
         } else {
             this._d(this.add.text(x, y, 'Tom', {
-                fontSize: '13px', color: '#223344', fontFamily: 'monospace'
+                fontSize: UI_FONTS.body, color: '#223344', fontFamily: UI_FONTS.family
             }).setOrigin(0.5));
         }
     }
@@ -332,13 +332,13 @@ class InventoryScene extends Phaser.Scene {
             const bpDispName = (itemDef.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
                 ? getMineralDisplayName(itemDef, this.hero) : itemDef.name;
             this._d(this.add.text(x, y + size / 2 - 2, this._shortName(bpDispName), {
-                fontSize: '11px', color: nameCol, fontFamily: 'monospace'
+                fontSize: '11px', color: nameCol, fontFamily: UI_FONTS.family
             }).setOrigin(0.5, 1));
 
             // Stack count badge
             if (count > 1) {
                 this._d(this.add.text(x + size / 2 - 4, y - size / 2 + 2, `${count}`, {
-                    fontSize: '12px', color: '#ffee88', fontFamily: 'monospace', fontStyle: 'bold'
+                    fontSize: UI_FONTS.small, color: '#ffee88', fontFamily: UI_FONTS.family, fontStyle: 'bold'
                 }).setOrigin(1, 0));
             }
 
@@ -388,17 +388,17 @@ class InventoryScene extends Phaser.Scene {
         const defStr = pet.effectiveDef > 0 ? `  DEF: ${pet.effectiveDef}` : '';
         const hpText = `${pet.petName}  HP: ${pet.hp}/${pet.effectiveMaxHp}  ATK: ${pet.effectiveAttack}${defStr}`;
         this._d(this.add.text(labelX, baseY, `KJÆLEDYR  ·  ${hpText}`, {
-            fontSize: '13px', color: '#ffaadd', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#ffaadd', fontFamily: UI_FONTS.family
         }));
         this._d(this.add.text(cx + panelW / 2 - 20, baseY,
             `(${pet.backpackCount}/4)`, {
-            fontSize: '13px', color: '#334455', fontFamily: 'monospace'
+            fontSize: UI_FONTS.body, color: '#334455', fontFamily: UI_FONTS.family
         }).setOrigin(1, 0));
 
         // Pet equipment slots (weapon + armor)
         const eqY = baseY + 18;
         this._d(this.add.text(labelX, eqY, 'Utstyr:', {
-            fontSize: '12px', color: '#886688', fontFamily: 'monospace'
+            fontSize: UI_FONTS.small, color: '#886688', fontFamily: UI_FONTS.family
         }));
         const eqSlotSize = 42;
         this._makePetEquipSlot(labelX + 54, eqY + eqSlotSize / 2 + 2, eqSlotSize, 'weapon', pet);
@@ -442,12 +442,12 @@ class InventoryScene extends Phaser.Scene {
             const petDispName = (itemDef.type === 'mineral' && typeof getMineralDisplayName !== 'undefined')
                 ? getMineralDisplayName(itemDef, this.hero) : itemDef.name;
             this._d(this.add.text(x, y + size / 2 - 2, this._shortName(petDispName), {
-                fontSize: '11px', color: nameCol, fontFamily: 'monospace'
+                fontSize: '11px', color: nameCol, fontFamily: UI_FONTS.family
             }).setOrigin(0.5, 1));
 
             if (count > 1) {
                 this._d(this.add.text(x + size / 2 - 4, y - size / 2 + 2, `${count}`, {
-                    fontSize: '12px', color: '#ffee88', fontFamily: 'monospace', fontStyle: 'bold'
+                    fontSize: UI_FONTS.small, color: '#ffee88', fontFamily: UI_FONTS.family, fontStyle: 'bold'
                 }).setOrigin(1, 0));
             }
 
@@ -486,7 +486,7 @@ class InventoryScene extends Phaser.Scene {
         if (item) {
             this._drawItemIcon(x, y, item, size - 8);
             this._d(this.add.text(x, y + size / 2 - 2, item.name.length > 8 ? item.name.slice(0, 7) + '…' : item.name, {
-                fontSize: '10px', color: '#ffaadd', fontFamily: 'monospace'
+                fontSize: '10px', color: '#ffaadd', fontFamily: UI_FONTS.family
             }).setOrigin(0.5, 1));
             bg.setInteractive({ useHandCursor: true });
             bg.on('pointerover', () => {
@@ -507,7 +507,7 @@ class InventoryScene extends Phaser.Scene {
             });
         } else {
             this._d(this.add.text(x, y, label, {
-                fontSize: '11px', color: '#443344', fontFamily: 'monospace'
+                fontSize: '11px', color: '#443344', fontFamily: UI_FONTS.family
             }).setOrigin(0.5));
         }
     }
@@ -521,7 +521,7 @@ class InventoryScene extends Phaser.Scene {
         const entries = Object.entries(counts);
         if (entries.length === 0) {
             this._d(this.add.text(cx, y, 'Ingen evner ennå', {
-                fontSize: '13px', color: '#334455', fontFamily: 'monospace'
+                fontSize: UI_FONTS.body, color: '#334455', fontFamily: UI_FONTS.family
             }).setOrigin(0.5));
             return;
         }
@@ -536,7 +536,7 @@ class InventoryScene extends Phaser.Scene {
                 cx - totalW / 2 + 44 + (i % 5) * 90,
                 y + Math.floor(i / 5) * 16,
                 lbl,
-                { fontSize: '12px', fontFamily: 'monospace', color: col }
+                { fontSize: UI_FONTS.small, fontFamily: UI_FONTS.family, color: col }
             ));
         });
     }
