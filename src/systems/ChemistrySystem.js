@@ -68,7 +68,7 @@ class ChemistrySystem {
         }
 
         // First-synthesis discovery popup
-        if (!hero.discoveredMolecules[moleculeId]) {
+        if (hero.discoveredMolecules && !hero.discoveredMolecules[moleculeId]) {
             hero.discoveredMolecules[moleculeId] = true;
             if (typeof EventBus !== 'undefined') {
                 EventBus.emit('discovery', {

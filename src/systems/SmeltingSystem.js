@@ -145,7 +145,7 @@ class SmeltingSystem {
         const doubled = doubleChance > 0 && Math.random() < doubleChance;
 
         // First-craft discovery popup
-        if (!hero.discoveredAlloys[alloyId]) {
+        if (hero.discoveredAlloys && !hero.discoveredAlloys[alloyId]) {
             hero.discoveredAlloys[alloyId] = true;
             if (typeof EventBus !== 'undefined') {
                 EventBus.emit('discovery', {
