@@ -436,11 +436,20 @@ class CombatManager {
             }
         }
 
+        const isBoss = monster.type === 'boss' || monster.type === 'zone_boss';
+
         if (died || !scene.hero.alive) {
             scene.cameras.main.shake(120, 0.008);
+            scene.hero._flashHit();
             scene._heroDied();
         } else {
-            scene.cameras.main.shake(100, 0.006);
+            if (isBoss) {
+                scene.cameras.main.shake(160, 0.010);
+                scene.cameras.main.flash(150, 180, 20, 20, false);
+            } else {
+                scene.cameras.main.shake(100, 0.006);
+            }
+            scene.hero._flashHit();
             // Thorns synergy
             if (scene.hero.thornsDamage > 0 && monster.alive) {
                 const thornsResult = monster.takeDamage(scene.hero.thornsDamage);

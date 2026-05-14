@@ -158,6 +158,17 @@ class Hero {
         this._drawSprite();
     }
 
+    _flashHit() {
+        const s  = TILE_SIZE;
+        const fg = this.scene.add.graphics().setDepth(9);
+        fg.fillStyle(0xff3300, 0.45);
+        fg.fillRect(this.graphics.x + 2, this.graphics.y + 2, s - 4, s - 4);
+        this.scene.tweens.add({
+            targets: fg, alpha: 0, duration: 150,
+            onComplete: () => { if (fg.scene) fg.destroy(); }
+        });
+    }
+
     clearAllEffects() {
         this.poisonTurns = 0;
         this.burnTurns   = 0;
