@@ -466,6 +466,23 @@ class ItemSpawner {
                     // Track mineral pickups for leaderboard
                     if (obj.isMineral) scene.hero.mineralsCollected++;
 
+                    // First-time mineral discovery popup (no skill required)
+                    if (obj.isMineral && scene.hero.discoveredMinerals
+                            && !scene.hero.discoveredMinerals[obj.item.id]) {
+                        scene.hero.discoveredMinerals[obj.item.id] = true;
+                        const tierCol = (typeof MINERAL_TIER_COLORS !== 'undefined')
+                            ? MINERAL_TIER_COLORS[obj.item.tier] : null;
+                        EventBus.emit('discovery', {
+                            type:      'mineral',
+                            name:      obj.item.name,
+                            iconColor: tierCol || obj.item.color || 0xaaaaaa,
+                            iconText:  obj.item.name ? obj.item.name[0] : '?',
+                            subtitle:  [obj.item.formula, obj.item.tier ? `Tier ${obj.item.tier}` : null]
+                                           .filter(Boolean).join(' · '),
+                            desc:      obj.item.desc || '',
+                        });
+                    }
+
                     // Can hero identify minerals? (requires Geolog skill)
                     const canIdentify = obj.isMineral && (scene.hero.mineralIdentifyLevel || 0) > 0;
 
@@ -484,6 +501,14 @@ class ItemSpawner {
                                     if (elem) {
                                         const hexCol = '#' + elem.color.toString(16).padStart(6, '0');
                                         scene._floatingText(hx, hy, `${elem.symbol} (${elem.name}) oppdaget!`, hexCol);
+                                        EventBus.emit('discovery', {
+                                            type:     'element',
+                                            name:     `${elem.symbol} – ${elem.name}`,
+                                            iconColor: elem.color,
+                                            iconText:  elem.symbol,
+                                            subtitle:  `Atomnr. ${elem.atomicNumber}`,
+                                            desc:      `${scene.hero.elementTracker.discoveredCount}/118 oppdaget`,
+                                        });
                                     }
                                 }
                             }
@@ -494,6 +519,14 @@ class ItemSpawner {
                         const newBonuses = scene.hero.elementTracker.checkCompletions();
                         for (const bonus of newBonuses) {
                             scene._floatingText(hx, hy, `★ ${bonus.name} fullført! ${bonus.desc}`, '#ffcc00', true);
+                            EventBus.emit('discovery', {
+                                type:     'elementBonus',
+                                name:     bonus.name,
+                                iconColor: 0xffcc00,
+                                iconText:  '★',
+                                subtitle:  bonus.desc,
+                                desc:      'Belønning aktivert!',
+                            });
                         }
                         if (newBonuses.length > 0) {
                             scene.hero.elementTracker.applyBonusRewards(scene.hero);

@@ -153,6 +153,13 @@ class GameScene extends Phaser.Scene {
             if (bonus.id === 'all_118') this._triggerElementVictory();
         });
 
+        // ── Discovery popup overlay ───────────────────────────────────────────
+        if (!this.scene.isActive('DiscoveryPopupScene')) {
+            this.scene.launch('DiscoveryPopupScene');
+        } else {
+            this.scene.get('DiscoveryPopupScene').registerListeners();
+        }
+
         // ── HUD overlay ───────────────────────────────────────────────────────
         this.scene.launch('UIScene', { gameScene: this });
 

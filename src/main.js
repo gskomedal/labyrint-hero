@@ -29,7 +29,8 @@ const config = {
         MineralWikiScene,
         SmelteryScene,
         ChemLabScene,
-        AcceleratorScene
+        AcceleratorScene,
+        DiscoveryPopupScene
     ]
 };
 
