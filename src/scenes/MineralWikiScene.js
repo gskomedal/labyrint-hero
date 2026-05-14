@@ -40,9 +40,17 @@ class MineralWikiScene extends Phaser.Scene {
         const totalMinerals = (typeof MINERAL_DEFS !== 'undefined') ? Object.keys(MINERAL_DEFS).length : 0;
         const totalElements = (typeof TOTAL_ALL_ELEMENTS !== 'undefined') ? TOTAL_ALL_ELEMENTS
                              : (typeof ELEMENTS !== 'undefined' ? Object.keys(ELEMENTS).length : 0);
-        const tracker = this.heroRef?.elementTracker || null;
+        const tracker    = this.heroRef?.elementTracker || null;
+        const hasGeolog  = (this.heroRef?.mineralIdentifyLevel || 0) > 0;
+        const foundMinerals = hasGeolog
+            ? Object.keys(this.heroRef.discoveredMinerals || {}).length : null;
         const subStr = tracker
-            ? `${totalMinerals} mineraler  ·  Oppdaget ${tracker.discoveredCount}/${totalElements} grunnstoffer`
+            ? [
+                foundMinerals !== null
+                    ? `${foundMinerals}/${totalMinerals} mineraler oppdaget`
+                    : `${totalMinerals} mineraler`,
+                `${tracker.discoveredCount}/${totalElements} grunnstoffer oppdaget`,
+              ].join('  ·  ')
             : `${totalMinerals} mineraler  ·  ${totalElements} grunnstoffer å samle`;
         this.add.text(cx, py + 36, subStr, {
             fontSize: '12px', color: '#887766', fontFamily: 'monospace'
@@ -216,7 +224,7 @@ class MineralWikiScene extends Phaser.Scene {
     }
 
     _buildMineralRow(def, rowY) {
-        const w = this._listArea.w;
+        const w    = this._listArea.w;
         const cont = this._listContainer;
 
         // Row separator
@@ -225,15 +233,44 @@ class MineralWikiScene extends Phaser.Scene {
             cont.add(sep);
         }
 
-        // Color swatch (filled circle)
+        // Determine if this mineral has been discovered (requires Geolog)
+        const hasGeolog   = (this.heroRef?.mineralIdentifyLevel || 0) > 0;
+        const isDiscovered = !hasGeolog
+            || !!(this.heroRef?.discoveredMinerals?.[def.id]);
+
+        const tierColors = (typeof MINERAL_TIER_COLORS !== 'undefined') ? MINERAL_TIER_COLORS : {};
+        const tierCol    = tierColors[def.tier] || 0x888888;
+        const tierHex    = '#' + tierCol.toString(16).padStart(6, '0');
+        const tierLabel  = def.subtype === 'crystal' ? `KRYSTALL T${def.tier}` : `T${def.tier}`;
+
+        // Color swatch – always visible (helps players recognise on pickup)
         const swatch = this.add.graphics();
-        swatch.fillStyle(def.color, 1);
+        swatch.fillStyle(isDiscovered ? def.color : 0x333333, 1);
         swatch.fillCircle(14, rowY + 16, 8);
         swatch.lineStyle(1, 0x000000, 0.5);
         swatch.strokeCircle(14, rowY + 16, 8);
         cont.add(swatch);
 
-        // Name + formula
+        if (!isDiscovered) {
+            // Unknown mineral — show placeholder row
+            const unknownTxt = this.add.text(32, rowY + 8, '??? Ukjent mineral', {
+                fontSize: '14px', color: '#444455', fontFamily: 'monospace', fontStyle: 'bold'
+            });
+            cont.add(unknownTxt);
+
+            const tierBadge = this.add.text(w - 8, rowY + 10, tierLabel, {
+                fontSize: '11px', color: '#333344', fontFamily: 'monospace', fontStyle: 'bold'
+            }).setOrigin(1, 0);
+            cont.add(tierBadge);
+
+            const hintTxt = this.add.text(32, rowY + 30, 'Finn dette mineralet for å avsløre detaljene', {
+                fontSize: '11px', color: '#333344', fontFamily: 'monospace'
+            });
+            cont.add(hintTxt);
+            return;
+        }
+
+        // Discovered mineral — full details
         const nameTxt = this.add.text(32, rowY + 8, def.name, {
             fontSize: '14px', color: '#ddccaa', fontFamily: 'monospace', fontStyle: 'bold'
         });
@@ -246,11 +283,6 @@ class MineralWikiScene extends Phaser.Scene {
             cont.add(formulaTxt);
         }
 
-        // Tier badge (right side)
-        const tierColors = (typeof MINERAL_TIER_COLORS !== 'undefined') ? MINERAL_TIER_COLORS : {};
-        const tierCol = tierColors[def.tier] || 0x888888;
-        const tierHex = '#' + tierCol.toString(16).padStart(6, '0');
-        const tierLabel = def.subtype === 'crystal' ? `KRYSTALL T${def.tier}` : `T${def.tier}`;
         const tierBadge = this.add.text(w - 8, rowY + 10, tierLabel, {
             fontSize: '11px', color: tierHex, fontFamily: 'monospace', fontStyle: 'bold'
         }).setOrigin(1, 0);
