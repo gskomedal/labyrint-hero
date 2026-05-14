@@ -318,6 +318,23 @@ const Audio = (function () {
             _noise(0.12, sfxGain, 0.12, 0.1, 50);
         },
 
+        /** Short ascending chime for standard discoveries (mineral/element/molecule/alloy) */
+        playDiscovery() {
+            if (!ctx || !sfxEnabled) return;
+            [0, 4, 7].forEach((s, i) =>
+                _note(_freq(s + 12), 0.18, sfxGain, 'triangle', 0.22, i * 0.09)
+            );
+        },
+
+        /** Celebratory fanfare for element-group bonus discoveries */
+        playGroupBonus() {
+            if (!ctx || !sfxEnabled) return;
+            [0, 4, 7, 12, 16].forEach((s, i) =>
+                _note(_freq(s + 12), 0.25, sfxGain, 'triangle', 0.28, i * 0.10)
+            );
+            _noise(0.18, sfxGain, 0.10, 0.45, 1200);
+        },
+
         // ── Settings ────────────────────────────────────────────────────────
 
         get musicEnabled() { return musicEnabled; },
