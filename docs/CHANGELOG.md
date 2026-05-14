@@ -2,6 +2,20 @@
 
 ---
 
+## v0.54 – 2026-05-14
+
+### Nye funksjoner
+- **Oppdagelses-popups for mineraler, grunnstoffer og kombinasjoner:** Animert popup-kort vises første gang spilleren oppdager noe nytt: et mineral (uansett ferdighet), et kjemisk grunnstoff (krever Geolog-identifisering), en grunnstoffgruppe-fullføring (f.eks. jernmetaller → +2 maks HP), en kjemisk forbindelse (ChemLab) eller en legering (Smelteverk). Popupen animeres inn med `Back.easeOut`, viser fargekodet ramme, badge-tekst, ikon, navn, undertittel og beskrivelse, og lukkes automatisk etter 3,5 sekunder eller via «OK →»-knapp. Oppdagelses-tilstand (`discoveredMinerals`, `discoveredMolecules`, `discoveredAlloys`) lagres i save-filen slik at popup ikke gjentas etter innlasting
+
+### Tekniske endringer
+- Ny `src/scenes/DiscoveryPopupScene.js`: persistent overlay-scene med intern kø som viser én popup om gangen; eksponerer `registerListeners()` som kalles av GameScene etter `EventBus.off()` ved hvert verdensskifte
+- `HeroCrafting.js`: tre nye tracking-objekter (`discoveredMinerals`, `discoveredMolecules`, `discoveredAlloys`) lagt til i `init`, `serialize` og `applyStats`
+- `ItemSpawner.js`: emitter `discovery`-hendelse ved første mineralplukk, første grunnstoff-identifisering og grunnstoffgruppe-fullføring
+- `ChemistrySystem.js`: emitter `discovery`-hendelse ved første syntese av hvert molekyl
+- `SmeltingSystem.js`: emitter `discovery`-hendelse ved første smiing av hver legering
+
+---
+
 ## v0.53 – 2026-05-07
 
 ### Tekniske endringer
