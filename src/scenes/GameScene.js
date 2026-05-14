@@ -153,6 +153,13 @@ class GameScene extends Phaser.Scene {
             if (bonus.id === 'all_118') this._triggerElementVictory();
         });
 
+        // ── Discovery popup overlay ───────────────────────────────────────────
+        if (!this.scene.isActive('DiscoveryPopupScene')) {
+            this.scene.launch('DiscoveryPopupScene');
+        } else {
+            this.scene.get('DiscoveryPopupScene').registerListeners();
+        }
+
         // ── HUD overlay ───────────────────────────────────────────────────────
         this.scene.launch('UIScene', { gameScene: this });
 
@@ -372,8 +379,83 @@ class GameScene extends Phaser.Scene {
             }
         }
         this._shownSynergies = newSynergies.map(s => s.id);
+
+        // First Geolog unlock: retroactively discover minerals already in inventory/stash
+        if (skill.id === 'mineral_eye' && this.hero.mineralIdentifyLevel === 1) {
+            this._retroactiveGeologDiscovery();
+        }
+
         const ui = this.scene.get('UIScene');
         if (ui && ui.sys.isActive()) ui.refresh();
+    }
+
+    _retroactiveGeologDiscovery() {
+        const hero = this.hero;
+        const allSlots = [
+            ...(hero.inventory.backpack || []),
+            ...(hero.campStash        || []),
+        ];
+
+        for (const slot of allSlots) {
+            if (!slot || !slot.id) continue;
+            const def = (typeof MINERAL_DEFS !== 'undefined') ? MINERAL_DEFS[slot.id] : null;
+            if (!def || def.type !== 'mineral') continue;
+
+            // Mineral discovery popup
+            if (!hero.discoveredMinerals[def.id]) {
+                hero.discoveredMinerals[def.id] = true;
+                const tierCol = (typeof MINERAL_TIER_COLORS !== 'undefined')
+                    ? MINERAL_TIER_COLORS[def.tier] : null;
+                EventBus.emit('discovery', {
+                    type:      'mineral',
+                    name:      def.name,
+                    iconColor: tierCol || def.color || 0xaaaaaa,
+                    iconText:  def.name ? def.name[0] : '?',
+                    subtitle:  [def.formula, def.tier ? `Tier ${def.tier}` : null]
+                                   .filter(Boolean).join(' · '),
+                    desc:      def.desc || '',
+                });
+            }
+
+            // Element discovery from mineral yields
+            if (def.yields && hero.elementTracker) {
+                for (const y of def.yields) {
+                    const isNew = hero.elementTracker.discover(y.symbol);
+                    if (isNew && typeof ELEMENTS !== 'undefined') {
+                        const elem = ELEMENTS[y.symbol];
+                        if (elem) {
+                            const hexCol = '#' + elem.color.toString(16).padStart(6, '0');
+                            this._floatingText(hero.gridX, hero.gridY,
+                                `${elem.symbol} (${elem.name}) oppdaget!`, hexCol);
+                            EventBus.emit('discovery', {
+                                type:      'element',
+                                name:      `${elem.symbol} – ${elem.name}`,
+                                iconColor: elem.color,
+                                iconText:  elem.symbol,
+                                subtitle:  `Atomnr. ${elem.atomicNumber}`,
+                                desc:      `${hero.elementTracker.discoveredCount}/118 oppdaget`,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // Check for element group bonuses triggered by retroactive discoveries
+        const newBonuses = hero.elementTracker.checkCompletions();
+        for (const bonus of newBonuses) {
+            this._floatingText(hero.gridX, hero.gridY,
+                `★ ${bonus.name} fullført! ${bonus.desc}`, '#ffcc00', true);
+            EventBus.emit('discovery', {
+                type:      'elementBonus',
+                name:      bonus.name,
+                iconColor: 0xffcc00,
+                iconText:  '★',
+                subtitle:  bonus.desc,
+                desc:      'Belønning aktivert!',
+            });
+        }
+        if (newBonuses.length > 0) hero.elementTracker.applyBonusRewards(hero);
     }
 
     /** Hero stats with pet data attached for save/load */

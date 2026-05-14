@@ -143,6 +143,22 @@ class SmeltingSystem {
         // Double alloy chance from Metallurgist Legeringsmester
         const doubleChance = hero.doubleAlloyChance || 0;
         const doubled = doubleChance > 0 && Math.random() < doubleChance;
+
+        // First-craft discovery popup
+        if (hero.discoveredAlloys && !hero.discoveredAlloys[alloyId]) {
+            hero.discoveredAlloys[alloyId] = true;
+            if (typeof EventBus !== 'undefined') {
+                EventBus.emit('discovery', {
+                    type:      'alloy',
+                    name:      alloy.name,
+                    iconColor: alloy.color || 0xaaaaff,
+                    iconText:  '⚒',
+                    subtitle:  alloy.tier ? `Tier ${alloy.tier} legering` : 'Legering',
+                    desc:      'Klar for smiing!',
+                });
+            }
+        }
+
         return { success: true, alloy, energyCost, doubled };
     }
 

@@ -103,6 +103,11 @@ const HeroCrafting = {
         hero.campStash = [];
         hero.fuelReserve = 0;
         hero._backpackUpgrades = 0;
+
+        // First-discovery tracking (prevents repeat popups across worlds)
+        hero.discoveredMinerals  = {};
+        hero.discoveredMolecules = {};
+        hero.discoveredAlloys    = {};
     },
 
     /** Return serializable crafting state from a hero instance. */
@@ -188,6 +193,9 @@ const HeroCrafting = {
             magicAoeUnlocked:     hero.magicAoeUnlocked,
             elementTitle:         hero.elementTitle,
             legendaryItemEarned:  hero.legendaryItemEarned,
+            discoveredMinerals:   { ...hero.discoveredMinerals },
+            discoveredMolecules:  { ...hero.discoveredMolecules },
+            discoveredAlloys:     { ...hero.discoveredAlloys },
         };
     },
 
@@ -273,5 +281,8 @@ const HeroCrafting = {
         hero.magicAoeUnlocked     = stats.magicAoeUnlocked     || false;
         hero.elementTitle         = stats.elementTitle         || null;
         hero.legendaryItemEarned  = stats.legendaryItemEarned  || false;
+        hero.discoveredMinerals   = stats.discoveredMinerals   ? { ...stats.discoveredMinerals }  : {};
+        hero.discoveredMolecules  = stats.discoveredMolecules  ? { ...stats.discoveredMolecules } : {};
+        hero.discoveredAlloys     = stats.discoveredAlloys     ? { ...stats.discoveredAlloys }    : {};
     }
 };

@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.52
-**Sist oppdatert:** 2026-05-05 (v0.52)
+**Versjon:** 0.54
+**Sist oppdatert:** 2026-05-14 (v0.54)
 
 ---
 
@@ -85,6 +85,7 @@ src/
     AcceleratorScene.js              – partikkelakselerator (transuransk syntese)
     ElementBookScene.js              – periodisk system / elementbok
     MineralWikiScene.js              – browseable mineralkatalog
+    DiscoveryPopupScene.js           – animert popup ved første funn av mineral, grunnstoff, gruppe, molekyl eller legering
     SettingsScene.js                 – lydinnstillinger
     LeaderboardScene.js              – lokal + global ledertavle
     GameOverScene.js                 – død/seier-skjerm

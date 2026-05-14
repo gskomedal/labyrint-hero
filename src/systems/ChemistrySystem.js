@@ -67,6 +67,21 @@ class ChemistrySystem {
             }
         }
 
+        // First-synthesis discovery popup
+        if (hero.discoveredMolecules && !hero.discoveredMolecules[moleculeId]) {
+            hero.discoveredMolecules[moleculeId] = true;
+            if (typeof EventBus !== 'undefined') {
+                EventBus.emit('discovery', {
+                    type:      'molecule',
+                    name:      mol.name,
+                    iconColor: mol.color || 0x44cc88,
+                    iconText:  '⚗',
+                    subtitle:  mol.formula || '',
+                    desc:      mol.desc || '',
+                });
+            }
+        }
+
         return { success: true, item, bonusItem, energyCost };
     }
 
