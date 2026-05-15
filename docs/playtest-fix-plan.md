@@ -1,5 +1,7 @@
 # Plan for Fixing Playtest Issues (#164–#187)
 
+> **TEMPORARY FILE** — Delete this document once all batches are merged. Tracking-only; not part of GDD or CHANGELOG.
+
 ## Goals
 - Ship the bug fixes first, then UX, then balance, then larger systems work.
 - Each batch is independently shippable. One PR per batch is recommended; small bugs can be folded into a single PR.
