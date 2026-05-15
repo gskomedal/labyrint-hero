@@ -177,15 +177,17 @@ const Audio = (function () {
         /** Start themed background music for a given world number */
         startMusic(worldNum) {
             if (!ctx) return;
-            // Map world number to music piece using same logic as visual themes
-            let themeIdx;
-            if (worldNum <= 7) {
-                themeIdx = Math.min(Math.floor((worldNum - 1) / 2), MUSIC_PIECES.length - 1);
-            } else if (typeof getZone !== 'undefined') {
+            // Mirror getWorldTheme(): music follows the zone, not per-world,
+            // so the audio transition coincides with the zone boundary.
+            let themeIdx = MUSIC_PIECES.length - 1;
+            if (typeof getZone !== 'undefined') {
                 const zone = getZone(worldNum);
-                themeIdx = Math.min(zone.themeIdx, MUSIC_PIECES.length - 1);
-            } else {
-                themeIdx = MUSIC_PIECES.length - 1;
+                if (zone) {
+                    const rawIdx = (zone.id === 'surface') ? 0
+                                 : (zone.id === 'bedrock') ? 1
+                                 : zone.themeIdx;
+                    themeIdx = Math.min(rawIdx, MUSIC_PIECES.length - 1);
+                }
             }
             // Always restart music on new world
             this.stopMusic();

@@ -7,6 +7,8 @@
 ### Balanse / nye funksjoner
 - **Mineraler gated av Geolog-skill hos handelsmann (#166):** `_generateMerchantStock` legger nå kun mineraler i butikken hvis `hero.geologistUnlocked` er sann
 - **Kjæledyr-fart i skill-treet (#165):** Villmarksjeger-banen har nå `petSpeedBonus`-bidrag på alle tre tier-noder (Skarpsyn +15%, Vitalt anslag +15%, Presisjon +25%). `GameScene._tickPet` skalerer tick-intervallet med bonusen så kjæledyret beveger seg oftere. Bonusen serialiseres i `Hero.getStats/applyStats`
+- **Verdenstema følger sone-grensene (#181):** `getWorldTheme()` og `Audio.startMusic()` velger nå tema og musikk ut fra verdens sone (`getZone()`) i stedet for `Math.floor((worldNum-1)/2)`-rotasjon. Alle 3 verdener i Overflate-sonen deler nå skog-tema; alle 4 verdener i Grunnfjell deler steingrotte; deeper-sonene beholder sine dedikerte tema
+- **Mer kontrast i Underverden og Dyplag (#177):** `WORLD_THEMES[6]` (Underverden) og `WORLD_THEMES[5]` (Dyplag) har lysere `FLOOR_A`/`FLOOR_B` og litt lysere wall-toner så vegger og korridor er tydeligere atskilt
 
 ### UX-forbedringer
 - **Større lukk-knapper (#180):** Ny `UIHelper.makeCloseButton(scene, x, y, onClose, opts)` med 44×44px treffområde. Migrert i `InventoryScene`, `MerchantScene`, `SkillScene`, `ChemLabScene`, `AcceleratorScene`, `SmelteryScene`, `ElementBookScene`, `MineralWikiScene`, `WelcomeScene`, `LeaderboardScene`

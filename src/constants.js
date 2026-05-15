@@ -203,14 +203,15 @@ const WORLD_THEMES = [
         DECO:         'temple',
     },
     {   // 5 – Worlds 8-12: Deep Magma (Dyplag)
+        // Floors lightened for navigation contrast (#177)
         name:         'Dyplag',
         WALL:         0x1a0800,
         WALL_TOP:     0x2a1204,
         WALL_MID:     0x140600,
-        FLOOR_A:      0x120500,
-        FLOOR_B:      0x0e0300,
+        FLOOR_A:      0x2a1408,   // was 0x120500 — brighter ember corridor
+        FLOOR_B:      0x220e04,   // was 0x0e0300
         CRACKED_WALL: 0x2a0e04,
-        CRACKED_LINE: 0xff6622,
+        CRACKED_LINE: 0xff8833,
         DOOR:         0x3a1a08,
         DOOR_FRAME:   0xff8844,
         SECRET_COLOR: 0x1a0800,
@@ -219,19 +220,20 @@ const WORLD_THEMES = [
         DECO:         'deep',
     },
     {   // 6 – Worlds 13-18: Underworld (Underverden)
+        // Floors lightened relative to walls for navigation contrast (#177)
         name:         'Underverden',
         WALL:         0x0a0418,
-        WALL_TOP:     0x140828,
+        WALL_TOP:     0x180a30,
         WALL_MID:     0x080310,
-        FLOOR_A:      0x0a0414,
-        FLOOR_B:      0x080310,
+        FLOOR_A:      0x1a1030,   // was 0x0a0414 — brighter purple corridor
+        FLOOR_B:      0x140a24,   // was 0x080310
         CRACKED_WALL: 0x120620,
-        CRACKED_LINE: 0x8844cc,
-        DOOR:         0x201040,
-        DOOR_FRAME:   0xaa66ff,
-        SECRET_COLOR: 0x0a0418,
+        CRACKED_LINE: 0xaa66ee,
+        DOOR:         0x281452,
+        DOOR_FRAME:   0xcc88ff,
+        SECRET_COLOR: 0x12082a,
         FOG_TINT:     0x020008,
-        ACCENT:       0xaa66ff,
+        ACCENT:       0xcc88ff,
         DECO:         'underworld',
     },
     {   // 7 – Worlds 19-25: Earth's Core (Jordens kjerne)
@@ -253,13 +255,15 @@ const WORLD_THEMES = [
 ];
 
 function getWorldTheme(worldNum) {
-    // Surface and Bedrock zones use the original per-world theme rotation
-    // Deeper zones use their dedicated new themes
-    if (worldNum <= 7) {
-        const idx = Math.floor((worldNum - 1) / 2);
-        return WORLD_THEMES[Math.min(idx, 4)]; // 0-4: forest, cave, ice, volcanic, temple
-    }
+    // Theme follows the world's zone. All worlds within a zone share the same
+    // theme/music so the visual transition coincides with the zone boundary.
     const zone = typeof getZone !== 'undefined' ? getZone(worldNum) : null;
-    if (zone) return WORLD_THEMES[Math.min(zone.themeIdx, WORLD_THEMES.length - 1)];
-    return WORLD_THEMES[WORLD_THEMES.length - 1];
+    if (!zone) return WORLD_THEMES[WORLD_THEMES.length - 1];
+    // Surface zone (1-3) → Forest (idx 0)
+    // Bedrock zone (4-7) → Stone Cave (idx 1)
+    // The deeper zones (deep / underworld / core) use their dedicated themeIdx.
+    const idx = (zone.id === 'surface') ? 0
+              : (zone.id === 'bedrock') ? 1
+              : zone.themeIdx;
+    return WORLD_THEMES[Math.min(idx, WORLD_THEMES.length - 1)];
 }
