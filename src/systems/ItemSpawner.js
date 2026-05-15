@@ -318,7 +318,7 @@ class ItemSpawner {
                         for (let gi = 0; gi < count; gi++) {
                             const gas = nobleGases[Math.floor(Math.random() * nobleGases.length)];
                             scene.hero.elementTracker.collect(gas, 1);
-                            scene.hero.elementTracker.discover(gas);
+                            scene.hero.elementTracker.discoverWithPopup(gas);
                             EventBus.emit('floatingText', { gx: room.tiles[0].x, gy: room.tiles[0].y, msg: `Edelgass samlet: ${gas}`, color: '#aaccff' });
                         }
                     }
@@ -639,14 +639,20 @@ class ItemSpawner {
         return tierPrices[mineral.tier] || 20;
     }
 
+    /**
+     * Item price scales with world number to counter late-game gold inflation
+     * (#184). Multiplicative `worldMul` keeps early prices reasonable but
+     * doubles them by world ~10 and triples by world ~20.
+     */
     _itemPrice(item, worldNum) {
         let base = 20;
         if (item.type === 'consumable') base = 12;
         if (item.type === 'tool') base = 8;
-        if (item.type === 'mineral') return this._mineralPrice(item);
+        if (item.type === 'mineral') return Math.round(this._mineralPrice(item) * (1 + worldNum * 0.08));
         const tierMul = (item.tier || 1) * 10;
         const rarityMul = item.rarity ? (RARITIES.findIndex(r => r.id === item.rarity) + 1) : 1;
-        return Math.round((base + tierMul) * rarityMul * MERCHANT_MARKUP + worldNum * 2);
+        const worldMul = 1 + worldNum * 0.10;   // +10 % per world
+        return Math.round((base + tierMul) * rarityMul * MERCHANT_MARKUP * worldMul);
     }
 
     checkMerchant() {

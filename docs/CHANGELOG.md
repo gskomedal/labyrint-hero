@@ -4,6 +4,13 @@
 
 ## v0.55 – 2026-05-15
 
+### Balanse
+- **Nye mineraler for Cr/Mn/Ni/Sn og F (#175, #182):** Lagt til `pyrolusite` (Mn, T2), `fluorite` (F, T2), `stannite` (Sn+Cu, T3), `siegenite` (Ni+Co, T3). Lagt inn i `MINERAL_POOL[2]` og `[3]` så de dukker opp i tidlige verdener
+- **Tier 6 dominansen til Uraninitt/Thoritt brutt (#182):** Lagt til `rhodochrosite` (Mn, T6) og `awaruite_ore` (Ni-Fe, T6) i `MINERAL_POOL[6]`. Halverer effektivt U/Th-frekvensen på høyere verdener
+- **Pris-skalering mot gull-inflasjon (#184):** `_itemPrice` ganger nå med `1 + worldNum * 0.10` (mineraler `1 + worldNum * 0.08`). Effektiv pris-dobling rundt verden 10, tre-dobling rundt verden 20
+- **Smidde gjenstander litt sterkere (#187):** +1 ATK/DEF på de fleste våpen/rustning-oppskriftene i `ALLOY_EQUIPMENT`
+- **Messing brukbar nå (#174):** Nye `brass_dagger` (+4 ATK, +1 DEF) og `brass_amulet` (+2 DEF, +2 HP) smedes fra messing
+
 ### Spillmekanikk
 - **Bomber har nå tydelige VFX og kan ryste vanlige vegger (#173):** Ny statisk `ChemistrySystem._spawnExplosionVFX(scene, gx, gy, radius, color)` lager sentral flash, ekspanderende sjokkring, 16 gnistpartikler og kamera-shake skalert med radius. Bomber med `wallBreak`-flagg sprenger fremdeles `CRACKED_WALL` deterministisk; i tillegg kan vanlige `WALL`-fliser i radius ramle med en sannsynlighet skalert med skade (opp til 50% for de kraftigste — termittlading, plasmagranat, neodym-magnetbombe)
 - **Dører åpnes nå med angrep, ikke automatisk (#186):** `InputHandler` blokkerer bare bevegelse mot låst dør og setter `hero.facing`. `CombatManager.handleAttack` håndterer dør-åpning når man har nøkkel og angrep-knappen trykkes mot døren
