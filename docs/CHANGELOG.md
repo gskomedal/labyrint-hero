@@ -4,6 +4,10 @@
 
 ## v0.55 – 2026-05-15
 
+### Nye funksjoner
+- **Selg varer hos handelsmann (#183):** `MerchantScene` har nå Kjøp/Selg-faner. Selgepris er ca. 30% av kjøpsprisen (samme formel som `_itemPrice` så salgsverdien skalerer med tier, sjeldenhet og verden). Nøkkel og hakke kan ikke selges
+- **Synsfelt følger korridorene på Normal/Vanskelig (#185):** `MapRenderer.updateFog` bruker Bresenham-line-of-sight innenfor radius, så vegger blokkerer sikten. Lett vanskelighet beholder den klassiske sirkulære radiusen
+
 ### Balanse
 - **Nye mineraler for Cr/Mn/Ni/Sn og F (#175, #182):** Lagt til `pyrolusite` (Mn, T2), `fluorite` (F, T2), `stannite` (Sn+Cu, T3), `siegenite` (Ni+Co, T3). Lagt inn i `MINERAL_POOL[2]` og `[3]` så de dukker opp i tidlige verdener
 - **Tier 6 dominansen til Uraninitt/Thoritt brutt (#182):** Lagt til `rhodochrosite` (Mn, T6) og `awaruite_ore` (Ni-Fe, T6) i `MINERAL_POOL[6]`. Halverer effektivt U/Th-frekvensen på høyere verdener
