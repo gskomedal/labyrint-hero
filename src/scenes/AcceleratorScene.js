@@ -208,7 +208,7 @@ class AcceleratorScene extends Phaser.Scene {
 
         // Produce the synthetic element
         tracker.collect(recipe.product, 1);
-        tracker.discover(recipe.product);
+        tracker.discoverWithPopup(recipe.product);
 
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Syntetisert: ${recipe.product}!`, color: '#8866ff' });
 
@@ -218,6 +218,14 @@ class AcceleratorScene extends Phaser.Scene {
             tracker.applyBonusRewards(hero);
             for (const bonus of newBonuses) {
                 EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `★ ${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00', big: true });
+                EventBus.emit('discovery', {
+                    type:      'elementBonus',
+                    name:      bonus.name,
+                    iconColor: 0xffcc00,
+                    iconText:  '★',
+                    subtitle:  bonus.desc,
+                    desc:      'Belønning aktivert!',
+                });
             }
         }
 

@@ -19,6 +19,28 @@ class ElementTracker {
         return true;
     }
 
+    /**
+     * Single funnel for element discovery: marks as discovered and, if new,
+     * emits a 'discovery' EventBus event so any source (smelting, transmutation,
+     * alloy crafting, molecule synthesis, mineral pickup) gets a popup.
+     * Returns true if it was a new discovery.
+     */
+    discoverWithPopup(symbol) {
+        if (!this.discover(symbol)) return false;
+        if (typeof EventBus === 'undefined' || typeof ELEMENTS === 'undefined') return true;
+        const elem = ELEMENTS[symbol];
+        if (!elem) return true;
+        EventBus.emit('discovery', {
+            type:     'element',
+            name:     `${elem.symbol} – ${elem.name}`,
+            iconColor: elem.color,
+            iconText:  elem.symbol,
+            subtitle:  `Atomnr. ${elem.atomicNumber}`,
+            desc:      `${this.discoveredCount}/118 oppdaget`,
+        });
+        return true;
+    }
+
     isDiscovered(symbol) {
         return !!this.discovered[symbol];
     }

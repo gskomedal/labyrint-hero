@@ -329,7 +329,7 @@ class ChemistrySystem {
             delete hero.elementTracker.collected[symbol];
         }
         hero.elementTracker.collect(targetSym, 1);
-        hero.elementTracker.discover(targetSym);
+        hero.elementTracker.discoverWithPopup(targetSym);
         return targetSym;
     }
 }

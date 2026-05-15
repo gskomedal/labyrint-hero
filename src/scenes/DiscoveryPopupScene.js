@@ -23,9 +23,40 @@ class DiscoveryPopupScene extends Phaser.Scene {
     /** Re-subscribe to EventBus (called by GameScene after EventBus.off()). */
     registerListeners() {
         EventBus.on('discovery', (data) => {
-            this._queue.push(data);
+            this._enqueue(data);
             if (!this._isShowing) this._showNext();
         });
+    }
+
+    /**
+     * Priority-aware enqueue. Element / mineral / molecule / alloy discoveries
+     * must show BEFORE element-group-bonus popups, so the player doesn't miss
+     * the new element behind the group reward.
+     * Lower priority number = shown earlier.
+     */
+    _enqueue(data) {
+        const priority = this._priority(data.type);
+        // Insert at the first position where the next item has higher priority,
+        // i.e. keep stable order within the same priority bucket.
+        let insertAt = this._queue.length;
+        for (let i = 0; i < this._queue.length; i++) {
+            if (this._priority(this._queue[i].type) > priority) {
+                insertAt = i;
+                break;
+            }
+        }
+        this._queue.splice(insertAt, 0, data);
+    }
+
+    _priority(type) {
+        switch (type) {
+            case 'mineral':
+            case 'element':
+            case 'molecule':
+            case 'alloy':       return 1;
+            case 'elementBonus': return 2;
+            default:             return 1;
+        }
     }
 
     // ── Queue management ──────────────────────────────────────────────────────

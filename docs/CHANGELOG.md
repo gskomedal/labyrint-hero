@@ -15,6 +15,9 @@
 ### Feilretting
 - **Ryggsekk-telling vises kun ett sted (#172):** Den hardkodete `(N/10)`-teksten er fjernet; RYGGSEKK-etiketten viser nå alltid riktig kapasitet (`itemCount/bpCount`)
 - **Scandium-belte aktiveres ved trykk (#170):** `Forstørrelsesbelte` har nå `instantUse: true` og påføres umiddelbart når man trykker på det i inventaret (i stedet for å gå via hurtigslot/Q). Beskrivelsen er oppdatert. Ny `instantUse`-mekanikk i `Inventory.useSlot` håndterer permanente oppgraderinger generisk
+- **Bauxitt forsvinner ikke lenger ved smelte-rekke (#164):** `_doSmeltFrom` slår nå opp riktig slot fra mineral-id ved klikk i stedet for å stole på den fangede indeksen. Tidligere kunne en `campStash.splice()` fra forrige smelting forskyve indekser slik at neste smelte mutert feil oppføring
+- **Transmutasjon utløser nå oppdagelses-popup (#176):** Ny `ElementTracker.discoverWithPopup()` er felles trakt som markerer elementet oppdaget og emitter en `discovery`-event hvis det er nytt. Brukt av akselerator-syntese (`AcceleratorScene._doSynthesize`), kjemilab-transmutasjon (`ChemistrySystem`), smelting-utbytter (`SmeltingSystem.smelt`) og fusjons-He-biprodukt (`_consumeVirtualFuel`)
+- **Gruppeprestasjon overdøver ikke grunnstoff-popup (#178):** `DiscoveryPopupScene._enqueue` bruker prioritets-kø: grunnstoff/mineral/molekyl/legering (P1) vises før gruppe-bonus (P2). Stable order innen samme prioritet
 
 ---
 
