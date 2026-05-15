@@ -187,11 +187,8 @@ class ElementBookScene extends Phaser.Scene {
             });
         }
 
-        // ── Close button ──────────────────────────────────────────────────────
-        const closeBtn = this.add.text(px + panelW - 30, py + 8, '✕', {
-            fontSize: '18px', color: '#887766', fontFamily: 'monospace'
-        }).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerdown', () => this.scene.stop());
+        // ── Close button (touch-friendly) ─────────────────────────────────────
+        UIHelper.makeCloseButton(this, px + panelW - 24, py + 22, () => this.scene.stop(), { color: '#887766' });
 
         // ESC or B to close
         this.input.keyboard.on('keydown-ESC', () => this.scene.stop());

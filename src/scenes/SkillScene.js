@@ -46,13 +46,8 @@ class SkillScene extends Phaser.Scene {
             this.input.keyboard.on('keydown-T', () => this.scene.stop());
             this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
 
-            // Close button (top-right)
-            const closeBtn = this.add.text(px + panelW - 20, py + 8, '✕', {
-                fontSize: '18px', color: '#88aacc', fontFamily: 'monospace'
-            }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-            closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
-            closeBtn.on('pointerout',  () => closeBtn.setColor('#88aacc'));
-            closeBtn.on('pointerdown', () => this.scene.stop());
+            // Close button (touch-friendly)
+            UIHelper.makeCloseButton(this, px + panelW - 24, py + 18, () => this.scene.stop());
         }
 
         this.add.rectangle(cx, py + 38, panelW - 30, 1, 0x2a2060);
@@ -177,7 +172,8 @@ class SkillScene extends Phaser.Scene {
         // Card background
         const bg = this.add.graphics();
         if (maxed) {
-            bg.fillStyle(0x0a0818, 0.9);
+            // Completed: solid filled with path color tint for visual distinction
+            bg.fillStyle(colColor, 0.20);
         } else if (locked) {
             bg.fillStyle(0x0c0c18, 0.8);
         } else {
@@ -194,11 +190,19 @@ class SkillScene extends Phaser.Scene {
                 yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
             });
         } else if (maxed) {
-            bg.lineStyle(1, colColor, 0.3);
+            // Completed: bright solid border in path color (no glow needed)
+            bg.lineStyle(3, colColor, 1.0);
         } else {
             bg.lineStyle(1, 0x222233, 0.6);
         }
         bg.strokeRoundedRect(cx - w / 2, y, w, h, 5);
+
+        // Completed checkmark badge (top-left)
+        if (maxed) {
+            this.add.text(cx - w / 2 + 8, y + 6, '✓', {
+                fontSize: '16px', color: '#44ff88', fontFamily: 'monospace', fontStyle: 'bold'
+            });
+        }
 
         // Tier badge (T1/T2/T3)
         const tierLabel = 'T' + (tierIndex + 1);
@@ -222,25 +226,24 @@ class SkillScene extends Phaser.Scene {
         // Skill name
         this.add.text(cx, y + 20, skill.name, {
             fontSize: '14px',
-            color: maxed ? '#445566' : (locked ? '#333355' : '#e8e8ff'),
+            color: locked ? '#333355' : '#e8e8ff',
             fontFamily: 'monospace', fontStyle: 'bold',
             align: 'center', wordWrap: { width: w - 12 }
         }).setOrigin(0.5, 0);
 
         // Category badge + description combined
-        const catHex = locked ? '#222233' : '#' + colColor.toString(16).padStart(6, '0');
         const descLine = skill.desc.replace(/\n/g, ', ');
         this.add.text(cx, y + 42, `[${skill.category}] ${descLine}`, {
             fontSize: '12px',
-            color: locked ? '#1e1e30' : (maxed ? '#334455' : '#8899bb'),
+            color: locked ? '#1e1e30' : '#8899bb',
             fontFamily: 'monospace', align: 'center',
             wordWrap: { width: w - 10 }
         }).setOrigin(0.5, 0);
 
-        // Maxed label
+        // Completed label (replaces "MAKS" with clearer wording)
         if (maxed) {
-            this.add.text(cx, y + h / 2, 'MAKS', {
-                fontSize: '14px', color: '#2a2a44', fontFamily: 'monospace', fontStyle: 'bold'
+            this.add.text(cx, y + h - 18, 'FULLFØRT ✓', {
+                fontSize: '12px', color: '#44ff88', fontFamily: 'monospace', fontStyle: 'bold'
             }).setOrigin(0.5);
         }
 

@@ -68,7 +68,7 @@ class SmeltingSystem {
 
                 // Add to tracker
                 hero.elementTracker.collect(y.symbol, amount);
-                hero.elementTracker.discover(y.symbol);
+                hero.elementTracker.discoverWithPopup(y.symbol);
             }
         }
 
@@ -418,7 +418,7 @@ class SmeltingSystem {
                 // Fusion produces He as a byproduct (matches the design doc
                 // and the in-game skill description "H + Li → He + energi").
                 hero.elementTracker.collect('He', 1);
-                hero.elementTracker.discover('He');
+                hero.elementTracker.discoverWithPopup('He');
             }
         }
         return remaining;

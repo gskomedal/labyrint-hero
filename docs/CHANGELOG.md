@@ -2,6 +2,46 @@
 
 ---
 
+## v0.55 – 2026-05-15
+
+### Nye funksjoner
+- **Selg varer hos handelsmann (#183):** `MerchantScene` har nå Kjøp/Selg-faner. Selgepris er ca. 30% av kjøpsprisen (samme formel som `_itemPrice` så salgsverdien skalerer med tier, sjeldenhet og verden). Nøkkel og hakke kan ikke selges
+- **Synsfelt følger korridorene på Normal/Vanskelig (#185):** `MapRenderer.updateFog` bruker Bresenham-line-of-sight innenfor radius, så vegger blokkerer sikten. Lett vanskelighet beholder den klassiske sirkulære radiusen
+
+### Balanse
+- **Nye mineraler for Cr/Mn/Ni/Sn og F (#175, #182):** Lagt til `pyrolusite` (Mn, T2), `fluorite` (F, T2), `stannite` (Sn+Cu, T3), `siegenite` (Ni+Co, T3). Lagt inn i `MINERAL_POOL[2]` og `[3]` så de dukker opp i tidlige verdener
+- **Tier 6 dominansen til Uraninitt/Thoritt brutt (#182):** Lagt til `rhodochrosite` (Mn, T6) og `awaruite_ore` (Ni-Fe, T6) i `MINERAL_POOL[6]`. Halverer effektivt U/Th-frekvensen på høyere verdener
+- **Pris-skalering mot gull-inflasjon (#184):** `_itemPrice` ganger nå med `1 + worldNum * 0.10` (mineraler `1 + worldNum * 0.08`). Effektiv pris-dobling rundt verden 10, tre-dobling rundt verden 20
+- **Smidde gjenstander litt sterkere (#187):** +1 ATK/DEF på de fleste våpen/rustning-oppskriftene i `ALLOY_EQUIPMENT`
+- **Messing brukbar nå (#174):** Nye `brass_dagger` (+4 ATK, +1 DEF) og `brass_amulet` (+2 DEF, +2 HP) smedes fra messing
+
+### Spillmekanikk
+- **Bomber har nå tydelige VFX og kan ryste vanlige vegger (#173):** Ny statisk `ChemistrySystem._spawnExplosionVFX(scene, gx, gy, radius, color)` lager sentral flash, ekspanderende sjokkring, 16 gnistpartikler og kamera-shake skalert med radius. Bomber med `wallBreak`-flagg sprenger fremdeles `CRACKED_WALL` deterministisk; i tillegg kan vanlige `WALL`-fliser i radius ramle med en sannsynlighet skalert med skade (opp til 50% for de kraftigste — termittlading, plasmagranat, neodym-magnetbombe)
+- **Dører åpnes nå med angrep, ikke automatisk (#186):** `InputHandler` blokkerer bare bevegelse mot låst dør og setter `hero.facing`. `CombatManager.handleAttack` håndterer dør-åpning når man har nøkkel og angrep-knappen trykkes mot døren
+
+### Balanse / nye funksjoner
+- **Mineraler gated av Geolog-skill hos handelsmann (#166):** `_generateMerchantStock` legger nå kun mineraler i butikken hvis `hero.geologistUnlocked` er sann
+- **Kjæledyr-fart i skill-treet (#165):** Villmarksjeger-banen har nå `petSpeedBonus`-bidrag på alle tre tier-noder (Skarpsyn +15%, Vitalt anslag +15%, Presisjon +25%). `GameScene._tickPet` skalerer tick-intervallet med bonusen så kjæledyret beveger seg oftere. Bonusen serialiseres i `Hero.getStats/applyStats`
+- **Verdenstema følger sone-grensene (#181):** `getWorldTheme()` og `Audio.startMusic()` velger nå tema og musikk ut fra verdens sone (`getZone()`) i stedet for `Math.floor((worldNum-1)/2)`-rotasjon. Alle 3 verdener i Overflate-sonen deler nå skog-tema; alle 4 verdener i Grunnfjell deler steingrotte; deeper-sonene beholder sine dedikerte tema
+- **Mer kontrast i Underverden og Dyplag (#177):** `WORLD_THEMES[6]` (Underverden) og `WORLD_THEMES[5]` (Dyplag) har lysere `FLOOR_A`/`FLOOR_B` og litt lysere wall-toner så vegger og korridor er tydeligere atskilt
+
+### UX-forbedringer
+- **Større lukk-knapper (#180):** Ny `UIHelper.makeCloseButton(scene, x, y, onClose, opts)` med 44×44px treffområde. Migrert i `InventoryScene`, `MerchantScene`, `SkillScene`, `ChemLabScene`, `AcceleratorScene`, `SmelteryScene`, `ElementBookScene`, `MineralWikiScene`, `WelcomeScene`, `LeaderboardScene`
+- **Mineral-wiki i topmenyen (#179):** Ny `⛏`-knapp i HUD-toppen åpner Mineral-wiki. HUD-knappene er forstørret (fontstørrelse 16→24, mellomrom 28→40px) med 36×36px treffområde
+- **Synlig "UTSTYR"-tekst (#171):** Etiketter under utstyr-seksjonen lyses opp fra `#445566` til `#aabbcc` med fet skrift
+- **Fullførte ferdigheter (#167):** `SkillScene` skiller nå mellom låste og fullførte ferdigheter — fullførte får tett ramme i banens farge, grønn `✓`-haking og «FULLFØRT ✓»-merke; låste er fortsatt mørke
+- **Synlige monsterpiler (#168):** Skjelett-bueskyttere skyter nå en faktisk animert pil med glød, i stedet for usynlig direkte-skade
+- **Større handelsmann-vindu (#169):** `MerchantScene`-panelet økt fra 440×380 til 580×460 så varer og pris ikke renderes utenfor
+
+### Feilretting
+- **Ryggsekk-telling vises kun ett sted (#172):** Den hardkodete `(N/10)`-teksten er fjernet; RYGGSEKK-etiketten viser nå alltid riktig kapasitet (`itemCount/bpCount`)
+- **Scandium-belte aktiveres ved trykk (#170):** `Forstørrelsesbelte` har nå `instantUse: true` og påføres umiddelbart når man trykker på det i inventaret (i stedet for å gå via hurtigslot/Q). Beskrivelsen er oppdatert. Ny `instantUse`-mekanikk i `Inventory.useSlot` håndterer permanente oppgraderinger generisk
+- **Bauxitt forsvinner ikke lenger ved smelte-rekke (#164):** `_doSmeltFrom` slår nå opp riktig slot fra mineral-id ved klikk i stedet for å stole på den fangede indeksen. Tidligere kunne en `campStash.splice()` fra forrige smelting forskyve indekser slik at neste smelte mutert feil oppføring
+- **Transmutasjon utløser nå oppdagelses-popup (#176):** Ny `ElementTracker.discoverWithPopup()` er felles trakt som markerer elementet oppdaget og emitter en `discovery`-event hvis det er nytt. Brukt av akselerator-syntese (`AcceleratorScene._doSynthesize`), kjemilab-transmutasjon (`ChemistrySystem`), smelting-utbytter (`SmeltingSystem.smelt`) og fusjons-He-biprodukt (`_consumeVirtualFuel`)
+- **Gruppeprestasjon overdøver ikke grunnstoff-popup (#178):** `DiscoveryPopupScene._enqueue` bruker prioritets-kø: grunnstoff/mineral/molekyl/legering (P1) vises før gruppe-bonus (P2). Stable order innen samme prioritet
+
+---
+
 ## v0.54 – 2026-05-14
 
 ### Nye funksjoner

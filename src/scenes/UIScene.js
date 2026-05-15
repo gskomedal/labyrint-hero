@@ -59,18 +59,25 @@ class UIScene extends Phaser.Scene {
               launchData: () => ({ heroRef: this.gameScene.hero, viewOnly: true }) },
             { label: '🎒', scene: 'InventoryScene',
               launchData: () => ({}) },
+            { label: '⛏', scene: 'MineralWikiScene',
+              launchData: () => ({ heroRef: this.gameScene.hero }) },
             { label: '⚙', scene: 'SettingsScene',
               launchData: () => ({}) },
         ];
-        const btnSpacing = 28;
+        const btnSpacing = 40;
+        const btnHitSize = 36;
         const totalW = (hudBtns.length - 1) * btnSpacing;
         let btnX = W / 2 - totalW / 2;
         hudBtns.forEach(def => {
-            const btn = this.add.text(btnX, 10, def.label, {
-                fontSize: '16px', color: '#445566', fontFamily: 'monospace'
-            }).setOrigin(0.5, 0).setInteractive({ useHandCursor: true });
-            btn.on('pointerover', () => btn.setColor('#88bbff'));
-            btn.on('pointerout',  () => btn.setColor('#445566'));
+            const btn = this.add.text(btnX, 12, def.label, {
+                fontSize: '24px', color: '#88aacc', fontFamily: 'monospace'
+            }).setOrigin(0.5, 0);
+            btn.setInteractive(
+                new Phaser.Geom.Rectangle(-btnHitSize / 2, -4, btnHitSize, btnHitSize),
+                Phaser.Geom.Rectangle.Contains
+            );
+            btn.on('pointerover', () => btn.setColor('#ffffff'));
+            btn.on('pointerout',  () => btn.setColor('#88aacc'));
             btn.on('pointerdown', () => {
                 Audio.init();
                 if (!this.scene.isActive(def.scene)) {

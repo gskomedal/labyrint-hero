@@ -376,6 +376,54 @@ const MINERAL_DEFS = {
         desc: 'Sjelden indiumsulfid. Viktig for berøringsskjermer.'
     },
 
+    // Halide — fluorine source (#182)
+    fluorite: {
+        id: 'fluorite', name: 'Flusspat', type: 'mineral', subtype: 'ore',
+        formula: 'CaF₂', tier: 2, color: 0x66ccaa,
+        yields: [{ symbol: 'F', amount: 3, chance: 1.0 }, { symbol: 'Ca', amount: 2, chance: 0.85 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Grønnlilla krystaller. Viktigste fluorkilde.'
+    },
+    // Additional Mn source — fills the Cr/Mn/Ni/Sn shortage (#175)
+    pyrolusite: {
+        id: 'pyrolusite', name: 'Pyrolusitt', type: 'mineral', subtype: 'ore',
+        formula: 'MnO₂', tier: 2, color: 0x554455,
+        yields: [{ symbol: 'Mn', amount: 4, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.7 }],
+        energyCost: 2, smeltingTime: 3, stackSize: 10,
+        desc: 'Sort manganoksid. Vanligste mangankilde.'
+    },
+    // Additional Sn source — bronze recipe is no longer Sn-starved (#175)
+    stannite: {
+        id: 'stannite', name: 'Stannitt', type: 'mineral', subtype: 'ore',
+        formula: 'Cu₂FeSnS₄', tier: 3, color: 0x666655,
+        yields: [{ symbol: 'Sn', amount: 2, chance: 1.0 }, { symbol: 'Cu', amount: 1, chance: 0.85 }, { symbol: 'Fe', amount: 1, chance: 0.6 }, { symbol: 'S', amount: 1, chance: 0.55 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Stålgrå tinn-kobber-sulfid. Sekundær tinnkilde.'
+    },
+    // Additional Ni source (#175)
+    siegenite: {
+        id: 'siegenite', name: 'Siegenitt', type: 'mineral', subtype: 'ore',
+        formula: '(Co,Ni)₃S₄', tier: 3, color: 0x778899,
+        yields: [{ symbol: 'Ni', amount: 2, chance: 1.0 }, { symbol: 'Co', amount: 2, chance: 0.85 }, { symbol: 'S', amount: 1, chance: 0.5 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Lys grå Co-Ni-sulfid. Viktig nikkelkilde.'
+    },
+    // Tier 6 minerals that aren't U/Th (#182) — dilute the actinide pool
+    rhodochrosite: {
+        id: 'rhodochrosite', name: 'Rhodochrositt', type: 'mineral', subtype: 'ore',
+        formula: 'MnCO₃', tier: 6, color: 0xff88aa,
+        yields: [{ symbol: 'Mn', amount: 3, chance: 1.0 }, { symbol: 'C', amount: 2, chance: 0.8 }, { symbol: 'O', amount: 3, chance: 0.6 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Rosafargede karbonatkrystaller. Dyplagsmangan.'
+    },
+    awaruite_ore: {
+        id: 'awaruite_ore', name: 'Awaruitt', type: 'mineral', subtype: 'ore',
+        formula: 'Ni₃Fe', tier: 6, color: 0xaabbbb,
+        yields: [{ symbol: 'Ni', amount: 4, chance: 1.0 }, { symbol: 'Fe', amount: 2, chance: 0.9 }],
+        energyCost: 5, smeltingTime: 6, stackSize: 10,
+        desc: 'Sjelden Ni-Fe-legering fra kjernen. Tett, magnetisk.'
+    },
+
     // Actinides
     thorite: {
         id: 'thorite', name: 'Thoritt', type: 'mineral', subtype: 'ore',
@@ -464,11 +512,13 @@ const MINERAL_DEFS = {
 
 const MINERAL_POOL = {
     1: ['quartz', 'hematite', 'magnetite', 'limestone', 'halite', 'bauxite', 'olivine', 'ice_crystal', 'sylvite'],
-    2: ['pyrite', 'ilmenite', 'apatite', 'niter', 'borax', 'thortveitite'],
-    3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite', 'zircon', 'pentlandite', 'spodumene', 'cobaltite', 'vanadinite', 'stibnite', 'celestine', 'barite'],
+    2: ['pyrite', 'ilmenite', 'apatite', 'niter', 'borax', 'thortveitite', 'fluorite', 'pyrolusite'],
+    3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite', 'zircon', 'pentlandite', 'spodumene', 'cobaltite', 'vanadinite', 'stibnite', 'celestine', 'barite', 'stannite', 'siegenite'],
     4: ['galena', 'cassiterite', 'cinnabar', 'columbite', 'monazite', 'bastnaesite', 'greenockite', 'wolframite', 'molybdenite', 'bromargyryte', 'iodyrite', 'germanite', 'gallite', 'xenotime', 'indite_ore'],
     5: ['argentite', 'native_gold', 'native_silver', 'pgm_ore', 'samarskite', 'pollucite', 'calaverite'],
-    6: ['uraninite', 'thorite'],
+    // Tier 6 now contains varied minerals so high worlds don't drown the
+    // player in Uraninite/Thorite (#182). Each entry is one of 5 picks.
+    6: ['uraninite', 'thorite', 'rhodochrosite', 'awaruite_ore'],
 };
 
 const CRYSTAL_POOL = {

@@ -564,13 +564,44 @@ class MapRenderer {
         for (let y = 0; y < scene.tileH; y++)
             for (let x = 0; x < scene.tileW; x++)
                 if (scene.fog[y][x] === FOG.LIT) scene.fog[y][x] = FOG.DIM;
+
+        // Line-of-sight vision on Normal and Hard so corridors actually feel
+        // like corridors (#185). Easy keeps the legacy circular radius.
+        const useLOS = scene.difficulty === 'normal' || scene.difficulty === 'hard';
+
+        const isOpaque = (gx, gy) => {
+            if (gx < 0 || gx >= scene.tileW || gy < 0 || gy >= scene.tileH) return true;
+            const t = scene.maze[gy][gx];
+            return t === TILE.WALL || t === TILE.CRACKED_WALL || t === TILE.SECRET;
+        };
+
+        // Bresenham line-of-sight: returns true if the tile at (tx,ty) is
+        // visible from the hero given the wall layout. Walls themselves are
+        // lit if the ray reaches them (so the player can see the wall they
+        // face, but not what's behind it).
+        const hasLineOfSight = (tx, ty) => {
+            let x = hx, y = hy;
+            const dx = Math.abs(tx - x), dy = Math.abs(ty - y);
+            const sx = x < tx ? 1 : -1;
+            const sy = y < ty ? 1 : -1;
+            let err = dx - dy;
+            while (x !== tx || y !== ty) {
+                const e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x += sx; }
+                if (e2 <  dx) { err += dx; y += sy; }
+                if (x === tx && y === ty) break;
+                if (isOpaque(x, y)) return false;
+            }
+            return true;
+        };
+
         for (let dy = -r; dy <= r; dy++) {
             for (let dx = -r; dx <= r; dx++) {
-                if (dx * dx + dy * dy <= r * r) {
-                    const nx = hx + dx, ny = hy + dy;
-                    if (nx >= 0 && nx < scene.tileW && ny >= 0 && ny < scene.tileH)
-                        scene.fog[ny][nx] = FOG.LIT;
-                }
+                if (dx * dx + dy * dy > r * r) continue;
+                const nx = hx + dx, ny = hy + dy;
+                if (nx < 0 || nx >= scene.tileW || ny < 0 || ny >= scene.tileH) continue;
+                if (useLOS && !hasLineOfSight(nx, ny)) continue;
+                scene.fog[ny][nx] = FOG.LIT;
             }
         }
 

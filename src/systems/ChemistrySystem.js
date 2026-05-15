@@ -178,7 +178,15 @@ class ChemistrySystem {
             const rad = Math.round(eff.radius * bombRadMul) + bombRadiusBonus;
             const defPierce = eff.defPierce || 0;
             const chainCount = (eff.chain || 0) + bombChainBonus;
-            item.desc = `${dmg} skade, radius ${rad}` + (defPierce ? `, ignorer ${defPierce} Def` : '');
+            // Probability of cracking a regular wall scales with bomb damage —
+            // stronger bombs (thermite, neodym, plasma) can punch holes in
+            // walls. Cracked walls always collapse if wallBreak is set.
+            const regularWallChance = eff.wallBreak ? Math.min(0.5, dmg / 60) : 0;
+            const descParts = [`${dmg} skade, radius ${rad}`];
+            if (defPierce) descParts.push(`ignorer ${defPierce} Def`);
+            if (eff.wallBreak) descParts.push('sprenger sprukne vegger');
+            if (regularWallChance > 0) descParts.push(`${Math.round(regularWallChance*100)}% rist vanlige vegger`);
+            item.desc = descParts.join(', ');
             item.use = (hero, scene) => {
                 if (!scene) return false;
                 const hitIds = new Set();
@@ -209,14 +217,18 @@ class ChemistrySystem {
                     else break;
                 }
                 scene.monsters = scene.monsters.filter(m => m.alive);
-                // Wall breaking: cracked walls within radius collapse
+                // Wall breaking
                 if (eff.wallBreak && scene.maze) {
                     let wallsBroken = 0;
                     for (let wy = 0; wy < scene.tileH; wy++) {
                         for (let wx = 0; wx < scene.tileW; wx++) {
-                            if (scene.maze[wy][wx] !== TILE.CRACKED_WALL) continue;
+                            const t = scene.maze[wy][wx];
                             const d = Math.abs(wx - hero.gridX) + Math.abs(wy - hero.gridY);
-                            if (d <= rad) {
+                            if (d > rad) continue;
+                            if (t === TILE.CRACKED_WALL) {
+                                scene.maze[wy][wx] = TILE.FLOOR;
+                                wallsBroken++;
+                            } else if (t === TILE.WALL && regularWallChance > 0 && Math.random() < regularWallChance) {
                                 scene.maze[wy][wx] = TILE.FLOOR;
                                 wallsBroken++;
                             }
@@ -227,6 +239,9 @@ class ChemistrySystem {
                         scene.mapRenderer.updateFog();
                     }
                 }
+                // Visual effects: expanding ring, flash, particles, shake
+                ChemistrySystem._spawnExplosionVFX(scene, hero.gridX, hero.gridY, rad, item.color || 0xff6622);
+                if (typeof Audio !== 'undefined' && Audio.playArrow) Audio.playArrow();
                 return true;
             };
         } else if (eff.onUse === 'acid_bomb') {
@@ -329,7 +344,78 @@ class ChemistrySystem {
             delete hero.elementTracker.collected[symbol];
         }
         hero.elementTracker.collect(targetSym, 1);
-        hero.elementTracker.discover(targetSym);
+        hero.elementTracker.discoverWithPopup(targetSym);
         return targetSym;
+    }
+
+    /**
+     * Visual explosion: a flash, an expanding ring, sparks, and screen shake.
+     * Pure procedural — no asset files. Auto-cleans after the tween.
+     */
+    static _spawnExplosionVFX(scene, gx, gy, radius, color) {
+        if (!scene || !scene.add) return;
+        const cx = gx * TILE_SIZE + TILE_SIZE / 2;
+        const cy = gy * TILE_SIZE + TILE_SIZE / 2;
+        const maxR = radius * TILE_SIZE;
+
+        // 1) Bright central flash
+        const flash = scene.add.graphics();
+        flash.setDepth(40);
+        flash.fillStyle(0xffffee, 0.9);
+        flash.fillCircle(cx, cy, TILE_SIZE * 0.7);
+        scene.tweens.add({
+            targets: flash, alpha: 0, scale: 1.6,
+            duration: 220, ease: 'Quad.easeOut',
+            onComplete: () => flash.destroy(),
+        });
+
+        // 2) Expanding shock ring
+        const ring = scene.add.graphics();
+        ring.setDepth(39);
+        ring.x = cx; ring.y = cy;
+        const drawRing = (rad, alpha) => {
+            ring.clear();
+            ring.lineStyle(3, color, alpha);
+            ring.strokeCircle(0, 0, rad);
+            ring.lineStyle(6, color, alpha * 0.4);
+            ring.strokeCircle(0, 0, rad);
+        };
+        drawRing(TILE_SIZE * 0.3, 1);
+        scene.tweens.addCounter({
+            from: 0, to: 1,
+            duration: 320, ease: 'Quad.easeOut',
+            onUpdate: (t) => {
+                const v = t.getValue();
+                drawRing(TILE_SIZE * 0.3 + maxR * v, 1 - v);
+            },
+            onComplete: () => ring.destroy(),
+        });
+
+        // 3) Spark particles
+        const sparkCount = 16;
+        for (let i = 0; i < sparkCount; i++) {
+            const ang = (Math.PI * 2 * i) / sparkCount + Math.random() * 0.3;
+            const dist = maxR * (0.4 + Math.random() * 0.7);
+            const spark = scene.add.graphics();
+            spark.setDepth(41);
+            spark.fillStyle(0xffaa44, 1);
+            spark.fillRect(-2, -2, 4, 4);
+            spark.x = cx; spark.y = cy;
+            scene.tweens.add({
+                targets: spark,
+                x: cx + Math.cos(ang) * dist,
+                y: cy + Math.sin(ang) * dist,
+                alpha: 0,
+                duration: 260 + Math.random() * 120,
+                ease: 'Quad.easeOut',
+                onComplete: () => spark.destroy(),
+            });
+        }
+
+        // 4) Screen shake proportional to radius
+        if (scene.cameras && scene.cameras.main) {
+            const intensity = Math.min(0.012, 0.005 + radius * 0.0015);
+            scene.cameras.main.shake(180, intensity);
+        }
     }
 }

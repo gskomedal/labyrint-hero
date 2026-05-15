@@ -64,5 +64,33 @@ const UIHelper = {
         if (origin) txt.setOrigin(origin.x ?? origin, origin.y ?? origin);
         const normal = normalColor || style.color;
         return UIHelper.attachHover(txt, { hoverColor, normalColor: normal, onClick });
+    },
+
+    /**
+     * Create a touch-friendly close (✕) button at (x, y) with a generous hit area.
+     * @param {Phaser.Scene} scene
+     * @param {number} x
+     * @param {number} y
+     * @param {() => void} onClose
+     * @param {object} [opts] - { color, hoverColor, fontSize, hitSize }
+     * @returns {Phaser.GameObjects.Text}
+     */
+    makeCloseButton(scene, x, y, onClose, opts = {}) {
+        const color      = opts.color      || '#88aacc';
+        const hoverColor = opts.hoverColor || '#ff6666';
+        const fontSize   = opts.fontSize   || '28px';
+        const hitSize    = opts.hitSize    || 44;
+        const txt = scene.add.text(x, y, '✕', {
+            fontSize, color, fontFamily: 'monospace', fontStyle: 'bold'
+        }).setOrigin(0.5);
+        txt.setInteractive(
+            new Phaser.Geom.Rectangle(-hitSize / 2, -hitSize / 2, hitSize, hitSize),
+            Phaser.Geom.Rectangle.Contains
+        );
+        scene.input.setDefaultCursor;
+        txt.on('pointerover', () => txt.setColor(hoverColor));
+        txt.on('pointerout',  () => txt.setColor(color));
+        txt.on('pointerdown', onClose);
+        return txt;
     }
 };

@@ -341,20 +341,23 @@ const TECH_UPGRADES = {
 // These are created when a player forges equipment from an alloy at the Camp Room.
 
 const ALLOY_EQUIPMENT = {
-    // Weapons
-    bronze_sword:   { id: 'bronze_sword',   name: 'Bronsesverd',       type: 'weapon', alloyId: 'bronze',           color: 0xcc8844, atk: 4, desc: '+4 Angrep (bronse)' },
-    steel_sword:    { id: 'steel_sword',    name: 'Stålsverd',         type: 'weapon', alloyId: 'steel',            color: 0xaabbcc, atk: 6, desc: '+6 Angrep (stål)' },
-    stainless_axe:  { id: 'stainless_axe',  name: 'Rustfri stridsøks', type: 'weapon', alloyId: 'stainless_steel', color: 0xccddee, atk: 7, desc: '+7 Angrep (rustfritt)' },
-    electrum_staff: { id: 'electrum_staff', name: 'Elektrumstav',      type: 'weapon', alloyId: 'electrum',         color: 0xeecc44, atk: 6, def: 3, desc: '+6 ATK, +3 DEF (elektrum)' },
-    titanium_blade: { id: 'titanium_blade', name: 'Titanklinge',       type: 'weapon', alloyId: 'titanium_alloy',   color: 0x99aacc, atk: 8, hearts: 1, desc: '+8 ATK, +1 HP (titan)' },
-    pt_ir_sword:    { id: 'pt_ir_sword',    name: 'Pt-Ir sverd',       type: 'weapon', alloyId: 'platinum_iridium', color: 0xeeeedd, atk: 10, def: 2, desc: '+10 ATK, +2 DEF (Pt-Ir)' },
-    // Armor
-    bronze_armor:      { id: 'bronze_armor',      name: 'Bronserustning',    type: 'armor', alloyId: 'bronze',           color: 0xcc8844, def: 3, desc: '+3 Forsvar (bronse)' },
-    steel_plate:       { id: 'steel_plate',       name: 'Stålplate',         type: 'armor', alloyId: 'steel',            color: 0xaabbcc, def: 5, hearts: 1, desc: '+5 DEF, +1 HP (stål)' },
-    stainless_mail:    { id: 'stainless_mail',    name: 'Rustfri ringbrynj', type: 'armor', alloyId: 'stainless_steel', color: 0xccddee, def: 7, desc: '+7 Forsvar (rustfritt)' },
-    dural_vest:        { id: 'dural_vest',        name: 'Duralvest',         type: 'armor', alloyId: 'duraluminium',     color: 0xbbccdd, def: 4, hearts: 2, desc: '+4 DEF, +2 HP (lett)' },
-    titanium_plate:    { id: 'titanium_plate',    name: 'Titanrustning',     type: 'armor', alloyId: 'titanium_alloy',   color: 0x99aacc, def: 7, hearts: 2, desc: '+7 DEF, +2 HP (titan)' },
-    pt_ir_armor:       { id: 'pt_ir_armor',       name: 'Pt-Ir rustning',    type: 'armor', alloyId: 'platinum_iridium', color: 0xeeeedd, def: 8, hearts: 3, desc: '+8 DEF, +3 HP (Pt-Ir)' },
+    // Weapons (forged items buffed +1 ATK across most tiers — #187)
+    bronze_sword:   { id: 'bronze_sword',   name: 'Bronsesverd',       type: 'weapon', alloyId: 'bronze',           color: 0xcc8844, atk: 5, desc: '+5 Angrep (bronse)' },
+    steel_sword:    { id: 'steel_sword',    name: 'Stålsverd',         type: 'weapon', alloyId: 'steel',            color: 0xaabbcc, atk: 7, desc: '+7 Angrep (stål)' },
+    stainless_axe:  { id: 'stainless_axe',  name: 'Rustfri stridsøks', type: 'weapon', alloyId: 'stainless_steel', color: 0xccddee, atk: 8, desc: '+8 Angrep (rustfritt)' },
+    electrum_staff: { id: 'electrum_staff', name: 'Elektrumstav',      type: 'weapon', alloyId: 'electrum',         color: 0xeecc44, atk: 7, def: 3, desc: '+7 ATK, +3 DEF (elektrum)' },
+    titanium_blade: { id: 'titanium_blade', name: 'Titanklinge',       type: 'weapon', alloyId: 'titanium_alloy',   color: 0x99aacc, atk: 9, hearts: 1, desc: '+9 ATK, +1 HP (titan)' },
+    pt_ir_sword:    { id: 'pt_ir_sword',    name: 'Pt-Ir sverd',       type: 'weapon', alloyId: 'platinum_iridium', color: 0xeeeedd, atk: 11, def: 2, desc: '+11 ATK, +2 DEF (Pt-Ir)' },
+    // Brass equipment (#174) — light, corrosion-resistant
+    brass_dagger:   { id: 'brass_dagger',  name: 'Messingdolk',        type: 'weapon', alloyId: 'brass',            color: 0xddaa44, atk: 4, def: 1, desc: '+4 ATK, +1 DEF (messing)' },
+    brass_amulet:   { id: 'brass_amulet',  name: 'Messingamulett',     type: 'armor',  alloyId: 'brass',            color: 0xddaa44, def: 2, hearts: 2, desc: '+2 DEF, +2 HP (messing)' },
+    // Armor (forged items buffed +1 DEF on key tiers — #187)
+    bronze_armor:      { id: 'bronze_armor',      name: 'Bronserustning',    type: 'armor', alloyId: 'bronze',           color: 0xcc8844, def: 4, desc: '+4 Forsvar (bronse)' },
+    steel_plate:       { id: 'steel_plate',       name: 'Stålplate',         type: 'armor', alloyId: 'steel',            color: 0xaabbcc, def: 6, hearts: 1, desc: '+6 DEF, +1 HP (stål)' },
+    stainless_mail:    { id: 'stainless_mail',    name: 'Rustfri ringbrynj', type: 'armor', alloyId: 'stainless_steel', color: 0xccddee, def: 8, desc: '+8 Forsvar (rustfritt)' },
+    dural_vest:        { id: 'dural_vest',        name: 'Duralvest',         type: 'armor', alloyId: 'duraluminium',     color: 0xbbccdd, def: 5, hearts: 2, desc: '+5 DEF, +2 HP (lett)' },
+    titanium_plate:    { id: 'titanium_plate',    name: 'Titanrustning',     type: 'armor', alloyId: 'titanium_alloy',   color: 0x99aacc, def: 8, hearts: 2, desc: '+8 DEF, +2 HP (titan)' },
+    pt_ir_armor:       { id: 'pt_ir_armor',       name: 'Pt-Ir rustning',    type: 'armor', alloyId: 'platinum_iridium', color: 0xeeeedd, def: 9, hearts: 3, desc: '+9 DEF, +3 HP (Pt-Ir)' },
     // ── New alloy equipment (v0.40) ─────────────────────────────────────────
     manganese_sword:  { id: 'manganese_sword',  name: 'Manganstål-sverd',   type: 'weapon', alloyId: 'manganese_steel',  color: 0x9988aa, atk: 5, def: 1, desc: '+5 ATK, +1 DEF (manganstål)' },
     tungsten_axe:     { id: 'tungsten_axe',     name: 'Wolframøks',          type: 'weapon', alloyId: 'tungsten_carbide', color: 0x556677, atk: 8, desc: '+8 ATK (wolframkarbid)' },
@@ -367,7 +370,9 @@ const ALLOY_EQUIPMENT = {
     // ── Craftable tools (keys, pickaxes, backpack upgrades) ─────────────
     forged_key:      { id: 'key',     name: 'Smidd nøkkel',        type: 'tool', alloyId: 'bronze',         color: 0xffcc00, desc: 'Åpner låste dører', use() { return false; } },
     forged_pickaxe:  { id: 'pickaxe', name: 'Smidd hakke',         type: 'tool', alloyId: 'steel',          color: 0xaa7744, desc: 'Bryter gjennom sprukne vegger', use() { return false; } },
-    backpack_upgrade:{ id: 'backpack_upgrade', name: 'Forstørrelsesbelte', type: 'consumable', alloyId: 'scandium_alloy', color: 0xbbddcc, desc: '+3 ryggsekk-plasser (maks 2 oppgraderinger)',
+    backpack_upgrade:{ id: 'backpack_upgrade', name: 'Forstørrelsesbelte', type: 'consumable', alloyId: 'scandium_alloy', color: 0xbbddcc,
+        desc: '+3 ryggsekk-plasser (trykk i inventar – maks 2 oppgraderinger)',
+        instantUse: true,
         use(hero) {
             const upgrades = hero._backpackUpgrades || 0;
             if (upgrades >= 2) return false;

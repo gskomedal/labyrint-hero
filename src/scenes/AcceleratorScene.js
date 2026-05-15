@@ -48,10 +48,7 @@ class AcceleratorScene extends Phaser.Scene {
             wordWrap: { width: this.panelW - 40 }
         });
 
-        const closeBtn = this.add.text(this.px + this.panelW - 20, this.py + 10, '✕', {
-            fontSize: '22px', color: '#6644aa', fontFamily: 'monospace'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerdown', () => this.scene.stop());
+        UIHelper.makeCloseButton(this, this.px + this.panelW - 24, this.py + 22, () => this.scene.stop(), { color: '#6644aa' });
         this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
         this.input.keyboard.on('keydown-P', () => this.scene.stop());
 
@@ -211,7 +208,7 @@ class AcceleratorScene extends Phaser.Scene {
 
         // Produce the synthetic element
         tracker.collect(recipe.product, 1);
-        tracker.discover(recipe.product);
+        tracker.discoverWithPopup(recipe.product);
 
         EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `Syntetisert: ${recipe.product}!`, color: '#8866ff' });
 
@@ -221,6 +218,14 @@ class AcceleratorScene extends Phaser.Scene {
             tracker.applyBonusRewards(hero);
             for (const bonus of newBonuses) {
                 EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `★ ${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00', big: true });
+                EventBus.emit('discovery', {
+                    type:      'elementBonus',
+                    name:      bonus.name,
+                    iconColor: 0xffcc00,
+                    iconText:  '★',
+                    subtitle:  bonus.desc,
+                    desc:      'Belønning aktivert!',
+                });
             }
         }
 

@@ -101,6 +101,10 @@ class Inventory {
 
         if (itemDef.type === 'weapon' || itemDef.type === 'armor') {
             this._equip(slotIndex, hero);
+        } else if (itemDef.instantUse && typeof itemDef.use === 'function') {
+            // Permanent upgrades / one-shot consumables: apply immediately on tap
+            const consumed = itemDef.use(hero, scene);
+            if (consumed) this.dropSlot(slotIndex);
         } else if (itemDef.type === 'consumable' || itemDef.type === 'tool' || itemDef.type === 'molecule') {
             // Assign to quick-use slot
             this._assignQuickUse(slotIndex);

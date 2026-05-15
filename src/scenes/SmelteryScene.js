@@ -97,11 +97,8 @@ class SmelteryScene extends Phaser.Scene {
 
         this.add.rectangle(cx, tabY + 18, this.panelW - 20, 1, 0x221100);
 
-        // ── Close button ──────────────────────────────────────────────────────
-        const closeBtn = this.add.text(this.px + this.panelW - 20, this.py + 10, '✕', {
-            fontSize: '22px', color: '#886644', fontFamily: UI_FONTS.family
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerdown', () => this.scene.stop());
+        // ── Close button (touch-friendly) ─────────────────────────────────────
+        UIHelper.makeCloseButton(this, this.px + this.panelW - 24, this.py + 22, () => this.scene.stop(), { color: '#886644' });
 
         this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
         this.input.keyboard.on('keydown-V', () => this.scene.stop());
@@ -428,25 +425,46 @@ class SmelteryScene extends Phaser.Scene {
         this._doSmeltFrom('stash', stashIndex, mineralDef);
     }
 
-    /** Shared smelt logic for both backpack and stash sources. */
-    _doSmeltFrom(source, index, mineralDef) {
+    /** Shared smelt logic for both backpack and stash sources.
+     *  Resolves the source slot by mineral id at call time to avoid stale
+     *  indices after a previous campStash splice or backpack mutation. */
+    _doSmeltFrom(source, hintIndex, mineralDef) {
         const hero = this.heroRef;
+
+        // Re-resolve the slot from the mineral id so we operate on the
+        // correct entry even if the captured index has shifted.
+        const findSlot = (container, id) => {
+            // Prefer the hinted index if it still matches.
+            if (container[hintIndex] && container[hintIndex].id === id && (container[hintIndex].count || 0) > 0) {
+                return hintIndex;
+            }
+            for (let i = 0; i < container.length; i++) {
+                const e = container[i];
+                if (e && e.id === id && (e.count || 0) > 0) return i;
+            }
+            return -1;
+        };
+
+        const container = source === 'stash' ? hero.campStash : hero.inventory.backpack;
+        const actualIndex = findSlot(container, mineralDef.id);
+        if (actualIndex === -1) return;  // mineral is gone — bail out silently
+
         const result = this.smelter.smelt(mineralDef, hero);
 
         this.smelter.consumeFuel(hero, result.energyCost);
 
-        // Remove one mineral from source
+        // Remove one mineral from source using the freshly resolved index
         if (source === 'stash') {
-            const stashEntry = hero.campStash[index];
+            const stashEntry = hero.campStash[actualIndex];
             if (stashEntry) {
                 stashEntry.count--;
-                if (stashEntry.count <= 0) hero.campStash.splice(index, 1);
+                if (stashEntry.count <= 0) hero.campStash.splice(actualIndex, 1);
             }
         } else {
-            const entry = hero.inventory.backpack[index];
+            const entry = hero.inventory.backpack[actualIndex];
             if (entry) {
                 entry.count--;
-                if (entry.count <= 0) hero.inventory.backpack[index] = null;
+                if (entry.count <= 0) hero.inventory.backpack[actualIndex] = null;
             }
         }
 
@@ -468,6 +486,14 @@ class SmelteryScene extends Phaser.Scene {
             hero.elementTracker.applyBonusRewards(hero);
             for (const bonus of newBonuses) {
                 EventBus.emit('floatingText', { gx: hero.gridX, gy: hero.gridY, msg: `★ ${bonus.name} fullført! ${bonus.desc}`, color: '#ffcc00', big: true });
+                EventBus.emit('discovery', {
+                    type:      'elementBonus',
+                    name:      bonus.name,
+                    iconColor: 0xffcc00,
+                    iconText:  '★',
+                    subtitle:  bonus.desc,
+                    desc:      'Belønning aktivert!',
+                });
             }
         }
         Audio.playPickup();
