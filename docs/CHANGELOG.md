@@ -14,6 +14,7 @@
 
 ### Feilretting
 - **Ryggsekk-telling vises kun ett sted (#172):** Den hardkodete `(N/10)`-teksten er fjernet; RYGGSEKK-etiketten viser nå alltid riktig kapasitet (`itemCount/bpCount`)
+- **Scandium-belte aktiveres ved trykk (#170):** `Forstørrelsesbelte` har nå `instantUse: true` og påføres umiddelbart når man trykker på det i inventaret (i stedet for å gå via hurtigslot/Q). Beskrivelsen er oppdatert. Ny `instantUse`-mekanikk i `Inventory.useSlot` håndterer permanente oppgraderinger generisk
 
 ---
 

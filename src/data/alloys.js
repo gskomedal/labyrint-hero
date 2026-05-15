@@ -367,7 +367,9 @@ const ALLOY_EQUIPMENT = {
     // ── Craftable tools (keys, pickaxes, backpack upgrades) ─────────────
     forged_key:      { id: 'key',     name: 'Smidd nøkkel',        type: 'tool', alloyId: 'bronze',         color: 0xffcc00, desc: 'Åpner låste dører', use() { return false; } },
     forged_pickaxe:  { id: 'pickaxe', name: 'Smidd hakke',         type: 'tool', alloyId: 'steel',          color: 0xaa7744, desc: 'Bryter gjennom sprukne vegger', use() { return false; } },
-    backpack_upgrade:{ id: 'backpack_upgrade', name: 'Forstørrelsesbelte', type: 'consumable', alloyId: 'scandium_alloy', color: 0xbbddcc, desc: '+3 ryggsekk-plasser (maks 2 oppgraderinger)',
+    backpack_upgrade:{ id: 'backpack_upgrade', name: 'Forstørrelsesbelte', type: 'consumable', alloyId: 'scandium_alloy', color: 0xbbddcc,
+        desc: '+3 ryggsekk-plasser (trykk i inventar – maks 2 oppgraderinger)',
+        instantUse: true,
         use(hero) {
             const upgrades = hero._backpackUpgrades || 0;
             if (upgrades >= 2) return false;
