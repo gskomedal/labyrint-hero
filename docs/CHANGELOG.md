@@ -4,6 +4,10 @@
 
 ## v0.55 – 2026-05-15
 
+### Spillmekanikk
+- **Bomber har nå tydelige VFX og kan ryste vanlige vegger (#173):** Ny statisk `ChemistrySystem._spawnExplosionVFX(scene, gx, gy, radius, color)` lager sentral flash, ekspanderende sjokkring, 16 gnistpartikler og kamera-shake skalert med radius. Bomber med `wallBreak`-flagg sprenger fremdeles `CRACKED_WALL` deterministisk; i tillegg kan vanlige `WALL`-fliser i radius ramle med en sannsynlighet skalert med skade (opp til 50% for de kraftigste — termittlading, plasmagranat, neodym-magnetbombe)
+- **Dører åpnes nå med angrep, ikke automatisk (#186):** `InputHandler` blokkerer bare bevegelse mot låst dør og setter `hero.facing`. `CombatManager.handleAttack` håndterer dør-åpning når man har nøkkel og angrep-knappen trykkes mot døren
+
 ### Balanse / nye funksjoner
 - **Mineraler gated av Geolog-skill hos handelsmann (#166):** `_generateMerchantStock` legger nå kun mineraler i butikken hvis `hero.geologistUnlocked` er sann
 - **Kjæledyr-fart i skill-treet (#165):** Villmarksjeger-banen har nå `petSpeedBonus`-bidrag på alle tre tier-noder (Skarpsyn +15%, Vitalt anslag +15%, Presisjon +25%). `GameScene._tickPet` skalerer tick-intervallet med bonusen så kjæledyret beveger seg oftere. Bonusen serialiseres i `Hero.getStats/applyStats`

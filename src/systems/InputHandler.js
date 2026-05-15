@@ -101,19 +101,11 @@ class InputHandler {
             return;
         }
 
-        // Locked door – auto-use key if available
+        // Locked door – do not auto-unlock; player must press attack with a key
         if (tile === TILE.DOOR) {
-            const keyIdx = scene._findItemInBackpack('key');
-            if (keyIdx === -1) {
-                scene._showMessage('Låst dør! Du trenger en nøkkel 🔑', '#ffcc00');
-                return;
-            }
-            Audio.playDoor();
-            scene.hero.inventory.dropSlot(keyIdx);
-            scene.maze[ny][nx] = TILE.FLOOR;
-            scene.mapRenderer.drawMap();
-            scene.cameras.main.shake(50, 0.003);
-            scene._floatingText(nx, ny, '🔑 Åpnet!', '#ffcc00');
+            scene.hero.facing = { dx, dy };
+            scene._showMessage('Låst dør – trykk angrep for å åpne 🔑', '#ffcc00');
+            return;
         }
 
         // Update facing direction

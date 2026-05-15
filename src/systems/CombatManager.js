@@ -41,6 +41,23 @@ class CombatManager {
                 scene._showMessage('Trenger hakke for å bryte veggen!', '#cc9944');
                 return;
             }
+
+            // 3. Unlock locked door with a key (requires explicit attack press)
+            if (scene.maze[fy][fx] === TILE.DOOR) {
+                const keyIdx = scene._findItemInBackpack('key');
+                if (keyIdx === -1) {
+                    scene._showMessage('Låst dør! Du trenger en nøkkel 🔑', '#ffcc00');
+                    return;
+                }
+                Audio.playDoor();
+                scene.hero.inventory.dropSlot(keyIdx);
+                scene.maze[fy][fx] = TILE.FLOOR;
+                scene.mapRenderer.drawMap();
+                scene.mapRenderer.updateFog();
+                scene.cameras.main.shake(50, 0.003);
+                scene._floatingText(fx, fy, '🔑 Åpnet!', '#ffcc00');
+                return;
+            }
         }
 
         // 3. Attack any adjacent monster
