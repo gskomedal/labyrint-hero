@@ -15,7 +15,9 @@ class MerchantScene extends Phaser.Scene {
         this._dyn = [];
 
         const cx = W / 2, cy = H / 2;
-        const panelW = 440, panelH = 380;
+        const panelW = 580, panelH = 460;
+        this._panelW = panelW;
+        this._panelH = panelH;
 
         // Background
         this.add.rectangle(cx, cy, W, H, 0x000000, 0.78);
@@ -43,13 +45,8 @@ class MerchantScene extends Phaser.Scene {
             fontSize: '13px', color: '#334455', fontFamily: 'monospace'
         }).setOrigin(0.5);
 
-        // Close button
-        const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
-            fontSize: '20px', color: '#667788', fontFamily: 'monospace'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
-        closeBtn.on('pointerdown', () => this._close());
+        // Close button (touch-friendly)
+        UIHelper.makeCloseButton(this, cx + panelW / 2 - 22, cy - panelH / 2 + 22, () => this._close());
 
         this._buildShop(cx, cy, panelW, panelH);
         this._updateGold();
@@ -161,7 +158,7 @@ class MerchantScene extends Phaser.Scene {
         this._updateGold();
 
         const { width: W, height: H } = this.cameras.main;
-        this._buildShop(W / 2, H / 2, 440, 380);
+        this._buildShop(W / 2, H / 2, this._panelW, this._panelH);
     }
 
     _showMsg(text) {

@@ -97,11 +97,8 @@ class SmelteryScene extends Phaser.Scene {
 
         this.add.rectangle(cx, tabY + 18, this.panelW - 20, 1, 0x221100);
 
-        // ── Close button ──────────────────────────────────────────────────────
-        const closeBtn = this.add.text(this.px + this.panelW - 20, this.py + 10, '✕', {
-            fontSize: '22px', color: '#886644', fontFamily: UI_FONTS.family
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerdown', () => this.scene.stop());
+        // ── Close button (touch-friendly) ─────────────────────────────────────
+        UIHelper.makeCloseButton(this, this.px + this.panelW - 24, this.py + 22, () => this.scene.stop(), { color: '#886644' });
 
         this.input.keyboard.on('keydown-ESC', () => this.scene.stop());
         this.input.keyboard.on('keydown-V', () => this.scene.stop());

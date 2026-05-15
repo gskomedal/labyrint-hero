@@ -72,12 +72,7 @@ class WelcomeScene extends Phaser.Scene {
 
         this.add.rectangle(cx, py + 76, panelW - 80, 1, 0x6a4a22);
 
-        const closeBtn = this.add.text(px + panelW - 24, py + 24, '✕', {
-            fontSize: '20px', color: '#887766', fontFamily: 'monospace'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerover', () => closeBtn.setColor('#ff8866'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#887766'));
-        closeBtn.on('pointerdown', (p, _x, _y, ev) => { ev.stopPropagation(); this._close(); });
+        UIHelper.makeCloseButton(this, px + panelW - 26, py + 28, () => this._close(), { color: '#887766', hoverColor: '#ff8866' });
 
         // ── Body text area ────────────────────────────────────────────────────
         this._bodyArea = {

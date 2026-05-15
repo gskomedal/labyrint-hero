@@ -2,6 +2,21 @@
 
 ---
 
+## v0.55 – 2026-05-15
+
+### UX-forbedringer
+- **Større lukk-knapper (#180):** Ny `UIHelper.makeCloseButton(scene, x, y, onClose, opts)` med 44×44px treffområde. Migrert i `InventoryScene`, `MerchantScene`, `SkillScene`, `ChemLabScene`, `AcceleratorScene`, `SmelteryScene`, `ElementBookScene`, `MineralWikiScene`, `WelcomeScene`, `LeaderboardScene`
+- **Mineral-wiki i topmenyen (#179):** Ny `⛏`-knapp i HUD-toppen åpner Mineral-wiki. HUD-knappene er forstørret (fontstørrelse 16→24, mellomrom 28→40px) med 36×36px treffområde
+- **Synlig "UTSTYR"-tekst (#171):** Etiketter under utstyr-seksjonen lyses opp fra `#445566` til `#aabbcc` med fet skrift
+- **Fullførte ferdigheter (#167):** `SkillScene` skiller nå mellom låste og fullførte ferdigheter — fullførte får tett ramme i banens farge, grønn `✓`-haking og «FULLFØRT ✓»-merke; låste er fortsatt mørke
+- **Synlige monsterpiler (#168):** Skjelett-bueskyttere skyter nå en faktisk animert pil med glød, i stedet for usynlig direkte-skade
+- **Større handelsmann-vindu (#169):** `MerchantScene`-panelet økt fra 440×380 til 580×460 så varer og pris ikke renderes utenfor
+
+### Feilretting
+- **Ryggsekk-telling vises kun ett sted (#172):** Den hardkodete `(N/10)`-teksten er fjernet; RYGGSEKK-etiketten viser nå alltid riktig kapasitet (`itemCount/bpCount`)
+
+---
+
 ## v0.54 – 2026-05-14
 
 ### Nye funksjoner

@@ -236,12 +236,55 @@ class MonsterManager {
     _fireArrow(m) {
         const scene = this.scene;
         const dmg = Math.max(1, Math.floor(m.attack * 0.5));
-        const died = scene.hero.takeDamage(dmg);
-        if (typeof Audio !== 'undefined' && Audio.playHurt) Audio.playHurt();
-        scene._floatingText(scene.hero.gridX, scene.hero.gridY, `→ -${dmg}`, '#ddccaa');
-        scene.hero._drawSprite();
-        scene.cameras.main.shake(80, 0.004);
-        if (died) scene._heroDied();
+
+        // Visible animated arrow projectile from monster to hero
+        const dx = Math.sign(scene.hero.gridX - m.gridX);
+        const dy = Math.sign(scene.hero.gridY - m.gridY);
+        const arrowG = scene.add.graphics();
+        arrowG.setDepth(15);
+        // Bright red arrow with yellow head — large enough to read clearly
+        arrowG.fillStyle(0xff4422, 1);
+        if (dx !== 0) {
+            arrowG.fillRect(-8, -2, 16, 4);
+            arrowG.fillStyle(0xffcc22, 1);
+            arrowG.fillTriangle(dx * 10, 0, dx * 4, -5, dx * 4, 5);
+        } else {
+            arrowG.fillRect(-2, -8, 4, 16);
+            arrowG.fillStyle(0xffcc22, 1);
+            arrowG.fillTriangle(0, dy * 10, -5, dy * 4, 5, dy * 4);
+        }
+        // Glow halo behind the arrow
+        const glow = scene.add.graphics();
+        glow.setDepth(14);
+        glow.fillStyle(0xff8844, 0.45);
+        glow.fillCircle(0, 0, 9);
+
+        arrowG.x = m.gridX * TILE_SIZE + TILE_SIZE / 2;
+        arrowG.y = m.gridY * TILE_SIZE + TILE_SIZE / 2;
+        glow.x = arrowG.x;
+        glow.y = arrowG.y;
+
+        const targetX = scene.hero.gridX * TILE_SIZE + TILE_SIZE / 2;
+        const targetY = scene.hero.gridY * TILE_SIZE + TILE_SIZE / 2;
+        const dist = Math.abs(scene.hero.gridX - m.gridX) + Math.abs(scene.hero.gridY - m.gridY);
+        const dur = Math.max(90, dist * 55);
+
+        if (typeof Audio !== 'undefined' && Audio.playArrow) Audio.playArrow();
+        scene.tweens.add({
+            targets: [arrowG, glow],
+            x: targetX, y: targetY,
+            duration: dur, ease: 'Linear',
+            onComplete: () => {
+                arrowG.destroy();
+                glow.destroy();
+                const died = scene.hero.takeDamage(dmg);
+                if (typeof Audio !== 'undefined' && Audio.playHurt) Audio.playHurt();
+                scene._floatingText(scene.hero.gridX, scene.hero.gridY, `→ -${dmg}`, '#ff6644');
+                scene.hero._drawSprite();
+                scene.cameras.main.shake(80, 0.004);
+                if (died) scene._heroDied();
+            }
+        });
     }
 
     monsterAt(gx, gy) {

@@ -58,13 +58,8 @@ class MineralWikiScene extends Phaser.Scene {
 
         this.add.rectangle(cx, py + 50, panelW - 30, 1, 0x3a2a18);
 
-        // Close button (X)
-        const closeBtn = this.add.text(px + panelW - 22, py + 14, '✕', {
-            fontSize: '18px', color: '#887766', fontFamily: 'monospace'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerover', () => closeBtn.setColor('#ff8866'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#887766'));
-        closeBtn.on('pointerdown', () => this._close());
+        // Close button (touch-friendly)
+        UIHelper.makeCloseButton(this, px + panelW - 24, py + 22, () => this._close(), { color: '#887766', hoverColor: '#ff8866' });
 
         // ── Tabs ──────────────────────────────────────────────────────────────
         const TABS = [

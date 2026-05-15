@@ -54,13 +54,8 @@ class LeaderboardScene extends Phaser.Scene {
             this._refreshList();
         });
 
-        // Close button (top-right)
-        const closeBtn = this.add.text(W - 30, 30, '\u2715', {
-            fontSize: '20px', color: '#667788', fontFamily: 'monospace'
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerover', () => closeBtn.setColor('#ff6666'));
-        closeBtn.on('pointerout',  () => closeBtn.setColor('#667788'));
-        closeBtn.on('pointerdown', () => this.scene.start('MenuScene'));
+        // Close button (touch-friendly)
+        UIHelper.makeCloseButton(this, W - 30, 30, () => this.scene.start('MenuScene'));
 
         // ESC keyboard shortcut
         this.input.keyboard.on('keydown-ESC', () => this.scene.start('MenuScene'));

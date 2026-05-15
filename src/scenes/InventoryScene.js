@@ -44,10 +44,10 @@ class InventoryScene extends Phaser.Scene {
 
         // Section labels (static) - shifted right
         this.add.text(contentCX - 220, panelY - panelH / 2 + 62, 'UTSTYR', {
-            fontSize: UI_FONTS.body, color: '#445566', fontFamily: UI_FONTS.family
+            fontSize: UI_FONTS.body, color: '#aabbcc', fontFamily: UI_FONTS.family, fontStyle: 'bold'
         });
         this.add.text(contentCX, panelY - panelH / 2 + 168, 'EVNER', {
-            fontSize: UI_FONTS.body, color: '#445566', fontFamily: UI_FONTS.family
+            fontSize: UI_FONTS.body, color: '#aabbcc', fontFamily: UI_FONTS.family, fontStyle: 'bold'
         }).setOrigin(0.5);
         // RYGGSEKK label is drawn dynamically in _refresh() to show slot count
 
@@ -86,13 +86,7 @@ class InventoryScene extends Phaser.Scene {
         });
 
         // Close button (touch-friendly)
-        const closeBtn = this.add.text(cx + panelW / 2 - 20, cy - panelH / 2 + 18, '✕', {
-            fontSize: '20px', color: '#667788', fontFamily: UI_FONTS.family
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-        UIHelper.attachHover(closeBtn, {
-            hoverColor: '#ff6666', normalColor: '#667788',
-            onClick: () => this._tryClose(),
-        });
+        UIHelper.makeCloseButton(this, cx + panelW / 2 - 20, cy - panelH / 2 + 22, () => this._tryClose());
 
         // ── Build dynamic slot UI ──────────────────────────────────────────────
         this._refresh();
@@ -162,12 +156,6 @@ class InventoryScene extends Phaser.Scene {
         // Skills
         this._drawSkills(contentCX, panelY - panelH / 2 + 185);
 
-        // Backpack label with count
-        this._d(this.add.text(contentCX + 80, panelY - panelH / 2 + 220,
-            `(${this.inv.itemCount}/10)`, {
-            fontSize: UI_FONTS.body, color: '#334455', fontFamily: UI_FONTS.family
-        }));
-
         // Backpack slots (dynamic size – base 10 + skill expansions)
         const bpY     = panelY - panelH / 2 + 245;
         const cols = 5, gap = 8;
@@ -177,7 +165,7 @@ class InventoryScene extends Phaser.Scene {
 
         const bpLabel = `RYGGSEKK (${this.inv.itemCount}/${bpCount})`;
         this._d(this.add.text(contentCX - 220, bpY - 22, bpLabel, {
-            fontSize: UI_FONTS.body, color: '#445566', fontFamily: UI_FONTS.family
+            fontSize: UI_FONTS.body, color: '#aabbcc', fontFamily: UI_FONTS.family, fontStyle: 'bold'
         }));
 
         for (let i = 0; i < bpCount; i++) {
