@@ -4,6 +4,10 @@
 
 ## v0.55 – 2026-05-15
 
+### Balanse / nye funksjoner
+- **Mineraler gated av Geolog-skill hos handelsmann (#166):** `_generateMerchantStock` legger nå kun mineraler i butikken hvis `hero.geologistUnlocked` er sann
+- **Kjæledyr-fart i skill-treet (#165):** Villmarksjeger-banen har nå `petSpeedBonus`-bidrag på alle tre tier-noder (Skarpsyn +15%, Vitalt anslag +15%, Presisjon +25%). `GameScene._tickPet` skalerer tick-intervallet med bonusen så kjæledyret beveger seg oftere. Bonusen serialiseres i `Hero.getStats/applyStats`
+
 ### UX-forbedringer
 - **Større lukk-knapper (#180):** Ny `UIHelper.makeCloseButton(scene, x, y, onClose, opts)` med 44×44px treffområde. Migrert i `InventoryScene`, `MerchantScene`, `SkillScene`, `ChemLabScene`, `AcceleratorScene`, `SmelteryScene`, `ElementBookScene`, `MineralWikiScene`, `WelcomeScene`, `LeaderboardScene`
 - **Mineral-wiki i topmenyen (#179):** Ny `⛏`-knapp i HUD-toppen åpner Mineral-wiki. HUD-knappene er forstørret (fontstørrelse 16→24, mellomrom 28→40px) med 36×36px treffområde

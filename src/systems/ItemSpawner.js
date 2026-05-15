@@ -609,8 +609,10 @@ class ItemSpawner {
         if (arm) stock.push({ item: arm, price: this._itemPrice(arm, wn) });
         stock.push({ item: ITEM_DEFS.key, price: 10 + wn * 3 });
 
-        // Mineral for sale (world 1+)
-        if (typeof rollMineralForWorld !== 'undefined') {
+        // Mineral for sale (world 1+) — gated behind Geologist skill so it
+        // cannot bypass the Geology unlock condition.
+        const geoUnlocked = !!(scene.hero && scene.hero.geologistUnlocked);
+        if (geoUnlocked && typeof rollMineralForWorld !== 'undefined') {
             const mineral = rollMineralForWorld(wn);
             if (mineral) {
                 const mItem = { ...mineral, count: 1 };

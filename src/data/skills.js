@@ -71,19 +71,20 @@ const SKILL_TREE_PATHS = [
             {
                 id:       'keen_eye',
                 name:     'Skarpsyn',
-                desc:     '+2 synsradius\n+20% XP\n+2 kjæledyr-ATK',
+                desc:     '+2 synsradius\n+20% XP\n+2 kjæledyr-ATK\n+15% kjæl.-fart',
                 category: 'VIS',
                 maxStack: 2,
                 apply(hero) {
                     hero.visionRadius += 2;
                     hero.xpMultiplier += 0.20;
                     hero.petBonusAtk = (hero.petBonusAtk || 0) + 2;
+                    hero.petSpeedBonus = (hero.petSpeedBonus || 0) + 0.15;
                 }
             },
             {
                 id:       'vital_strike',
                 name:     'Vitalt anslag',
-                desc:     '+20% kritisk\n+15% unnvikelse\n+3 kjæl.-HP, +1 kjæl.-DEF\nPotion healer kjæledyr',
+                desc:     '+20% kritisk\n+15% unnvikelse\n+3 kjæl.-HP, +1 kjæl.-DEF\n+15% kjæl.-fart\nPotion healer kjæledyr',
                 category: 'ATK',
                 maxStack: 2,
                 apply(hero) {
@@ -91,19 +92,21 @@ const SKILL_TREE_PATHS = [
                     hero.dodgeChance = Math.min(0.6, hero.dodgeChance + 0.15);
                     hero.petBonusHp = (hero.petBonusHp || 0) + 3;
                     hero.petBonusDef = (hero.petBonusDef || 0) + 1;
+                    hero.petSpeedBonus = (hero.petSpeedBonus || 0) + 0.15;
                     hero.petHealShare = true;
                 }
             },
             {
                 id:       'precision',
                 name:     'Presisjon',
-                desc:     '+3 Angrep\n+3 kjæl.-ATK\n+3 kjæl.-HP\n+2 hjerter nå',
+                desc:     '+3 Angrep\n+3 kjæl.-ATK\n+3 kjæl.-HP\n+25% kjæl.-fart\n+2 hjerter nå',
                 category: 'ATK',
                 maxStack: 1,
                 apply(hero) {
                     hero.attack += 3;
                     hero.petBonusAtk = (hero.petBonusAtk || 0) + 3;
                     hero.petBonusHp = (hero.petBonusHp || 0) + 3;
+                    hero.petSpeedBonus = (hero.petSpeedBonus || 0) + 0.25;
                     hero.hearts = Math.min(hero.hearts + 2, hero.maxHearts);
                 }
             },

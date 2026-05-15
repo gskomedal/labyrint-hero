@@ -30,6 +30,7 @@ class Hero {
         this.petBonusAtk = 0;
         this.petBonusHp  = 0;
         this.petBonusDef = 0;
+        this.petSpeedBonus = 0;     // 0..0.7 fraction shortening pet tick interval
         this.petHealShare = false; // life potions also heal pet
 
         // Progression
@@ -288,6 +289,7 @@ class Hero {
             petBonusAtk:   this.petBonusAtk,
             petBonusHp:    this.petBonusHp,
             petBonusDef:   this.petBonusDef,
+            petSpeedBonus: this.petSpeedBonus,
             petHealShare:  this.petHealShare,
             gold:         this.gold,
             poisonTurns:  this.poisonTurns,
@@ -320,6 +322,7 @@ class Hero {
         this.petBonusAtk  = stats.petBonusAtk  || 0;
         this.petBonusHp   = stats.petBonusHp   || 0;
         this.petBonusDef  = stats.petBonusDef  || 0;
+        this.petSpeedBonus = stats.petSpeedBonus || 0;
         this.petHealShare = stats.petHealShare  || false;
         this.gold         = stats.gold         || 0;
         this.poisonTurns  = stats.poisonTurns  || 0;

@@ -350,7 +350,11 @@ class GameScene extends Phaser.Scene {
     _tickPet(delta) {
         if (!this.pet || !this.pet.alive) return;
         this.petTickTimer += delta;
-        if (this.petTickTimer < MONSTER_TICK_MS) return;
+        // Pet speed: skill bonus (hero.petSpeedBonus 0..0.7) shortens the
+        // tick interval, so the pet acts more frequently than monsters.
+        const speedBonus = Math.min(0.7, this.hero?.petSpeedBonus || 0);
+        const interval = Math.max(120, MONSTER_TICK_MS * (1 - speedBonus));
+        if (this.petTickTimer < interval) return;
         this.petTickTimer = 0;
 
         // Pet attacks adjacent monster first
