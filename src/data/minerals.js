@@ -117,9 +117,9 @@ const MINERAL_DEFS = {
     zircon: {
         id: 'zircon', name: 'Zirkon', type: 'mineral', subtype: 'ore',
         formula: 'ZrSiO₄', tier: 3, color: 0xccaa77,
-        yields: [{ symbol: 'Zr', amount: 3, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }],
+        yields: [{ symbol: 'Zr', amount: 3, chance: 1.0 }, { symbol: 'Si', amount: 1, chance: 0.85 }, { symbol: 'O', amount: 2, chance: 0.6 }, { symbol: 'Hf', amount: 1, chance: 0.25 }],
         energyCost: 3, smeltingTime: 4, stackSize: 10,
-        desc: 'Robust silikatmineral. Rik zirkoniumkilde.'
+        desc: 'Robust silikatmineral. Rik zirkoniumkilde. Inneholder alltid spor av hafnium.'
     },
     pentlandite: {
         id: 'pentlandite', name: 'Pentlanditt', type: 'mineral', subtype: 'ore',
@@ -270,9 +270,9 @@ const MINERAL_DEFS = {
     molybdenite: {
         id: 'molybdenite', name: 'Molybdenitt', type: 'mineral', subtype: 'ore',
         formula: 'MoS\u2082', tier: 4, color: 0x667788,
-        yields: [{ symbol: 'Mo', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 1.0 }],
+        yields: [{ symbol: 'Mo', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 1, chance: 1.0 }, { symbol: 'Re', amount: 1, chance: 0.15 }],
         energyCost: 4, smeltingTime: 5, stackSize: 10,
-        desc: 'Sølvgrå, flisete krystaller. Molybdenkilde.'
+        desc: 'Sølvgrå, flisete krystaller. Molybdenkilde – inneholder sjelden også rhenium.'
     },
     barite: {
         id: 'barite', name: 'Barytt', type: 'mineral', subtype: 'ore',
@@ -433,6 +433,50 @@ const MINERAL_DEFS = {
         desc: 'Radioaktivt thoriummineral. Alternativ kjernebrensel.'
     },
 
+    // Trace-element sources: fill remaining naturally-occurring gaps
+    bismuthinite: {
+        id: 'bismuthinite', name: 'Bismutinitt', type: 'mineral', subtype: 'ore',
+        formula: 'Bi₂S₃', tier: 4, color: 0x9999aa,
+        yields: [{ symbol: 'Bi', amount: 2, chance: 1.0 }, { symbol: 'S', amount: 2, chance: 0.85 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Blygrå metallisk sulfid. Viktigste vismutkilde.'
+    },
+    clausthalite: {
+        id: 'clausthalite', name: 'Clausthalitt', type: 'mineral', subtype: 'ore',
+        formula: 'PbSe', tier: 4, color: 0x556677,
+        yields: [{ symbol: 'Pb', amount: 2, chance: 1.0 }, { symbol: 'Se', amount: 1, chance: 0.5 }],
+        energyCost: 3, smeltingTime: 4, stackSize: 10,
+        desc: 'Sjelden blyselenid. Den fremste mineralkilden til selen.'
+    },
+    lorandite: {
+        id: 'lorandite', name: 'Lorandit', type: 'mineral', subtype: 'ore',
+        formula: 'TlAsS₂', tier: 5, color: 0xbb3344,
+        yields: [{ symbol: 'Tl', amount: 1, chance: 1.0 }, { symbol: 'As', amount: 1, chance: 0.7 }, { symbol: 'S', amount: 2, chance: 0.5 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Skarlagensrøde krystaller. Eneste praktiske kilde til thallium.'
+    },
+    gadolinite: {
+        id: 'gadolinite', name: 'Gadolinitt', type: 'mineral', subtype: 'ore',
+        formula: '(Y,Ce)₂FeBe₂Si₂O₁₀', tier: 5, color: 0x335544,
+        yields: [{ symbol: 'Y', amount: 1, chance: 0.85 }, { symbol: 'Be', amount: 1, chance: 0.7 }, { symbol: 'Fe', amount: 1, chance: 0.55 }, { symbol: 'Tb', amount: 1, chance: 0.20 }, { symbol: 'Ho', amount: 1, chance: 0.15 }],
+        energyCost: 4, smeltingTime: 5, stackSize: 10,
+        desc: 'Sort silikatmalm fra Norge. Bærer av tunge sjeldne jordarter.'
+    },
+    euxenite: {
+        id: 'euxenite', name: 'Euxenitt', type: 'mineral', subtype: 'ore',
+        formula: '(Y,Ce,U)(Nb,Ta,Ti)₂O₆', tier: 5, color: 0x443322,
+        yields: [{ symbol: 'Y', amount: 1, chance: 0.85 }, { symbol: 'Nb', amount: 1, chance: 0.6 }, { symbol: 'Ti', amount: 1, chance: 0.5 }, { symbol: 'Eu', amount: 1, chance: 0.20 }, { symbol: 'Tm', amount: 1, chance: 0.15 }, { symbol: 'Lu', amount: 1, chance: 0.10 }],
+        energyCost: 4, smeltingTime: 6, stackSize: 10,
+        desc: 'Brunsort oksidmalm. Konsentrerer sjeldne tunge lantanider.'
+    },
+    bekblende: {
+        id: 'bekblende', name: 'Bekblende', type: 'mineral', subtype: 'ore',
+        formula: 'UO₂ (uren)', tier: 6, color: 0x221a22,
+        yields: [{ symbol: 'U', amount: 2, chance: 1.0 }, { symbol: 'O', amount: 2, chance: 0.85 }, { symbol: 'Ra', amount: 1, chance: 0.20 }, { symbol: 'Rn', amount: 1, chance: 0.15 }, { symbol: 'Po', amount: 1, chance: 0.10 }, { symbol: 'Pa', amount: 1, chance: 0.10 }, { symbol: 'Ac', amount: 1, chance: 0.08 }, { symbol: 'At', amount: 1, chance: 0.05 }, { symbol: 'Fr', amount: 1, chance: 0.05 }],
+        energyCost: 6, smeltingTime: 8, stackSize: 10,
+        desc: 'Uren uranmalm. Curiene utvant radium og polonium herfra. Spor av hele henfallskjeden.'
+    },
+
     // ── Crystals / Gemstones (subtype: 'crystal') ───────────────────────────
     clear_quartz: {
         id: 'clear_quartz', name: 'Klar kvarts', type: 'mineral', subtype: 'crystal',
@@ -514,11 +558,11 @@ const MINERAL_POOL = {
     1: ['quartz', 'hematite', 'magnetite', 'limestone', 'halite', 'bauxite', 'olivine', 'ice_crystal', 'sylvite'],
     2: ['pyrite', 'ilmenite', 'apatite', 'niter', 'borax', 'thortveitite', 'fluorite', 'pyrolusite'],
     3: ['chalcopyrite', 'malachite', 'sphalerite', 'chromite', 'zircon', 'pentlandite', 'spodumene', 'cobaltite', 'vanadinite', 'stibnite', 'celestine', 'barite', 'stannite', 'siegenite'],
-    4: ['galena', 'cassiterite', 'cinnabar', 'columbite', 'monazite', 'bastnaesite', 'greenockite', 'wolframite', 'molybdenite', 'bromargyryte', 'iodyrite', 'germanite', 'gallite', 'xenotime', 'indite_ore'],
-    5: ['argentite', 'native_gold', 'native_silver', 'pgm_ore', 'samarskite', 'pollucite', 'calaverite'],
+    4: ['galena', 'cassiterite', 'cinnabar', 'columbite', 'monazite', 'bastnaesite', 'greenockite', 'wolframite', 'molybdenite', 'bromargyryte', 'iodyrite', 'germanite', 'gallite', 'xenotime', 'indite_ore', 'bismuthinite', 'clausthalite'],
+    5: ['argentite', 'native_gold', 'native_silver', 'pgm_ore', 'samarskite', 'pollucite', 'calaverite', 'lorandite', 'gadolinite', 'euxenite'],
     // Tier 6 now contains varied minerals so high worlds don't drown the
     // player in Uraninite/Thorite (#182). Each entry is one of 5 picks.
-    6: ['uraninite', 'thorite', 'rhodochrosite', 'awaruite_ore'],
+    6: ['uraninite', 'thorite', 'rhodochrosite', 'awaruite_ore', 'bekblende'],
 };
 
 const CRYSTAL_POOL = {
