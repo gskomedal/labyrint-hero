@@ -9,6 +9,16 @@
 - **Synsfelt følger korridorene på Normal/Vanskelig (#185):** `MapRenderer.updateFog` bruker Bresenham-line-of-sight innenfor radius, så vegger blokkerer sikten. Lett vanskelighet beholder den klassiske sirkulære radiusen
 
 ### Balanse
+- **Alle naturlig forekommende grunnstoff har nå en mineralkilde:** Tidligere kunne 22 grunnstoff aldri oppdages fordi ingen mineral listet dem i `yields`. Lagt til 6 nye mineraler og utvidet 2 eksisterende:
+  - `bismuthinite` (Bi₂S₃, T4) – vismut
+  - `clausthalite` (PbSe, T4) – selen i blyselenid
+  - `lorandite` (TlAsS₂, T5) – thallium
+  - `gadolinite` ((Y,Ce)₂FeBe₂Si₂O₁₀, T5) – tunge sjeldne jordarter, spor av Tb og Ho
+  - `euxenite` ((Y,Ce,U)(Nb,Ta,Ti)₂O₆, T5) – spor av Eu, Tm, Lu
+  - `bekblende` (uren UO₂, T6) – uran + spor av hele aktinid-henfallskjeden (Ra, Rn, Po, Pa, Ac, At, Fr)
+  - `zircon` gir nå også spor av Hf (geokjemisk korrekt)
+  - `molybdenite` gir nå også spor av Re (IRL kommersielt biprodukt)
+  - He, Ne, Ar, Kr, Xe dekkes uendret av eksisterende `gas_pocket`-rom
 - **Nye mineraler for Cr/Mn/Ni/Sn og F (#175, #182):** Lagt til `pyrolusite` (Mn, T2), `fluorite` (F, T2), `stannite` (Sn+Cu, T3), `siegenite` (Ni+Co, T3). Lagt inn i `MINERAL_POOL[2]` og `[3]` så de dukker opp i tidlige verdener
 - **Tier 6 dominansen til Uraninitt/Thoritt brutt (#182):** Lagt til `rhodochrosite` (Mn, T6) og `awaruite_ore` (Ni-Fe, T6) i `MINERAL_POOL[6]`. Halverer effektivt U/Th-frekvensen på høyere verdener
 - **Pris-skalering mot gull-inflasjon (#184):** `_itemPrice` ganger nå med `1 + worldNum * 0.10` (mineraler `1 + worldNum * 0.08`). Effektiv pris-dobling rundt verden 10, tre-dobling rundt verden 20
