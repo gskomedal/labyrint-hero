@@ -5,6 +5,7 @@
 ## v0.55 – 2026-05-15
 
 ### Tekniske endringer
+- **Global leaderboard aktivert:** Scores fra alle spillere lagres i Cloudflare KV og vises i Leaderboard-scenen sin Global-fane. Worker deployet til `https://labyrint-hero-leaderboard.gskomedal.workers.dev` med KV-namespace `LEADERBOARD`
 - **MIT-lisens lagt til:** Nytt `LICENSE`-fil i repo-root, `license`- og `author`-felt i `package.json`, og lisensseksjon i `README.md`. Prosjektet er nå offisielt åpen kildekode under MIT © 2026 Gunstein Skomedal
 
 ### Nye funksjoner

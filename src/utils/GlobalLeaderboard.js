@@ -18,7 +18,7 @@
 
 const GlobalLeaderboard = {
     // ⬇ CHANGE THIS to your deployed Cloudflare Worker URL ⬇
-    API_URL: 'https://labyrint-hero-leaderboard.workers.dev',
+    API_URL: 'https://labyrint-hero-leaderboard.gskomedal.workers.dev',
 
     /**
      * Submit a score to the global leaderboard (fire-and-forget).
