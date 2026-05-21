@@ -4,6 +4,6 @@ compatibility_date = "2024-01-01"
 
 [[kv_namespaces]]
 binding = "LEADERBOARD"
-id = "<YOUR_KV_NAMESPACE_ID>"
+id = "467642b21efe4b478e647bb9b3b37a57"
 # Create with: wrangler kv namespace create LEADERBOARD
 # Then replace the id above with the output.

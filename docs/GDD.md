@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
 **Versjon:** 0.55
-**Sist oppdatert:** 2026-05-16 (v0.55)
+**Sist oppdatert:** 2026-05-21 (v0.55)
 
 ---
 
@@ -417,8 +417,9 @@ Aktiveres automatisk når helten har evner fra begge stier i et par. Noen synerg
 - Maks 50 innlegg, sortert etter verdener klarert → nivå → drap
 - Registrerer kun verdensklarering, ikke død
 
-### Global ledertavle (#64)
+### Global ledertavle (#64) – aktivert v0.55
 - Backend: Cloudflare Worker + KV-lagring (`backend/worker.js`)
+- Live på `https://labyrint-hero-leaderboard.gskomedal.workers.dev` (KV-namespace `LEADERBOARD`)
 - REST API: `POST /scores` for innsending, `GET /scores` for henting (topp 100)
 - Automatisk innsending ved verdensklarering (brann-og-glem, feiler stille)
 - Filtrering: rase og vanskelighetsgrad
