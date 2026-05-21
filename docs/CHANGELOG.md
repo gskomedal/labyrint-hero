@@ -4,6 +4,9 @@
 
 ## v0.55 – 2026-05-15
 
+### Tekniske endringer
+- **MIT-lisens lagt til:** Nytt `LICENSE`-fil i repo-root, `license`- og `author`-felt i `package.json`, og lisensseksjon i `README.md`. Prosjektet er nå offisielt åpen kildekode under MIT © 2026 Gunstein Skomedal
+
 ### Nye funksjoner
 - **Selg varer hos handelsmann (#183):** `MerchantScene` har nå Kjøp/Selg-faner. Selgepris er ca. 30% av kjøpsprisen (samme formel som `_itemPrice` så salgsverdien skalerer med tier, sjeldenhet og verden). Nøkkel og hakke kan ikke selges
 - **Synsfelt følger korridorene på Normal/Vanskelig (#185):** `MapRenderer.updateFog` bruker Bresenham-line-of-sight innenfor radius, så vegger blokkerer sikten. Lett vanskelighet beholder den klassiske sirkulære radiusen

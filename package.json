@@ -1,4 +1,6 @@
 {
+  "license": "MIT",
+  "author": "Gunstein Skomedal",
   "devDependencies": {
     "playwright": "1.56.0"
   }

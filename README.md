@@ -130,3 +130,8 @@ docs/
 - [Game Design Document](docs/GDD.md) – Full spillbeskrivelse og regler
 - [Endringslogg](docs/CHANGELOG.md) – Versjonshistorikk
 - [Elements-modifikasjon](docs/Elements-mod.md) – Det periodiske system i spillet
+
+## Lisens
+
+Utgitt under [MIT-lisensen](LICENSE) – © 2026 Gunstein Skomedal.
+Fri til bruk, modifisering og distribusjon så lenge lisens- og copyright-notisen følger med.
