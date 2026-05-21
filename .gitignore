@@ -23,3 +23,10 @@ build/
 # Temp
 *.tmp
 *.bak
+
+# Cloudflare Wrangler cache
+.wrangler/
+backend/.wrangler/
+
+# Cowork local state
+.claude/
