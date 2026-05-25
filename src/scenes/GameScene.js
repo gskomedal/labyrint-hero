@@ -219,11 +219,11 @@ class GameScene extends Phaser.Scene {
     _celebrateBirthday() {
         Audio.playBirthday();
         this.cameras.main.flash(400, 255, 220, 120);
-        this._showMessage('Gratulerer med 12-årsdagen, Henrik! 🎉', '#ffdd33');
         this._floatingText(this.hero.gridX, this.hero.gridY - 1, '✦ BURSDAGSHELT ✦', '#ff66cc', true);
         this._hitSparks(this.hero.gridX, this.hero.gridY, 0xffdd33);
         this.time.delayedCall(250, () => this._hitSparks(this.hero.gridX, this.hero.gridY, 0xff66cc));
         this.time.delayedCall(500, () => this._hitSparks(this.hero.gridX, this.hero.gridY, 0x66ddff));
+        this.scene.launch('BirthdayPopupScene');
     }
 
     shutdown() {
@@ -234,7 +234,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene') || this.scene.isActive('ChemLabScene') || this.scene.isActive('AcceleratorScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene') || this.scene.isActive('ChemLabScene') || this.scene.isActive('AcceleratorScene') || this.scene.isActive('BirthdayPopupScene');
 
         if (!blocked) {
             this.inputHandler.handleInput(delta);

@@ -337,23 +337,33 @@ const Audio = (function () {
             _noise(0.18, sfxGain, 0.10, 0.45, 1200);
         },
 
-        /** Birthday celebration fanfare – "Happy Birthday"-inspired opening phrase */
+        /** Birthday celebration fanfare – full "Happy Birthday to You" melody */
         playBirthday() {
             if (!ctx || !sfxEnabled) return;
-            const base = 24; // two octaves above root → bright and cheerful
-            const melody = [
-                { s: 0, t: 0.00 }, { s: 0, t: 0.20 },
-                { s: 2, t: 0.40 }, { s: 0, t: 0.72 },
-                { s: 5, t: 1.04 }, { s: 4, t: 1.40 },
+            const base = 24; // bright register
+            const beat = 0.34; // seconds per beat
+            // Full "Happy Birthday to You" – [semitone offset from base, beats]
+            const song = [
+                // Happy birthday to you
+                [-5, 0.5], [-5, 0.5], [-3, 1], [-5, 1], [0, 1], [-1, 1.5],
+                // Happy birthday to you
+                [-5, 0.5], [-5, 0.5], [-3, 1], [-5, 1], [2, 1], [0, 1.5],
+                // Happy birthday dear friend
+                [-5, 0.5], [-5, 0.5], [7, 1], [4, 1], [0, 1], [-1, 1], [-3, 1.5],
+                // Happy birthday to you
+                [5, 0.5], [5, 0.5], [4, 1], [0, 1], [2, 1], [0, 1.5],
             ];
-            melody.forEach(n =>
-                _note(_freq(base + n.s), 0.28, sfxGain, 'triangle', 0.30, n.t)
-            );
-            // Sustained celebratory chord + sparkle tail
+            let when = 0;
+            song.forEach(([s, b]) => {
+                const dur = b * beat;
+                _note(_freq(base + s), dur * 0.92, sfxGain, 'triangle', 0.28, when);
+                when += dur;
+            });
+            // Final celebratory chord + sparkle tail
             [0, 4, 7, 12].forEach(s =>
-                _note(_freq(base + s), 0.9, sfxGain, 'sine', 0.16, 1.85)
+                _note(_freq(base + s), 1.1, sfxGain, 'sine', 0.16, when + 0.05)
             );
-            _noise(0.5, sfxGain, 0.09, 1.95, 1800);
+            _noise(0.6, sfxGain, 0.09, when + 0.15, 1800);
         },
 
         // ── Settings ────────────────────────────────────────────────────────
