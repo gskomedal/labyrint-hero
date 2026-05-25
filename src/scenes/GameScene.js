@@ -191,7 +191,7 @@ class GameScene extends Phaser.Scene {
         return Date.now() < Date.parse('2026-06-01T00:00:00');
     }
 
-    /** Equip a mythic loadout and grant near-eternal life to the birthday hero. */
+    /** Equip a strong loadout and grant a generous head start to the birthday hero. */
     _applyBirthdayLoadout() {
         const h = this.hero;
         const equipMythic = (id) => {
@@ -203,16 +203,16 @@ class GameScene extends Phaser.Scene {
         };
         equipMythic('mithril_axe');    // mythic → +21 angrep
         equipMythic('mithril_armor');  // mythic → +15 forsvar, +3 hjerte
-        // Near-eternal life
-        h.maxHearts += 90;
+        // Significantly more life than normal – but not invincible
+        h.maxHearts += 14;
         h.hearts     = h.maxHearts;
-        // Extra power for the birthday boy
-        h.attack       += 8;
-        h.defense      += 4;
-        h.visionRadius += 3;
-        h.gold         += 500;
+        // A modest power boost for the birthday boy
+        h.attack       += 3;
+        h.defense      += 2;
+        h.visionRadius += 2;
+        h.gold         += 300;
         // A little treasure to start with
-        for (let i = 0; i < 5; i++) h.inventory.addItem(ITEM_DEFS.big_health_pot);
+        for (let i = 0; i < 3; i++) h.inventory.addItem(ITEM_DEFS.big_health_pot);
         h.inventory.addItem(ITEM_DEFS.heart_crystal);
     }
 
