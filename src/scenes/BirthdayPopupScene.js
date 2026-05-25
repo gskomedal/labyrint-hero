@@ -35,8 +35,8 @@ class BirthdayPopupScene extends Phaser.Scene {
         panel.strokeRoundedRect(px + 8, py + 8, panelW - 16, panelH - 16, 10);
 
         // ── Title ─────────────────────────────────────────────────────────────
-        this.add.text(cx, py + 48, '🎂 GRATULERER MED DAGEN! 🎉', {
-            fontSize: '24px', color: '#ffdd33', fontFamily: 'monospace',
+        this.add.text(cx, py + 48, '🎂 GRATULERER MED DAGEN HENRIK! 🎉', {
+            fontSize: '21px', color: '#ffdd33', fontFamily: 'monospace',
             fontStyle: 'bold', stroke: '#5a3a00', strokeThickness: 3
         }).setOrigin(0.5);
 
