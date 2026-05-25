@@ -337,6 +337,25 @@ const Audio = (function () {
             _noise(0.18, sfxGain, 0.10, 0.45, 1200);
         },
 
+        /** Birthday celebration fanfare – "Happy Birthday"-inspired opening phrase */
+        playBirthday() {
+            if (!ctx || !sfxEnabled) return;
+            const base = 24; // two octaves above root → bright and cheerful
+            const melody = [
+                { s: 0, t: 0.00 }, { s: 0, t: 0.20 },
+                { s: 2, t: 0.40 }, { s: 0, t: 0.72 },
+                { s: 5, t: 1.04 }, { s: 4, t: 1.40 },
+            ];
+            melody.forEach(n =>
+                _note(_freq(base + n.s), 0.28, sfxGain, 'triangle', 0.30, n.t)
+            );
+            // Sustained celebratory chord + sparkle tail
+            [0, 4, 7, 12].forEach(s =>
+                _note(_freq(base + s), 0.9, sfxGain, 'sine', 0.16, 1.85)
+            );
+            _noise(0.5, sfxGain, 0.09, 1.95, 1800);
+        },
+
         // ── Settings ────────────────────────────────────────────────────────
 
         get musicEnabled() { return musicEnabled; },

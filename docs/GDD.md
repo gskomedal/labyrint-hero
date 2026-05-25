@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.55
-**Sist oppdatert:** 2026-05-21 (v0.55)
+**Versjon:** 0.56
+**Sist oppdatert:** 2026-05-25 (v0.56)
 
 ---
 
@@ -333,6 +333,16 @@ Livspotte, Stor livspotte, Styrkebrygg (midlertidig +ATK i 60 sek, skalerer med 
 
 **Verdenskalering (v0.35):** Bomber, potions og kjemiske produkter skalerer med +25% per verdensnummer. F.eks. en vanlig bombe gjør 6 skade i verden 1, ~15 i verden 5 og ~21 i verden 9.
 
+### Bursdagsoverraskelse (v0.56)
+Et skjult påskeegg knyttet til heltenavnet. Starter man et **nytt** spill med navnet `henrik12` (ufølsom for store/små bokstaver), får helten en bursdagsutrustning ved verden 1:
+- Mytisk Mithriløks (+21 angrep) og mytisk Mithrilrustning (+15 forsvar, +3 hjerte) utstyrt automatisk
+- Tilnærmet evig liv: maks-hjerter +90 (fullt fylt)
+- +8 angrep, +4 forsvar, +3 syn, 500 gull
+- Startpakke: 5 store livspotter + 1 hjerte-krystall i ryggsekken
+- Bursdagsfanfare (`Audio.playBirthday`), kamerablitz, konfetti-gnister og gratulasjonsmelding
+
+Egget kjører kun ved nytt spill; en lagret helt som lastes inn påvirkes ikke. Implementert i `GameScene._isBirthdayName`, `_applyBirthdayLoadout` og `_celebrateBirthday`.
+
 ---
 
 ## 7. Evner (Skills)
@@ -380,6 +390,7 @@ Aktiveres automatisk når helten har evner fra begge stier i et par. Noen synerg
 
 - **Bakgrunnsmusikk:** 8 flerstemte komposisjoner (Web Audio API) inspirert av Edvard Grieg. Hvert stykke har 3-5 uavhengige stemmer med individuelle notelengder, bølgeformer og volum. Look-ahead scheduling for presis synkronisering. Subtil velocity-variasjon for humanisering. Skifter med verden/sone. Stykker: Morgenstemning (skog), Dovregubbens hall (grotte), Solveigs vuggevise (is), Trollenes marsj (vulkan), Holberg Suite (tempel), Peer Gynts hjemkomst (dyplag), Åses død (underverden), Triumfmarsj (kjerne)
 - **SFX:** angrep, pilskudd, skade, plukk opp, nivå-opp, død, døroppning, veggskjøting, exit-portal
+- **Bursdagsfanfare:** `Audio.playBirthday` – en «Happy Birthday»-inspirert melodi med avsluttende akkord, brukt av henrik12-overraskelsen (se §6)
 - **Innstillinger:** ⚙-knapp i HUD åpner SettingsScene med volum-slidere og on/off-toggle
 
 ---

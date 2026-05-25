@@ -2,6 +2,13 @@
 
 ---
 
+## v0.56 – 2026-05-25
+
+### Nye funksjoner
+- **Bursdagsoverraskelse for «henrik12»:** Starter du et nytt spill med heltenavnet `henrik12` (ufølsom for store/små bokstaver), spilles en egen bursdagsfanfare (`Audio.playBirthday`) med konfetti-gnister og en gratulasjonsmelding. Helten utstyres automatisk med mytisk Mithriløks (+21 angrep) og mytisk Mithrilrustning (+15 forsvar, +3 hjerte), får tilnærmet evig liv (maks-hjerter +90), +8 angrep, +4 forsvar, +3 syn, 500 gull og en startpakke med 5 store livspotter og en hjerte-krystall. Logikken ligger i `GameScene._isBirthdayName`/`_applyBirthdayLoadout`/`_celebrateBirthday` og kjører kun ved nytt spill (ikke ved innlasting av lagret helt)
+
+---
+
 ## v0.55 – 2026-05-15
 
 ### Tekniske endringer
