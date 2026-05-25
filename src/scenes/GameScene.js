@@ -186,7 +186,9 @@ class GameScene extends Phaser.Scene {
     // ── Birthday surprise ──────────────────────────────────────────────────────
 
     _isBirthdayName(name) {
-        return typeof name === 'string' && name.trim().toLowerCase() === 'henrik12';
+        if (typeof name !== 'string' || name.trim().toLowerCase() !== 'henrik12') return false;
+        // Temporary surprise: active for 7 days from the birthday, then it disappears.
+        return Date.now() < Date.parse('2026-06-01T00:00:00');
     }
 
     /** Equip a mythic loadout and grant near-eternal life to the birthday hero. */
