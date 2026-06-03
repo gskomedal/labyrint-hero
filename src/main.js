@@ -30,8 +30,7 @@ const config = {
         SmelteryScene,
         ChemLabScene,
         AcceleratorScene,
-        DiscoveryPopupScene,
-        BirthdayPopupScene
+        DiscoveryPopupScene
     ]
 };
 

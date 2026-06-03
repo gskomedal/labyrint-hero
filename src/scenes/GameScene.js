@@ -79,9 +79,6 @@ class GameScene extends Phaser.Scene {
             } else if (this.startBonus === 'vision') {
                 this.hero.visionRadius += 2;
             }
-            // Birthday surprise for nephew Henrik (#henrik12)
-            this._birthdayHero = this._isBirthdayName(this.heroName);
-            if (this._birthdayHero) this._applyBirthdayLoadout();
             this.hero._draw();
         }
 
@@ -178,52 +175,6 @@ class GameScene extends Phaser.Scene {
 
         // Resume audio on window focus
         this.sys.game.events.on('focus', () => Audio.resume());
-
-        // Birthday celebration (fanfare + confetti) once the world is built
-        if (this._birthdayHero) this._celebrateBirthday();
-    }
-
-    // ── Birthday surprise ──────────────────────────────────────────────────────
-
-    _isBirthdayName(name) {
-        if (typeof name !== 'string' || name.trim().toLowerCase() !== 'henrik12') return false;
-        // Temporary surprise: active for 7 days from the birthday, then it disappears.
-        return Date.now() < Date.parse('2026-06-01T00:00:00');
-    }
-
-    /** Equip a strong loadout and grant a generous head start to the birthday hero. */
-    _applyBirthdayLoadout() {
-        const h = this.hero;
-        const equipMythic = (id) => {
-            const item = makeRarityItem(ITEM_DEFS[id], 'mythic');
-            const cur  = h.inventory.equipped[item.type];
-            if (cur) h.inventory._unapply(cur, h);
-            h.inventory.equipped[item.type] = item;
-            h.inventory._apply(item, h);
-        };
-        equipMythic('mithril_axe');    // mythic → +21 angrep
-        equipMythic('mithril_armor');  // mythic → +15 forsvar, +3 hjerte
-        // Significantly more life than normal – but not invincible
-        h.maxHearts += 14;
-        h.hearts     = h.maxHearts;
-        // A modest power boost for the birthday boy
-        h.attack       += 3;
-        h.defense      += 2;
-        h.visionRadius += 2;
-        h.gold         += 300;
-        // A little treasure to start with
-        for (let i = 0; i < 3; i++) h.inventory.addItem(ITEM_DEFS.big_health_pot);
-        h.inventory.addItem(ITEM_DEFS.heart_crystal);
-    }
-
-    _celebrateBirthday() {
-        Audio.playBirthday();
-        this.cameras.main.flash(400, 255, 220, 120);
-        this._floatingText(this.hero.gridX, this.hero.gridY - 1, '✦ BURSDAGSHELT ✦', '#ff66cc', true);
-        this._hitSparks(this.hero.gridX, this.hero.gridY, 0xffdd33);
-        this.time.delayedCall(250, () => this._hitSparks(this.hero.gridX, this.hero.gridY, 0xff66cc));
-        this.time.delayedCall(500, () => this._hitSparks(this.hero.gridX, this.hero.gridY, 0x66ddff));
-        this.scene.launch('BirthdayPopupScene');
     }
 
     shutdown() {
@@ -234,7 +185,7 @@ class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         if (!this.hero || !this.hero.alive) return;
-        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene') || this.scene.isActive('ChemLabScene') || this.scene.isActive('AcceleratorScene') || this.scene.isActive('BirthdayPopupScene');
+        const blocked = this.scene.isActive('SkillScene') || this.scene.isActive('InventoryScene') || this.scene.isActive('MerchantScene') || this.scene.isActive('ElementBookScene') || this.scene.isActive('SmelteryScene') || this.scene.isActive('ChemLabScene') || this.scene.isActive('AcceleratorScene');
 
         if (!blocked) {
             this.inputHandler.handleInput(delta);
