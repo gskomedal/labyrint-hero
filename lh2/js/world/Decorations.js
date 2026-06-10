@@ -76,6 +76,27 @@ const Decorations = {
         }
     },
 
+    /** Small flowers – colored heads on thin stems. */
+    addFlowers(area, rand, count) {
+        const colors = [0xee4466, 0xeecc33, 0xcc66ee, 0xff8844, 0xffffff];
+        const stemMat = new THREE.MeshLambertMaterial({ color: 0x3a7a3e });
+        for (let i = 0; i < count; i++) {
+            const spot = area.findSpot(rand, { minH: 1.5, maxH: 11, maxSlope: 0.5 });
+            if (!spot) continue;
+            const flower = new THREE.Group();
+            flower.position.set(spot.x, spot.y, spot.z);
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.035, 0.5, 4), stemMat);
+            stem.position.y = 0.25;
+            const head = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(0.12, 0),
+                new THREE.MeshLambertMaterial({ color: colors[Math.floor(rand() * colors.length)], flatShading: true }),
+            );
+            head.position.y = 0.55;
+            flower.add(stem, head);
+            area.group.add(flower);
+        }
+    },
+
     /** Decorative boulders. */
     addBoulders(area, rand, count) {
         const mat = new THREE.MeshLambertMaterial({ color: 0x77726a, flatShading: true });

@@ -30,7 +30,9 @@ class Interactions {
                 if (this.current && MINE_TYPES[this.current.type]) {
                     this.current.onInteract();
                 } else {
+                    // Combat swing: hit a monster in front, or just swing
                     this.player.swingOnce();
+                    Creatures.tryHit(this.area, this.cameraRig.forward);
                 }
             } else if (e.button === 2) {
                 if (this.current && USE_TYPES[this.current.type]) {

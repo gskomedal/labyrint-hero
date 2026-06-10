@@ -12,7 +12,12 @@ class HUD {
         this.discoveryPopup = document.getElementById('discovery-popup');
 
         this._buildSciencePanel();
+        this.heartsEl = document.createElement('div');
+        this.heartsEl.id = 'hearts-row';
+        this.panel.appendChild(this.heartsEl);
         this.refresh();
+
+        EventBus.on('lh2HeartsChanged', () => this.refresh());
 
         EventBus.on('lh2ScienceXP', () => this.refresh());
         EventBus.on('lh2InventoryChanged', () => this.refresh());
@@ -59,6 +64,9 @@ class HUD {
             this.rows[s.id].level.textContent = `Nv ${lvl}`;
             this.rows[s.id].fill.style.width = Math.min(100, (xp / next) * 100) + '%';
         }
+
+        this.heartsEl.textContent =
+            '♥'.repeat(this.hero.hearts) + '♡'.repeat(Math.max(0, this.hero.maxHearts - this.hero.hearts));
 
         const total = (typeof TOTAL_ALL_ELEMENTS !== 'undefined') ? TOTAL_ALL_ELEMENTS : 118;
         this.elementCounter.textContent = `Grunnstoffer: ${this.hero.elementTracker.discoveredCount}/${total}`;

@@ -21,6 +21,12 @@
   - **Nedstigning i nivåer som LH1:** sonene er nå kjedet – én gruvesjakt på overflaten fører til Grunnfjell, og hver grotte har en ned-portal (i labyrintkjernen) til neste sone og en opp-portal tilbake. Overflate → Grunnfjell → Dyplag → Underverden → Jordens kjerne
   - **Mer kupert verden:** ridged noise gir fjellrygger og daler (maks høyde 26 → 34), pluss busker og flere steiner/trær som detaljer
   - **LH1-aktig knapphet:** malmforekomster redusert fra 30/20 til 10/9 per område (+3 labyrint-belønninger). Nye direkte grunnstoffkilder: **gasslommer** (edelgasser per sone: Ar/He/Ne/Kr/Xe/Rn) og **gedigne grunnstoffer** (C, S, Cu, Ag, Au, Pt, Bi, Ir etter dybde) som går rett i grunnstoffsamlingen
+- **LH2 iterasjon 3 (levende terreng, grunnstoffer som i LH1):**
+  - **Direkte grunnstoffkilder kraftig nedskalert:** grunnstoffer utvinnes nå i hovedsak fra mineraler via smelting, som i LH1. Kun sjeldne unntak i dypet: maks én gasslomme (Ar fra Dyplag, He/Ne/Kr i Underverden, Xe/Rn i kjernen) og ett gedigent funn (Au/Ag i Underverden, Au/Pt/Ir i kjernen) per sone, med sannsynlighet under 100 %. Ingen på overflaten
+  - **Dyreliv på overflaten:** hoppende kaniner (flykter fra spilleren) og kretsende fugler – ren atmosfære
+  - **Monstre i grottene** (lett kamp): Grottegoblin (T2), Flaggermus (T3), Skjelett (T4) og Magmaånd (T5). De vandrer, jager spilleren innen 11 enheter og biter for 1 hjerte. Venstreklikk-sving gjør 1 skade (HP = 1 + tier); beseiret monster dropper et mineral av sonens tier. Respawn etter 60 s
+  - **Hjerter og myk død:** 5 hjerter i HUD, rød skadeblink, og ved 0 hjerter besvimer helten og våkner ved leiren med fulle hjerter – ingen fremgang tapes (myk permadeath som LH1)
+  - **Mer vegetasjon:** blomster (5 farger), flere busker og trær; spawn-punktet velger nå slakt gressterreng i stedet for fjelltopp
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

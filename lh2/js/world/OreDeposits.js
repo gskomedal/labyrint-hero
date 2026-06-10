@@ -79,29 +79,27 @@ const OreDeposits = {
     },
 
     /**
-     * Direct element sources, like LH1's gas pockets and native finds:
-     * gas vents (noble gases) and native element nuggets. They put elements
-     * straight into the collection instead of yielding minerals.
+     * Rare direct element sources, like LH1's gas pockets and native gold:
+     * at most one gas vent and one native nugget per deep zone. Everything
+     * else must be smelted from minerals.
      */
     addElementNodes(area, rand) {
         const gases = LH2.GAS_BY_TIER[area.tier] || [];
         const natives = LH2.NATIVE_BY_TIER[area.tier] || [];
-        const isCave = area.id !== 'surface';
 
-        const gasCount = isCave ? LH2.GAS_VENTS_PER_CAVE : 0;
-        const nativeCount = isCave ? LH2.NATIVE_NODES_PER_CAVE : 2;
-
-        for (let i = 0; i < gasCount && gases.length > 0; i++) {
+        if (gases.length > 0 && rand() < 0.7) {
             const spot = area.findSpot(rand, { maxSlope: 0.6 });
-            if (!spot) continue;
-            const symbol = gases[Math.floor(rand() * gases.length)];
-            this._addElementNode(area, `${area.id}:gas:${i}`, symbol, spot, rand, true);
+            if (spot) {
+                const symbol = gases[Math.floor(rand() * gases.length)];
+                this._addElementNode(area, `${area.id}:gas:0`, symbol, spot, rand, true);
+            }
         }
-        for (let i = 0; i < nativeCount && natives.length > 0; i++) {
+        if (natives.length > 0 && rand() < 0.6) {
             const spot = area.findSpot(rand, { maxSlope: 0.8 });
-            if (!spot) continue;
-            const symbol = natives[Math.floor(rand() * natives.length)];
-            this._addElementNode(area, `${area.id}:nat:${i}`, symbol, spot, rand, false);
+            if (spot) {
+                const symbol = natives[Math.floor(rand() * natives.length)];
+                this._addElementNode(area, `${area.id}:nat:0`, symbol, spot, rand, false);
+            }
         }
     },
 

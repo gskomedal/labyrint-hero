@@ -739,7 +739,7 @@ Et søsterspill i `lh2/`-mappen som tar progresjonsprinsippene fra hovedspillet 
 - **Labyrintelementer:** prosedyriske steinlabyrinter med kollisjon – en ruinlabyrint på overflaten med tier+1-mineraler i blindveiene, og en labyrint i hver grotte som vokter nedgangsportalen i kjernen.
 
 ### Spill-loop
-1. **Utvinn** malmforekomster (krystallklynger farget etter mineraldefinisjonen, 2–4 ladninger, respawn etter 90 s) → mineraler i ryggsekken + Geologi-XP. Knapphet som i LH1: ~10 forekomster per område. I tillegg finnes direkte grunnstoffkilder: **gasslommer** (edelgasser per sone) og **gedigne grunnstoffer** (C, S, Cu, Ag, Au, Pt, Bi, Ir etter dybde) som går rett i samlingen.
+1. **Utvinn** malmforekomster (krystallklynger farget etter mineraldefinisjonen, 2–4 ladninger, respawn etter 90 s) → mineraler i ryggsekken + Geologi-XP. Knapphet som i LH1: ~10 forekomster per område. Grunnstoffer kommer i hovedsak fra smelting av mineraler; sjeldne unntak i dypet er én gasslomme (edelgasser) og ett gedigent funn (Au/Ag/Pt/Ir) per sone.
 2. **Identifiser:** mineraler vises som «Ukjent mineral (Tier N)» til Geologi-nivået ≥ tier. Fra Geologi 3 pulserer forekomster i nærheten («Malmøye» i 3D).
 3. **Smelt** identifiserte mineraler ved smelteriet (brensel: tre fra trehogst, kull fra grottene) → rene grunnstoffer i periodesystemet + Metallurgi-XP. Gjenbruker `SmeltingSystem` og `ElementTracker` fra hovedspillet, inkl. energireserve-overføring.
 4. **Lag molekyler** ved kjemibordet fra innsamlede grunnstoffer (oppskrifter fra `MOLECULE_DEFS`, låses opp med Kjemi-nivå) → Kjemi-XP.
@@ -758,7 +758,12 @@ Samme XP-kurve som hovedspillet: `100 × 1.55^(nivå−1)`.
 ### Lagring
 Egen localStorage-nøkkel `labyrint_hero_2_v1` (kolliderer ikke med hovedspillet). Verden er deterministisk, så kun heltetilstand + uttømte forekomster lagres. Autolagring hvert 30. sekund, ved sonebytte og ved lukking.
 
+### Levende verden (iterasjon 3)
+- **Dyreliv på overflaten:** hoppende kaniner som flykter fra spilleren, og kretsende fugler.
+- **Monstre i grottene** med lett kamp: Grottegoblin (T2), Flaggermus (T3), Skjelett (T4), Magmaånd (T5). Vandrer/jager/biter (1 hjerte); venstreklikk-sving gjør 1 skade, HP = 1 + tier, dropp = ett mineral av sonens tier, respawn 60 s.
+- **Hjerter og myk død:** 5 hjerter, skadeblink, besvimelse ved 0 → våkner ved leiren med fulle hjerter, ingen fremgang tapt (myk permadeath som LH1).
+
 ### Avgrensning og veien videre
-Prototypen har bevisst **ingen** kamp, monstre, kjæledyr, handelsmenn, legeringer/smiing, akselerator eller lyd. Arkitekturen (område-objekter med egne interactables, delte datafiler med hovedspillet) er designet for at dette kan legges til i senere iterasjoner.
+Prototypen har bevisst **ingen** kjæledyr, handelsmenn, legeringer/smiing, akselerator eller lyd ennå, og kampsystemet er bevisst enkelt (ingen våpen/rustning). Arkitekturen (område-objekter med egne interactables, delte datafiler med hovedspillet) er designet for at dette kan legges til i senere iterasjoner.
 
 **Testing:** server repo-roten over HTTP (`python3 -m http.server 8000`) og åpne `http://localhost:8000/lh2/`. Hovedspillet er uendret og kjører som før.

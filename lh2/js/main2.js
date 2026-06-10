@@ -45,7 +45,21 @@ const LH2Main = {
 
         // ── Systems & UI ─────────────────────────────────────────────────────
         LH2Mining.init(this.hero, this.player);
+        Creatures.init(this.hero, this.player);
         this.interactions = new Interactions(this.player, this.cameraRig);
+
+        // Wildlife and monsters (transient, like LH1's per-world spawns)
+        {
+            const crand = (() => {
+                const n = makeNoise2D(LH2.SEED + 777);
+                let i = 0;
+                return () => (n(i++ * 0.7919, i * 1.317) + 1) / 2;
+            })();
+            Creatures.populateSurface(this.areas.surface, crand);
+            for (const zone of LH2.CAVE_ZONES) {
+                Creatures.populateCave(this.areas[zone.id], crand);
+            }
+        }
         this.hud = new HUD(this.hero);
         this.inventoryUI = new InventoryUI(this.hero);
         this.smelterUI = new SmelterUI(this.hero);
@@ -134,13 +148,15 @@ const LH2Main = {
             return () => (n(i++ * 0.7919, i * 1.317) + 1) / 2;
         })();
 
-        // Spawn: highest of a few candidate spots near the centre
+        // Spawn: gentle grassland near the centre (not a mountain top)
         let spawn = { x: 0, z: 0 };
-        let bestH = -99;
-        for (let t = 0; t < 25; t++) {
-            const x = (rand() - 0.5) * 60, z = (rand() - 0.5) * 60;
+        let bestScore = Infinity;
+        for (let t = 0; t < 40; t++) {
+            const x = (rand() - 0.5) * 80, z = (rand() - 0.5) * 80;
             const h = surface.getHeightAt(x, z);
-            if (h > bestH && surface.getSlopeAt(x, z) < 0.4) { bestH = h; spawn = { x, z }; }
+            if (h < 2.5) continue;
+            const score = Math.abs(h - 7) + surface.getSlopeAt(x, z) * 8;
+            if (score < bestScore) { bestScore = score; spawn = { x, z }; }
         }
         surface.spawn = spawn;
 
@@ -162,9 +178,10 @@ const LH2Main = {
         OreDeposits.populateAt(surface, [maze.centerPos, ...maze.rewardSpots], rand, 'surface:maze');
 
         // Nature & resources (LH1-like scarcity)
-        Decorations.addTrees(surface, rand, 18, () => LH2Mining.chopTree());
+        Decorations.addTrees(surface, rand, 22, () => LH2Mining.chopTree());
         Decorations.addBoulders(surface, rand, 30);
-        Decorations.addBushes(surface, rand, 40);
+        Decorations.addBushes(surface, rand, 45);
+        Decorations.addFlowers(surface, rand, 35);
         OreDeposits.populate(surface, rand, LH2.SURFACE_ORE_NODES);
         OreDeposits.addElementNodes(surface, rand);
 
@@ -222,6 +239,35 @@ const LH2Main = {
         }, 500);
     },
 
+    // ── Damage & soft death (LH1-style: no progress lost) ───────────────────
+
+    damageHero(amount, sourceName) {
+        if (this._switching) return;
+        this.hero.hearts = Math.max(0, this.hero.hearts - amount);
+        EventBus.emit('lh2HeartsChanged');
+
+        const flash = document.getElementById('damage-flash');
+        flash.classList.add('active');
+        setTimeout(() => flash.classList.remove('active'), 250);
+
+        if (this.hero.hearts <= 0) {
+            EventBus.emit('lh2Toast', { text: `Du besvimte (${sourceName})! Våkner ved leiren...`, cls: 'levelup' });
+            this.hero.hearts = this.hero.maxHearts;
+            const fade = document.getElementById('fade-overlay');
+            this._switching = true;
+            fade.style.opacity = 1;
+            setTimeout(() => {
+                this._activateArea('surface');
+                const s = this.areas.surface.spawn;
+                this.player.setPosition(s.x, this.areas.surface.getHeightAt(s.x, s.z), s.z);
+                EventBus.emit('lh2HeartsChanged');
+                this.save();
+                fade.style.opacity = 0;
+                this._switching = false;
+            }, 600);
+        }
+    },
+
     // ── Save ─────────────────────────────────────────────────────────────────
 
     save() {
@@ -269,6 +315,7 @@ const LH2Main = {
         this.interactions.update(this.player.pos);
         OreDeposits.update(this.activeArea, this.hero.sciences, this.player.pos, time);
         Decorations.update(this.activeArea, time);
+        if (!this._switching) Creatures.update(this.activeArea, dt, time);
         this.cameraRig.update(dt, this.player.pos, (x, z) => this.activeArea.getHeightAt(x, z));
 
         this.renderer.render(this.scene, this.camera);

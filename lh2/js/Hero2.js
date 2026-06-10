@@ -7,6 +7,9 @@ class Hero2 {
         this.area = 'surface';
         this.pos = { x: 0, y: 0, z: 0 };
 
+        this.maxHearts = LH2.MAX_HEARTS;
+        this.hearts = this.maxHearts;
+
         this.sciences = new Sciences();
         this.elementTracker = new ElementTracker();
 
@@ -40,6 +43,7 @@ class Hero2 {
         return {
             area: this.area,
             pos: { ...this.pos },
+            hearts: this.hearts,
             sciences: this.sciences.serialize(),
             elements: this.elementTracker.serialize(),
             inventory: this.inventory.serialize(),
@@ -53,6 +57,7 @@ class Hero2 {
         if (!data) return hero;
         if (data.area) hero.area = data.area;
         if (data.pos) hero.pos = { ...data.pos };
+        if (data.hearts !== undefined) hero.hearts = Math.max(1, data.hearts);
         hero.sciences = Sciences.deserialize(data.sciences);
         hero.elementTracker = ElementTracker.deserialize(data.elements);
         if (data.inventory) hero.inventory = Inventory.deserialize(data.inventory, hero);

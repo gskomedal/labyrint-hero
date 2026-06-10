@@ -45,11 +45,21 @@ const LH2 = {
     CAVE_ORE_NODES: 9,
     MAZE_REWARD_NODES: 3,
 
-    // Direct element sources (gas pockets / native elements), per cave tier
-    GAS_VENTS_PER_CAVE: 2,
-    NATIVE_NODES_PER_CAVE: 2,
-    GAS_BY_TIER:    { 2: ['Ar'], 3: ['He', 'Ne'], 4: ['Kr'], 5: ['Xe', 'Rn'] },
-    NATIVE_BY_TIER: { 1: ['C', 'S'], 2: ['Cu', 'S'], 3: ['Ag', 'Bi'], 4: ['Au', 'Pt'], 5: ['Au', 'Pt', 'Ir'] },
+    // Direct element sources are RARE, like LH1: a few noble-gas pockets in
+    // the deep zones, and native gold/silver/platinum finds at the bottom.
+    // Everything else must be smelted from minerals.
+    GAS_BY_TIER:    { 3: ['Ar'], 4: ['He', 'Ne', 'Kr'], 5: ['Xe', 'Rn'] },
+    NATIVE_BY_TIER: { 4: ['Au', 'Ag'], 5: ['Au', 'Pt', 'Ir'] },
+
+    // Creatures
+    SURFACE_RABBITS: 6,
+    SURFACE_BIRDS: 4,
+    CAVE_MONSTERS: 4,
+    MONSTER_AGGRO_RADIUS: 11,
+    MONSTER_ATTACK_COOLDOWN_MS: 1400,
+    MONSTER_RESPAWN_MS: 60000,
+    HIT_RANGE: 2.6,
+    MAX_HEARTS: 5,
 
     SAVE_KEY: 'labyrint_hero_2_v1',
 
