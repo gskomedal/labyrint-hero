@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Labyrint Hero 2 – Prototype</title>
+    <!--
+        Labyrint Hero 2 – 3D open-world prototype.
+        No build tools: Three.js is loaded as an ES module from CDN by the
+        inline module script at the bottom; everything else is classic
+        global-scope scripts, same style as the main game.
+        Testing: serve the repo root over HTTP for reliable module loading,
+        e.g. `python3 -m http.server 8000` then open http://localhost:8000/lh2/
+    -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <!-- HUD overlay -->
+    <div id="hud">
+        <div id="science-panel"></div>
+        <div id="top-right">
+            <div id="element-counter">Grunnstoffer: 0/118</div>
+            <div id="bag-counter">Sekk: 0/20</div>
+            <button id="new-game-btn" title="Slett lagring og start på nytt">Nytt spill</button>
+        </div>
+        <div id="prompt" class="hidden"></div>
+        <div id="action-progress" class="hidden"><div id="action-progress-fill"></div></div>
+        <div id="toast-stack"></div>
+        <div id="discovery-popup" class="hidden"></div>
+        <div id="help-line">WASD – gå &middot; Mus (hold) – kamera &middot; E – bruk &middot; Tab – sekk &middot; Shift – løp &middot; Mellomrom – hopp</div>
+        <div id="fade-overlay"></div>
+    </div>
+
+    <!-- Overlays -->
+    <div id="overlay-inventory" class="overlay hidden"></div>
+    <div id="overlay-smelter" class="overlay hidden"></div>
+
+    <!-- Reused from Labyrint Hero 1 (global scope, Phaser-free) -->
+    <script src="../src/utils/EventBus.js"></script>
+    <script src="../src/data/elements.js"></script>
+    <script src="../src/data/minerals.js"></script>
+    <script src="../src/data/alloys.js"></script>
+    <script src="../src/data/molecules.js"></script>
+    <script src="../src/data/items.js"></script>
+    <script src="../src/systems/ElementTracker.js"></script>
+    <script src="../src/systems/Inventory.js"></script>
+    <script src="../src/systems/SmeltingSystem.js"></script>
+
+    <!-- Labyrint Hero 2 -->
+    <script src="js/constants2.js"></script>
+    <script src="js/noise.js"></script>
+    <script src="js/SaveManager2.js"></script>
+    <script src="js/Sciences.js"></script>
+    <script src="js/Hero2.js"></script>
+    <script src="js/world/Terrain.js"></script>
+    <script src="js/world/CaveWorld.js"></script>
+    <script src="js/world/OreDeposits.js"></script>
+    <script src="js/world/Decorations.js"></script>
+    <script src="js/Player.js"></script>
+    <script src="js/CameraRig.js"></script>
+    <script src="js/Interactions.js"></script>
+    <script src="js/Mining.js"></script>
+    <script src="js/ui/HUD.js"></script>
+    <script src="js/ui/InventoryUI.js"></script>
+    <script src="js/ui/SmelterUI.js"></script>
+    <script src="js/main2.js"></script>
+
+    <!-- Three.js bridge: the only module script. Classic scripts above have
+         already executed, so all LH2 globals exist when start() runs.
+         Three.js r165 is vendored as a single ESM file (no UMD builds exist
+         anymore) so the game works offline and without build tools. -->
+    <script type="module">
+        import * as THREE from './vendor/three.module.js';
+        window.THREE = THREE;
+        LH2Main.start();
+    </script>
+</body>
+</html>
