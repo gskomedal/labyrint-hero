@@ -1,6 +1,6 @@
 # Labyrint Hero – Game Design Document
-**Versjon:** 0.55
-**Sist oppdatert:** 2026-05-21 (v0.55)
+**Versjon:** 0.56
+**Sist oppdatert:** 2026-06-10 (v0.56)
 
 ---
 
@@ -725,3 +725,39 @@ Se `docs/Elements-mod.md` for fullstendig designdokument.
 4. ~~**Leaderboard**~~ – ✅ Implementert i v0.14.
 5. ~~**Frostbrent statuseffekt**~~ – ✅ Implementert i v0.14 (+ brann og stun).
 6. **Refaktorering** – Splitte GameScene.js i mindre moduler (CombatManager, MapRenderer, etc.).
+
+---
+
+## 14. Labyrint Hero 2 – 3D-prototype (v0.56)
+
+Et søsterspill i `lh2/`-mappen som tar progresjonsprinsippene fra hovedspillet – samle mineraler, oppdage grunnstoffer og levle opp i vitenskapene – inn i en åpen 3D-verden uten trange ganger.
+
+### Konsept
+- **Ekte 3D, tredjeperson:** Three.js r165 (vendored ESM-fil i `lh2/vendor/` – fortsatt ingen byggverktøy eller npm-avhengigheter). All grafikk er prosedyrisk lavpoly-geometri, ingen assets.
+- **Én deterministisk øy** (fast seed): heightmap fra simplex-støy med radiell falloff, omgitt av hav. WASD + mus-orbit-kamera, sprint, hopp, gravitasjon og bakkekollisjon mot heightmappen.
+- **Dybde→tier i 3D:** Fire grotteinnganger på øya fører til lukkede huler som speiler sonene fra hovedspillet: Grunnfjell (T2), Dyplag (T3), Underverden (T4) og Jordens kjerne (T5). Overflaten gir tier 1-mineraler; dypere soner gir høyere tier (og 20 % sjanse for tier+1).
+
+### Spill-loop
+1. **Utvinn** malmforekomster (krystallklynger farget etter mineraldefinisjonen, 2–4 ladninger, respawn etter 90 s) → mineraler i ryggsekken + Geologi-XP.
+2. **Identifiser:** mineraler vises som «Ukjent mineral (Tier N)» til Geologi-nivået ≥ tier. Fra Geologi 3 pulserer forekomster i nærheten («Malmøye» i 3D).
+3. **Smelt** identifiserte mineraler ved smelteriet (brensel: tre fra trehogst, kull fra grottene) → rene grunnstoffer i periodesystemet + Metallurgi-XP. Gjenbruker `SmeltingSystem` og `ElementTracker` fra hovedspillet, inkl. energireserve-overføring.
+4. **Lag molekyler** ved kjemibordet fra innsamlede grunnstoffer (oppskrifter fra `MOLECULE_DEFS`, låses opp med Kjemi-nivå) → Kjemi-XP.
+5. **Oppdag:** hvert nytt grunnstoff gir Fysikk-XP (5 × tier) og oppdagelses-popup.
+
+### Vitenskapene
+Samme XP-kurve som hovedspillet: `100 × 1.55^(nivå−1)`.
+
+| Vitenskap | XP-kilde | Nivåeffekt |
+|-----------|----------|------------|
+| Geologi | Gruvedrift (10 × tier) | Identifikasjon (nivå ≥ tier), malmglød fra nivå 3 |
+| Metallurgi | Smelting (15 × tier) | Energikostnad ×max(0.5, 1 − 0.05×(nivå−1)) |
+| Kjemi | Molekylsyntese (20 × tier) | Oppskrifter med tier ≤ nivå |
+| Fysikk | Nye grunnstoffer (5 × tier) | Vises kun – reservert for akselerator-innhold senere |
+
+### Lagring
+Egen localStorage-nøkkel `labyrint_hero_2_v1` (kolliderer ikke med hovedspillet). Verden er deterministisk, så kun heltetilstand + uttømte forekomster lagres. Autolagring hvert 30. sekund, ved sonebytte og ved lukking.
+
+### Avgrensning og veien videre
+Prototypen har bevisst **ingen** kamp, monstre, kjæledyr, handelsmenn, legeringer/smiing, akselerator eller lyd. Arkitekturen (område-objekter med egne interactables, delte datafiler med hovedspillet) er designet for at dette kan legges til i senere iterasjoner.
+
+**Testing:** server repo-roten over HTTP (`python3 -m http.server 8000`) og åpne `http://localhost:8000/lh2/`. Hovedspillet er uendret og kjører som før.

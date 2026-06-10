@@ -94,6 +94,9 @@ class MenuScene extends Phaser.Scene {
             this.scene.start('MineralWikiScene', { fromMenu: true })
         );
 
+        const lh2Btn = this._btn(cx, cy + 205, '[ LABYRINT HERO 2 – 3D PROTOTYPE ]', '#66ddff', 14);
+        lh2Btn.on('pointerdown', () => { window.location.href = 'lh2/'; });
+
         // ── Footer tips ───────────────────────────────────────────────────────
         const ts = { fontSize: '13px', color: '#445566', fontFamily: 'monospace' };
         this.add.text(cx, H - 50, 'WASD/Piltaster: Beveg  ·  SPACE/F: Angrep  ·  R: Pil  ·  E: Inventar  ·  M: Kart', ts).setOrigin(0.5);

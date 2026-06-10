@@ -2,6 +2,26 @@
 
 ---
 
+## v0.56 – 2026-06-10
+
+### Nye funksjoner
+- **Labyrint Hero 2 – 3D åpen verden-prototype (`lh2/`):** Helt nytt spill i samme repo, med samme progresjonsprinsipper som hovedspillet men i ekte 3D (Three.js r165, vendored ESM – fortsatt ingen byggverktøy):
+  - Prosedyregenerert øy (seeded simplex-støy, lavpoly vertex-farget terreng) med fritt tredjepersons-kamera, WASD-bevegelse, sprint og hopp
+  - Fire grotteinnganger på øya fører ned til **Grunnfjell** (T2), **Dyplag** (T3), **Underverden** (T4) og **Jordens kjerne** (T5) – dybde→tier-prinsippet fra hovedspillet oversatt til 3D
+  - **Gruvedrift:** prosedyriske malmforekomster (krystallklynger farget etter mineral) med 2–4 ladninger og respawn; gir Geologi-XP (10 × tier)
+  - **Vitenskapsnivåer** i geologi, metallurgi, kjemi og fysikk med samme XP-kurve som hovedspillet (100 × 1.55^(nivå−1)). Geologi identifiserer mineraler (nivå ≥ tier) og gir malmglød fra nivå 3; metallurgi reduserer smeltekostnad; kjemi låser opp molekyloppskrifter; fysikk får XP per nytt grunnstoff
+  - **Smelteri og kjemibord** ved leiren: gjenbruker `SmeltingSystem`, `ElementTracker` og mineral-/grunnstoffdataene fra hovedspillet. Brensel fra trehogst (tre) og kullårer i grottene, med energireserve-overføring
+  - **HUD og periodesystem** som HTML/CSS-overlegg på norsk, med oppdagelses-popups og ryggsekk (Tab)
+  - Egen lagringsnøkkel `labyrint_hero_2_v1` (autolagring hvert 30. sekund + ved sonebytte)
+  - Ny knapp `[ LABYRINT HERO 2 – 3D PROTOTYPE ]` i hovedmenyen
+  - Bevisst utelatt i prototypen (planlagt senere): kamp/monstre, kjæledyr, handelsmenn, akselerator/legeringer, lyd
+
+### Tekniske endringer
+- **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene
+- **Testing av LH2:** server repo-roten over HTTP (f.eks. `python3 -m http.server 8000`) og åpne `http://localhost:8000/lh2/` – ES-modul-importen av Three.js krever vanligvis HTTP
+
+---
+
 ## v0.55 – 2026-05-15
 
 ### Tekniske endringer
