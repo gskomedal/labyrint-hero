@@ -202,7 +202,7 @@ const LH2Main = {
             this.scene.fog = new THREE.Fog(0xbfd8ee, 120, 420);
         } else {
             this.scene.background = new THREE.Color(this.activeArea.fogColor).multiplyScalar(0.4);
-            this.scene.fog = new THREE.Fog(this.activeArea.fogColor, 12, 85);
+            this.scene.fog = new THREE.Fog(this.activeArea.fogColor, 10, 62);
         }
     },
 
@@ -316,7 +316,7 @@ const LH2Main = {
         OreDeposits.update(this.activeArea, this.hero.sciences, this.player.pos, time);
         Decorations.update(this.activeArea, time);
         if (!this._switching) Creatures.update(this.activeArea, dt, time);
-        this.cameraRig.update(dt, this.player.pos, (x, z) => this.activeArea.getHeightAt(x, z));
+        this.cameraRig.update(dt, this.player.pos, this.activeArea);
 
         this.renderer.render(this.scene, this.camera);
     },

@@ -14,10 +14,8 @@ const LH2 = {
     WATER_LEVEL: 0.0,       // y of the ocean plane
     MIN_WALK_HEIGHT: 0.5,   // can't walk below this (into the ocean)
 
-    // Caves (chained underground zones, each reached from the one above)
-    CAVE_SIZE: 120,
-    CAVE_SEGMENTS: 48,
-    CAVE_CEILING: 13,
+    // Caves (chained labyrinth zones, each reached from the one above)
+    CAVE_TUNNEL_WIDTH: 6,   // world units per maze tile (tunnel width)
 
     // Maze structures (stone labyrinths on the surface and in every cave)
     MAZE_TILE: 3,           // world units per maze tile

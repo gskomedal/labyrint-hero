@@ -27,6 +27,11 @@
   - **Monstre i grottene** (lett kamp): Grottegoblin (T2), Flaggermus (T3), Skjelett (T4) og Magmaånd (T5). De vandrer, jager spilleren innen 11 enheter og biter for 1 hjerte. Venstreklikk-sving gjør 1 skade (HP = 1 + tier); beseiret monster dropper et mineral av sonens tier. Respawn etter 60 s
   - **Hjerter og myk død:** 5 hjerter i HUD, rød skadeblink, og ved 0 hjerter besvimer helten og våkner ved leiren med fulle hjerter – ingen fremgang tapes (myk permadeath som LH1)
   - **Mer vegetasjon:** blomster (5 farger), flere busker og trær; spawn-punktet velger nå slakt gressterreng i stedet for fjelltopp
+- **LH2 iterasjon 4 (underverdenen er nå en ekte hulelabyrint):**
+  - **Hele grottesonen er labyrint:** brede ganger (6 enheter), vegger fra gulv til tak og massivt steintak over alt – layouten kan ikke ses ovenfra. Tre åpne kamre med glødende krystaller bryter opp gangene
+  - **Nedgangsportalen ligger på flisen lengst unna spawn** (BFS gjennom labyrinten, typisk 40+ fliser), så man må faktisk løse labyrinten for å komme dypere. Belønningsforekomster (tier+1) i fjerne blindveier
+  - **Kamerakollisjon:** kameraet trekkes inn foran vegger/terreng mellom spilleren og ønsket posisjon, og klemmes under huletaket – ingen røntgenblikk
+  - Tettere tåke i gangene for hulefølelse; småkrystaller (uten lys) spredt i tunnelene
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

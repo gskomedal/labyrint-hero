@@ -65,7 +65,7 @@ class CameraRig {
         return { x: -Math.sin(this.yaw), z: -Math.cos(this.yaw) };
     }
 
-    update(dt, playerPos, getHeightAt) {
+    update(dt, playerPos, area) {
         const target = new THREE.Vector3(
             playerPos.x,
             playerPos.y + this.targetOffset,
@@ -80,12 +80,31 @@ class CameraRig {
             target.z + Math.cos(this.yaw) * cosP * this.dist,
         );
 
+        // Under a cave ceiling the camera must stay below it
+        if (area.ceilingY !== undefined) {
+            desired.y = Math.min(desired.y, area.ceilingY - 0.5);
+        }
+
+        // Occlusion: pull the camera in front of any wall/terrain between the
+        // player and the desired position, so cave layouts stay hidden
+        let clampT = 1;
+        for (let t = 0.12; t <= 1.0001; t += 0.045) {
+            const px = target.x + (desired.x - target.x) * t;
+            const py = target.y + (desired.y - target.y) * t;
+            const pz = target.z + (desired.z - target.z) * t;
+            if (py < area.getHeightAt(px, pz) + 0.35) {
+                clampT = Math.max(0.1, t - 0.07);
+                break;
+            }
+        }
+        if (clampT < 1) desired.lerpVectors(target, desired, clampT);
+
         // Keep the camera above the ground
-        const minY = getHeightAt(desired.x, desired.z) + 0.6;
-        if (desired.y < minY) desired.y = minY;
+        const minY = area.getHeightAt(desired.x, desired.z) + 0.6;
+        if (desired.y < minY && area.ceilingY === undefined) desired.y = minY;
 
         if (!this._smoothPos) this._smoothPos = desired.clone();
-        const k = Math.min(1, dt * 10);
+        const k = Math.min(1, dt * (clampT < 1 ? 16 : 10));
         this._smoothPos.lerp(desired, k);
 
         this.camera.position.copy(this._smoothPos);
