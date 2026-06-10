@@ -21,6 +21,7 @@ class SmelterUI {
         this.open = true;
         this.tab = tab || 'smelt';
         LH2Main.uiOpen = true;
+        if (LH2Main.cameraRig) LH2Main.cameraRig.unlock();
         this._render();
         this.el.classList.remove('hidden');
     }

@@ -27,7 +27,7 @@ const OreDeposits = {
 
             let def;
             const isCave = area.id !== 'surface';
-            if (isCave && rand() < 0.12) {
+            if (isCave && rand() < 0.15) {
                 // Coal seams underground keep the smelter running
                 def = FUEL_DEFS.coal;
             } else if (isCave && poolUp.length > 0 && rand() < 0.2) {
@@ -37,30 +37,143 @@ const OreDeposits = {
             }
             if (!def) continue;
 
-            const node = {
-                id: `${area.id}:${i}`,
-                itemId: def.id,
-                isFuel: def.type === 'fuel',
-                pos: spot,
-                maxCharges: 2 + Math.floor(rand() * 3), // 2–4
-                charges: 0, // set below
-                respawnAt: 0,
-                mesh: this._buildMesh(def, spot, rand),
-            };
-            node.charges = node.maxCharges;
-
-            area.group.add(node.mesh);
-            area.nodes.push(node);
-
-            area.interactables.push({
-                type: node.isFuel ? 'fuel-node' : 'ore',
-                pos: spot,
-                node,
-                getLabel: () => LH2Mining.nodeLabel(node),
-                isActive: () => node.charges > 0,
-                onInteract: () => LH2Mining.mineNode(node),
-            });
+            this.addNode(area, `${area.id}:${i}`, def, spot, rand);
         }
+    },
+
+    /** Maze rewards: better minerals (tier+1) at given spots. */
+    populateAt(area, spots, rand, idPrefix) {
+        const pool = this._mineralsOfTier(Math.min(6, area.tier + 1));
+        spots.forEach((spot, i) => {
+            const def = pool[Math.floor(rand() * pool.length)];
+            if (def) this.addNode(area, `${idPrefix}:${i}`, def, spot, rand);
+        });
+    },
+
+    /** One mineral/fuel node with mesh + interactable. */
+    addNode(area, id, def, spot, rand) {
+        const node = {
+            id,
+            itemId: def.id,
+            isFuel: def.type === 'fuel',
+            pos: spot,
+            maxCharges: 2 + Math.floor(rand() * 3), // 2–4
+            charges: 0, // set below
+            respawnAt: 0,
+            mesh: this._buildMesh(def, spot, rand),
+        };
+        node.charges = node.maxCharges;
+
+        area.group.add(node.mesh);
+        area.nodes.push(node);
+
+        area.interactables.push({
+            type: node.isFuel ? 'fuel-node' : 'ore',
+            pos: spot,
+            node,
+            getLabel: () => LH2Mining.nodeLabel(node),
+            isActive: () => node.charges > 0,
+            onInteract: () => LH2Mining.mineNode(node),
+        });
+        return node;
+    },
+
+    /**
+     * Direct element sources, like LH1's gas pockets and native finds:
+     * gas vents (noble gases) and native element nuggets. They put elements
+     * straight into the collection instead of yielding minerals.
+     */
+    addElementNodes(area, rand) {
+        const gases = LH2.GAS_BY_TIER[area.tier] || [];
+        const natives = LH2.NATIVE_BY_TIER[area.tier] || [];
+        const isCave = area.id !== 'surface';
+
+        const gasCount = isCave ? LH2.GAS_VENTS_PER_CAVE : 0;
+        const nativeCount = isCave ? LH2.NATIVE_NODES_PER_CAVE : 2;
+
+        for (let i = 0; i < gasCount && gases.length > 0; i++) {
+            const spot = area.findSpot(rand, { maxSlope: 0.6 });
+            if (!spot) continue;
+            const symbol = gases[Math.floor(rand() * gases.length)];
+            this._addElementNode(area, `${area.id}:gas:${i}`, symbol, spot, rand, true);
+        }
+        for (let i = 0; i < nativeCount && natives.length > 0; i++) {
+            const spot = area.findSpot(rand, { maxSlope: 0.8 });
+            if (!spot) continue;
+            const symbol = natives[Math.floor(rand() * natives.length)];
+            this._addElementNode(area, `${area.id}:nat:${i}`, symbol, spot, rand, false);
+        }
+    },
+
+    _addElementNode(area, id, symbol, spot, rand, isGas) {
+        const elem = ELEMENTS[symbol];
+        const node = {
+            id,
+            itemId: symbol,
+            isElement: true,
+            isGas,
+            pos: spot,
+            maxCharges: isGas ? 3 : 2,
+            charges: 0,
+            respawnAt: 0,
+            mesh: isGas ? this._buildGasVent(elem, spot) : this._buildNugget(elem, spot, rand),
+        };
+        node.charges = node.maxCharges;
+
+        area.group.add(node.mesh);
+        area.nodes.push(node);
+
+        area.interactables.push({
+            type: 'element',
+            pos: spot,
+            node,
+            getLabel: () => LH2Mining.nodeLabel(node),
+            isActive: () => node.charges > 0,
+            onInteract: () => LH2Mining.mineNode(node),
+        });
+    },
+
+    /** Fumarole: rock rim + glowing translucent gas plume. */
+    _buildGasVent(elem, spot) {
+        const group = new THREE.Group();
+        group.position.set(spot.x, spot.y, spot.z);
+
+        const rim = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.9, 1.2, 0.5, 7),
+            new THREE.MeshLambertMaterial({ color: 0x4a4742, flatShading: true }),
+        );
+        rim.position.y = 0.2;
+
+        const plumeMat = new THREE.MeshStandardMaterial({
+            color: elem.color, emissive: elem.color, emissiveIntensity: 0.7,
+            transparent: true, opacity: 0.45, flatShading: true,
+        });
+        const plume = new THREE.Mesh(new THREE.ConeGeometry(0.5, 2.2, 6), plumeMat);
+        plume.position.y = 1.4;
+
+        group.add(rim, plume);
+        group.userData.shardMat = plumeMat;
+        group.userData.plume = plume;
+        return group;
+    },
+
+    /** Shiny metallic chunk for native elements (gold, silver, sulfur...). */
+    _buildNugget(elem, spot, rand) {
+        const group = new THREE.Group();
+        group.position.set(spot.x, spot.y, spot.z);
+
+        const mat = new THREE.MeshStandardMaterial({
+            color: elem.color, emissive: elem.color, emissiveIntensity: 0.25,
+            metalness: 0.7, roughness: 0.35, flatShading: true,
+        });
+        for (let i = 0; i < 3; i++) {
+            const chunk = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3 + rand() * 0.25, 0), mat);
+            chunk.position.set((rand() - 0.5) * 0.9, 0.3 + rand() * 0.3, (rand() - 0.5) * 0.9);
+            chunk.rotation.set(rand() * 3, rand() * 3, rand() * 3);
+            group.add(chunk);
+        }
+        group.userData.shardMat = mat;
+        return group;
     },
 
     /** Cluster of 3–5 crystal shards on a rock base, colored per def. */
@@ -108,10 +221,12 @@ const OreDeposits = {
             mat.color.setHex(0x4a4a4a);
         } else {
             node.mesh.scale.setScalar(1);
-            const def = MINERAL_DEFS[node.itemId] || FUEL_DEFS[node.itemId];
+            const def = node.isElement
+                ? ELEMENTS[node.itemId]
+                : (MINERAL_DEFS[node.itemId] || FUEL_DEFS[node.itemId]);
             mat.color.setHex(def.color);
             mat.emissive.setHex(def.color);
-            mat.emissiveIntensity = 0.18;
+            mat.emissiveIntensity = node.isGas ? 0.7 : (node.isElement ? 0.25 : 0.18);
         }
     },
 
@@ -126,7 +241,7 @@ const OreDeposits = {
             }
 
             // "Malmøye": pulse nearby deposits when geologi >= 3
-            if (node.charges > 0 && sciences.hasOreHighlight()) {
+            if (node.charges > 0 && !node.isElement && sciences.hasOreHighlight()) {
                 const dx = node.pos.x - playerPos.x;
                 const dz = node.pos.z - playerPos.z;
                 if (dx * dx + dz * dz < 25 * 25) {

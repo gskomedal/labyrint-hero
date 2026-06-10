@@ -22,15 +22,21 @@ const LH2Mining = {
 
     /** Display name for an ore node, honoring the identification gate. */
     nodeLabel(node) {
+        if (node.isElement) {
+            const elem = ELEMENTS[node.itemId];
+            return node.isGas
+                ? `Tapp gasslomme (${elem.name})`
+                : `Utvinn gedigent ${elem.name}`;
+        }
         if (node.isFuel) {
             const def = FUEL_DEFS[node.itemId];
-            return `Trykk [E] – Utvinn ${def.name}`;
+            return `Utvinn ${def.name}`;
         }
         const def = MINERAL_DEFS[node.itemId];
         const name = this.hero.sciences.canIdentifyTier(def.tier)
             ? def.name
             : `ukjent mineral (Tier ${def.tier})`;
-        return `Trykk [E] – Utvinn ${name}`;
+        return `Utvinn ${name}`;
     },
 
     /** Item display name honoring identification (used by toasts/UI too). */
@@ -64,6 +70,20 @@ const LH2Mining = {
     },
 
     _finishMine(node) {
+        // Direct element sources (gas pockets, native elements) bypass the
+        // backpack and land straight in the element collection, like LH1's
+        // gas pocket rooms.
+        if (node.isElement) {
+            const elem = ELEMENTS[node.itemId];
+            this.hero.elementTracker.collect(node.itemId, 1);
+            this.hero.elementTracker.discoverWithPopup(node.itemId);
+            this._depleteCharge(node);
+            this.hero.sciences.addXP('geologi', 8 * (elem.tier || 1));
+            EventBus.emit('lh2Toast', { text: `+1 ${elem.name} (${elem.symbol})` });
+            EventBus.emit('lh2InventoryChanged');
+            return;
+        }
+
         const def = node.isFuel ? FUEL_DEFS[node.itemId] : MINERAL_DEFS[node.itemId];
 
         if (!this.hero.inventory.addItem(def)) {
@@ -71,11 +91,7 @@ const LH2Mining = {
             return;
         }
 
-        node.charges--;
-        if (node.charges <= 0) {
-            node.respawnAt = Date.now() + LH2.NODE_RESPAWN_MS;
-            OreDeposits.setDepleted(node, true);
-        }
+        this._depleteCharge(node);
 
         // Geologi XP: 10 × tier per mined unit (fuel counts as tier 1)
         const tier = def.tier || 1;
@@ -83,6 +99,14 @@ const LH2Mining = {
 
         EventBus.emit('lh2Toast', { text: `+1 ${this.itemName(def)}` });
         EventBus.emit('lh2InventoryChanged');
+    },
+
+    _depleteCharge(node) {
+        node.charges--;
+        if (node.charges <= 0) {
+            node.respawnAt = Date.now() + LH2.NODE_RESPAWN_MS;
+            OreDeposits.setDepleted(node, true);
+        }
     },
 
     _startAction(duration, onComplete) {

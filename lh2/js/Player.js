@@ -10,6 +10,7 @@ class Player {
         this.walkPhase = 0;
         this.moving = false;
         this.mining = false;
+        this.swingTimer = 0;
 
         this._buildBody();
     }
@@ -67,12 +68,12 @@ class Player {
      * @param {number} dt seconds
      * @param {object} input { forward, back, left, right, sprint, jump }
      * @param {object} area active area with getHeightAt(x, z)
-     * @param {number} camYaw camera yaw for movement direction
+     * @param {number} camYaw camera yaw – FPS-style: also the character heading
      */
     update(dt, input, area, camYaw) {
         const speed = input.sprint ? LH2.SPRINT_SPEED : LH2.WALK_SPEED;
 
-        // Movement vector in camera space
+        // Movement in camera space: W = where the camera looks, A/D strafe
         let mx = 0, mz = 0;
         if (input.forward) mz -= 1;
         if (input.back) mz += 1;
@@ -81,29 +82,38 @@ class Player {
 
         this.moving = (mx !== 0 || mz !== 0);
 
+        // FPS-style: the character always faces the camera heading
+        const fx = -Math.sin(camYaw), fz = -Math.cos(camYaw); // forward
+        const rx = -fz, rz = fx;                              // right (strafe)
+        this.group.rotation.y = Math.atan2(fx, fz);
+
         if (this.moving) {
             const len = Math.hypot(mx, mz);
             mx /= len; mz /= len;
-            // Rotate by camera yaw
-            const sin = Math.sin(camYaw), cos = Math.cos(camYaw);
-            const wx = mx * cos - mz * sin;
-            const wz = mx * sin + mz * cos;
+            const wx = rx * mx - fx * mz;
+            const wz = rz * mx - fz * mz;
 
             const nx = this.pos.x + wx * speed * dt;
             const nz = this.pos.z + wz * speed * dt;
             const groundHere = area.getHeightAt(this.pos.x, this.pos.z);
             const groundThere = area.getHeightAt(nx, nz);
 
-            // Block walking into the ocean and up cliffs
+            // Block walking into the ocean and up cliffs/maze walls
             const walkable = groundThere >= (area.minWalkHeight !== undefined ? area.minWalkHeight : LH2.MIN_WALK_HEIGHT)
                 && (groundThere - groundHere) <= LH2.MAX_STEP_HEIGHT;
             if (walkable) {
                 this.pos.x = nx;
                 this.pos.z = nz;
+            } else {
+                // Slide along the blocked axis so walls don't feel sticky
+                const gx = area.getHeightAt(nx, this.pos.z);
+                const gz = area.getHeightAt(this.pos.x, nz);
+                if (gx >= (area.minWalkHeight ?? LH2.MIN_WALK_HEIGHT) && gx - groundHere <= LH2.MAX_STEP_HEIGHT) {
+                    this.pos.x = nx;
+                } else if (gz >= (area.minWalkHeight ?? LH2.MIN_WALK_HEIGHT) && gz - groundHere <= LH2.MAX_STEP_HEIGHT) {
+                    this.pos.z = nz;
+                }
             }
-
-            // Face movement direction
-            this.group.rotation.y = Math.atan2(wx, wz);
         }
 
         // Gravity + ground snap
@@ -123,7 +133,20 @@ class Player {
         this._animate(dt, input.sprint);
     }
 
+    /** One quick pickaxe swing (LMB with nothing in range). */
+    swingOnce() {
+        this.swingTimer = 0.35;
+    }
+
     _animate(dt, sprinting) {
+        if (this.swingTimer > 0) {
+            this.swingTimer -= dt;
+            const t = 1 - this.swingTimer / 0.35;
+            this.armR.rotation.x = -2.2 + Math.sin(t * Math.PI) * 1.4;
+            this.pickaxe.visible = true;
+            if (this.swingTimer <= 0) this.pickaxe.visible = false;
+            return;
+        }
         if (this.mining) {
             // Pickaxe swing: fast arc on the right arm
             this.walkPhase += dt * 9;

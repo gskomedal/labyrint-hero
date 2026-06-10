@@ -10,14 +10,18 @@ const LH2 = {
     // Surface island
     WORLD_SIZE: 400,        // world units, square
     TERRAIN_SEGMENTS: 160,  // heightmap resolution per side
-    TERRAIN_HEIGHT: 26,     // max terrain elevation
+    TERRAIN_HEIGHT: 34,     // max terrain elevation
     WATER_LEVEL: 0.0,       // y of the ocean plane
     MIN_WALK_HEIGHT: 0.5,   // can't walk below this (into the ocean)
 
-    // Caves (one per underground zone, reached via surface portals)
+    // Caves (chained underground zones, each reached from the one above)
     CAVE_SIZE: 120,
     CAVE_SEGMENTS: 48,
     CAVE_CEILING: 13,
+
+    // Maze structures (stone labyrinths on the surface and in every cave)
+    MAZE_TILE: 3,           // world units per maze tile
+    MAZE_WALL_HEIGHT: 3.2,  // above MAX_STEP_HEIGHT, so walls block movement
 
     // XP curve – same as Labyrint Hero 1
     XP_BASE: 100,
@@ -35,6 +39,17 @@ const LH2 = {
     MINE_TIME_MS: 1200,
     CHOP_TIME_MS: 1500,
     NODE_RESPAWN_MS: 90000,
+
+    // Resource density (LH1-like scarcity: few but meaningful finds)
+    SURFACE_ORE_NODES: 10,
+    CAVE_ORE_NODES: 9,
+    MAZE_REWARD_NODES: 3,
+
+    // Direct element sources (gas pockets / native elements), per cave tier
+    GAS_VENTS_PER_CAVE: 2,
+    NATIVE_NODES_PER_CAVE: 2,
+    GAS_BY_TIER:    { 2: ['Ar'], 3: ['He', 'Ne'], 4: ['Kr'], 5: ['Xe', 'Rn'] },
+    NATIVE_BY_TIER: { 1: ['C', 'S'], 2: ['Cu', 'S'], 3: ['Ag', 'Bi'], 4: ['Au', 'Pt'], 5: ['Au', 'Pt', 'Ir'] },
 
     SAVE_KEY: 'labyrint_hero_2_v1',
 

@@ -147,12 +147,12 @@ class CaveArea {
             crystal.rotation.z = (rand(i, 0) - 0.5) * 0.4;
             this.group.add(crystal);
 
-            const light = new THREE.PointLight(this.lightColor, 220, 70, 1.8);
+            const light = new THREE.PointLight(this.lightColor, 280, 80, 1.8);
             light.position.set(x, y + 4, z);
             this.group.add(light);
         }
         // Dim ambient so floors are never pitch black
-        this.group.add(new THREE.AmbientLight(this.fogColor, 3.5));
+        this.group.add(new THREE.AmbientLight(this.fogColor, 6));
         // Light by the spawn/exit portal
         const exitLight = new THREE.PointLight(0xffffff, 120, 50, 1.8);
         exitLight.position.set(this.spawn.x, this.getHeightAt(this.spawn.x, this.spawn.z) + 4, this.spawn.z);
@@ -161,10 +161,15 @@ class CaveArea {
 }
 
 const CaveWorld = {
-    /** Build all cave areas, their deposits, and exit portals. */
+    /**
+     * Build the chained underground zones, LH1-style descent:
+     * surface → Grunnfjell → Dyplag → Underverden → Jordens kjerne.
+     * Each cave has an up-portal at its spawn and a down-portal hidden at the
+     * centre of a stone labyrinth (the labyrinth guards the way down).
+     */
     buildAll(switchArea) {
         const areas = {};
-        for (const zone of LH2.CAVE_ZONES) {
+        LH2.CAVE_ZONES.forEach((zone, idx) => {
             const cave = new CaveArea(zone, LH2.SEED + zone.tier * 7919);
             const rand = (() => {
                 const noise = makeNoise2D(LH2.SEED + zone.tier * 131);
@@ -172,25 +177,56 @@ const CaveWorld = {
                 return () => (noise(i++ * 0.7919, i * 1.317) + 1) / 2;
             })();
 
-            OreDeposits.populate(cave, rand, 20);
-
-            // Exit portal back to the surface
-            const exitPos = { x: cave.spawn.x, y: cave.getHeightAt(cave.spawn.x, cave.spawn.z), z: cave.spawn.z + 4 };
-            cave.group.add(Decorations.buildPortal(exitPos, 0x88ddff));
-            cave.interactables.push({
-                type: 'portal',
-                pos: exitPos,
-                getLabel: () => 'Trykk [E] – Tilbake til overflaten',
-                isActive: () => true,
-                onInteract: () => switchArea('surface', zone.id),
+            // Labyrinth in the middle of the cavern; descent portal at its core
+            const maze = MazeStructure.add(cave, {
+                cx: 0, cz: -cave.size * 0.05,
+                cellW: 7, cellH: 5,
+                rand,
+                wallColor: new THREE.Color(zone.fogColor).multiplyScalar(3.2).getHex(),
             });
 
+            OreDeposits.populate(cave, rand, LH2.CAVE_ORE_NODES);
+            OreDeposits.populateAt(cave, maze.rewardSpots, rand, `${zone.id}:maze`);
+            OreDeposits.addElementNodes(cave, rand);
+
+            // Up-portal at spawn: back to the area above
+            const upTarget = idx === 0 ? 'surface' : LH2.CAVE_ZONES[idx - 1].id;
+            const upLabel = idx === 0 ? 'Tilbake til overflaten'
+                : `Opp til ${LH2.CAVE_ZONES[idx - 1].name}`;
+            const upPos = { x: cave.spawn.x, y: cave.getHeightAt(cave.spawn.x, cave.spawn.z), z: cave.spawn.z + 4 };
+            cave.group.add(Decorations.buildPortal(upPos, 0x88ddff));
+            cave.interactables.push({
+                type: 'portal',
+                pos: upPos,
+                getLabel: () => upLabel,
+                isActive: () => true,
+                onInteract: () => switchArea(upTarget, zone.id),
+            });
+
+            // Down-portal at the labyrinth core (none in the deepest zone)
+            const below = LH2.CAVE_ZONES[idx + 1];
+            if (below) {
+                const dp = maze.centerPos;
+                cave.downPortalPos = dp;
+                cave.group.add(Decorations.buildPortal(dp, below.lightColor, below.name));
+                const dLight = new THREE.PointLight(below.lightColor, 90, 40, 1.8);
+                dLight.position.set(dp.x, dp.y + 4, dp.z);
+                cave.group.add(dLight);
+                cave.interactables.push({
+                    type: 'portal',
+                    pos: dp,
+                    getLabel: () => `Ned til ${below.name} (Tier ${below.tier})`,
+                    isActive: () => true,
+                    onInteract: () => switchArea(below.id, zone.id),
+                });
+            }
+
             areas[zone.id] = cave;
-        }
+        });
         return areas;
     },
 
-    /** Place cave entrance portals on the surface terrain. */
+    /** One mine entrance on the surface, leading down to the first zone. */
     addSurfaceEntrances(surface, switchArea) {
         const rand = (() => {
             const noise = makeNoise2D(LH2.SEED + 4242);
@@ -198,29 +234,25 @@ const CaveWorld = {
             return () => (noise(i++ * 0.7919, i * 1.317) + 1) / 2;
         })();
 
-        surface.entrancePos = {};
-        LH2.CAVE_ZONES.forEach((zone, idx) => {
-            // One entrance per quadrant, on rocky elevated ground
-            const baseAng = (idx / LH2.CAVE_ZONES.length) * Math.PI * 2 + Math.PI / 4;
-            let spot = null;
-            for (let t = 0; t < 40 && !spot; t++) {
-                const ang = baseAng + (rand() - 0.5) * 0.9;
-                const r = 60 + rand() * 90;
-                const x = Math.cos(ang) * r, z = Math.sin(ang) * r;
-                const y = surface.getHeightAt(x, z);
-                if (y > 4 && surface.getSlopeAt(x, z) < 0.8) spot = { x, y, z };
-            }
-            if (!spot) spot = { x: Math.cos(baseAng) * 50, y: surface.getHeightAt(Math.cos(baseAng) * 50, Math.sin(baseAng) * 50), z: Math.sin(baseAng) * 50 };
+        const first = LH2.CAVE_ZONES[0];
+        let spot = null;
+        for (let t = 0; t < 60 && !spot; t++) {
+            const ang = rand() * Math.PI * 2;
+            const r = 40 + rand() * 60;
+            const x = Math.cos(ang) * r, z = Math.sin(ang) * r;
+            const y = surface.getHeightAt(x, z);
+            if (y > 4 && surface.getSlopeAt(x, z) < 0.8) spot = { x, y, z };
+        }
+        if (!spot) spot = { x: 45, y: surface.getHeightAt(45, 0), z: 0 };
 
-            surface.entrancePos[zone.id] = spot;
-            surface.group.add(Decorations.buildPortal(spot, zone.lightColor, zone.name));
-            surface.interactables.push({
-                type: 'portal',
-                pos: spot,
-                getLabel: () => `Trykk [E] – Gå ned i ${zone.name} (Tier ${zone.tier})`,
-                isActive: () => true,
-                onInteract: () => switchArea(zone.id, null),
-            });
+        surface.entrancePos = { [first.id]: spot };
+        surface.group.add(Decorations.buildPortal(spot, first.lightColor, first.name));
+        surface.interactables.push({
+            type: 'portal',
+            pos: spot,
+            getLabel: () => `Gruvesjakt ned til ${first.name} (Tier ${first.tier})`,
+            isActive: () => true,
+            onInteract: () => switchArea(first.id, null),
         });
     },
 };

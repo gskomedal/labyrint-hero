@@ -733,12 +733,13 @@ Se `docs/Elements-mod.md` for fullstendig designdokument.
 Et søsterspill i `lh2/`-mappen som tar progresjonsprinsippene fra hovedspillet – samle mineraler, oppdage grunnstoffer og levle opp i vitenskapene – inn i en åpen 3D-verden uten trange ganger.
 
 ### Konsept
-- **Ekte 3D, tredjeperson:** Three.js r165 (vendored ESM-fil i `lh2/vendor/` – fortsatt ingen byggverktøy eller npm-avhengigheter). All grafikk er prosedyrisk lavpoly-geometri, ingen assets.
-- **Én deterministisk øy** (fast seed): heightmap fra simplex-støy med radiell falloff, omgitt av hav. WASD + mus-orbit-kamera, sprint, hopp, gravitasjon og bakkekollisjon mot heightmappen.
-- **Dybde→tier i 3D:** Fire grotteinnganger på øya fører til lukkede huler som speiler sonene fra hovedspillet: Grunnfjell (T2), Dyplag (T3), Underverden (T4) og Jordens kjerne (T5). Overflaten gir tier 1-mineraler; dypere soner gir høyere tier (og 20 % sjanse for tier+1).
+- **Ekte 3D, FPS-stil tredjeperson:** Three.js r165 (vendored ESM-fil i `lh2/vendor/` – fortsatt ingen byggverktøy eller npm-avhengigheter). All grafikk er prosedyrisk lavpoly-geometri, ingen assets. Pointer lock: musa styrer figur + kamera, WASD går/strafer, venstreklikk hogger/graver, høyreklikk bruker portaler/stasjoner (E som alternativ).
+- **Én deterministisk øy** (fast seed): heightmap fra simplex-støy (fbm + ridged for fjellrygger) med radiell falloff, omgitt av hav. Sprint, hopp, gravitasjon og bakkekollisjon mot heightmappen. Busker, steiner og trær som detaljer.
+- **Kjedet nedstigning som i LH1:** én gruvesjakt på overflaten fører til Grunnfjell (T2); derfra går ned-portaler videre til Dyplag (T3), Underverden (T4) og Jordens kjerne (T5), med opp-portaler tilbake. Overflaten gir tier 1-mineraler; dypere soner gir høyere tier (og 20 % sjanse for tier+1).
+- **Labyrintelementer:** prosedyriske steinlabyrinter med kollisjon – en ruinlabyrint på overflaten med tier+1-mineraler i blindveiene, og en labyrint i hver grotte som vokter nedgangsportalen i kjernen.
 
 ### Spill-loop
-1. **Utvinn** malmforekomster (krystallklynger farget etter mineraldefinisjonen, 2–4 ladninger, respawn etter 90 s) → mineraler i ryggsekken + Geologi-XP.
+1. **Utvinn** malmforekomster (krystallklynger farget etter mineraldefinisjonen, 2–4 ladninger, respawn etter 90 s) → mineraler i ryggsekken + Geologi-XP. Knapphet som i LH1: ~10 forekomster per område. I tillegg finnes direkte grunnstoffkilder: **gasslommer** (edelgasser per sone) og **gedigne grunnstoffer** (C, S, Cu, Ag, Au, Pt, Bi, Ir etter dybde) som går rett i samlingen.
 2. **Identifiser:** mineraler vises som «Ukjent mineral (Tier N)» til Geologi-nivået ≥ tier. Fra Geologi 3 pulserer forekomster i nærheten («Malmøye» i 3D).
 3. **Smelt** identifiserte mineraler ved smelteriet (brensel: tre fra trehogst, kull fra grottene) → rene grunnstoffer i periodesystemet + Metallurgi-XP. Gjenbruker `SmeltingSystem` og `ElementTracker` fra hovedspillet, inkl. energireserve-overføring.
 4. **Lag molekyler** ved kjemibordet fra innsamlede grunnstoffer (oppskrifter fra `MOLECULE_DEFS`, låses opp med Kjemi-nivå) → Kjemi-XP.

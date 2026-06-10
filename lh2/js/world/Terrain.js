@@ -29,6 +29,9 @@ class Terrain {
         const f = 1 / 130; // base noise frequency
         let h = fbm2(this.noise, x * f, z * f, 5, 2.0, 0.5);
         h = (h + 1) / 2; // -> [0, 1]
+        // Ridged noise adds sharp ridges/valleys so the island isn't flat
+        const ridge = 1 - Math.abs(fbm2(this.noise, x * f * 1.7 + 37, z * f * 1.7 + 37, 4, 2.1, 0.55));
+        h = h * 0.6 + ridge * ridge * 0.4;
         // Radial island falloff: high in the middle, below sea level at edges
         const d = Math.sqrt(x * x + z * z) / (this.size * 0.5);
         const falloff = Math.max(0, 1 - Math.pow(d, 2.4));
@@ -76,9 +79,9 @@ class Terrain {
 
             // Color by height band: sand -> grass -> rock -> snow
             if (h < 1.2)       c.setHex(0xc8b878);
-            else if (h < 9)    c.setHex(0x4f8f4a);
-            else if (h < 16)   c.setHex(0x3e7340);
-            else if (h < 21)   c.setHex(0x77716a);
+            else if (h < 10)   c.setHex(0x4f8f4a);
+            else if (h < 19)   c.setHex(0x3e7340);
+            else if (h < 26)   c.setHex(0x77716a);
             else               c.setHex(0xe8e8ee);
 
             // Slight noise variation so the low-poly facets read better

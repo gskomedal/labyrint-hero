@@ -1,60 +1,68 @@
-// ─── Labyrint Hero 2 – Third-person camera ───────────────────────────────────
-// Spherical orbit around a point above the player. Mouse drag rotates,
-// wheel zooms, pitch clamped, lerped follow, kept above the terrain.
-// Deliberately no pointer-lock: drag-orbit is simpler and touch-friendlier.
+// ─── Labyrint Hero 2 – Third-person camera (FPS-style controls) ──────────────
+// Pointer-lock mouse look: the mouse steers character + camera together, like
+// a standard FPS/third-person action game. Click the canvas to capture the
+// mouse, Esc releases it. Wheel zooms the follow distance.
 
 class CameraRig {
     constructor(camera, domElement) {
         this.camera = camera;
-        this.yaw = Math.PI;          // around Y
-        this.pitch = 0.45;           // 0 = horizontal, up to ~1.4
-        this.dist = 10;
+        this.domElement = domElement;
+        this.yaw = Math.PI;          // around Y – also the character's heading
+        this.pitch = 0.42;           // camera elevation angle
+        this.dist = 7;
         this.targetOffset = 1.6;     // look-at height above player feet
+        this.locked = false;
 
-        this._dragging = false;
-        this._lastX = 0;
-        this._lastY = 0;
         this._smoothPos = null;
 
-        domElement.addEventListener('mousedown', (e) => {
-            this._dragging = true;
-            this._lastX = e.clientX;
-            this._lastY = e.clientY;
+        domElement.addEventListener('click', () => {
+            if (!this.locked && !LH2Main.uiOpen) {
+                domElement.requestPointerLock();
+            }
         });
-        window.addEventListener('mouseup', () => { this._dragging = false; });
-        window.addEventListener('mousemove', (e) => {
-            if (!this._dragging) return;
-            const dx = e.clientX - this._lastX;
-            const dy = e.clientY - this._lastY;
-            this._lastX = e.clientX;
-            this._lastY = e.clientY;
-            this.yaw -= dx * 0.008;
-            this.pitch = Math.min(1.4, Math.max(0.05, this.pitch + dy * 0.006));
+
+        document.addEventListener('pointerlockchange', () => {
+            this.locked = document.pointerLockElement === domElement;
+            const ch = document.getElementById('crosshair');
+            if (ch) ch.classList.toggle('hidden', !this.locked);
+            const hint = document.getElementById('mouse-hint');
+            if (hint) hint.classList.toggle('hidden', this.locked);
         });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!this.locked) return;
+            this.yaw -= e.movementX * 0.0024;
+            this.pitch = Math.min(1.35, Math.max(-0.1, this.pitch + e.movementY * 0.0022));
+        });
+
         domElement.addEventListener('wheel', (e) => {
             e.preventDefault();
-            this.dist = Math.min(22, Math.max(4, this.dist + e.deltaY * 0.012));
+            this.dist = Math.min(20, Math.max(2.5, this.dist + e.deltaY * 0.012));
         }, { passive: false });
 
-        // Touch: one-finger drag orbits
+        // Touch fallback: one-finger drag orbits (no pointer lock on mobile)
+        let lastT = null;
         domElement.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                this._dragging = true;
-                this._lastX = e.touches[0].clientX;
-                this._lastY = e.touches[0].clientY;
-            }
+            if (e.touches.length === 1) lastT = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         }, { passive: true });
-        window.addEventListener('touchend', () => { this._dragging = false; });
+        window.addEventListener('touchend', () => { lastT = null; });
         window.addEventListener('touchmove', (e) => {
-            if (!this._dragging || e.touches.length !== 1) return;
+            if (!lastT || e.touches.length !== 1) return;
             const t = e.touches[0];
-            const dx = t.clientX - this._lastX;
-            const dy = t.clientY - this._lastY;
-            this._lastX = t.clientX;
-            this._lastY = t.clientY;
-            this.yaw -= dx * 0.008;
-            this.pitch = Math.min(1.4, Math.max(0.05, this.pitch + dy * 0.006));
+            this.yaw -= (t.clientX - lastT.x) * 0.008;
+            this.pitch = Math.min(1.35, Math.max(-0.1, this.pitch + (t.clientY - lastT.y) * 0.006));
+            lastT = { x: t.clientX, y: t.clientY };
         }, { passive: true });
+    }
+
+    /** Release the mouse (used when overlays open). */
+    unlock() {
+        if (this.locked) document.exitPointerLock();
+    }
+
+    /** Forward unit vector (x,z) of the current heading. */
+    get forward() {
+        return { x: -Math.sin(this.yaw), z: -Math.cos(this.yaw) };
     }
 
     update(dt, playerPos, getHeightAt) {
@@ -64,19 +72,20 @@ class CameraRig {
             playerPos.z,
         );
 
-        const cosP = Math.cos(this.pitch);
+        const cosP = Math.cos(Math.max(0.02, this.pitch));
+        const elev = Math.sin(Math.max(0.02, this.pitch));
         const desired = new THREE.Vector3(
             target.x + Math.sin(this.yaw) * cosP * this.dist,
-            target.y + Math.sin(this.pitch) * this.dist,
+            target.y + elev * this.dist + (this.pitch < 0.02 ? this.pitch * 4 : 0),
             target.z + Math.cos(this.yaw) * cosP * this.dist,
         );
 
         // Keep the camera above the ground
-        const minY = getHeightAt(desired.x, desired.z) + 0.8;
+        const minY = getHeightAt(desired.x, desired.z) + 0.6;
         if (desired.y < minY) desired.y = minY;
 
         if (!this._smoothPos) this._smoothPos = desired.clone();
-        const k = Math.min(1, dt * 8);
+        const k = Math.min(1, dt * 10);
         this._smoothPos.lerp(desired, k);
 
         this.camera.position.copy(this._smoothPos);

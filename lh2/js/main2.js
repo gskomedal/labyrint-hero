@@ -45,7 +45,7 @@ const LH2Main = {
 
         // ── Systems & UI ─────────────────────────────────────────────────────
         LH2Mining.init(this.hero, this.player);
-        this.interactions = new Interactions();
+        this.interactions = new Interactions(this.player, this.cameraRig);
         this.hud = new HUD(this.hero);
         this.inventoryUI = new InventoryUI(this.hero);
         this.smelterUI = new SmelterUI(this.hero);
@@ -150,10 +150,23 @@ const LH2Main = {
         const ly = surface.getHeightAt(spawn.x + 8, spawn.z + 3);
         Decorations.addLabTable(surface, { x: spawn.x + 8, y: ly, z: spawn.z + 3 }, () => this.smelterUI.show('chem'));
 
-        // Nature & resources
-        Decorations.addTrees(surface, rand, 14, () => LH2Mining.chopTree());
-        Decorations.addBoulders(surface, rand, 25);
-        OreDeposits.populate(surface, rand, 30);
+        // Ancient stone labyrinth ruin with better minerals in its dead ends
+        let ruinSpot = surface.findSpot(rand, { minH: 3, maxH: 14, maxSlope: 0.25, minRadius: 55, maxRadius: 110 })
+            || { x: -70, z: 60 };
+        const maze = MazeStructure.add(surface, {
+            cx: ruinSpot.x, cz: ruinSpot.z,
+            cellW: 8, cellH: 6,
+            rand,
+            wallColor: 0x8a857c,
+        });
+        OreDeposits.populateAt(surface, [maze.centerPos, ...maze.rewardSpots], rand, 'surface:maze');
+
+        // Nature & resources (LH1-like scarcity)
+        Decorations.addTrees(surface, rand, 18, () => LH2Mining.chopTree());
+        Decorations.addBoulders(surface, rand, 30);
+        Decorations.addBushes(surface, rand, 40);
+        OreDeposits.populate(surface, rand, LH2.SURFACE_ORE_NODES);
+        OreDeposits.addElementNodes(surface, rand);
 
         this.areas.surface = surface;
     },
@@ -187,9 +200,15 @@ const LH2Main = {
             this._activateArea(targetId);
 
             let pos;
+            const zoneIdx = (id) => LH2.CAVE_ZONES.findIndex(z => z.id === id);
             if (targetId === 'surface' && fromId && this.areas.surface.entrancePos[fromId]) {
+                // Coming up to the surface: appear by the mine entrance
                 const e = this.areas.surface.entrancePos[fromId];
                 pos = { x: e.x, z: e.z + 5 };
+            } else if (fromId && zoneIdx(fromId) > zoneIdx(targetId) && this.activeArea.downPortalPos) {
+                // Coming up from the zone below: appear by the down-portal
+                const d = this.activeArea.downPortalPos;
+                pos = { x: d.x, z: d.z + 3 };
             } else {
                 pos = this.activeArea.spawn;
             }

@@ -48,10 +48,31 @@ const Decorations = {
             area.interactables.push({
                 type: 'tree',
                 pos: spot,
-                getLabel: () => 'Trykk [E] – Hogg ved (+2 Tre)',
+                getLabel: () => 'Hogg ved (+2 Tre)',
                 isActive: () => true,
                 onInteract: () => onChop(tree),
             });
+        }
+    },
+
+    /** Small bushes and tufts – pure detail, no interaction. */
+    addBushes(area, rand, count) {
+        const mats = [
+            new THREE.MeshLambertMaterial({ color: 0x3a7a3e, flatShading: true }),
+            new THREE.MeshLambertMaterial({ color: 0x4f8a3a, flatShading: true }),
+            new THREE.MeshLambertMaterial({ color: 0x6a8a3a, flatShading: true }),
+        ];
+        for (let i = 0; i < count; i++) {
+            const spot = area.findSpot(rand, { minH: 1.2, maxH: 14, maxSlope: 0.7 });
+            if (!spot) continue;
+            const bush = new THREE.Mesh(
+                new THREE.IcosahedronGeometry(0.35 + rand() * 0.45, 0),
+                mats[Math.floor(rand() * mats.length)],
+            );
+            bush.position.set(spot.x, spot.y + 0.2, spot.z);
+            bush.scale.y = 0.7;
+            bush.rotation.y = rand() * 3;
+            area.group.add(bush);
         }
     },
 
@@ -98,7 +119,7 @@ const Decorations = {
         area.interactables.push({
             type: 'smelter',
             pos,
-            getLabel: () => 'Trykk [E] – Smelteri',
+            getLabel: () => 'Smelteri',
             isActive: () => true,
             onInteract: onUse,
         });
@@ -134,7 +155,7 @@ const Decorations = {
         area.interactables.push({
             type: 'labtable',
             pos,
-            getLabel: () => 'Trykk [E] – Kjemibord',
+            getLabel: () => 'Kjemibord',
             isActive: () => true,
             onInteract: onUse,
         });
