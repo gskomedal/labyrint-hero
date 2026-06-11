@@ -61,16 +61,17 @@ const LH2Main = {
             }
         }
         this.hud = new HUD(this.hero);
-        this.inventoryUI = new InventoryUI(this.hero);
-        this.smelterUI = new SmelterUI(this.hero);
         this.minimap = new Minimap(this.hero, this.player, this.cameraRig);
 
-        // Reused LH1 Phaser scenes: K = skilltre, B = grunnstoffbok, V = wiki
+        // Reused LH1 Phaser scenes: Tab = inventar, K = skilltre,
+        // B = grunnstoffbok, V = mineralwiki (smelteri/kjemilab via stasjonene)
         window.addEventListener('keydown', (e) => {
+            if (e.code === 'Tab') e.preventDefault();
             if (LH2Main.uiOpen || LH2Mining.isActive()) return;
             if (e.code === 'KeyK') LH1UIHost.openSkillTree(this.hero);
             else if (e.code === 'KeyB') LH1UIHost.open('ElementBookScene', { heroRef: this.hero });
             else if (e.code === 'KeyV') LH1UIHost.open('MineralWikiScene', { heroRef: this.hero, fromMenu: false });
+            else if (e.code === 'Tab') LH1UIHost.open('InventoryScene', {});
         });
 
         // Fysikk XP: identifying newly discovered elements
@@ -171,9 +172,11 @@ const LH2Main = {
 
         // Camp: smelter + lab table near spawn
         const sy = surface.getHeightAt(spawn.x + 5, spawn.z);
-        Decorations.addSmelter(surface, { x: spawn.x + 5, y: sy, z: spawn.z }, () => this.smelterUI.show('smelt'));
+        Decorations.addSmelter(surface, { x: spawn.x + 5, y: sy, z: spawn.z },
+            () => LH1UIHost.open('SmelteryScene', { heroRef: this.hero }));
         const ly = surface.getHeightAt(spawn.x + 8, spawn.z + 3);
-        Decorations.addLabTable(surface, { x: spawn.x + 8, y: ly, z: spawn.z + 3 }, () => this.smelterUI.show('chem'));
+        Decorations.addLabTable(surface, { x: spawn.x + 8, y: ly, z: spawn.z + 3 },
+            () => LH1UIHost.open('ChemLabScene', { heroRef: this.hero, worldNum: 1 }));
 
         // Ancient stone labyrinth ruin with better minerals in its dead ends
         let ruinSpot = surface.findSpot(rand, { minH: 3, maxH: 14, maxSlope: 0.25, minRadius: 55, maxRadius: 110 })

@@ -157,6 +157,7 @@ html, body {
 
 #discovery-popup {
     position: absolute;
+    z-index: 60;
     top: 22%;
     left: 50%;
     transform: translateX(-50%);

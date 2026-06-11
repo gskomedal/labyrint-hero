@@ -6,10 +6,17 @@
 // base, then every skill in hero.skills is re-applied – so saves only store
 // the skill list, never derived stats.
 
-class Hero2 {
+class Hero2 extends Hero {
     constructor() {
+        super();
         this.area = 'surface';
         this.pos = { x: 0, y: 0, z: 0 };
+
+        // Identity (LH1 scenes show name/portrait; creator comes later)
+        this.heroName = 'Helt';
+        this.race = 'human';
+        this.appearance = (typeof defaultAppearance === 'function') ? defaultAppearance('human') : {};
+        this.gold = 0;
 
         // Hero level – LH1's curve. XP comes from defeating monsters.
         this.level = 1;
@@ -25,8 +32,8 @@ class Hero2 {
         this.chemistUnlocked = true;
         this.acceleratorUnlocked = false;
 
-        // Equipment (plain item objects from ALLOY_EQUIPMENT forging)
-        this.equipped = { weapon: null, armor: null };
+        // Equipment lives in LH1's Inventory (inventory.equipped) so
+        // InventoryScene's equip/unequip flows work unchanged.
 
         this.sciences = new Sciences();
         this.elementTracker = new ElementTracker();
@@ -34,10 +41,12 @@ class Hero2 {
         this.inventory = new Inventory();
         this.inventory.expandBackpack(10); // 20 slots total
 
-        this.molecules = {};        // { moleculeId: count }
+        this.molecules = {};        // legacy stash (pre-ChemLabScene saves)
         this.alloyInventory = {};   // { alloyId: count }
+        this.campStash = [];        // LH1 camp storage: [{ id, count }]
         this.discoveredMinerals = {}; // { mineralId: true } – for the wiki
         this.discoveredAlloys = {};
+        this.discoveredMolecules = {};
         this.fuelReserve = 0;
 
         this._resetSkillFields();
@@ -158,13 +167,16 @@ class Hero2 {
         }
         if (typeof applySynergies === 'function') applySynergies(this);
 
-        // Equipment on top of skills
+        // Equipment on top of skills (LH1 model: inventory.equipped)
         for (const slot of ['weapon', 'armor']) {
-            const item = this.equipped[slot];
+            const item = this.inventory.equipped[slot];
             if (!item) continue;
             this.attack += item.atk || 0;
             this.defense += item.def || 0;
             this.maxHearts += item.hearts || 0;
+            if (item.visionBonus) this.visionRadius += item.visionBonus;
+            if (item.critBonus) this.critChance = Math.min(0.75, this.critChance + item.critBonus);
+            if (item.dodgeBonus) this.dodgeChance = Math.min(0.6, this.dodgeChance + item.dodgeBonus);
         }
 
         // Science effects multiply on top (metallurgy cheapens smelting)
@@ -188,28 +200,9 @@ class Hero2 {
     }
 
     // ── Equipment ────────────────────────────────────────────────────────────
-
-    /** Equip a weapon/armor item from a backpack slot (swaps with current). */
-    equipItem(slotIndex) {
-        const entry = this.inventory.backpack[slotIndex];
-        if (!entry || !entry.type || (entry.type !== 'weapon' && entry.type !== 'armor')) return false;
-        const old = this.equipped[entry.type];
-        this.equipped[entry.type] = entry;
-        this.inventory.backpack[slotIndex] = old || null;
-        this.replaySkills();
-        return true;
-    }
-
-    /** Unequip back into the backpack, if space. */
-    unequipItem(slot) {
-        const item = this.equipped[slot];
-        if (!item || this.inventory.isFull) return false;
-        const idx = this.inventory.backpack.indexOf(null);
-        this.inventory.backpack[idx] = item;
-        this.equipped[slot] = null;
-        this.replaySkills();
-        return true;
-    }
+    // Equip/unequip happens through LH1's InventoryScene (inventory.useSlot /
+    // unequip). Their incremental stat changes are consistent with the next
+    // replaySkills() pass, which re-derives from inventory.equipped.
 
     // ── Serialization ────────────────────────────────────────────────────────
 
@@ -220,35 +213,23 @@ class Hero2 {
             hearts: this.hearts,
             level: this.level,
             xp: this.xp,
+            gold: this.gold,
+            heroName: this.heroName,
+            race: this.race,
+            appearance: { ...this.appearance },
             skillPoints: this.skillPoints,
             skills: [...this.skills],
-            equipped: {
-                weapon: this.equipped.weapon ? { ...this.equipped.weapon } : null,
-                armor: this.equipped.armor ? { ...this.equipped.armor } : null,
-            },
             alloyInventory: { ...this.alloyInventory },
+            campStash: this.campStash.map(e => ({ ...e })),
             discoveredAlloys: { ...this.discoveredAlloys },
             discoveredMinerals: { ...this.discoveredMinerals },
+            discoveredMolecules: { ...this.discoveredMolecules },
             sciences: this.sciences.serialize(),
             elements: this.elementTracker.serialize(),
             inventory: this.inventory.serialize(),
-            equipmentSlots: this._serializeEquipmentSlots(),
             molecules: { ...this.molecules },
             fuelReserve: this.fuelReserve,
         };
-    }
-
-    // Forged equipment in the backpack is stored as plain objects; LH1's
-    // Inventory.serialize would try ITEM_DEFS lookups, so they are stored
-    // separately by slot index.
-    _serializeEquipmentSlots() {
-        const out = {};
-        this.inventory.backpack.forEach((entry, i) => {
-            if (entry && entry.type && (entry.type === 'weapon' || entry.type === 'armor') && entry.alloyId) {
-                out[i] = { ...entry };
-            }
-        });
-        return out;
     }
 
     static deserialize(data) {
@@ -275,18 +256,27 @@ class Hero2 {
             }
         }
 
-        if (data.equipped) {
-            hero.equipped.weapon = data.equipped.weapon ? { ...data.equipped.weapon } : null;
-            hero.equipped.armor = data.equipped.armor ? { ...data.equipped.armor } : null;
-        }
+        hero.gold = data.gold || 0;
+        if (data.heroName) hero.heroName = data.heroName;
+        if (data.race) hero.race = data.race;
+        if (data.appearance) hero.appearance = { ...data.appearance };
         if (data.alloyInventory) hero.alloyInventory = { ...data.alloyInventory };
+        if (data.campStash) hero.campStash = data.campStash.map(e => ({ ...e }));
         if (data.discoveredAlloys) hero.discoveredAlloys = { ...data.discoveredAlloys };
         if (data.discoveredMinerals) hero.discoveredMinerals = { ...data.discoveredMinerals };
+        if (data.discoveredMolecules) hero.discoveredMolecules = { ...data.discoveredMolecules };
         hero.sciences = Sciences.deserialize(data.sciences);
         hero.elementTracker = ElementTracker.deserialize(data.elements);
         if (data.inventory) hero.inventory = Inventory.deserialize(data.inventory, hero);
         if (hero.inventory.backpack.length < 20) {
             hero.inventory.expandBackpack(20 - hero.inventory.backpack.length);
+        }
+        // Migration from older LH2 saves: hero-level equipped + exact-stat
+        // equipment slots move into LH1's inventory.equipped/backpack model
+        if (data.equipped) {
+            for (const slot of ['weapon', 'armor']) {
+                if (data.equipped[slot]) hero.inventory.equipped[slot] = { ...data.equipped[slot] };
+            }
         }
         if (data.equipmentSlots) {
             for (const i in data.equipmentSlots) {

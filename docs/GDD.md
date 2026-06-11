@@ -761,7 +761,7 @@ Egen localStorage-nøkkel `labyrint_hero_2_v1` (kolliderer ikke med hovedspillet
 ### Heltebygging (iterasjon 5–6) – LH1-design i 3D
 - **Heltenivå:** XP fra monstre (12 × tier), LH1s kurve. Nivåopprykk gir ferdighetspoeng.
 - **Skilltre (K):** LH1s KOMPLETTE skillsystem og originale SkillScene gjenbrukes uendret – alle stier, tiers, stacking og synergier fra `src/data/skills.js`. Effekter re-utledes ved replay av skill-listen, og broes til LH2-mekanikkene (angrep, hjerter, XP, dobbel malm/legering, smelteenergi, minimap-malm).
-- **Gjenbrukt LH1-UI:** SkillScene (K), ElementBookScene (B) og MineralWikiScene (V) kjører uendret i en gjennomsiktig Phaser-instans oppå Three.js (`LH1UIHost`). Phaser er vendored i `lh2/vendor/`.
+- **Gjenbrukt LH1-UI:** SkillScene (K), ElementBookScene (B), MineralWikiScene (V), SmelteryScene (smelteovnen, med leirlager/`campStash`), ChemLabScene (kjemibordet) og InventoryScene (Tab, med karakterportrett og utstyr) kjører uendret i en gjennomsiktig Phaser-instans oppå Three.js (`LH1UIHost`). Phaser er vendored i `lh2/vendor/`. Vitenskaps-XP gis via wrappere rundt `SmeltingSystem`/`ChemistrySystem` i `lh1-shims.js`.
 - **Utstyrskjede:** smelt grunnstoffer → støp legeringer (`ALLOY_DEFS`) → smi våpen/rustning (`ALLOY_EQUIPMENT`) → utrust fra ryggsekken. Våpen gir slagskade, rustning blokkesjanse (5 %/DEF) og bonushjerter.
 - **Navigasjon:** lykt i grottene + minimap med fog of war i labyrintene (malmmarkører gated bak Malmøye/Geologi 3, som LH1s minimap-integrasjon).
 

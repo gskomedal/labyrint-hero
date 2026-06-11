@@ -46,6 +46,14 @@
   - Phaser 3.60 vendored i `lh2/vendor/` (samme prinsipp som Three.js – fungerer offline)
   - Gamle LH2-skills migreres automatisk (ukjente IDer refunderes som poeng)
   - Mineralwikien spores nå via `discoveredMinerals` ved utvinning, som i LH1
+- **LH2 iterasjon 7 (leirlager + resten av LH1-grensesnittet):**
+  - **LH1s SmelteryScene erstatter LH2s smelteri-UI:** hele smelteovnen med Lager/Smelt/Legering/Smi-faner kjører uendret – inkludert **leirlageret** (`campStash`): mineraler og brensel flyttes mellom ryggsekk og leir, og brenselenergi telles fra begge
+  - **LH1s ChemLabScene erstatter kjemibord-UIet:** molekylsyntese via original `ChemistrySystem` (potions havner i ryggsekken som i LH1)
+  - **LH1s InventoryScene erstatter ryggsekk-UIet (Tab):** originalt inventar med detaljert karakterportrett, utstyrsplasser (våpen/rustning via LH1s `Inventory.useSlot`), hurtigplass og knapper til elementbok/wiki. En usynlig `GameScene`-shim i UI-verten gir scenen helten
+  - Helten har nå `heroName`, `race`, `appearance` (standard menneske) og `gold` – klar for karakterskaper og handelsmenn senere
+  - Vitenskaps-XP flyttet til systemnivå: `SmeltingSystem.smelt`/`craftAlloy` og `ChemistrySystem.synthesize` er wrappet i LH2 (`lh1-shims.js`) så all smelting/støping/syntese gir metallurgi/kjemi-XP uansett hvilken UI som brukes
+  - Prosedyrelyd fra LH1 (`AudioManager`) lastes nå i LH2 – sceneknapper og oppdagelser har lyd
+  - LH2s egne DOM-baserte smelteri/inventar-UIer er fjernet
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

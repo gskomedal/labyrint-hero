@@ -28,7 +28,6 @@
         <div id="prompt" class="hidden"></div>
         <div id="action-progress" class="hidden"><div id="action-progress-fill"></div></div>
         <div id="toast-stack"></div>
-        <div id="discovery-popup" class="hidden"></div>
         <div id="damage-flash"></div>
         <div id="crosshair" class="hidden"></div>
         <div id="mouse-hint">Klikk i spillvinduet for musstyring</div>
@@ -37,11 +36,10 @@
         <div id="fade-overlay"></div>
     </div>
 
-    <!-- Overlays -->
-    <div id="overlay-inventory" class="overlay hidden"></div>
-    <div id="overlay-smelter" class="overlay hidden"></div>
     <!-- LH1's original Phaser UI scenes render in here (transparent overlay) -->
     <div id="lh1-ui"></div>
+    <!-- Discovery popup above everything, incl. the LH1 UI overlay -->
+    <div id="discovery-popup" class="hidden"></div>
 
     <!-- Phaser (vendored) – only used for the reused LH1 UI scenes -->
     <script src="vendor/phaser.min.js"></script>
@@ -56,21 +54,32 @@
     <script src="../src/systems/ElementTracker.js"></script>
     <script src="../src/systems/Inventory.js"></script>
     <script src="../src/systems/SmeltingSystem.js"></script>
+    <script src="../src/systems/ChemistrySystem.js"></script>
+    <script src="../src/data/musicPieces.js"></script>
+    <script src="../src/systems/AudioManager.js"></script>
 
     <!-- Reused LH1 UI: skill system + original Phaser scenes -->
     <script src="../src/data/skills.js"></script>
     <script src="../src/utils/UITheme.js"></script>
     <script src="../src/utils/UIHelper.js"></script>
     <script src="../src/utils/TooltipManager.js"></script>
+    <script src="../src/graphics/CharacterSprite.js"></script>
+    <script src="../src/graphics/DetailedCharacterSprite.js"></script>
+    <script src="../src/graphics/SceneBackgrounds.js"></script>
+    <script src="../src/scenes/smeltery/SmelteryTabs.js"></script>
     <script src="../src/scenes/SkillScene.js"></script>
     <script src="../src/scenes/ElementBookScene.js"></script>
     <script src="../src/scenes/MineralWikiScene.js"></script>
+    <script src="../src/scenes/SmelteryScene.js"></script>
+    <script src="../src/scenes/ChemLabScene.js"></script>
+    <script src="../src/scenes/InventoryScene.js"></script>
 
     <!-- Labyrint Hero 2 -->
     <script src="js/constants2.js"></script>
     <script src="js/noise.js"></script>
     <script src="js/SaveManager2.js"></script>
     <script src="js/Sciences.js"></script>
+    <script src="js/lh1-shims.js"></script>
     <script src="js/Hero2.js"></script>
     <script src="js/world/Terrain.js"></script>
     <script src="js/world/MazeStructure.js"></script>
@@ -83,8 +92,6 @@
     <script src="js/Interactions.js"></script>
     <script src="js/Mining.js"></script>
     <script src="js/ui/HUD.js"></script>
-    <script src="js/ui/InventoryUI.js"></script>
-    <script src="js/ui/SmelterUI.js"></script>
     <script src="js/ui/LH1UIHost.js"></script>
     <script src="js/ui/Minimap.js"></script>
     <script src="js/main2.js"></script>

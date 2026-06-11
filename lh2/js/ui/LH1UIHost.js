@@ -47,6 +47,15 @@ const LH1UIHost = {
         this.game.scene.add('SkillScene', SkillScene, false);
         this.game.scene.add('ElementBookScene', ElementBookScene, false);
         this.game.scene.add('MineralWikiScene', MineralWikiScene, false);
+        this.game.scene.add('SmelteryScene', SmelteryScene, false);
+        this.game.scene.add('ChemLabScene', ChemLabScene, false);
+        this.game.scene.add('InventoryScene', InventoryScene, false);
+
+        // InventoryScene looks up this.scene.get('GameScene') for hero + pet.
+        // A dummy scene with that key carries the references instead.
+        this.game.scene.add('GameScene', class extends Phaser.Scene {
+            constructor() { super({ key: 'GameScene' }); }
+        }, false);
 
         // Skill picks from LH1's SkillScene: spend a point, sync LH2 effects
         this.game.events.on('skillPicked', () => {
@@ -68,8 +77,22 @@ const LH1UIHost = {
         this._container.classList.add('active');
         this._activeKey = key;
 
+        let attempts = 0;
         const doStart = () => {
-            this.game.scene.start(key, data);
+            // Keep the GameScene shim's hero/pet refs current
+            const gsShim = this.game.scene.getScene('GameScene');
+            if (gsShim) { gsShim.hero = LH2Main.hero; gsShim.pet = null; }
+
+            try {
+                this.game.scene.start(key, data);
+            } catch (err) {
+                // The scene manager can still be processing the previous
+                // scene's shutdown queue – retry shortly
+                if (++attempts < 10) { setTimeout(doStart, 80); return; }
+                console.warn('LH1UIHost: could not start', key, err);
+                this._onClosed();
+                return;
+            }
             this.game.scene.getScene(key).events.once('shutdown', () => this._onClosed());
         };
         if (this._ready) doStart();
@@ -77,6 +100,17 @@ const LH1UIHost = {
     },
 
     _onClosed() {
+        // A hosted scene may have launched another (e.g. Elementbok from the
+        // inventory) – stay open and track that one instead
+        const HOSTED = ['SkillScene', 'ElementBookScene', 'MineralWikiScene',
+            'SmelteryScene', 'ChemLabScene', 'InventoryScene'];
+        const stillActive = HOSTED.find(k => this.game.scene.isActive(k));
+        if (stillActive) {
+            this._activeKey = stillActive;
+            this.game.scene.getScene(stillActive).events.once('shutdown', () => this._onClosed());
+            return;
+        }
+
         this._container.classList.remove('active');
         this._activeKey = null;
         LH2Main.uiOpen = false;
