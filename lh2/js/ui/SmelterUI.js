@@ -119,27 +119,83 @@ class SmelterUI {
         for (const r of def.recipe) {
             tracker.collected[r.symbol] -= r.amount;
         }
-        this.hero.molecules[moleculeId] = (this.hero.molecules[moleculeId] || 0) + 1;
-        this.log.unshift(`Laget ${def.name} (${def.formula})`);
+        // "Potent kjemi" skill: chance of a second molecule
+        const doubled = (this.hero.moleculeDoubleChance || 0) > 0
+            && Math.random() < this.hero.moleculeDoubleChance;
+        const amount = doubled ? 2 : 1;
+        this.hero.molecules[moleculeId] = (this.hero.molecules[moleculeId] || 0) + amount;
+        this.log.unshift(`Laget ${amount} ${def.name} (${def.formula})${doubled ? ' – dobbel!' : ''}`);
         this.log = this.log.slice(0, 12);
 
         this.hero.sciences.addXP('kjemi', 20 * def.tier);
-        EventBus.emit('lh2Toast', { text: `+1 ${def.name}` });
+        EventBus.emit('lh2Toast', { text: `+${amount} ${def.name}` });
+        this._render();
+    }
+
+    _doAlloy(alloyId) {
+        const check = this.smelting.canCraftAlloy(alloyId, this.hero, this._totalEnergy());
+        if (!check.canCraft) return;
+
+        this._consumeEnergy(check.energyCost);
+        const result = this.smelting.craftAlloy(alloyId, this.hero);
+        if (!result.success) return;
+
+        const amount = result.doubled ? 2 : 1;
+        this.hero.alloyInventory[alloyId] = (this.hero.alloyInventory[alloyId] || 0) + amount;
+        this.log.unshift(`Støpte ${amount} ${result.alloy.name}${result.doubled ? ' – dobbel!' : ''} (${check.energyCost} energi)`);
+        this.log = this.log.slice(0, 12);
+
+        this.hero.sciences.addXP('metallurgi', 20 * result.alloy.tier);
+        this.hero.applyScienceEffects();
+        this._render();
+    }
+
+    _doForge(equipId) {
+        const template = ALLOY_EQUIPMENT[equipId];
+        if (!template) return;
+        const FORGE_ENERGY = 5;
+        if ((this.hero.alloyInventory[template.alloyId] || 0) < 1) return;
+        if (this._totalEnergy() < FORGE_ENERGY) return;
+
+        this._consumeEnergy(FORGE_ENERGY);
+        this.hero.alloyInventory[template.alloyId]--;
+        const result = this.smelting.forgeEquipment(equipId, this.hero);
+        if (!result.success) return;
+
+        if (!this.hero.inventory.addItem(result.item)) {
+            EventBus.emit('lh2Toast', { text: 'Sekken er full!' });
+            // Refund the alloy if the item didn't fit
+            this.hero.alloyInventory[template.alloyId]++;
+            return;
+        }
+
+        this.log.unshift(`Smidde ${result.item.name}!`);
+        this.log = this.log.slice(0, 12);
+        this.hero.sciences.addXP('metallurgi', 25 * (ALLOY_DEFS[template.alloyId].tier || 1));
+        EventBus.emit('lh2Toast', { text: `Smidde ${result.item.name}! Utrust i sekken (Tab)`, cls: 'levelup' });
+        EventBus.emit('lh2InventoryChanged');
         this._render();
     }
 
     // ── Rendering ────────────────────────────────────────────────────────────
 
     _render() {
-        const body = this.tab === 'smelt' ? this._smeltTabHtml() : this._chemTabHtml();
+        const bodies = {
+            smelt: () => this._smeltTabHtml(),
+            alloy: () => this._alloyTabHtml(),
+            forge: () => this._forgeTabHtml(),
+            chem: () => this._chemTabHtml(),
+        };
+        const tabNames = { smelt: 'Smelteri', alloy: 'Legering', forge: 'Smi', chem: 'Kjemibord' };
+        const tabsHtml = Object.keys(tabNames).map(t =>
+            `<button class="smelter-tab ${this.tab === t ? 'active' : ''}" data-tab="${t}">${tabNames[t]}</button>`
+        ).join('');
+
         this.el.innerHTML = `
             <div class="overlay-panel">
                 <button class="overlay-close">Lukk [Esc]</button>
-                <div class="smelter-tabs">
-                    <button class="smelter-tab ${this.tab === 'smelt' ? 'active' : ''}" data-tab="smelt">Smelteri</button>
-                    <button class="smelter-tab ${this.tab === 'chem' ? 'active' : ''}" data-tab="chem">Kjemibord</button>
-                </div>
-                ${body}
+                <div class="smelter-tabs">${tabsHtml}</div>
+                ${(bodies[this.tab] || bodies.smelt)()}
             </div>`;
 
         this.el.querySelector('.overlay-close').addEventListener('click', () => this.hide());
@@ -152,6 +208,70 @@ class SmelterUI {
         this.el.querySelectorAll('[data-craft]').forEach(btn => {
             btn.addEventListener('click', () => this._doCraft(btn.dataset.craft));
         });
+        this.el.querySelectorAll('[data-alloy]').forEach(btn => {
+            btn.addEventListener('click', () => this._doAlloy(btn.dataset.alloy));
+        });
+        this.el.querySelectorAll('[data-forge]').forEach(btn => {
+            btn.addEventListener('click', () => this._doForge(btn.dataset.forge));
+        });
+    }
+
+    _alloyTabHtml() {
+        const energy = this._totalEnergy();
+        let rows = '';
+        for (const entry of this.smelting.getAvailableAlloys(this.hero, energy)) {
+            const a = entry.alloy;
+            const recipeHtml = a.recipe.map(r => {
+                const have = this.hero.elementTracker.getCount(r.symbol);
+                const ok = have >= r.amount;
+                return `<span style="color:${ok ? '#9d9' : '#d77'}">${r.amount} ${r.symbol} (${have})</span>`;
+            }).join(' + ');
+            const owned = this.hero.alloyInventory[a.id] || 0;
+            rows += `
+                <div class="smelt-row">
+                    ${this._chip(a.color)}
+                    <span class="smelt-name">${a.name} (${a.formula})${owned ? ` ×${owned}` : ''}<br>
+                        <span class="smelt-meta">${recipeHtml}</span></span>
+                    <span class="smelt-meta">${entry.energyCost} energi</span>
+                    <button data-alloy="${a.id}" ${entry.canCraft ? '' : 'disabled'}>Støp</button>
+                </div>`;
+        }
+        return `
+            <h2>Legering</h2>
+            <div class="energy-info">Tilgjengelig energi: ${energy} &middot; Rene grunnstoffer → legeringer</div>
+            <div class="smelt-columns">
+                <div class="smelt-col" style="min-width:430px"><h3>Oppskrifter</h3>${rows}</div>
+                <div class="smelt-col"><h3>Logg</h3><div class="smelt-log">${this.log.map(l => `<div>${l}</div>`).join('')}</div></div>
+            </div>`;
+    }
+
+    _forgeTabHtml() {
+        const energy = this._totalEnergy();
+        let rows = '';
+        for (const alloyId in this.hero.alloyInventory) {
+            const count = this.hero.alloyInventory[alloyId];
+            if (count <= 0) continue;
+            const alloy = ALLOY_DEFS[alloyId];
+            for (const eq of this.smelting.getForgeableEquipment(alloyId)) {
+                if (eq.type !== 'weapon' && eq.type !== 'armor') continue;
+                const can = count >= 1 && energy >= 5;
+                rows += `
+                    <div class="smelt-row">
+                        ${this._chip(eq.color)}
+                        <span class="smelt-name">${eq.name}<br><span class="smelt-meta">${eq.desc} &middot; 1× ${alloy.name} (${count})</span></span>
+                        <span class="smelt-meta">5 energi</span>
+                        <button data-forge="${Object.keys(ALLOY_EQUIPMENT).find(k => ALLOY_EQUIPMENT[k] === eq) || eq.id}" ${can ? '' : 'disabled'}>Smi</button>
+                    </div>`;
+            }
+        }
+        if (!rows) rows = '<div class="smelt-meta">Ingen legeringer på lager. Støp legeringer først (Legering-fanen).</div>';
+        return `
+            <h2>Smi utstyr</h2>
+            <div class="energy-info">Tilgjengelig energi: ${energy} &middot; Legeringer → våpen og rustning. Utrust fra sekken (Tab)</div>
+            <div class="smelt-columns">
+                <div class="smelt-col" style="min-width:430px"><h3>Utstyr</h3>${rows}</div>
+                <div class="smelt-col"><h3>Logg</h3><div class="smelt-log">${this.log.map(l => `<div>${l}</div>`).join('')}</div></div>
+            </div>`;
     }
 
     _chip(color) {

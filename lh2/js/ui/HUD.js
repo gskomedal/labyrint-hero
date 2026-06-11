@@ -11,6 +11,22 @@ class HUD {
         this.toastStack = document.getElementById('toast-stack');
         this.discoveryPopup = document.getElementById('discovery-popup');
 
+        // Hero level row above the sciences
+        this.levelRow = document.createElement('div');
+        this.levelRow.className = 'science-row';
+        this.levelRow.innerHTML = `
+            <span class="science-name" style="color:#ffe9a0">Helt</span>
+            <span class="science-level"></span>
+            <div class="science-bar"><div class="science-bar-fill" style="background:#ffe9a0"></div></div>`;
+        this.panel.appendChild(this.levelRow);
+
+        this.skillPointsEl = document.createElement('div');
+        this.skillPointsEl.id = 'skill-points-row';
+        this.skillPointsEl.addEventListener('click', () => {
+            if (!LH2Main.uiOpen && LH2Main.skillUI) LH2Main.skillUI.show();
+        });
+        this.panel.appendChild(this.skillPointsEl);
+
         this._buildSciencePanel();
         this.heartsEl = document.createElement('div');
         this.heartsEl.id = 'hearts-row';
@@ -18,6 +34,11 @@ class HUD {
         this.refresh();
 
         EventBus.on('lh2HeartsChanged', () => this.refresh());
+        EventBus.on('lh2HeroXP', () => this.refresh());
+        EventBus.on('lh2SkillsChanged', () => this.refresh());
+        EventBus.on('lh2LevelUp', (d) => {
+            this.toast(`Nivå ${d.level}! +1 ferdighetspoeng (trykk K)`, 'levelup');
+        });
 
         EventBus.on('lh2ScienceXP', () => this.refresh());
         EventBus.on('lh2InventoryChanged', () => this.refresh());
@@ -56,6 +77,13 @@ class HUD {
     }
 
     refresh() {
+        this.levelRow.querySelector('.science-level').textContent = `Nv ${this.hero.level}`;
+        this.levelRow.querySelector('.science-bar-fill').style.width =
+            Math.min(100, (this.hero.xp / this.hero.xpToNext) * 100) + '%';
+        this.skillPointsEl.textContent = this.hero.skillPoints > 0
+            ? `★ ${this.hero.skillPoints} ferdighetspoeng – trykk K`
+            : '';
+
         const sci = this.hero.sciences;
         for (const s of LH2.SCIENCES) {
             const lvl = sci.getLevel(s.id);

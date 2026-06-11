@@ -63,6 +63,8 @@ const LH2Main = {
         this.hud = new HUD(this.hero);
         this.inventoryUI = new InventoryUI(this.hero);
         this.smelterUI = new SmelterUI(this.hero);
+        this.skillUI = new SkillUI(this.hero);
+        this.minimap = new Minimap(this.hero, this.player, this.cameraRig);
 
         // Fysikk XP: identifying newly discovered elements
         EventBus.on('discovery', (d) => {
@@ -196,6 +198,8 @@ const LH2Main = {
         this.activeArea.group.visible = true;
         this.hero.area = id;
         this.interactions.setArea(this.activeArea);
+        // The lantern lights the tunnels; daylight covers the surface
+        this.player.lantern.intensity = id === 'surface' ? 0 : 55;
 
         if (id === 'surface') {
             this.scene.background = new THREE.Color(0x87b5e8);
@@ -317,6 +321,7 @@ const LH2Main = {
         Decorations.update(this.activeArea, time);
         if (!this._switching) Creatures.update(this.activeArea, dt, time);
         this.cameraRig.update(dt, this.player.pos, this.activeArea);
+        this.minimap.update(this.activeArea, time);
 
         this.renderer.render(this.scene, this.camera);
     },

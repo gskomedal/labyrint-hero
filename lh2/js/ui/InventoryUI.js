@@ -44,26 +44,43 @@ class InventoryUI {
         const inv = this.hero.inventory;
 
         let bpHtml = '';
-        for (const entry of inv.backpack) {
+        inv.backpack.forEach((entry, i) => {
             if (!entry) {
                 bpHtml += `<div class="bp-slot"></div>`;
-                continue;
+                return;
             }
             const def = inv._getItemDef(entry);
             if (!def) {
                 bpHtml += `<div class="bp-slot"></div>`;
-                continue;
+                return;
             }
             const hex = '#' + (def.color || 0x888888).toString(16).padStart(6, '0');
+            const isEquip = def.type === 'weapon' || def.type === 'armor';
             const name = LH2Mining.itemName(def);
             const count = entry.count !== undefined ? entry.count : 1;
             bpHtml += `
-                <div class="bp-slot">
+                <div class="bp-slot ${isEquip ? 'bp-equip' : ''}" ${isEquip ? `data-equip-slot="${i}" title="Klikk for å utruste"` : ''}>
                     <div class="bp-chip" style="background:${hex}"></div>
                     <div>${name}</div>
-                    <div class="bp-count">×${count}</div>
+                    <div class="bp-count">${isEquip ? (def.atk ? `+${def.atk} ATK` : `+${def.def} DEF`) : '×' + count}</div>
                 </div>`;
-        }
+        });
+
+        // Equipped gear
+        const equipCell = (slot, label) => {
+            const item = this.hero.equipped[slot];
+            if (!item) return `<div class="bp-slot"><div class="bp-count">${label}: tom</div></div>`;
+            const hex = '#' + (item.color || 0x888888).toString(16).padStart(6, '0');
+            const stats = [item.atk ? `+${item.atk} ATK` : '', item.def ? `+${item.def} DEF` : '', item.hearts ? `+${item.hearts} ♥` : '']
+                .filter(Boolean).join(' ');
+            return `
+                <div class="bp-slot bp-equip" data-unequip="${slot}" title="Klikk for å ta av">
+                    <div class="bp-chip" style="background:${hex}"></div>
+                    <div>${item.name}</div>
+                    <div class="bp-count">${stats}</div>
+                </div>`;
+        };
+        const equippedHtml = equipCell('weapon', 'Våpen') + equipCell('armor', 'Rustning');
 
         // Molecule stash (crafted at the lab table)
         let molHtml = '';
@@ -82,6 +99,8 @@ class InventoryUI {
         this.el.innerHTML = `
             <div class="overlay-panel">
                 <button class="overlay-close">Lukk [Tab]</button>
+                <h2>Utstyr <span class="smelt-meta">ATK ${this.hero.attack} &middot; DEF ${this.hero.defense}</span></h2>
+                <div class="backpack-grid">${equippedHtml}</div>
                 <h2>Ryggsekk</h2>
                 <div class="backpack-grid">${bpHtml}</div>
                 ${molHtml ? `<h2>Molekyler</h2><div class="backpack-grid">${molHtml}</div>` : ''}
@@ -90,6 +109,19 @@ class InventoryUI {
             </div>`;
 
         this.el.querySelector('.overlay-close').addEventListener('click', () => this.hide());
+        this.el.querySelectorAll('[data-equip-slot]').forEach(el => {
+            el.addEventListener('click', () => {
+                if (this.hero.equipItem(+el.dataset.equipSlot)) {
+                    EventBus.emit('lh2Toast', { text: 'Utrustet!' });
+                    this._render();
+                }
+            });
+        });
+        this.el.querySelectorAll('[data-unequip]').forEach(el => {
+            el.addEventListener('click', () => {
+                if (this.hero.unequipItem(el.dataset.unequip)) this._render();
+            });
+        });
     }
 
     _periodicTableHtml() {

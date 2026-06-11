@@ -32,6 +32,14 @@
   - **Nedgangsportalen ligger på flisen lengst unna spawn** (BFS gjennom labyrinten, typisk 40+ fliser), så man må faktisk løse labyrinten for å komme dypere. Belønningsforekomster (tier+1) i fjerne blindveier
   - **Kamerakollisjon:** kameraet trekkes inn foran vegger/terreng mellom spilleren og ønsket posisjon, og klemmes under huletaket – ingen røntgenblikk
   - Tettere tåke i gangene for hulefølelse; småkrystaller (uten lys) spredt i tunnelene
+- **LH2 iterasjon 5 (navigasjon + LH1-spilldesign: nivå, skilltre, utstyr):**
+  - **Lykt:** helten bærer lys i grottene – tunnelene er nå godt synlige uten å miste hulestemningen
+  - **Minimap** (nede til venstre, M skrur av/på): overflaten vises som helhetlig øykart med leir- og gruvemarkører; i grottene kartlegges labyrinten med fog of war etter hvert som du utforsker. Malmmarkører på kartet krever Malmøye-ferdigheten eller Geologi nivå 3 (som i LH1)
+  - **Heltenivå og XP:** monstre gir XP (12 × tier); samme nivåkurve som LH1. Nivåopprykk gir ferdighetspoeng
+  - **Skilltre (K):** fem LH1-spesialiseringer med 2 ferdigheter hver – Kriger (Kraftig slag, Kampherdet), Villmarksjeger (Skarpsyn, Rappfot), Geolog (Malmøye, Effektiv utvinning), Metallurg (Rask smelting, Legeringsmester), Kjemiker (Potent kjemi, Nøyaktig prosess). Ferdigheter kan stables som i LH1
+  - **Legeringer og smiing:** to nye faner i smelteriet gjenbruker LH1s `ALLOY_DEFS`/`ALLOY_EQUIPMENT` – rene grunnstoffer støpes til legeringer (bronse, stål, titan, Pt-Ir m.fl.), som smis til våpen og rustning
+  - **Utstyr:** klikk på smidd utstyr i ryggsekken (Tab) for å utruste. Våpen øker angrep (slagskade = ATK), rustning gir forsvar (5% blokkesjanse per DEF-poeng) og bonushjerter. Monstre har mer HP (1 + 2×tier) så utstyr betyr noe
+  - Hjertedryss: HUD viser nå heltenivå med XP-bar og klikkbart ferdighetspoeng-varsel
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

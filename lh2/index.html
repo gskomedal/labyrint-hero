@@ -32,13 +32,15 @@
         <div id="damage-flash"></div>
         <div id="crosshair" class="hidden"></div>
         <div id="mouse-hint">Klikk i spillvinduet for musstyring</div>
-        <div id="help-line">WASD – gå &middot; Mus – sikt &middot; Venstreklikk – hogg/grav &middot; Høyreklikk – bruk &middot; Tab – sekk &middot; Shift – løp &middot; Esc – frigjør mus</div>
+        <div id="help-line">WASD – gå &middot; Venstreklikk – hogg/slå &middot; Høyreklikk – bruk &middot; Tab – sekk &middot; K – ferdigheter &middot; M – kart &middot; Esc – frigjør mus</div>
+        <canvas id="minimap" width="170" height="170"></canvas>
         <div id="fade-overlay"></div>
     </div>
 
     <!-- Overlays -->
     <div id="overlay-inventory" class="overlay hidden"></div>
     <div id="overlay-smelter" class="overlay hidden"></div>
+    <div id="overlay-skills" class="overlay hidden"></div>
 
     <!-- Reused from Labyrint Hero 1 (global scope, Phaser-free) -->
     <script src="../src/utils/EventBus.js"></script>
@@ -56,6 +58,7 @@
     <script src="js/noise.js"></script>
     <script src="js/SaveManager2.js"></script>
     <script src="js/Sciences.js"></script>
+    <script src="js/skills2.js"></script>
     <script src="js/Hero2.js"></script>
     <script src="js/world/Terrain.js"></script>
     <script src="js/world/MazeStructure.js"></script>
@@ -70,6 +73,8 @@
     <script src="js/ui/HUD.js"></script>
     <script src="js/ui/InventoryUI.js"></script>
     <script src="js/ui/SmelterUI.js"></script>
+    <script src="js/ui/SkillUI.js"></script>
+    <script src="js/ui/Minimap.js"></script>
     <script src="js/main2.js"></script>
 
     <!-- Three.js bridge: the only module script. Classic scripts above have

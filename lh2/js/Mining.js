@@ -91,13 +91,19 @@ const LH2Mining = {
             return;
         }
 
+        // "Effektiv utvinning" skill: chance of a second unit
+        let amount = 1;
+        if ((this.hero.miningDoubleChance || 0) > 0 && Math.random() < this.hero.miningDoubleChance) {
+            if (this.hero.inventory.addItem(def)) amount = 2;
+        }
+
         this._depleteCharge(node);
 
         // Geologi XP: 10 × tier per mined unit (fuel counts as tier 1)
         const tier = def.tier || 1;
-        this.hero.sciences.addXP('geologi', 10 * tier);
+        this.hero.sciences.addXP('geologi', 10 * tier * amount);
 
-        EventBus.emit('lh2Toast', { text: `+1 ${this.itemName(def)}` });
+        EventBus.emit('lh2Toast', { text: `+${amount} ${this.itemName(def)}` });
         EventBus.emit('lh2InventoryChanged');
     },
 

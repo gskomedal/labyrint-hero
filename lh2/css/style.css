@@ -224,6 +224,35 @@ html, body {
     color: #aac;
 }
 
+#minimap {
+    position: absolute;
+    bottom: 34px;
+    left: 14px;
+    border: 1px solid #445;
+    border-radius: 6px;
+    background: rgba(8, 9, 14, 0.85);
+}
+
+#skill-points-row {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #ffe9a0;
+    cursor: pointer;
+    pointer-events: auto;
+}
+#skill-points-row:hover { text-decoration: underline; }
+
+.skill-paths {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(300px, 1fr));
+    gap: 8px 18px;
+}
+
+.skill-path h3 { font-size: 14px; margin: 8px 0 6px; }
+
+.bp-slot.bp-equip { cursor: pointer; border-color: #667; }
+.bp-slot.bp-equip:hover { border-color: #ffe9a0; }
+
 #help-line {
     position: absolute;
     bottom: 10px;

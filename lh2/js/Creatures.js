@@ -152,9 +152,10 @@ const Creatures = {
             const mesh = this._buildMonster(type);
             mesh.position.set(spot.x, spot.y, spot.z);
             area.group.add(mesh);
+            const hp = 1 + area.tier * 2;
             area.creatures.push({
                 kind: 'monster', type, mesh, home: spot,
-                hp: 1 + area.tier, maxHp: 1 + area.tier,
+                hp, maxHp: hp,
                 dir: rand() * Math.PI * 2,
                 nextTurn: 0, attackAt: 0, respawnAt: 0,
                 walkPhase: rand() * 10,
@@ -180,7 +181,7 @@ const Creatures = {
         }
         if (!best) return false;
 
-        best.hp--;
+        best.hp -= this.hero.attack;
         // Knockback + hit flash
         const kx = best.mesh.position.x - p.x, kz = best.mesh.position.z - p.z;
         const kd = Math.hypot(kx, kz) || 1;
@@ -205,13 +206,17 @@ const Creatures = {
         c.mesh.visible = false;
         c.respawnAt = Date.now() + LH2.MONSTER_RESPAWN_MS;
 
+        // XP toward the hero level (LH1: monsters are the XP source)
+        const xp = 12 * area.tier;
+        this.hero.addXP(xp);
+
         // Loot: a mineral of the zone's tier straight into the backpack
         const pool = Object.values(MINERAL_DEFS).filter(m => m.tier === area.tier);
         const def = pool[Math.floor(Math.random() * pool.length)];
         if (def && this.hero.inventory.addItem(def)) {
-            EventBus.emit('lh2Toast', { text: `${c.type.name} beseiret! +1 ${LH2Mining.itemName(def)}`, cls: 'levelup' });
+            EventBus.emit('lh2Toast', { text: `${c.type.name} beseiret! +${xp} XP, +1 ${LH2Mining.itemName(def)}`, cls: 'levelup' });
         } else {
-            EventBus.emit('lh2Toast', { text: `${c.type.name} beseiret!`, cls: 'levelup' });
+            EventBus.emit('lh2Toast', { text: `${c.type.name} beseiret! +${xp} XP`, cls: 'levelup' });
         }
         EventBus.emit('lh2InventoryChanged');
     },
@@ -295,10 +300,14 @@ const Creatures = {
                 c.dir = Math.atan2(dx, dz);
                 this._moveOnGround(c, area, (dx / dp) * c.type.speed * dt, (dz / dp) * c.type.speed * dt);
             } else if (dp <= 1.4) {
-                // Bite
+                // Bite – defense gives a block chance (5% per point, max 50%)
                 if (now - c.attackAt > LH2.MONSTER_ATTACK_COOLDOWN_MS) {
                     c.attackAt = now;
-                    LH2Main.damageHero(1, c.type.name);
+                    if (Math.random() < Math.min(0.5, this.hero.defense * 0.05)) {
+                        EventBus.emit('lh2Toast', { text: 'Blokkert!' });
+                    } else {
+                        LH2Main.damageHero(1, c.type.name);
+                    }
                 }
             } else if (time > c.nextTurn) {
                 // Wander

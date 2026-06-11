@@ -13,6 +13,11 @@ class Player {
         this.swingTimer = 0;
 
         this._buildBody();
+
+        // Lantern: lights up the tunnels around the hero (off on the surface)
+        this.lantern = new THREE.PointLight(0xffcc88, 0, 20, 1.5);
+        this.lantern.position.set(0, 2.4, 0);
+        this.group.add(this.lantern);
     }
 
     _buildBody() {
@@ -71,7 +76,8 @@ class Player {
      * @param {number} camYaw camera yaw – FPS-style: also the character heading
      */
     update(dt, input, area, camYaw) {
-        const speed = input.sprint ? LH2.SPRINT_SPEED : LH2.WALK_SPEED;
+        const speedMul = (LH2Main.hero && LH2Main.hero.moveSpeedMul) || 1;
+        const speed = (input.sprint ? LH2.SPRINT_SPEED : LH2.WALK_SPEED) * speedMul;
 
         // Movement in camera space: W = where the camera looks, A/D strafe
         let mx = 0, mz = 0;

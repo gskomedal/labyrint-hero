@@ -758,6 +758,12 @@ Samme XP-kurve som hovedspillet: `100 × 1.55^(nivå−1)`.
 ### Lagring
 Egen localStorage-nøkkel `labyrint_hero_2_v1` (kolliderer ikke med hovedspillet). Verden er deterministisk, så kun heltetilstand + uttømte forekomster lagres. Autolagring hvert 30. sekund, ved sonebytte og ved lukking.
 
+### Heltebygging (iterasjon 5) – LH1-design i 3D
+- **Heltenivå:** XP fra monstre (12 × tier), LH1s kurve. Nivåopprykk gir ferdighetspoeng.
+- **Skilltre (K):** Kriger, Villmarksjeger, Geolog, Metallurg, Kjemiker – 2 stablebare ferdigheter per vei, koblet til LH2-mekanikkene (angrep, hjerter, XP, fart, minimap-malm, dobbel malm/legering/molekyl, smelteenergi).
+- **Utstyrskjede:** smelt grunnstoffer → støp legeringer (`ALLOY_DEFS`) → smi våpen/rustning (`ALLOY_EQUIPMENT`) → utrust fra ryggsekken. Våpen gir slagskade, rustning blokkesjanse (5 %/DEF) og bonushjerter.
+- **Navigasjon:** lykt i grottene + minimap med fog of war i labyrintene (malmmarkører gated bak Malmøye/Geologi 3, som LH1s minimap-integrasjon).
+
 ### Levende verden (iterasjon 3)
 - **Dyreliv på overflaten:** hoppende kaniner som flykter fra spilleren, og kretsende fugler.
 - **Monstre i grottene** med lett kamp: Grottegoblin (T2), Flaggermus (T3), Skjelett (T4), Magmaånd (T5). Vandrer/jager/biter (1 hjerte); venstreklikk-sving gjør 1 skade, HP = 1 + tier, dropp = ett mineral av sonens tier, respawn 60 s.
