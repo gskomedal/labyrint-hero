@@ -40,6 +40,12 @@
   - **Legeringer og smiing:** to nye faner i smelteriet gjenbruker LH1s `ALLOY_DEFS`/`ALLOY_EQUIPMENT` – rene grunnstoffer støpes til legeringer (bronse, stål, titan, Pt-Ir m.fl.), som smis til våpen og rustning
   - **Utstyr:** klikk på smidd utstyr i ryggsekken (Tab) for å utruste. Våpen øker angrep (slagskade = ATK), rustning gir forsvar (5% blokkesjanse per DEF-poeng) og bonushjerter. Monstre har mer HP (1 + 2×tier) så utstyr betyr noe
   - Hjertedryss: HUD viser nå heltenivå med XP-bar og klikkbart ferdighetspoeng-varsel
+- **LH2 iterasjon 6 (gjenbruk av LH1s originale grensesnitt):**
+  - **LH1s Phaser-scener kjører nå uendret inni LH2** via en gjennomsiktig Phaser-instans (`lh2/js/ui/LH1UIHost.js`) oppå Three.js-canvaset: **SkillScene** (K), **ElementBookScene** (B) og **MineralWikiScene** (V) lastes direkte fra `src/scenes/` uten endringer
+  - **LH1s komplette skillsystem erstatter LH2s forenklede:** `src/data/skills.js` med alle stier (Kriger, Villmarksjeger, Geolog, Metallurg, Kjemiker, Fysiker), tiers, stacking, opplåsingskrav og synergier. Ferdighetseffekter re-utledes ved «replay» (reset til base + re-apply av alle valgte skills), så lagringen kun trenger skill-listen. Fysiker-stien venter på akselerator-innhold
+  - Phaser 3.60 vendored i `lh2/vendor/` (samme prinsipp som Three.js – fungerer offline)
+  - Gamle LH2-skills migreres automatisk (ukjente IDer refunderes som poeng)
+  - Mineralwikien spores nå via `discoveredMinerals` ved utvinning, som i LH1
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

@@ -23,7 +23,7 @@ class HUD {
         this.skillPointsEl = document.createElement('div');
         this.skillPointsEl.id = 'skill-points-row';
         this.skillPointsEl.addEventListener('click', () => {
-            if (!LH2Main.uiOpen && LH2Main.skillUI) LH2Main.skillUI.show();
+            if (!LH2Main.uiOpen) LH1UIHost.openSkillTree(this.hero);
         });
         this.panel.appendChild(this.skillPointsEl);
 

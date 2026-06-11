@@ -91,6 +91,9 @@ const LH2Mining = {
             return;
         }
 
+        // Track first finds for the mineral wiki (LH1 convention)
+        if (!node.isFuel) this.hero.discoveredMinerals[def.id] = true;
+
         // "Effektiv utvinning" skill: chance of a second unit
         let amount = 1;
         if ((this.hero.miningDoubleChance || 0) > 0 && Math.random() < this.hero.miningDoubleChance) {

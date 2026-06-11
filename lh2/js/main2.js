@@ -63,8 +63,15 @@ const LH2Main = {
         this.hud = new HUD(this.hero);
         this.inventoryUI = new InventoryUI(this.hero);
         this.smelterUI = new SmelterUI(this.hero);
-        this.skillUI = new SkillUI(this.hero);
         this.minimap = new Minimap(this.hero, this.player, this.cameraRig);
+
+        // Reused LH1 Phaser scenes: K = skilltre, B = grunnstoffbok, V = wiki
+        window.addEventListener('keydown', (e) => {
+            if (LH2Main.uiOpen || LH2Mining.isActive()) return;
+            if (e.code === 'KeyK') LH1UIHost.openSkillTree(this.hero);
+            else if (e.code === 'KeyB') LH1UIHost.open('ElementBookScene', { heroRef: this.hero });
+            else if (e.code === 'KeyV') LH1UIHost.open('MineralWikiScene', { heroRef: this.hero, fromMenu: false });
+        });
 
         // Fysikk XP: identifying newly discovered elements
         EventBus.on('discovery', (d) => {

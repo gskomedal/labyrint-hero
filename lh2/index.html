@@ -32,7 +32,7 @@
         <div id="damage-flash"></div>
         <div id="crosshair" class="hidden"></div>
         <div id="mouse-hint">Klikk i spillvinduet for musstyring</div>
-        <div id="help-line">WASD – gå &middot; Venstreklikk – hogg/slå &middot; Høyreklikk – bruk &middot; Tab – sekk &middot; K – ferdigheter &middot; M – kart &middot; Esc – frigjør mus</div>
+        <div id="help-line">WASD – gå &middot; Venstreklikk – hogg/slå &middot; Høyreklikk – bruk &middot; Tab – sekk &middot; K – ferdigheter &middot; B – grunnstoffbok &middot; V – mineralwiki &middot; M – kart</div>
         <canvas id="minimap" width="170" height="170"></canvas>
         <div id="fade-overlay"></div>
     </div>
@@ -40,7 +40,11 @@
     <!-- Overlays -->
     <div id="overlay-inventory" class="overlay hidden"></div>
     <div id="overlay-smelter" class="overlay hidden"></div>
-    <div id="overlay-skills" class="overlay hidden"></div>
+    <!-- LH1's original Phaser UI scenes render in here (transparent overlay) -->
+    <div id="lh1-ui"></div>
+
+    <!-- Phaser (vendored) – only used for the reused LH1 UI scenes -->
+    <script src="vendor/phaser.min.js"></script>
 
     <!-- Reused from Labyrint Hero 1 (global scope, Phaser-free) -->
     <script src="../src/utils/EventBus.js"></script>
@@ -53,12 +57,20 @@
     <script src="../src/systems/Inventory.js"></script>
     <script src="../src/systems/SmeltingSystem.js"></script>
 
+    <!-- Reused LH1 UI: skill system + original Phaser scenes -->
+    <script src="../src/data/skills.js"></script>
+    <script src="../src/utils/UITheme.js"></script>
+    <script src="../src/utils/UIHelper.js"></script>
+    <script src="../src/utils/TooltipManager.js"></script>
+    <script src="../src/scenes/SkillScene.js"></script>
+    <script src="../src/scenes/ElementBookScene.js"></script>
+    <script src="../src/scenes/MineralWikiScene.js"></script>
+
     <!-- Labyrint Hero 2 -->
     <script src="js/constants2.js"></script>
     <script src="js/noise.js"></script>
     <script src="js/SaveManager2.js"></script>
     <script src="js/Sciences.js"></script>
-    <script src="js/skills2.js"></script>
     <script src="js/Hero2.js"></script>
     <script src="js/world/Terrain.js"></script>
     <script src="js/world/MazeStructure.js"></script>
@@ -73,7 +85,7 @@
     <script src="js/ui/HUD.js"></script>
     <script src="js/ui/InventoryUI.js"></script>
     <script src="js/ui/SmelterUI.js"></script>
-    <script src="js/ui/SkillUI.js"></script>
+    <script src="js/ui/LH1UIHost.js"></script>
     <script src="js/ui/Minimap.js"></script>
     <script src="js/main2.js"></script>
 

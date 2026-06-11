@@ -238,8 +238,10 @@ const OreDeposits = {
                 this.setDepleted(node, false);
             }
 
-            // "Malmøye": pulse nearby deposits when geologi >= 3
-            if (node.charges > 0 && !node.isElement && sciences.hasOreHighlight()) {
+            // "Malmøye": pulse nearby deposits (skill or geologi >= 3)
+            const highlight = sciences.hasOreHighlight()
+                || (typeof LH2Main !== 'undefined' && LH2Main.hero && LH2Main.hero.oreMapSkill);
+            if (node.charges > 0 && !node.isElement && highlight) {
                 const dx = node.pos.x - playerPos.x;
                 const dz = node.pos.z - playerPos.z;
                 if (dx * dx + dz * dz < 25 * 25) {

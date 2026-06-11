@@ -224,6 +224,22 @@ html, body {
     color: #aac;
 }
 
+/* LH1's Phaser UI scenes overlay (transparent canvas).
+   visibility (not display) so Phaser's Scale.FIT can measure the
+   container even while hidden. */
+#lh1-ui {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    visibility: hidden;
+    pointer-events: none;
+}
+#lh1-ui.active {
+    visibility: visible;
+    pointer-events: auto;
+}
+#lh1-ui canvas { margin: auto; }
+
 #minimap {
     position: absolute;
     bottom: 34px;
