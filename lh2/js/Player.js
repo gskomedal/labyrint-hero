@@ -12,7 +12,7 @@ class Player {
         this.mining = false;
         this.swingTimer = 0;
 
-        this._buildBody();
+        this._buildBody(null, 'human');
 
         // Lantern: lights up the tunnels around the hero (off on the surface)
         this.lantern = new THREE.PointLight(0xffcc88, 0, 20, 1.5);
@@ -20,19 +20,41 @@ class Player {
         this.group.add(this.lantern);
     }
 
-    _buildBody() {
+    /** (Re)build the body from the hero's appearance + race – the character
+     *  creator's choices show up directly on the 3D figure. */
+    applyAppearance(hero) {
+        if (this.body) {
+            this.group.remove(this.body);
+            this.body.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+        }
+        this._buildBody(hero ? hero.appearance : null, hero ? hero.race : 'human');
+    }
+
+    _buildBody(appearance, race) {
         const mat = (hex) => new THREE.MeshLambertMaterial({ color: hex });
+        this.body = new THREE.Group();
         const box = (w, h, d, color, x, y, z) => {
             const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color));
             m.position.set(x, y, z);
+            m.castShadow = true;
             return m;
         };
 
-        const SKIN = 0xd9a878, CLOTH = 0x3a6e9e, PANTS = 0x55483a, HAIR = 0x4a3220;
+        const a = appearance || {};
+        const SKIN = a.skinColor !== undefined ? a.skinColor : 0xd9a878;
+        const CLOTH = a.clothColor !== undefined ? a.clothColor : 0x3a6e9e;
+        const HAIR = a.hairColor !== undefined ? a.hairColor : 0x4a3220;
+        const PANTS = new THREE.Color(CLOTH).multiplyScalar(0.55).getHex();
 
         this.torso = box(0.7, 0.85, 0.4, CLOTH, 0, 1.25, 0);
         this.head = box(0.5, 0.5, 0.45, SKIN, 0, 1.95, 0);
-        const hair = box(0.54, 0.18, 0.49, HAIR, 0, 2.22, 0);
+        const hairH = a.hairStyle === 'long' ? 0.45 : 0.18;
+        const hair = box(0.54, hairH, 0.49, HAIR, 0, 2.22 - (hairH - 0.18) / 2 + (a.hairStyle === 'long' ? 0 : 0), 0);
+        if (a.hairStyle === 'long') hair.position.z = -0.04;
+        let beard = null;
+        if (a.beardStyle && a.beardStyle !== 'none') {
+            beard = box(0.4, a.beardStyle === 'long' ? 0.45 : 0.22, 0.12, HAIR, 0, 1.66, 0.22);
+        }
 
         // Limbs pivot at the shoulder/hip: mesh offset inside a pivot group
         const limb = (w, h, d, color, px, py, pz) => {
@@ -59,7 +81,19 @@ class Player {
         this.pickaxe.visible = false;
         this.armR.add(pick);
 
-        this.group.add(this.torso, this.head, hair, this.armL, this.armR, this.legL, this.legR);
+        this.body.add(this.torso, this.head, hair, this.armL, this.armR, this.legL, this.legR);
+        if (beard) this.body.add(beard);
+
+        // Race proportions: stocky dwarves, slender elves, small hobbits
+        const scales = {
+            dwarf: [1.15, 0.8, 1.15],
+            elf: [0.92, 1.08, 0.92],
+            hobbit: [0.8, 0.68, 0.8],
+        };
+        const s = scales[race];
+        if (s) this.body.scale.set(s[0], s[1], s[2]);
+
+        this.group.add(this.body);
     }
 
     get pos() { return this.group.position; }

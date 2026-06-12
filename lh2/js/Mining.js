@@ -111,6 +111,9 @@ const LH2Mining = {
     },
 
     _depleteCharge(node) {
+        const def = node.isElement ? ELEMENTS[node.itemId]
+            : (MINERAL_DEFS[node.itemId] || FUEL_DEFS[node.itemId]);
+        FX.burst(LH2Main.activeArea.group, node.pos, def.color || 0xffffff, 14, 4);
         node.charges--;
         if (node.charges <= 0) {
             node.respawnAt = Date.now() + LH2.NODE_RESPAWN_MS;

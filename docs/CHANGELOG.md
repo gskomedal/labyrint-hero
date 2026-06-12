@@ -54,6 +54,11 @@
   - Vitenskaps-XP flyttet til systemnivå: `SmeltingSystem.smelt`/`craftAlloy` og `ChemistrySystem.synthesize` er wrappet i LH2 (`lh1-shims.js`) så all smelting/støping/syntese gir metallurgi/kjemi-XP uansett hvilken UI som brukes
   - Prosedyrelyd fra LH1 (`AudioManager`) lastes nå i LH2 – sceneknapper og oppdagelser har lyd
   - LH2s egne DOM-baserte smelteri/inventar-UIer er fjernet
+- **LH2 iterasjon 8 (karakterskaper, handelsmann, grafikkløft):**
+  - **LH1s CharacterCreatorScene åpnes automatisk ved første oppstart:** velg rase (Menneske/Dverg/Alv/Hobbit med LH1s stats: hjerter/angrep/forsvar/syn/XP-mult), utseende (kjønn, hud, hår, øyne, drakt, frisyre, skjegg), navn og startbonus. `GameScene`-shimmen i UI-verten fanger opp `scene.start('GameScene', …)` og overfører valget til Hero2
+  - **Utseendet vises i 3D:** spillerfiguren bygges fra `hero.appearance` (hud-/hår-/draktfarger, frisyre, skjegg) og rasen gir proporsjoner – brede dverger, slanke alver, små hobbiter
+  - **Handelsmann ved leiren** (LH1s MerchantScene med kjøp/selg-faner): bod med markise ved spawn, lager med potions, våpen, rustning, brensel og mineraler. Monstre dropper nå **gull** (2–5 + 2×tier)
+  - **Grafikk:** myke skygger fra solen over hele øya (PCFSoft shadow map), synlig solskive, drivende lavpoly-skyer, og partikkeleffekter ved gruvedrift (gnister i mineralfargen), kamp (treff-støv) og monsterdød
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

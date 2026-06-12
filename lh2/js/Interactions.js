@@ -6,7 +6,7 @@
 //   E           – still works for everything (keyboard fallback)
 
 const MINE_TYPES = { ore: true, 'fuel-node': true, tree: true, element: true };
-const USE_TYPES = { portal: true, smelter: true, labtable: true };
+const USE_TYPES = { portal: true, smelter: true, labtable: true, merchant: true };
 
 class Interactions {
     constructor(player, cameraRig) {

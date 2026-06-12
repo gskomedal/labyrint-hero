@@ -182,6 +182,7 @@ const Creatures = {
         if (!best) return false;
 
         best.hp -= this.hero.attack;
+        FX.burst(area.group, best.mesh.position, 0xffffff, 8, 3);
         // Knockback + hit flash
         const kx = best.mesh.position.x - p.x, kz = best.mesh.position.z - p.z;
         const kd = Math.hypot(kx, kz) || 1;
@@ -205,19 +206,22 @@ const Creatures = {
     _kill(c, area) {
         c.mesh.visible = false;
         c.respawnAt = Date.now() + LH2.MONSTER_RESPAWN_MS;
+        FX.burst(area.group, c.mesh.position, c.type.color, 20, 5);
 
-        // XP toward the hero level (LH1: monsters are the XP source)
+        // XP + gold (LH1: monsters are the XP and gold source)
         const xp = 12 * area.tier;
         this.hero.addXP(xp);
+        const gold = 2 + Math.floor(Math.random() * 4) + area.tier * 2;
+        this.hero.gold += gold;
 
         // Loot: a mineral of the zone's tier straight into the backpack
         const pool = Object.values(MINERAL_DEFS).filter(m => m.tier === area.tier);
         const def = pool[Math.floor(Math.random() * pool.length)];
-        if (def && this.hero.inventory.addItem(def)) {
-            EventBus.emit('lh2Toast', { text: `${c.type.name} beseiret! +${xp} XP, +1 ${LH2Mining.itemName(def)}`, cls: 'levelup' });
-        } else {
-            EventBus.emit('lh2Toast', { text: `${c.type.name} beseiret! +${xp} XP`, cls: 'levelup' });
-        }
+        const lootText = def && this.hero.inventory.addItem(def)
+            ? `, +1 ${LH2Mining.itemName(def)}` : '';
+        EventBus.emit('lh2Toast', {
+            text: `${c.type.name} beseiret! +${xp} XP, +${gold}g${lootText}`, cls: 'levelup',
+        });
         EventBus.emit('lh2InventoryChanged');
     },
 

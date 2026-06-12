@@ -50,11 +50,21 @@ const LH1UIHost = {
         this.game.scene.add('SmelteryScene', SmelteryScene, false);
         this.game.scene.add('ChemLabScene', ChemLabScene, false);
         this.game.scene.add('InventoryScene', InventoryScene, false);
+        this.game.scene.add('MerchantScene', MerchantScene, false);
+        this.game.scene.add('CharacterCreatorScene', CharacterCreatorScene, false);
 
-        // InventoryScene looks up this.scene.get('GameScene') for hero + pet.
-        // A dummy scene with that key carries the references instead.
+        // InventoryScene looks up this.scene.get('GameScene') for hero + pet,
+        // and CharacterCreatorScene exits via scene.start('GameScene', data).
+        // A dummy scene with that key carries the refs and intercepts the
+        // creator's result instead of running a Phaser game world.
         this.game.scene.add('GameScene', class extends Phaser.Scene {
             constructor() { super({ key: 'GameScene' }); }
+            init(data) {
+                if (data && data.race && LH1UIHost.onCharacterCreated) {
+                    LH1UIHost.onCharacterCreated(data);
+                }
+            }
+            create() { this.scene.stop(); }
         }, false);
 
         // Skill picks from LH1's SkillScene: spend a point, sync LH2 effects
@@ -103,7 +113,8 @@ const LH1UIHost = {
         // A hosted scene may have launched another (e.g. Elementbok from the
         // inventory) – stay open and track that one instead
         const HOSTED = ['SkillScene', 'ElementBookScene', 'MineralWikiScene',
-            'SmelteryScene', 'ChemLabScene', 'InventoryScene'];
+            'SmelteryScene', 'ChemLabScene', 'InventoryScene',
+            'MerchantScene', 'CharacterCreatorScene'];
         const stillActive = HOSTED.find(k => this.game.scene.isActive(k));
         if (stillActive) {
             this._activeKey = stillActive;

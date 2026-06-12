@@ -182,8 +182,79 @@ const Decorations = {
         });
     },
 
-    /** Animate smelter fire flicker. */
-    update(area, time) {
+    /** Merchant NPC with a small market stall by the camp. */
+    addMerchant(area, pos, onUse) {
+        const group = new THREE.Group();
+        group.position.set(pos.x, pos.y, pos.z);
+
+        const mat = (hex) => new THREE.MeshLambertMaterial({ color: hex, flatShading: true });
+        const box = (w, h, d, color, x, y, z) => {
+            const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color));
+            m.position.set(x, y, z);
+            m.castShadow = true;
+            return m;
+        };
+
+        // Figure: purple robe + hat
+        const robe = box(0.75, 1.1, 0.5, 0x6a3d8f, 0, 0.95, 0);
+        const head = box(0.45, 0.45, 0.42, 0xd9a878, 0, 1.75, 0);
+        const hatBrim = box(0.7, 0.08, 0.7, 0x4a2a66, 0, 2.0, 0);
+        const hatTop = box(0.34, 0.4, 0.34, 0x4a2a66, 0, 2.22, 0);
+
+        // Stall: counter + striped awning
+        const counter = box(2.4, 0.8, 0.9, 0x7a5a36, 0, 0.4, 1.3);
+        const poleL = box(0.1, 2.2, 0.1, 0x5a4226, -1.1, 1.1, 1.7);
+        const poleR = box(0.1, 2.2, 0.1, 0x5a4226, 1.1, 1.1, 1.7);
+        const awning = box(2.6, 0.08, 1.3, 0xcc4444, 0, 2.25, 1.35);
+        const awning2 = box(2.6, 0.1, 0.4, 0xeeeedd, 0, 2.26, 1.0);
+
+        group.add(robe, head, hatBrim, hatTop, counter, poleL, poleR, awning, awning2);
+        area.group.add(group);
+
+        area.interactables.push({
+            type: 'merchant',
+            pos,
+            getLabel: () => 'Handelsmann',
+            isActive: () => true,
+            onInteract: onUse,
+        });
+    },
+
+    /** Drifting low-poly clouds above the island. */
+    addClouds(area, rand, count) {
+        area.clouds = [];
+        const mat = new THREE.MeshLambertMaterial({
+            color: 0xffffff, transparent: true, opacity: 0.85, flatShading: true,
+        });
+        for (let i = 0; i < count; i++) {
+            const cloud = new THREE.Group();
+            const blobs = 2 + Math.floor(rand() * 3);
+            for (let b = 0; b < blobs; b++) {
+                const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(3 + rand() * 4, 0), mat);
+                blob.position.set((rand() - 0.5) * 9, (rand() - 0.5) * 1.5, (rand() - 0.5) * 5);
+                blob.scale.y = 0.45;
+                cloud.add(blob);
+            }
+            cloud.position.set(
+                (rand() - 0.5) * LH2.WORLD_SIZE * 1.2,
+                55 + rand() * 25,
+                (rand() - 0.5) * LH2.WORLD_SIZE * 1.2,
+            );
+            cloud.userData.speed = 1.2 + rand() * 1.6;
+            area.group.add(cloud);
+            area.clouds.push(cloud);
+        }
+    },
+
+    /** Animate smelter fire flicker + cloud drift. */
+    update(area, time, dt) {
+        if (area.clouds) {
+            const limit = LH2.WORLD_SIZE * 0.7;
+            for (const cloud of area.clouds) {
+                cloud.position.x += cloud.userData.speed * (dt || 0.016);
+                if (cloud.position.x > limit) cloud.position.x = -limit;
+            }
+        }
         if (area.smelterGroup) {
             const f = area.smelterGroup.userData.fire;
             const l = area.smelterGroup.userData.fireLight;

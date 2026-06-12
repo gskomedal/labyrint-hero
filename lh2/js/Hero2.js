@@ -12,10 +12,11 @@ class Hero2 extends Hero {
         this.area = 'surface';
         this.pos = { x: 0, y: 0, z: 0 };
 
-        // Identity (LH1 scenes show name/portrait; creator comes later)
+        // Identity (set by LH1's CharacterCreatorScene on first start)
         this.heroName = 'Helt';
         this.race = 'human';
         this.appearance = (typeof defaultAppearance === 'function') ? defaultAppearance('human') : {};
+        this.startBonus = null; // 'heart' | 'attack' | 'vision'
         this.gold = 0;
 
         // Hero level – LH1's curve. XP comes from defeating monsters.
@@ -60,11 +61,19 @@ class Hero2 extends Hero {
      * LH2 mechanics read the ones they understand.
      */
     _resetSkillFields() {
-        this.attack = 2;
-        this.defense = 0;
-        this.maxHearts = LH2.MAX_HEARTS;
-        this.visionRadius = 5;
-        this.xpMultiplier = 1;
+        // Race base stats from LH1's RACE_DEFS (CharacterCreatorScene)
+        const race = (typeof RACE_DEFS !== 'undefined' && RACE_DEFS[this.race]) || null;
+        this.attack = race ? race.attack : 2;
+        this.defense = race ? race.defense : 0;
+        this.maxHearts = race ? race.hearts : LH2.MAX_HEARTS;
+        this.visionRadius = race ? race.visionRadius : 5;
+        this.xpMultiplier = race ? race.xpMultiplier : 1;
+
+        // Start bonus from the character creator
+        if (this.startBonus === 'heart') this.maxHearts += 1;
+        else if (this.startBonus === 'attack') this.attack += 1;
+        else if (this.startBonus === 'vision') this.visionRadius += 2;
+
         this.critChance = 0;
         this.dodgeChance = 0;
         this.counterChance = 0;
@@ -194,6 +203,16 @@ class Hero2 extends Hero {
         EventBus.emit('lh2HeartsChanged');
     }
 
+    /** Apply the character creator's result (race, name, looks, bonus). */
+    applyCharacter(data) {
+        if (data.race) this.race = data.race;
+        if (data.heroName) this.heroName = data.heroName;
+        if (data.appearance) this.appearance = { ...data.appearance };
+        if (data.startBonus) this.startBonus = data.startBonus.id || data.startBonus;
+        this.replaySkills();
+        this.hearts = this.maxHearts;
+    }
+
     /** Kept as the common entry point (science level-ups call this). */
     applyScienceEffects() {
         this.replaySkills();
@@ -217,6 +236,7 @@ class Hero2 extends Hero {
             heroName: this.heroName,
             race: this.race,
             appearance: { ...this.appearance },
+            startBonus: this.startBonus,
             skillPoints: this.skillPoints,
             skills: [...this.skills],
             alloyInventory: { ...this.alloyInventory },
@@ -260,6 +280,7 @@ class Hero2 extends Hero {
         if (data.heroName) hero.heroName = data.heroName;
         if (data.race) hero.race = data.race;
         if (data.appearance) hero.appearance = { ...data.appearance };
+        if (data.startBonus) hero.startBonus = data.startBonus;
         if (data.alloyInventory) hero.alloyInventory = { ...data.alloyInventory };
         if (data.campStash) hero.campStash = data.campStash.map(e => ({ ...e }));
         if (data.discoveredAlloys) hero.discoveredAlloys = { ...data.discoveredAlloys };

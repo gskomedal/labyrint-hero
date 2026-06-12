@@ -12,6 +12,8 @@ const LH2Main = {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.getElementById('game-container').appendChild(this.renderer.domElement);
 
         this.scene = new THREE.Scene();
@@ -117,6 +119,21 @@ const LH2Main = {
             if (!this.skipSaveOnUnload) this.save();
         });
 
+        // The 3D figure mirrors the hero's appearance and race
+        this.player.applyAppearance(this.hero);
+
+        // First start: LH1's character creator picks race, looks and bonus
+        LH1UIHost.onCharacterCreated = (data) => {
+            this.hero.applyCharacter(data);
+            this.player.applyAppearance(this.hero);
+            EventBus.emit('lh2Toast', { text: `Velkommen, ${this.hero.heroName}!`, cls: 'levelup' });
+            EventBus.emit('lh2InventoryChanged');
+            this.save();
+        };
+        if (!saved) {
+            setTimeout(() => LH1UIHost.open('CharacterCreatorScene', { difficulty: 'normal' }), 400);
+        }
+
         // Debug handle (hobby-project style)
         window.lh2 = this;
 
@@ -145,11 +162,27 @@ const LH2Main = {
         surface.group.add(terrain.group);
         surface.group.visible = false;
 
-        // Lights: sun + sky
+        // Lights: sun + sky, with soft shadows across the island
         const sun = new THREE.DirectionalLight(0xfff2dd, 2.6);
         sun.position.set(120, 180, 80);
+        sun.castShadow = true;
+        sun.shadow.mapSize.set(2048, 2048);
+        sun.shadow.camera.left = -220;
+        sun.shadow.camera.right = 220;
+        sun.shadow.camera.top = 220;
+        sun.shadow.camera.bottom = -220;
+        sun.shadow.camera.far = 500;
+        sun.shadow.bias = -0.0006;
         const hemi = new THREE.HemisphereLight(0xbcd8ff, 0x55663f, 1.4);
         surface.group.add(sun, hemi);
+
+        // Visible sun disc
+        const sunDisc = new THREE.Mesh(
+            new THREE.SphereGeometry(9, 12, 10),
+            new THREE.MeshBasicMaterial({ color: 0xfff4cc }),
+        );
+        sunDisc.position.set(190, 230, 130);
+        surface.group.add(sunDisc);
 
         // Seeded placement PRNG
         const rand = (() => {
@@ -189,15 +222,87 @@ const LH2Main = {
         });
         OreDeposits.populateAt(surface, [maze.centerPos, ...maze.rewardSpots], rand, 'surface:maze');
 
+        // Merchant stall by the camp (buys/sells via LH1's MerchantScene)
+        const my = surface.getHeightAt(spawn.x + 2, spawn.z + 7);
+        Decorations.addMerchant(surface, { x: spawn.x + 2, y: my, z: spawn.z + 7 },
+            () => this._openMerchant());
+
         // Nature & resources (LH1-like scarcity)
         Decorations.addTrees(surface, rand, 22, () => LH2Mining.chopTree());
         Decorations.addBoulders(surface, rand, 30);
         Decorations.addBushes(surface, rand, 45);
         Decorations.addFlowers(surface, rand, 35);
+        Decorations.addClouds(surface, rand, 9);
         OreDeposits.populate(surface, rand, LH2.SURFACE_ORE_NODES);
         OreDeposits.addElementNodes(surface, rand);
 
+        // Everything on the surface throws/receives shadows except water
+        surface.group.traverse(obj => {
+            if (!obj.isMesh) return;
+            obj.receiveShadow = true;
+            if (obj.geometry && obj.geometry.type !== 'PlaneGeometry') obj.castShadow = true;
+        });
+
         this.areas.surface = surface;
+    },
+
+    // ── Merchant (LH1's MerchantScene with a slim GameScene stand-in) ────────
+
+    _openMerchant() {
+        if (!this._merchantStock || this._merchantStock.length === 0) {
+            this._merchantStock = this._makeMerchantStock();
+        }
+        LH1UIHost.open('MerchantScene', {
+            gameScene: {
+                hero: this.hero,
+                worldNum: 1,
+                itemSpawner: {
+                    // LH1's pricing formula (ItemSpawner._itemPrice), simplified
+                    _itemPrice: (item, wn) => {
+                        let base = 20;
+                        if (item.type === 'consumable') base = 12;
+                        if (item.type === 'tool') base = 8;
+                        if (item.type === 'mineral') return Math.round((item.tier || 1) * 15 * (1 + wn * 0.08));
+                        if (item.type === 'fuel') return 5 + (FUEL_DEFS[item.id]?.energyValue || 3) * 3;
+                        const tierMul = (item.tier || 1) * 10;
+                        return Math.round((base + tierMul) * (1 + wn * 0.10));
+                    },
+                },
+            },
+            stock: this._merchantStock,
+        });
+    },
+
+    _makeMerchantStock() {
+        const stock = [];
+        const price = (item) => {
+            if (item.type === 'mineral') return Math.round((item.tier || 1) * 15 * 1.08);
+            if (item.type === 'fuel') return 5 + (FUEL_DEFS[item.id]?.energyValue || 3) * 3;
+            const base = item.type === 'consumable' ? 12 : 20;
+            return Math.round((base + (item.tier || 1) * 10) * 1.1);
+        };
+        const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        const consumables = Object.values(ITEM_DEFS).filter(i => i.type === 'consumable' && (i.tier || 1) <= 2);
+        for (let i = 0; i < 2 && consumables.length; i++) {
+            const item = pick(consumables);
+            stock.push({ item, price: price(item) });
+        }
+        const weapons = Object.values(ITEM_DEFS).filter(i => i.type === 'weapon' && (i.tier || 1) <= 2);
+        if (weapons.length) { const w = pick(weapons); stock.push({ item: w, price: price(w) }); }
+        const armors = Object.values(ITEM_DEFS).filter(i => i.type === 'armor' && (i.tier || 1) <= 2);
+        if (armors.length) { const a = pick(armors); stock.push({ item: a, price: price(a) }); }
+
+        const fuelDef = FUEL_DEFS[pick(['wood', 'charcoal', 'coal'])];
+        stock.push({
+            item: { id: fuelDef.id, name: fuelDef.name, type: 'fuel', tier: fuelDef.tier || 1, color: fuelDef.color, desc: fuelDef.desc, count: 3 },
+            price: 5 + fuelDef.energyValue * 3,
+        });
+        const minerals = Object.values(MINERAL_DEFS).filter(m => m.tier <= 2);
+        const mineral = pick(minerals);
+        stock.push({ item: { ...mineral, count: 1 }, price: price(mineral) });
+
+        return stock;
     },
 
     // ── Area switching ───────────────────────────────────────────────────────
@@ -328,7 +433,8 @@ const LH2Main = {
         LH2Mining.update(dt, this.player.moving);
         this.interactions.update(this.player.pos);
         OreDeposits.update(this.activeArea, this.hero.sciences, this.player.pos, time);
-        Decorations.update(this.activeArea, time);
+        Decorations.update(this.activeArea, time, dt);
+        FX.update(dt);
         if (!this._switching) Creatures.update(this.activeArea, dt, time);
         this.cameraRig.update(dt, this.player.pos, this.activeArea);
         this.minimap.update(this.activeArea, time);
