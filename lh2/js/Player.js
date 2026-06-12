@@ -51,6 +51,12 @@ class Player {
         const hairH = a.hairStyle === 'long' ? 0.45 : 0.18;
         const hair = box(0.54, hairH, 0.49, HAIR, 0, 2.22 - (hairH - 0.18) / 2 + (a.hairStyle === 'long' ? 0 : 0), 0);
         if (a.hairStyle === 'long') hair.position.z = -0.04;
+
+        // Face: eyes on the forward (+z) side of the head
+        const EYE = a.eyeColor !== undefined ? a.eyeColor : 0x223355;
+        const eyeL = box(0.09, 0.09, 0.03, EYE, -0.12, 1.99, 0.24);
+        const eyeR = box(0.09, 0.09, 0.03, EYE, 0.12, 1.99, 0.24);
+        const mouth = box(0.16, 0.04, 0.03, 0x8a5a4a, 0, 1.82, 0.24);
         let beard = null;
         if (a.beardStyle && a.beardStyle !== 'none') {
             beard = box(0.4, a.beardStyle === 'long' ? 0.45 : 0.22, 0.12, HAIR, 0, 1.66, 0.22);
@@ -81,7 +87,7 @@ class Player {
         this.pickaxe.visible = false;
         this.armR.add(pick);
 
-        this.body.add(this.torso, this.head, hair, this.armL, this.armR, this.legL, this.legR);
+        this.body.add(this.torso, this.head, hair, eyeL, eyeR, mouth, this.armL, this.armR, this.legL, this.legR);
         if (beard) this.body.add(beard);
 
         // Race proportions: stocky dwarves, slender elves, small hobbits

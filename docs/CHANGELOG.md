@@ -59,6 +59,14 @@
   - **Utseendet vises i 3D:** spillerfiguren bygges fra `hero.appearance` (hud-/hår-/draktfarger, frisyre, skjegg) og rasen gir proporsjoner – brede dverger, slanke alver, små hobbiter
   - **Handelsmann ved leiren** (LH1s MerchantScene med kjøp/selg-faner): bod med markise ved spawn, lager med potions, våpen, rustning, brensel og mineraler. Monstre dropper nå **gull** (2–5 + 2×tier)
   - **Grafikk:** myke skygger fra solen over hele øya (PCFSoft shadow map), synlig solskive, drivende lavpoly-skyer, og partikkeleffekter ved gruvedrift (gnister i mineralfargen), kamp (treff-støv) og monsterdød
+- **LH2 iterasjon 9 (grafikkrunde):**
+  - **Terreng:** myk fargeblanding mellom høydebånd (sand → gress → mørkt gress → fjell → snø) i stedet for harde kanter, og bratte flater blir fjellgrå uansett høyde
+  - **Himmelkuppel** med gradient fra dishorisont til blå senit, og horisonttåke som matcher
+  - **Levende hav:** vannet bølger (animerte vertekser) med solglans (Phong-speiling)
+  - **Bedre vegetasjon:** to tretyper (gran med etasjekroner og løvtre/bjørk med klumpete krone), per-tre farge- og størrelsesvariasjon, og ~380 instansierte gresstuster med fargevariasjon
+  - **Grottene:** stalaktitter og stalagmitter langs gangene, per-blokk fargevariasjon i veggene (instansfarger) og bedre grunnbelysning
+  - **Helten har fått ansikt** (øyne i valgt øyenfarge + munn) som peker dit man ser
+  - Minimap-paletten matcher det nye terrenget; kamera ser langt nok for himmelkuppelen
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

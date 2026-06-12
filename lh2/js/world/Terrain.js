@@ -70,22 +70,34 @@ class Terrain {
 
         const pos = geo.attributes.position;
         const colors = new Float32Array(pos.count * 3);
-        const c = new THREE.Color();
+
+        // Height bands blended smoothly + slope-based rock
+        const SAND = new THREE.Color(0xd4bd84);
+        const GRASS = new THREE.Color(0x55994f);
+        const GRASS_D = new THREE.Color(0x3c7a42);
+        const ROCK = new THREE.Color(0x7d7669);
+        const SNOW = new THREE.Color(0xeceff4);
+        const lerp = (a, b, t) => a.clone().lerp(b, Math.min(1, Math.max(0, t)));
 
         for (let v = 0; v < pos.count; v++) {
             const x = pos.getX(v), z = pos.getZ(v);
             const h = this.getHeightAt(x, z);
             pos.setY(v, h);
 
-            // Color by height band: sand -> grass -> rock -> snow
-            if (h < 1.2)       c.setHex(0xc8b878);
-            else if (h < 10)   c.setHex(0x4f8f4a);
-            else if (h < 19)   c.setHex(0x3e7340);
-            else if (h < 26)   c.setHex(0x77716a);
-            else               c.setHex(0xe8e8ee);
+            let c;
+            if (h < 1.0)       c = SAND.clone();
+            else if (h < 3)    c = lerp(SAND, GRASS, (h - 1.0) / 2);
+            else if (h < 14)   c = lerp(GRASS, GRASS_D, (h - 3) / 11);
+            else if (h < 23)   c = lerp(GRASS_D, ROCK, (h - 14) / 9);
+            else if (h < 29)   c = lerp(ROCK, SNOW, (h - 23) / 6);
+            else               c = SNOW.clone();
+
+            // Properly steep faces turn rocky regardless of height
+            const slope = this.getSlopeAt(x, z);
+            if (slope > 1.15 && h > 3) c.lerp(ROCK, Math.min(0.8, (slope - 1.15) * 1.1));
 
             // Slight noise variation so the low-poly facets read better
-            const tint = 0.92 + 0.08 * this.noise(x * 0.3, z * 0.3);
+            const tint = 0.93 + 0.07 * this.noise(x * 0.3, z * 0.3);
             colors[v * 3] = c.r * tint;
             colors[v * 3 + 1] = c.g * tint;
             colors[v * 3 + 2] = c.b * tint;
@@ -96,19 +108,56 @@ class Terrain {
 
         const mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
         const mesh = new THREE.Mesh(geo, mat);
-        mesh.receiveShadow = false;
+        mesh.receiveShadow = true;
         return mesh;
     }
 
     _buildWater() {
-        const geo = new THREE.PlaneGeometry(this.size * 2.4, this.size * 2.4);
+        // Animated, slightly glossy ocean (vertices waved in main loop)
+        const segs = 56;
+        const geo = new THREE.PlaneGeometry(this.size * 2.4, this.size * 2.4, segs, segs);
         geo.rotateX(-Math.PI / 2);
-        const mat = new THREE.MeshLambertMaterial({
-            color: 0x2266aa, transparent: true, opacity: 0.85,
+        const mat = new THREE.MeshPhongMaterial({
+            color: 0x2b6f9e, transparent: true, opacity: 0.82,
+            shininess: 90, specular: 0x99ccee, flatShading: true,
         });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.y = LH2.WATER_LEVEL;
+        this.water = mesh;
         return mesh;
+    }
+
+    /** Gentle two-directional waves; called every frame on the surface. */
+    animateWater(time) {
+        if (!this.water) return;
+        const pos = this.water.geometry.attributes.position;
+        const t = time * 0.0011;
+        for (let v = 0; v < pos.count; v++) {
+            const x = pos.getX(v), z = pos.getZ(v);
+            pos.setY(v, Math.sin(x * 0.05 + t) * 0.22 + Math.cos(z * 0.045 + t * 0.8) * 0.18);
+        }
+        pos.needsUpdate = true;
+        this.water.geometry.computeVertexNormals();
+    }
+
+    /** Gradient sky dome: horizon haze up to a blue zenith. */
+    buildSkyDome() {
+        const geo = new THREE.SphereGeometry(820, 20, 14);
+        const pos = geo.attributes.position;
+        const colors = new Float32Array(pos.count * 3);
+        const ZENITH = new THREE.Color(0x3f7fd1);
+        const HORIZON = new THREE.Color(0xd6e6f2);
+        for (let v = 0; v < pos.count; v++) {
+            const y = pos.getY(v) / 820; // -1..1
+            const c = HORIZON.clone().lerp(ZENITH, Math.min(1, Math.max(0, y * 1.4)));
+            colors[v * 3] = c.r;
+            colors[v * 3 + 1] = c.g;
+            colors[v * 3 + 2] = c.b;
+        }
+        geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+            vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false,
+        }));
     }
 
     /**

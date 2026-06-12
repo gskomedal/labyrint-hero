@@ -17,7 +17,7 @@ const LH2Main = {
         document.getElementById('game-container').appendChild(this.renderer.domElement);
 
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 600);
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1100);
 
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -145,6 +145,7 @@ const LH2Main = {
     _buildSurface() {
         const noise = makeNoise2D(LH2.SEED);
         const terrain = new Terrain(noise);
+        this.terrain = terrain;
 
         const surface = {
             id: 'surface',
@@ -160,6 +161,7 @@ const LH2Main = {
             findSpot: (rand, opts) => terrain.findSpot(rand, opts),
         };
         surface.group.add(terrain.group);
+        surface.group.add(terrain.buildSkyDome());
         surface.group.visible = false;
 
         // Lights: sun + sky, with soft shadows across the island
@@ -179,9 +181,10 @@ const LH2Main = {
         // Visible sun disc
         const sunDisc = new THREE.Mesh(
             new THREE.SphereGeometry(9, 12, 10),
-            new THREE.MeshBasicMaterial({ color: 0xfff4cc }),
+            new THREE.MeshBasicMaterial({ color: 0xfff4cc, fog: false }),
         );
         sunDisc.position.set(190, 230, 130);
+        sunDisc.userData.noShadow = true;
         surface.group.add(sunDisc);
 
         // Seeded placement PRNG
@@ -228,19 +231,24 @@ const LH2Main = {
             () => this._openMerchant());
 
         // Nature & resources (LH1-like scarcity)
-        Decorations.addTrees(surface, rand, 22, () => LH2Mining.chopTree());
+        Decorations.addTrees(surface, rand, 26, () => LH2Mining.chopTree());
         Decorations.addBoulders(surface, rand, 30);
         Decorations.addBushes(surface, rand, 45);
         Decorations.addFlowers(surface, rand, 35);
+        Decorations.addGrass(surface, rand, 380);
         Decorations.addClouds(surface, rand, 9);
         OreDeposits.populate(surface, rand, LH2.SURFACE_ORE_NODES);
         OreDeposits.addElementNodes(surface, rand);
 
-        // Everything on the surface throws/receives shadows except water
+        // Everything on the surface throws/receives shadows except water,
+        // the sky dome and the sun disc
         surface.group.traverse(obj => {
-            if (!obj.isMesh) return;
+            if (!obj.isMesh || obj.userData.noShadow) return;
             obj.receiveShadow = true;
-            if (obj.geometry && obj.geometry.type !== 'PlaneGeometry') obj.castShadow = true;
+            if (obj.geometry && obj.geometry.type !== 'PlaneGeometry'
+                && obj.geometry.type !== 'SphereGeometry') {
+                obj.castShadow = true;
+            }
         });
 
         this.areas.surface = surface;
@@ -435,6 +443,7 @@ const LH2Main = {
         OreDeposits.update(this.activeArea, this.hero.sciences, this.player.pos, time);
         Decorations.update(this.activeArea, time, dt);
         FX.update(dt);
+        if (this.activeArea.id === 'surface') this.terrain.animateWater(time);
         if (!this._switching) Creatures.update(this.activeArea, dt, time);
         this.cameraRig.update(dt, this.player.pos, this.activeArea);
         this.minimap.update(this.activeArea, time);

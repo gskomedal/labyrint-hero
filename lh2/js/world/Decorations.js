@@ -26,23 +26,62 @@ const Decorations = {
         return group;
     },
 
-    /** Trunk + cone canopy. Interactable: chop for wood fuel. */
+    /** Trees: spruces (stacked cones) and leafy trees (round canopy), with
+     *  per-tree color/size variation. Interactable: chop for wood fuel. */
     addTrees(area, rand, count, onChop) {
-        const trunkMat = new THREE.MeshLambertMaterial({ color: 0x6a4a2a, flatShading: true });
-        const leafMat = new THREE.MeshLambertMaterial({ color: 0x2e6b34, flatShading: true });
+        const trunkMats = [
+            new THREE.MeshLambertMaterial({ color: 0x6a4a2a, flatShading: true }),
+            new THREE.MeshLambertMaterial({ color: 0x59401f, flatShading: true }),
+            new THREE.MeshLambertMaterial({ color: 0xb9ac96, flatShading: true }), // birch
+        ];
+        const canopyMats = [
+            new THREE.MeshLambertMaterial({ color: 0x2e6b34, flatShading: true }),
+            new THREE.MeshLambertMaterial({ color: 0x3d7c2f, flatShading: true }),
+            new THREE.MeshLambertMaterial({ color: 0x5a8f3a, flatShading: true }),
+            new THREE.MeshLambertMaterial({ color: 0x7aa03f, flatShading: true }),
+        ];
 
         for (let i = 0; i < count; i++) {
-            const spot = area.findSpot(rand, { minH: 1.5, maxH: 12, maxSlope: 0.6 });
+            const spot = area.findSpot(rand, { minH: 1.5, maxH: 14, maxSlope: 0.6 });
             if (!spot) continue;
 
             const tree = new THREE.Group();
             tree.position.set(spot.x, spot.y, spot.z);
-            const h = 2.2 + rand() * 1.5;
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.32, h, 6), trunkMat);
-            trunk.position.y = h / 2;
-            const canopy = new THREE.Mesh(new THREE.ConeGeometry(1.5 + rand() * 0.6, 3 + rand() * 1.2, 7), leafMat);
-            canopy.position.y = h + 1.2;
-            tree.add(trunk, canopy);
+            tree.rotation.y = rand() * Math.PI * 2;
+            const spruce = rand() < 0.55;
+            const canopyMat = canopyMats[Math.floor(rand() * canopyMats.length)];
+
+            if (spruce) {
+                const h = 2.0 + rand() * 1.4;
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.3, h, 6), trunkMats[Math.floor(rand() * 2)]);
+                trunk.position.y = h / 2;
+                tree.add(trunk);
+                // Three stacked cones, narrowing upwards
+                let y = h * 0.7;
+                let r = 1.5 + rand() * 0.5;
+                for (let layer = 0; layer < 3; layer++) {
+                    const cone = new THREE.Mesh(new THREE.ConeGeometry(r, 1.9, 7), canopyMat);
+                    cone.position.y = y + 0.8;
+                    tree.add(cone);
+                    y += 1.1;
+                    r *= 0.72;
+                }
+            } else {
+                // Leafy tree: birch-ish trunk + lumpy canopy
+                const h = 2.4 + rand() * 1.2;
+                const birch = rand() < 0.4;
+                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.26, h, 6), trunkMats[birch ? 2 : Math.floor(rand() * 2)]);
+                trunk.position.y = h / 2;
+                tree.add(trunk);
+                for (let b = 0; b < 3; b++) {
+                    const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9 + rand() * 0.5, 0), canopyMat);
+                    blob.position.set((rand() - 0.5) * 1.1, h + 0.5 + (rand() - 0.5) * 0.7, (rand() - 0.5) * 1.1);
+                    tree.add(blob);
+                }
+            }
+
+            const s = 0.85 + rand() * 0.45;
+            tree.scale.setScalar(s);
             area.group.add(tree);
 
             area.interactables.push({
@@ -53,6 +92,35 @@ const Decorations = {
                 onInteract: () => onChop(tree),
             });
         }
+    },
+
+    /** Grass cover: hundreds of small instanced tufts with shade variation. */
+    addGrass(area, rand, count) {
+        const geo = new THREE.ConeGeometry(0.09, 0.42, 4);
+        const mat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
+        const grass = new THREE.InstancedMesh(geo, mat, count);
+        const m4 = new THREE.Matrix4();
+        const q = new THREE.Quaternion();
+        const eul = new THREE.Euler();
+        const sc = new THREE.Vector3();
+        const base = new THREE.Color(0x4f8f4a);
+        const c = new THREE.Color();
+        let placed = 0;
+        for (let i = 0; i < count * 3 && placed < count; i++) {
+            const spot = area.findSpot(rand, { minH: 1.6, maxH: 13, maxSlope: 0.55 });
+            if (!spot) continue;
+            eul.set((rand() - 0.5) * 0.35, rand() * Math.PI, (rand() - 0.5) * 0.35);
+            q.setFromEuler(eul);
+            sc.setScalar(0.7 + rand() * 0.9);
+            m4.compose(new THREE.Vector3(spot.x, spot.y + 0.12, spot.z), q, sc);
+            grass.setMatrixAt(placed, m4);
+            c.copy(base).multiplyScalar(0.8 + rand() * 0.5);
+            grass.setColorAt(placed, c);
+            placed++;
+        }
+        grass.count = placed;
+        if (grass.instanceColor) grass.instanceColor.needsUpdate = true;
+        area.group.add(grass);
     },
 
     /** Small bushes and tufts – pure detail, no interaction. */
@@ -185,7 +253,8 @@ const Decorations = {
     /** Merchant NPC with a small market stall by the camp. */
     addMerchant(area, pos, onUse) {
         const group = new THREE.Group();
-        group.position.set(pos.x, pos.y, pos.z);
+        // Seat the stall into sloping ground so nothing floats
+        group.position.set(pos.x, pos.y - 0.45, pos.z);
 
         const mat = (hex) => new THREE.MeshLambertMaterial({ color: hex, flatShading: true });
         const box = (w, h, d, color, x, y, z) => {

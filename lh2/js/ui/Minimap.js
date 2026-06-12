@@ -159,12 +159,12 @@ class Minimap {
                 const z = (py / S) * LH2.WORLD_SIZE - half;
                 const h = area.getHeightAt(x, z);
                 let r, g, b;
-                if (h < LH2.MIN_WALK_HEIGHT) { r = 30; g = 60; b = 110; }
-                else if (h < 1.2) { r = 160; g = 145; b = 95; }
-                else if (h < 10) { r = 60; g = 110; b = 58; }
-                else if (h < 19) { r = 48; g = 88; b = 50; }
-                else if (h < 26) { r = 100; g = 95; b = 88; }
-                else { r = 215; g = 215; b = 222; }
+                if (h < LH2.MIN_WALK_HEIGHT) { r = 35; g = 75; b = 125; }
+                else if (h < 1.2) { r = 195; g = 175; b = 120; }
+                else if (h < 12) { r = 78; g = 140; b = 72; }
+                else if (h < 20) { r = 58; g = 112; b = 62; }
+                else if (h < 27) { r = 118; g = 112; b = 100; }
+                else { r = 230; g = 234; b = 240; }
                 const i = (py * S + pxl) * 4;
                 img.data[i] = r; img.data[i + 1] = g; img.data[i + 2] = b; img.data[i + 3] = 235;
             }

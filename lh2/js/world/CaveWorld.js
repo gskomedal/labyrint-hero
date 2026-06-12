@@ -31,6 +31,7 @@ class CaveArea {
         this.group.add(this._buildFloor());
         this.group.add(this._buildWalls());
         this.group.add(this._buildCeiling());
+        this._addDripstone();
         this._addLights();
     }
 
@@ -182,10 +183,12 @@ class CaveArea {
 
         const wallH = this.ceilingY + 1.5;
         const geo = new THREE.BoxGeometry(this.tile, wallH, this.tile);
-        const c = new THREE.Color(this.fogColor).multiplyScalar(3.0);
-        const mat = new THREE.MeshLambertMaterial({ color: c, flatShading: true });
+        // White base material – per-instance colors give the rock variation
+        const mat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
         const walls = new THREE.InstancedMesh(geo, mat, count);
         const m4 = new THREE.Matrix4();
+        const base = new THREE.Color(this.fogColor).multiplyScalar(3.6);
+        const c = new THREE.Color();
         let idx = 0;
         for (let y = 0; y < this.th; y++) {
             for (let x = 0; x < this.tw; x++) {
@@ -193,10 +196,41 @@ class CaveArea {
                 const wx = this.originX + (x + 0.5) * this.tile;
                 const wz = this.originZ + (y + 0.5) * this.tile;
                 m4.makeTranslation(wx, wallH / 2 - 1, wz);
-                walls.setMatrixAt(idx++, m4);
+                walls.setMatrixAt(idx, m4);
+                // Shade jitter so the tunnels don't look like uniform blocks
+                c.copy(base).multiplyScalar(0.75 + 0.45 * ((this.noise(x * 0.9, y * 0.9) + 1) / 2));
+                walls.setColorAt(idx, c);
+                idx++;
             }
         }
+        if (walls.instanceColor) walls.instanceColor.needsUpdate = true;
         return walls;
+    }
+
+    /** Stalactites (ceiling) and stalagmites (floor) along the tunnels. */
+    _addDripstone() {
+        const mat = new THREE.MeshLambertMaterial({
+            color: new THREE.Color(this.fogColor).multiplyScalar(1.5),
+            flatShading: true,
+        });
+        for (let i = 0; i < 26; i++) {
+            const spot = this.findSpot(this._rand);
+            if (!spot) continue;
+            const ox = (this._rand() - 0.5) * this.tile * 0.7;
+            const oz = (this._rand() - 0.5) * this.tile * 0.7;
+            if (this._rand() < 0.6) {
+                const len = 1.2 + this._rand() * 2.2;
+                const tip = new THREE.Mesh(new THREE.ConeGeometry(0.3 + this._rand() * 0.25, len, 5), mat);
+                tip.position.set(spot.x + ox, this.ceilingY - len / 2 + 0.4, spot.z + oz);
+                tip.rotation.x = Math.PI; // hang from the ceiling
+                this.group.add(tip);
+            } else {
+                const len = 0.7 + this._rand() * 1.3;
+                const tip = new THREE.Mesh(new THREE.ConeGeometry(0.32 + this._rand() * 0.25, len, 5), mat);
+                tip.position.set(spot.x + ox, this._floorHeight(spot.x + ox, spot.z + oz) + len / 2, spot.z + oz);
+                this.group.add(tip);
+            }
+        }
     }
 
     _buildCeiling() {
@@ -249,7 +283,7 @@ class CaveArea {
         }
 
         // Ambient so tunnels are dim but readable
-        this.group.add(new THREE.AmbientLight(this.fogColor, 7));
+        this.group.add(new THREE.AmbientLight(this.fogColor, 10));
     }
 }
 
