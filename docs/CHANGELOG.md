@@ -67,6 +67,9 @@
   - **Grottene:** stalaktitter og stalagmitter langs gangene, per-blokk fargevariasjon i veggene (instansfarger) og bedre grunnbelysning
   - **Helten har fått ansikt** (øyne i valgt øyenfarge + munn) som peker dit man ser
   - Minimap-paletten matcher det nye terrenget; kamera ser langt nok for himmelkuppelen
+- **LH2 iterasjon 10 (musikk + kjæledyr):**
+  - **Bakgrunnsmusikk:** LH1s prosedyrelagde Grieg-musikk (`AudioManager` + `musicPieces.js`) spiller nå i LH2 og bytter tema etter sonen – Morgenstemning på overflaten, Dovregubbens hall i Grunnfjell osv. En liten `getZone`-shim gjør at LH1s `startMusic(worldNum)` virker uendret. Lyd starter ved første klikk/tast (nettlesers autoplay-regel); P skrur musikken av/på. Nivåopprykk og oppdagelser har SFX
+  - **Kjæledyr-følgesvenn:** lett 3D-skapning bygget på LH1s `PET_TYPES` (Rev/Katt/Drage/Ugle med farger og stats). Den trasker etter helten (raskere jo lenger bak den er), angriper monstre i nærheten, og flygende typer (ugle/drage) svever. Monstre retter ~35 % av angrepene mot kjæledyret hvis det er nært (LH1-mekanikk); slås det ut, kommer det tilbake ved helten etter 12 sek. Nye helter får et tilfeldig kjæledyr; typen lagres. Villmarksjeger-ferdighetene gir fortsatt pet-bonuser
 
 ### Tekniske endringer
 - **Delte systemfiler:** `lh2/index.html` laster `src/data/elements.js`, `minerals.js`, `alloys.js`, `molecules.js`, `items.js` samt `src/systems/ElementTracker.js`, `Inventory.js`, `SmeltingSystem.js` og `src/utils/EventBus.js` direkte. Endringer i disse filene påvirker nå begge spillene

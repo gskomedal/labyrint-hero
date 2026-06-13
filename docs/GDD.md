@@ -764,6 +764,8 @@ Egen localStorage-nøkkel `labyrint_hero_2_v1` (kolliderer ikke med hovedspillet
 - **Gjenbrukt LH1-UI:** SkillScene (K), ElementBookScene (B), MineralWikiScene (V), SmelteryScene (smelteovnen, med leirlager/`campStash`), ChemLabScene (kjemibordet), InventoryScene (Tab, med karakterportrett og utstyr), MerchantScene (handelsmannen ved leiren) og CharacterCreatorScene (første oppstart) kjører uendret i en gjennomsiktig Phaser-instans oppå Three.js (`LH1UIHost`). Phaser er vendored i `lh2/vendor/`. Vitenskaps-XP gis via wrappere rundt `SmeltingSystem`/`ChemistrySystem` i `lh1-shims.js`.
 - **Karakter:** rase/utseende fra skaperen brukes både av LH1-portrettene og av selve 3D-figuren (farger + raseproporsjoner). Rase-stats fra `RACE_DEFS`, startbonus støttes. Monstre dropper gull; handelsmannen kjøper og selger.
 - **Grafikk:** solskygger (PCFSoft), solskive, drivende skyer, partikkeleffekter (gruvedrift/kamp), lykt i grottene.
+- **Lyd:** LH1s prosedyrelagde Grieg-musikk spiller som bakgrunnsmusikk og følger sonens tema (overflate/grotter), via en `getZone`-shim så `AudioManager.startMusic` virker uendret. P skrur av/på; SFX på nivå/oppdagelser.
+- **Kjæledyr:** 3D-følgesvenn fra LH1s `PET_TYPES` (rev/katt/drage/ugle) som følger helten, slåss mot monstre og kan slås ut/komme tilbake. Monstre deler aggro mot pet-en (LH1-mekanikk).
 - **Utstyrskjede:** smelt grunnstoffer → støp legeringer (`ALLOY_DEFS`) → smi våpen/rustning (`ALLOY_EQUIPMENT`) → utrust fra ryggsekken. Våpen gir slagskade, rustning blokkesjanse (5 %/DEF) og bonushjerter.
 - **Navigasjon:** lykt i grottene + minimap med fog of war i labyrintene (malmmarkører gated bak Malmøye/Geologi 3, som LH1s minimap-integrasjon).
 

@@ -122,6 +122,21 @@ const LH2Main = {
         // The 3D figure mirrors the hero's appearance and race
         this.player.applyAppearance(this.hero);
 
+        // Pet companion (LH1 PET_TYPES). New heroes get a random one.
+        if (!this.hero.petTypeId) {
+            this.hero.petTypeId = ['fox', 'cat', 'dragon', 'owl'][Math.floor(Math.random() * 4)];
+        }
+        this._spawnPet();
+        if (this.pet) this.pet.enterArea(this.activeArea, this.player.pos);
+
+        // Background music (Grieg, procedural) – follows the area's zone theme
+        LH2Audio.init();
+        LH2Audio.playForArea(this.hero.area);
+
+        // SFX on key events (reuses LH1's procedural sounds)
+        EventBus.on('lh2LevelUp', () => LH2Audio.sfx('playLevelUp'));
+        EventBus.on('discovery', () => LH2Audio.sfx('playDiscovery'));
+
         // First start: LH1's character creator picks race, looks and bonus
         LH1UIHost.onCharacterCreated = (data) => {
             this.hero.applyCharacter(data);
@@ -313,6 +328,13 @@ const LH2Main = {
         return stock;
     },
 
+    // ── Pet ──────────────────────────────────────────────────────────────────
+
+    _spawnPet() {
+        if (!this.hero.petTypeId) { this.pet = null; return; }
+        this.pet = new Pet(this.hero.petTypeId, this.hero);
+    },
+
     // ── Area switching ───────────────────────────────────────────────────────
 
     _activateArea(id) {
@@ -323,6 +345,9 @@ const LH2Main = {
         this.interactions.setArea(this.activeArea);
         // The lantern lights the tunnels; daylight covers the surface
         this.player.lantern.intensity = id === 'surface' ? 0 : 55;
+        // Pet follows the hero between areas
+        if (this.pet) this.pet.enterArea(this.activeArea, this.player ? this.player.pos : this.activeArea.spawn);
+        if (typeof LH2Audio !== 'undefined') LH2Audio.playForArea(id);
 
         if (id === 'surface') {
             this.scene.background = new THREE.Color(0x87b5e8);
@@ -444,7 +469,10 @@ const LH2Main = {
         Decorations.update(this.activeArea, time, dt);
         FX.update(dt);
         if (this.activeArea.id === 'surface') this.terrain.animateWater(time);
-        if (!this._switching) Creatures.update(this.activeArea, dt, time);
+        if (!this._switching) {
+            Creatures.update(this.activeArea, dt, time);
+            if (this.pet) this.pet.update(dt, this.activeArea, time, this.activeArea.creatures);
+        }
         this.cameraRig.update(dt, this.player.pos, this.activeArea);
         this.minimap.update(this.activeArea, time);
 

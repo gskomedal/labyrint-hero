@@ -18,6 +18,7 @@ class Hero2 extends Hero {
         this.appearance = (typeof defaultAppearance === 'function') ? defaultAppearance('human') : {};
         this.startBonus = null; // 'heart' | 'attack' | 'vision'
         this.gold = 0;
+        this.petTypeId = null;  // 'fox' | 'cat' | 'dragon' | 'owl' | null
 
         // Hero level – LH1's curve. XP comes from defeating monsters.
         this.level = 1;
@@ -237,6 +238,7 @@ class Hero2 extends Hero {
             race: this.race,
             appearance: { ...this.appearance },
             startBonus: this.startBonus,
+            petTypeId: this.petTypeId,
             skillPoints: this.skillPoints,
             skills: [...this.skills],
             alloyInventory: { ...this.alloyInventory },
@@ -281,6 +283,7 @@ class Hero2 extends Hero {
         if (data.race) hero.race = data.race;
         if (data.appearance) hero.appearance = { ...data.appearance };
         if (data.startBonus) hero.startBonus = data.startBonus;
+        if (data.petTypeId !== undefined) hero.petTypeId = data.petTypeId;
         if (data.alloyInventory) hero.alloyInventory = { ...data.alloyInventory };
         if (data.campStash) hero.campStash = data.campStash.map(e => ({ ...e }));
         if (data.discoveredAlloys) hero.discoveredAlloys = { ...data.discoveredAlloys };

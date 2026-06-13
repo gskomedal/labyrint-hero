@@ -296,7 +296,21 @@ const Creatures = {
                 continue;
             }
 
-            const dx = p.x - c.mesh.position.x, dz = p.z - c.mesh.position.z;
+            // A nearby, active pet draws ~35% of the aggression (LH1 mechanic)
+            const pet = LH2Main.pet;
+            const petActive = pet && pet.group.visible && Date.now() >= pet.downUntil;
+            let tx = p.x, tz = p.z, targetIsPet = false;
+            if (petActive) {
+                const pd = Math.hypot(pet.group.position.x - c.mesh.position.x, pet.group.position.z - c.mesh.position.z);
+                if (pd < 4 || (c._petAggro && pd < LH2.MONSTER_AGGRO_RADIUS)) {
+                    if (c._petAggro === undefined) c._petAggro = Math.random() < 0.35;
+                    if (c._petAggro) { tx = pet.group.position.x; tz = pet.group.position.z; targetIsPet = true; }
+                } else {
+                    c._petAggro = undefined;
+                }
+            }
+
+            const dx = tx - c.mesh.position.x, dz = tz - c.mesh.position.z;
             const dp = Math.hypot(dx, dz);
 
             if (dp < LH2.MONSTER_AGGRO_RADIUS && dp > 1.4) {
@@ -307,7 +321,9 @@ const Creatures = {
                 // Bite – defense gives a block chance (5% per point, max 50%)
                 if (now - c.attackAt > LH2.MONSTER_ATTACK_COOLDOWN_MS) {
                     c.attackAt = now;
-                    if (Math.random() < Math.min(0.5, this.hero.defense * 0.05)) {
+                    if (targetIsPet) {
+                        pet.takeHit(1, area);
+                    } else if (Math.random() < Math.min(0.5, this.hero.defense * 0.05)) {
                         EventBus.emit('lh2Toast', { text: 'Blokkert!' });
                     } else {
                         LH2Main.damageHero(1, c.type.name);
