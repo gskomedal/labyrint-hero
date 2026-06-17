@@ -766,6 +766,8 @@ Egen localStorage-nøkkel `labyrint_hero_2_v1` (kolliderer ikke med hovedspillet
 - **Grafikk:** solskygger (PCFSoft), solskive, drivende skyer, partikkeleffekter (gruvedrift/kamp), lykt i grottene.
 - **Lyd:** LH1s prosedyrelagde Grieg-musikk spiller som bakgrunnsmusikk og følger sonens tema (overflate/grotter), via en `getZone`-shim så `AudioManager.startMusic` virker uendret. P skrur av/på; SFX på nivå/oppdagelser.
 - **Kjæledyr:** 3D-følgesvenn fra LH1s `PET_TYPES` (rev/katt/drage/ugle) som følger helten, slåss mot monstre og kan slås ut/komme tilbake. Monstre deler aggro mot pet-en (LH1-mekanikk).
+- **3D-karaktermodell:** detaljert lavpoly-humanoid (`CharacterModel`) delt mellom verden og skaperen – avsmalnende lemmer, ansikt, frisyrer/skjegg, antrekk og raseproporsjoner.
+- **3D karakterskaper:** levende roterende figur med fulle utseendevalg (`CharacterCreator3D`), erstatter LH1s 2D-preview; valgene vises på 3D-figuren i verden.
 - **Utstyrskjede:** smelt grunnstoffer → støp legeringer (`ALLOY_DEFS`) → smi våpen/rustning (`ALLOY_EQUIPMENT`) → utrust fra ryggsekken. Våpen gir slagskade, rustning blokkesjanse (5 %/DEF) og bonushjerter.
 - **Navigasjon:** lykt i grottene + minimap med fog of war i labyrintene (malmmarkører gated bak Malmøye/Geologi 3, som LH1s minimap-integrasjon).
 

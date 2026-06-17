@@ -38,6 +38,8 @@
 
     <!-- LH1's original Phaser UI scenes render in here (transparent overlay) -->
     <div id="lh1-ui"></div>
+    <!-- 3D character creator (live rotating model + controls) -->
+    <div id="creator3d" class="hidden"></div>
     <!-- Discovery popup above everything, incl. the LH1 UI overlay -->
     <div id="discovery-popup" class="hidden"></div>
 
@@ -65,6 +67,7 @@
     <script src="../src/utils/TooltipManager.js"></script>
     <script src="../src/graphics/CharacterSprite.js"></script>
     <script src="../src/graphics/DetailedCharacterSprite.js"></script>
+    <script src="../src/graphics/ItemGraphics.js"></script>
     <script src="../src/graphics/SceneBackgrounds.js"></script>
     <script src="../src/scenes/smeltery/SmelteryTabs.js"></script>
     <script src="../src/scenes/SkillScene.js"></script>
@@ -88,6 +91,7 @@
     <script src="js/world/CaveWorld.js"></script>
     <script src="js/world/OreDeposits.js"></script>
     <script src="js/world/Decorations.js"></script>
+    <script src="js/CharacterModel.js"></script>
     <script src="js/Player.js"></script>
     <script src="js/FX.js"></script>
     <script src="js/Pet.js"></script>
@@ -98,6 +102,7 @@
     <script src="js/Mining.js"></script>
     <script src="js/ui/HUD.js"></script>
     <script src="js/ui/LH1UIHost.js"></script>
+    <script src="js/ui/CharacterCreator3D.js"></script>
     <script src="js/ui/Minimap.js"></script>
     <script src="js/main2.js"></script>
 

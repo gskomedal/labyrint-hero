@@ -452,3 +452,85 @@ html, body {
     overflow-y: auto;
 }
 .smelt-log div { margin-bottom: 3px; }
+
+/* ─── 3D Character Creator ──────────────────────────────────────────────── */
+#creator3d {
+    position: absolute;
+    inset: 0;
+    z-index: 70;
+    background: radial-gradient(ellipse at 50% 30%, #141828 0%, #07080e 100%);
+    color: #cdd6e6;
+    overflow: auto;
+}
+#creator3d.hidden { display: none; }
+
+.cc-wrap { max-width: 1180px; margin: 0 auto; padding: 14px 20px 18px; }
+.cc-wrap h1 {
+    text-align: center; color: #ffe9a0; font-size: 26px; letter-spacing: 3px;
+    margin: 4px 0 14px; text-shadow: 0 2px 8px #000;
+}
+.cc-cols { display: grid; grid-template-columns: 270px 1fr 290px; gap: 18px; }
+.cc-col h3 { color: #88ddff; font-size: 15px; margin: 0 0 10px; letter-spacing: 1px; }
+.cc-col label { display: block; font-size: 12px; color: #899; margin: 10px 0 4px; }
+
+/* Race cards */
+.cc-races { display: flex; flex-direction: column; gap: 7px; }
+.cc-race {
+    text-align: left; background: #161a28; border: 2px solid #2a3047; color: #cdd6e6;
+    border-radius: 8px; padding: 9px 12px; cursor: pointer; font-family: inherit;
+    transition: border-color .12s, background .12s;
+}
+.cc-race:hover { background: #1d2336; }
+.cc-race.sel { border-color: #ffe9a0; background: #21283f; }
+.cc-race-name { font-size: 15px; font-weight: bold; color: #fff; }
+.cc-race-special { font-size: 11px; color: #ffcf6a; margin: 2px 0; }
+.cc-race-stats { font-size: 12px; color: #9fb0c8; }
+.cc-race-desc { margin-top: 12px; font-size: 12px; line-height: 1.5; color: #8fa0b8; font-style: italic; }
+
+/* Preview */
+.cc-mid { display: flex; flex-direction: column; align-items: center; }
+.cc-canvas {
+    width: 100%; height: 540px; border-radius: 12px; overflow: hidden;
+    background: linear-gradient(180deg, #1a2034 0%, #10131f 100%);
+    border: 1px solid #2a3047;
+}
+.cc-canvas-el { width: 100% !important; height: 100% !important; display: block; }
+#cc-name {
+    margin-top: 12px; width: 86%; text-align: center; font-family: inherit; font-size: 18px;
+    padding: 9px 14px; border-radius: 8px; background: #161a28; color: #fff;
+    border: 2px solid #3a4060; outline: none;
+}
+#cc-name:focus { border-color: #88ddff; }
+
+/* Appearance controls */
+.cc-row { display: flex; gap: 6px; flex-wrap: nowrap; align-items: center; }
+.cc-wrap-row { flex-wrap: wrap; }
+.cc-sw {
+    width: 26px; height: 26px; border-radius: 50%; border: 2px solid #2a3047;
+    cursor: pointer; padding: 0; transition: transform .1s, border-color .1s;
+}
+.cc-sw:hover { transform: scale(1.12); }
+.cc-sw.sel { border-color: #fff; box-shadow: 0 0 0 2px #88ddff; }
+.cc-pill {
+    background: #161a28; border: 1px solid #2a3047; color: #b9c4d6; font-family: inherit;
+    font-size: 12px; padding: 4px 9px; border-radius: 6px; cursor: pointer;
+}
+.cc-pill:hover { background: #1d2336; }
+.cc-pill.sel { background: #2a3a5a; border-color: #88ddff; color: #fff; }
+
+/* Footer */
+.cc-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; gap: 16px; flex-wrap: wrap; }
+.cc-bonuses { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cc-bonuses > span { font-size: 12px; color: #899; }
+.cc-bonus {
+    background: #161a28; border: 2px solid #2a3047; color: #cdd6e6; font-family: inherit;
+    font-size: 11px; padding: 5px 10px; border-radius: 7px; cursor: pointer; line-height: 1.3;
+}
+.cc-bonus span { color: #8fa0b8; }
+.cc-bonus.sel { background: #21283f; box-shadow: 0 0 0 1px currentColor inset; }
+#cc-start {
+    background: linear-gradient(180deg, #2e7d4f, #1f5e3a); border: 1px solid #43c07a;
+    color: #eaffea; font-family: inherit; font-size: 17px; font-weight: bold; letter-spacing: 1px;
+    padding: 11px 26px; border-radius: 9px; cursor: pointer;
+}
+#cc-start:hover { background: linear-gradient(180deg, #379a60, #246b43); }

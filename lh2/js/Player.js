@@ -1,6 +1,7 @@
 // ─── Labyrint Hero 2 – Player ────────────────────────────────────────────────
-// Procedural low-poly figure (boxes) with walk/mine animation, WASD movement
-// relative to camera yaw, gravity + ground snap against the active area.
+// Detailed low-poly humanoid (built by CharacterModel, shared with the
+// character creator) with walk/mine animation, WASD movement relative to the
+// camera yaw, gravity + ground snap against the active area.
 
 class Player {
     constructor() {
@@ -31,74 +32,15 @@ class Player {
     }
 
     _buildBody(appearance, race) {
-        const mat = (hex) => new THREE.MeshLambertMaterial({ color: hex });
-        this.body = new THREE.Group();
-        const box = (w, h, d, color, x, y, z) => {
-            const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color));
-            m.position.set(x, y, z);
-            m.castShadow = true;
-            return m;
-        };
-
-        const a = appearance || {};
-        const SKIN = a.skinColor !== undefined ? a.skinColor : 0xd9a878;
-        const CLOTH = a.clothColor !== undefined ? a.clothColor : 0x3a6e9e;
-        const HAIR = a.hairColor !== undefined ? a.hairColor : 0x4a3220;
-        const PANTS = new THREE.Color(CLOTH).multiplyScalar(0.55).getHex();
-
-        this.torso = box(0.7, 0.85, 0.4, CLOTH, 0, 1.25, 0);
-        this.head = box(0.5, 0.5, 0.45, SKIN, 0, 1.95, 0);
-        const hairH = a.hairStyle === 'long' ? 0.45 : 0.18;
-        const hair = box(0.54, hairH, 0.49, HAIR, 0, 2.22 - (hairH - 0.18) / 2 + (a.hairStyle === 'long' ? 0 : 0), 0);
-        if (a.hairStyle === 'long') hair.position.z = -0.04;
-
-        // Face: eyes on the forward (+z) side of the head
-        const EYE = a.eyeColor !== undefined ? a.eyeColor : 0x223355;
-        const eyeL = box(0.09, 0.09, 0.03, EYE, -0.12, 1.99, 0.24);
-        const eyeR = box(0.09, 0.09, 0.03, EYE, 0.12, 1.99, 0.24);
-        const mouth = box(0.16, 0.04, 0.03, 0x8a5a4a, 0, 1.82, 0.24);
-        let beard = null;
-        if (a.beardStyle && a.beardStyle !== 'none') {
-            beard = box(0.4, a.beardStyle === 'long' ? 0.45 : 0.22, 0.12, HAIR, 0, 1.66, 0.22);
-        }
-
-        // Limbs pivot at the shoulder/hip: mesh offset inside a pivot group
-        const limb = (w, h, d, color, px, py, pz) => {
-            const pivot = new THREE.Group();
-            pivot.position.set(px, py, pz);
-            const m = box(w, h, d, color, 0, -h / 2, 0);
-            pivot.add(m);
-            return pivot;
-        };
-
-        this.armL = limb(0.22, 0.75, 0.22, SKIN, -0.47, 1.62, 0);
-        this.armR = limb(0.22, 0.75, 0.22, SKIN, 0.47, 1.62, 0);
-        this.legL = limb(0.26, 0.85, 0.26, PANTS, -0.2, 0.85, 0);
-        this.legR = limb(0.26, 0.85, 0.26, PANTS, 0.2, 0.85, 0);
-
-        // Pickaxe in right hand: handle + head
-        const pick = new THREE.Group();
-        const handle = box(0.08, 0.7, 0.08, 0x8a6a3a, 0, -0.3, 0);
-        const head = box(0.45, 0.1, 0.1, 0x999aa5, 0, -0.62, 0);
-        pick.add(handle, head);
-        pick.position.set(0, -0.7, 0);
-        pick.rotation.z = Math.PI / 2.2;
-        this.pickaxe = pick;
-        this.pickaxe.visible = false;
-        this.armR.add(pick);
-
-        this.body.add(this.torso, this.head, hair, eyeL, eyeR, mouth, this.armL, this.armR, this.legL, this.legR);
-        if (beard) this.body.add(beard);
-
-        // Race proportions: stocky dwarves, slender elves, small hobbits
-        const scales = {
-            dwarf: [1.15, 0.8, 1.15],
-            elf: [0.92, 1.08, 0.92],
-            hobbit: [0.8, 0.68, 0.8],
-        };
-        const s = scales[race];
-        if (s) this.body.scale.set(s[0], s[1], s[2]);
-
+        // Detailed low-poly humanoid shared with the character creator preview
+        const built = CharacterModel.build(appearance, race);
+        this.body = built.group;
+        const p = built.parts;
+        this.armL = p.armL;
+        this.armR = p.armR;
+        this.legL = p.legL;
+        this.legR = p.legR;
+        this.pickaxe = p.pickaxe;
         this.group.add(this.body);
     }
 

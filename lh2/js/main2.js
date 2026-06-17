@@ -137,8 +137,8 @@ const LH2Main = {
         EventBus.on('lh2LevelUp', () => LH2Audio.sfx('playLevelUp'));
         EventBus.on('discovery', () => LH2Audio.sfx('playDiscovery'));
 
-        // First start: LH1's character creator picks race, looks and bonus
-        LH1UIHost.onCharacterCreated = (data) => {
+        // First start: the new 3D character creator picks race, looks + bonus
+        this._onCharacterCreated = (data) => {
             this.hero.applyCharacter(data);
             this.player.applyAppearance(this.hero);
             EventBus.emit('lh2Toast', { text: `Velkommen, ${this.hero.heroName}!`, cls: 'levelup' });
@@ -146,7 +146,7 @@ const LH2Main = {
             this.save();
         };
         if (!saved) {
-            setTimeout(() => LH1UIHost.open('CharacterCreatorScene', { difficulty: 'normal' }), 400);
+            setTimeout(() => CharacterCreator3D.open(this._onCharacterCreated), 400);
         }
 
         // Debug handle (hobby-project style)
